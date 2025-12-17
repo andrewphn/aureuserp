@@ -10,6 +10,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\View;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Webkul\Product\Models\Tag;
 use Webkul\Product\Models\Product;
@@ -86,7 +87,72 @@ class CreateProduct extends BaseCreateProduct
      */
     protected function clearPendingAiSession(): void
     {
-        session()->forget(['ai_pending_data', 'ai_similar_products', 'ai_pending_image_path']);
+        session()->forget(['ai_pending_data', 'ai_similar_products', 'ai_pending_image_path', 'ai_images_to_add']);
+    }
+
+    /**
+     * Get AI images to add to Spatie after creation
+     */
+    protected function getAiImagesToAdd(): array
+    {
+        return session('ai_images_to_add', []);
+    }
+
+    /**
+     * Set AI images to add to Spatie after creation
+     */
+    protected function setAiImagesToAdd(array $images): void
+    {
+        session(['ai_images_to_add' => $images]);
+    }
+
+    /**
+     * Add an AI image path to be added after creation
+     */
+    protected function addAiImageToAdd(string $imagePath): void
+    {
+        $images = $this->getAiImagesToAdd();
+        $images[] = $imagePath;
+        $this->setAiImagesToAdd(array_unique($images));
+    }
+
+    /**
+     * Override handleRecordCreation to add AI images to Spatie
+     */
+    protected function handleRecordCreation(array $data): Model
+    {
+        // Remove the old images array from data - we'll use Spatie instead
+        unset($data['images']);
+
+        $record = parent::handleRecordCreation($data);
+
+        // Add any AI-collected images to Spatie media library
+        $aiImages = $this->getAiImagesToAdd();
+        if (!empty($aiImages)) {
+            foreach ($aiImages as $imagePath) {
+                $fullPath = storage_path('app/public/' . $imagePath);
+                if (file_exists($fullPath)) {
+                    try {
+                        $record->addMedia($fullPath)
+                            ->toMediaCollection('product-images');
+                        Log::info('Added AI image to Spatie media', [
+                            'product_id' => $record->id,
+                            'image_path' => $imagePath,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to add AI image to Spatie', [
+                            'product_id' => $record->id,
+                            'image_path' => $imagePath,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
+                }
+            }
+            // Clear the session
+            session()->forget('ai_images_to_add');
+        }
+
+        return $record;
     }
 
     protected function getHeaderActions(): array
@@ -231,19 +297,17 @@ class CreateProduct extends BaseCreateProduct
                             $updates['reference_type_code_id'] = $data['reference_type_code_id'];
                         }
 
-                        // Download product image from URL if provided
+                        // Download product image from URL if provided - queue for Spatie
                         if (!empty($data['image_url'])) {
                             $downloadedImage = GeminiProductService::downloadProductImage(
                                 $data['image_url'],
                                 $data['identified_product_name'] ?? $productName
                             );
                             if ($downloadedImage) {
-                                $existingImages = $currentData['images'] ?? [];
-                                if (!is_array($existingImages)) {
-                                    $existingImages = [];
-                                }
-                                $existingImages[] = $downloadedImage;
-                                $updates['images'] = $existingImages;
+                                // Queue for Spatie media addition after creation
+                                $downloadedPath = 'products/images/' . $downloadedImage;
+                                $this->addAiImageToAdd($downloadedPath);
+                                Log::info('AI Populate - Image queued for Spatie', ['path' => $downloadedPath]);
                             }
                         }
 
@@ -680,22 +744,27 @@ class CreateProduct extends BaseCreateProduct
     {
         $pendingImagePath = $this->getPendingImagePath();
 
-        // Add the uploaded image to the existing product if we have one
+        // Add the uploaded image to the existing product using Spatie
         if (!empty($pendingImagePath)) {
             $product = Product::find($productId);
             if ($product) {
-                $images = $product->images ?? [];
-                if (!is_array($images)) {
-                    $images = [];
+                $fullPath = storage_path('app/public/' . $pendingImagePath);
+                if (file_exists($fullPath)) {
+                    try {
+                        $product->addMedia($fullPath)
+                            ->toMediaCollection('product-images');
+                        Log::info('Added uploaded image to existing product via Spatie', [
+                            'product_id' => $productId,
+                            'image_path' => $pendingImagePath,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Failed to add image to existing product via Spatie', [
+                            'product_id' => $productId,
+                            'image_path' => $pendingImagePath,
+                            'error' => $e->getMessage(),
+                        ]);
+                    }
                 }
-                $images[] = $pendingImagePath;
-                $product->images = $images;
-                $product->save();
-
-                Log::info('Added uploaded image to existing product', [
-                    'product_id' => $productId,
-                    'image_path' => $pendingImagePath,
-                ]);
             }
         }
 
@@ -823,24 +892,18 @@ class CreateProduct extends BaseCreateProduct
             $updates['reference_type_code_id'] = $aiData['reference_type_code_id'];
         }
 
-        // Add uploaded image to product's images array
-        $existingImages = $currentData['images'] ?? [];
-        if (!is_array($existingImages)) {
-            $existingImages = [];
-        }
-
-        Log::info('AI Photo - Adding image to product', [
+        // Queue images for Spatie media library (will be added after product creation)
+        Log::info('AI Photo - Queueing images for Spatie', [
             'pending_image_path' => $pendingImagePath,
-            'existing_images' => $existingImages,
         ]);
 
         if (!empty($pendingImagePath)) {
             // Verify the file exists
             $fullImagePath = storage_path('app/public/' . $pendingImagePath);
             if (file_exists($fullImagePath)) {
-                // Store just the filename - FileUpload's directory() setting will handle the path
-                $existingImages[] = basename($pendingImagePath);
-                Log::info('AI Photo - Image file verified', ['path' => $pendingImagePath, 'stored_as' => basename($pendingImagePath)]);
+                // Queue for Spatie media addition after creation
+                $this->addAiImageToAdd($pendingImagePath);
+                Log::info('AI Photo - Image queued for Spatie', ['path' => $pendingImagePath]);
             } else {
                 Log::warning('AI Photo - Image file not found', ['expected_path' => $fullImagePath]);
             }
@@ -853,14 +916,14 @@ class CreateProduct extends BaseCreateProduct
                 $aiData['identified_product_name'] ?? null
             );
             if ($downloadedImage) {
-                // Store just the filename - FileUpload's directory() setting will handle the path
-                $existingImages[] = basename($downloadedImage);
-                Log::info('AI Photo - Downloaded AI-suggested image', ['path' => $downloadedImage, 'stored_as' => basename($downloadedImage)]);
+                // Queue for Spatie media addition after creation
+                $downloadedPath = 'products/images/' . $downloadedImage;
+                $this->addAiImageToAdd($downloadedPath);
+                Log::info('AI Photo - Downloaded AI-suggested image queued for Spatie', ['path' => $downloadedPath]);
             }
         }
 
-        $updates['images'] = $existingImages;
-        Log::info('AI Photo - Final images array', ['images' => $existingImages]);
+        Log::info('AI Photo - Images queued for Spatie', ['count' => count($this->getAiImagesToAdd())]);
 
         // Quantity from user input
         if (!empty($aiData['_user_quantity']) && $aiData['_user_quantity'] > 0) {

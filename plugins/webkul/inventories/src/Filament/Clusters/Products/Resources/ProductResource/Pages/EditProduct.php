@@ -164,20 +164,29 @@ class EditProduct extends BaseEditProduct
                             $updates['reference_type_code_id'] = $data['reference_type_code_id'];
                         }
 
-                        // Download product image from URL if provided
+                        // Download product image from URL if provided - add directly to Spatie
                         if (!empty($data['image_url'])) {
                             $downloadedImage = GeminiProductService::downloadProductImage(
                                 $data['image_url'],
                                 $data['identified_product_name'] ?? $productName
                             );
                             if ($downloadedImage) {
-                                $existingImages = $currentData['images'] ?? [];
-                                if (!is_array($existingImages)) {
-                                    $existingImages = [];
+                                $downloadedFullPath = storage_path('app/public/products/images/' . $downloadedImage);
+                                if (file_exists($downloadedFullPath)) {
+                                    try {
+                                        $record->addMedia($downloadedFullPath)
+                                            ->toMediaCollection('product-images');
+                                        Log::info('AI Populate - Added image to Spatie media', [
+                                            'product_id' => $record->id,
+                                            'image_path' => $downloadedFullPath,
+                                        ]);
+                                    } catch (\Exception $e) {
+                                        Log::error('AI Populate - Failed to add image to Spatie', [
+                                            'product_id' => $record->id,
+                                            'error' => $e->getMessage(),
+                                        ]);
+                                    }
                                 }
-                                // Store just the filename - FileUpload's directory() setting will handle the path
-                                $existingImages[] = basename($downloadedImage);
-                                $updates['images'] = $existingImages;
                             }
                         }
 
@@ -421,13 +430,22 @@ class EditProduct extends BaseEditProduct
                             $updates['reference_type_code_id'] = $aiData['reference_type_code_id'];
                         }
 
-                        // Add uploaded image to product's images array
-                        $existingImages = $currentData['images'] ?? [];
-                        if (!is_array($existingImages)) {
-                            $existingImages = [];
+                        // Add uploaded image to Spatie media library
+                        if (file_exists($permanentFullPath)) {
+                            try {
+                                $record->addMedia($permanentFullPath)
+                                    ->toMediaCollection('product-images');
+                                Log::info('AI Photo - Added uploaded image to Spatie media', [
+                                    'product_id' => $record->id,
+                                    'image_path' => $permanentFullPath,
+                                ]);
+                            } catch (\Exception $e) {
+                                Log::error('AI Photo - Failed to add uploaded image to Spatie', [
+                                    'product_id' => $record->id,
+                                    'error' => $e->getMessage(),
+                                ]);
+                            }
                         }
-                        // Store just the filename - FileUpload's directory() setting will handle the path
-                        $existingImages[] = basename($permanentPath);
 
                         // Also download AI-suggested product image if available
                         if (!empty($aiData['image_url'])) {
@@ -436,11 +454,24 @@ class EditProduct extends BaseEditProduct
                                 $aiData['identified_product_name'] ?? null
                             );
                             if ($downloadedImage) {
-                                // Store just the filename
-                                $existingImages[] = basename($downloadedImage);
+                                $downloadedFullPath = storage_path('app/public/products/images/' . $downloadedImage);
+                                if (file_exists($downloadedFullPath)) {
+                                    try {
+                                        $record->addMedia($downloadedFullPath)
+                                            ->toMediaCollection('product-images');
+                                        Log::info('AI Photo - Added AI-suggested image to Spatie media', [
+                                            'product_id' => $record->id,
+                                            'image_path' => $downloadedFullPath,
+                                        ]);
+                                    } catch (\Exception $e) {
+                                        Log::error('AI Photo - Failed to add AI-suggested image to Spatie', [
+                                            'product_id' => $record->id,
+                                            'error' => $e->getMessage(),
+                                        ]);
+                                    }
+                                }
                             }
                         }
-                        $updates['images'] = $existingImages;
 
                         // Quantity from user input
                         if (!empty($data['quantity']) && $data['quantity'] > 0) {

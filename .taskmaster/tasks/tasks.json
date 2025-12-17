@@ -2,7 +2,7 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Create Nutrient SDK Integration Service",
         "description": "Build core service layer for Nutrient Web SDK initialization and configuration with license key management",
         "details": "Create app/Services/NutrientService.php that handles SDK initialization with the existing license key (pdf_live_SeDihzSCxobu2objNyuoWS3BViInKxxtFSORpgNAfRz). Implement methods for: SDK configuration management, license key validation, viewer instance creation with configurable options (toolbar items, annotation tools, zoom controls), error handling and fallback mechanisms. Create config/nutrient.php with settings for license key, default toolbar configuration, max file size (50MB), allowed file types, and autosave interval. Use Laravel's config caching for performance.",
@@ -14,7 +14,7 @@
         "updatedAt": "2025-10-01T00:39:43.076Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Build PDF Viewer Blade Component",
         "description": "Create reusable Blade component for PDF viewing with Nutrient SDK integration and Alpine.js interactivity",
         "details": "Create resources/views/components/pdf-viewer.blade.php component that integrates Nutrient SDK. Component should accept props for: document ID, viewer options, annotation permissions, toolbar configuration. Create resources/js/pdf-viewer.js module that initializes Nutrient SDK with provided options, handles document loading, manages annotation sync with backend, implements autosave functionality. Use Alpine.js for reactive state management. Include loading states, error boundaries, and mobile-responsive design. Register component in AppServiceProvider.",
@@ -28,7 +28,7 @@
         "updatedAt": "2025-10-01T00:44:58.589Z"
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Implement Annotation API and Service Layer",
         "description": "Build RESTful API endpoints and service layer for annotation CRUD operations with real-time synchronization using Nutrient SDK's InstantJSON format",
         "status": "done",
@@ -107,7 +107,7 @@
         "updatedAt": "2025-10-01T00:58:54.847Z"
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Create FilamentPHP Custom PDF Viewer Field",
         "description": "Develop custom FilamentPHP v3 field component for PDF viewing and annotation within admin forms",
         "details": "Create app/Filament/Forms/Components/PdfViewerField.php extending FilamentPHP's Field class. Implement methods for: configuring viewer options (toolbar, features, permissions), handling file uploads with validation, rendering the PDF viewer component, managing annotation state. Create corresponding Blade view in resources/views/filament/forms/components/pdf-viewer-field.blade.php. Add configuration methods like ->enableAnnotations(), ->setToolbar(), ->maxFileSize(). Integrate with Livewire for real-time updates.",
@@ -122,7 +122,7 @@
         "updatedAt": "2025-10-01T01:02:12.876Z"
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Build Document Management FilamentPHP Resource",
         "description": "Create comprehensive DocumentResource for managing PDF documents with full CRUD operations and advanced features",
         "details": "Create app/Filament/Resources/DocumentResource.php with table columns for: file name, module association, page count, file size, uploader, upload date. Implement filters for module type, date range, uploader, tags. Add bulk actions for download, delete, move between modules. Create form with FileUpload field, module selector, tags input, metadata fields. Implement custom table actions for: viewing PDF (modal/slide-over), downloading original, viewing annotations list. Add activity log widget showing document interactions. Create pages for List, Create, Edit, View.",
@@ -136,7 +136,7 @@
         "updatedAt": "2025-10-01T01:03:50.283Z"
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Integrate PDF System with Projects Module",
         "description": "Add PDF document support to existing Projects module for shop drawings and project documentation",
         "details": "Modify plugins/webkul/projects/src/Models/Project.php to add morphMany relationship for PDF documents. Create HasPdfDocuments trait in app/Traits/HasPdfDocuments.php with methods for: attaching documents, retrieving documents by type, counting documents. Update ProjectResource to include PDF upload section in form, add documents count badge to table, create relation manager for viewing project documents. Add 'View Drawings' table action that opens PDF viewer. Update project detail page to show document list widget.",
@@ -151,7 +151,7 @@
         "updatedAt": "2025-10-01T01:14:00.471Z"
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Implement Document Activity Tracking",
         "description": "Build comprehensive activity logging system for tracking all document interactions and user actions",
         "details": "Create app/Services/DocumentActivityService.php with methods for logging: document views, annotation changes, downloads, prints. Implement app/Observers/PdfDocumentObserver.php to automatically log document CRUD operations. Create app/Observers/PdfAnnotationObserver.php for annotation tracking. Add middleware app/Http/Middleware/TrackDocumentActivity.php for logging views. Create FilamentPHP widget for displaying recent activities. Implement activity pruning job to clean old logs after 90 days.",
@@ -165,7 +165,7 @@
         "updatedAt": "2025-10-01T01:15:07.184Z"
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Add Sales and Support Module Integration",
         "description": "Extend PDF functionality to Sales module for quotations and Support module for ticket attachments",
         "details": "Apply HasPdfDocuments trait to Sales Order and Support Ticket models. Update QuotationResource in sales module to include PDF preview of quotes, add approval stamp functionality using annotations. Modify Support plugin to allow PDF attachments on tickets, implement annotation tools for marking damaged areas. Create shared components for consistent PDF handling across modules. Add cross-module document search functionality in DocumentResource. Update dashboards to show document statistics per module.",
@@ -179,7 +179,7 @@
         "updatedAt": "2025-10-01T01:15:58.799Z"
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Comprehensive Testing & QA",
         "description": "Create comprehensive test suite covering unit, feature, browser, security, performance and compatibility testing for PDF viewer functionality with 80%+ code coverage target",
         "details": "Create tests/Unit/Services/NutrientServiceTest.php for testing NutrientService methods including: license key validation, SDK configuration generation, viewer instance creation, file validation, annotation presets, error handling with mock SDK responses. Create tests/Unit/Models/PdfDocumentTest.php and PdfAnnotationTest.php for model relationships, scopes, accessors and mutators. Implement tests/Feature/Api/AnnotationApiTest.php for testing annotation CRUD endpoints (GET /api/pdf/{document}/annotations, POST/PUT/DELETE operations) with authentication, authorization, validation and rate limiting checks. Create tests/Feature/Filament/DocumentResourceTest.php for testing FilamentPHP resource CRUD operations, filters, bulk actions, file upload validation. Set up Playwright browser testing in package.json with @playwright/test dependency, create playwright.config.ts with webkit/chromium/firefox configurations. Implement tests/Browser/PdfViewerTest.spec.ts for testing: PDF loading with various file sizes (including 50MB+ files), annotation tools functionality (highlight, text, drawing, stamps), toolbar interactions, zoom controls, mobile responsiveness. Create tests/Browser/AnnotationSyncTest.spec.ts for real-time annotation synchronization between multiple browser sessions, autosave functionality, conflict resolution. Add tests/Security/DocumentAccessTest.php for testing permission-based access control, document visibility scopes, unauthorized access attempts, SQL injection prevention in document queries. Create tests/Performance/LargePdfTest.php using PHPUnit with memory and time assertions for handling 50MB+ PDFs, testing page lazy loading, annotation performance with 100+ annotations per document. Implement tests/Browser/CrossBrowserTest.spec.ts for testing across Chrome, Firefox, Safari, Edge with specific focus on PDF.js fallback mechanisms, touch interactions on tablets, print functionality. Set up GitHub Actions workflow in .github/workflows/tests.yml for running PHPUnit tests with MySQL, Playwright tests with multiple browsers, code coverage reporting to Codecov. Create tests/Integration/ModuleIntegrationTest.php for testing PDF system integration with Projects, Sales, and Support modules including polymorphic relationships, trait usage, cross-module search. Add phpunit-coverage.xml configuration for coverage reporting excluding vendor directories, targeting 80% coverage minimum. Implement custom test traits in tests/Traits/CreatesTestPdfs.php for generating test PDF files, tests/Traits/MocksNutrientSdk.php for mocking SDK responses.",
@@ -282,7 +282,7 @@
         "updatedAt": "2025-10-01T01:44:58.319Z"
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Documentation & User Guides",
         "description": "Create comprehensive documentation suite including user guides, developer documentation, API specs, configuration guides, deployment checklists, and training materials for the PDF viewer and annotation system",
         "details": "Create documentation structure in /docs directory with subfolders: /user-guides, /developer-docs, /api-specs, /deployment, and /training. For USER DOCUMENTATION: Create docs/user-guides/pdf-viewer-guide.md covering: navigating the PDF viewer interface with screenshots, using annotation tools (highlighter, notes, stamps, drawings), saving and managing annotations, downloading annotated PDFs, keyboard shortcuts reference. Create docs/user-guides/admin-guide.md for: managing PDF documents in FilamentPHP resources, setting viewer permissions per user role, configuring toolbar options, monitoring document activity logs. For DEVELOPER DOCUMENTATION: Create docs/developer-docs/pdf-viewer-field-integration.md with: step-by-step guide for adding PdfViewerField to FilamentPHP resources, code examples for app/Filament/Forms/Components/PdfViewerField.php usage, available configuration methods (->enableAnnotations(), ->setToolbar(), ->maxFileSize()), event hooks and callbacks, Livewire integration patterns. Create docs/developer-docs/nutrient-sdk-guide.md covering: NutrientService class methods and usage from app/Services/NutrientService.php, SDK initialization with license key configuration, customizing annotation presets, implementing custom toolbar buttons, handling SDK errors and fallbacks. For API DOCUMENTATION: Create docs/api-specs/openapi.yaml with OpenAPI 3.0 specification for: GET /api/pdf/{document}/annotations endpoint, POST /api/pdf/{document}/annotations endpoint, PUT /api/pdf/annotations/{id} endpoint, DELETE /api/pdf/annotations/{id} endpoint, authentication schemes and rate limiting. Generate HTML documentation using Redoc or Swagger UI. Include request/response examples, error codes, and authentication requirements. For CONFIGURATION GUIDE: Create docs/deployment/configuration.md documenting all settings in config/nutrient.php: license key setup (NUTRIENT_LICENSE_KEY env variable), toolbar customization arrays, annotation settings, file upload restrictions (50MB limit, allowed MIME types), autosave intervals, viewer options (theme, zoom, scroll modes), performance settings (WebAssembly, caching). For DEPLOYMENT CHECKLIST: Create docs/deployment/production-checklist.md with: pre-deployment verification steps, environment variable requirements, file permission requirements for document storage, CDN setup for Nutrient SDK assets, SSL certificate requirements, backup procedures for annotation data, monitoring setup for SDK errors. For TRAINING MATERIALS: Create docs/training/quick-start-guide.md with step-by-step tutorials for common tasks. Record video tutorials using the actual implementation showing: uploading and viewing PDFs, adding annotations, collaborative annotation workflows, exporting annotated documents. Create docs/training/screenshots/ directory with annotated screenshots of all major features. Develop interactive demo page at /demo/pdf-viewer showcasing all features. Include troubleshooting section with common issues and solutions. All documentation should reference actual file paths from the codebase, use consistent formatting with markdown, include version numbers (@nutrient-sdk/viewer: ^1.7.0 from package.json), and be searchable through a documentation index.",
@@ -379,7 +379,7 @@
         ]
       },
       {
-        "id": 11,
+        "id": "11",
         "title": "Database Schema Enhancement for Project Wizard",
         "description": "Add required database columns and tables to support the wizard functionality including project types, address handling, and auto-generated project numbers",
         "details": "Create migration to add new columns to projects_projects table: project_type (VARCHAR 50), project_type_other (VARCHAR 255), use_customer_address (BOOLEAN default true). Verify projects_project_addresses table exists with proper relationship fields. Update Project model to include new fillable fields and hasOne projectAddress relationship. Update ProjectAddress model with belongsTo project relationship. These schema changes are foundational for all wizard functionality.",
@@ -455,7 +455,7 @@
         "expansionPrompt": "Break down into specific migration tasks: creating the migration file, adding project_type and project_type_other columns, adding use_customer_address boolean column, verifying projects_project_addresses table relationship, updating Project model fillable fields and relationships, and updating ProjectAddress model relationships. Include validation and rollback testing."
       },
       {
-        "id": 12,
+        "id": "12",
         "title": "Implement HasWizard Trait in CreateProject Page",
         "description": "Convert the existing CreateProject page from standard form to multi-step wizard using FilamentPHP v4 HasWizard trait",
         "details": "Add HasWizard trait to CreateProject class. Implement getSteps() method returning array of 5 wizard steps (Discovery, Design, Sourcing, Production, Delivery). Each step should be a Filament\\Forms\\Components\\Wizard\\Step instance with proper schema. Remove existing form() method dependencies and prepare for field distribution across steps. Import required Filament wizard components including Step, HasWizard trait.",
@@ -548,7 +548,7 @@
         "expansionPrompt": "Convert CreateProject page to wizard by: importing FilamentPHP wizard components, adding HasWizard trait, implementing getSteps() method with 5 step structure, removing existing form() method dependencies, creating step schemas with proper imports, testing wizard navigation and progress indicators, and handling form state management between steps."
       },
       {
-        "id": 13,
+        "id": "13",
         "title": "Discovery Step Implementation with Live Summary Panel",
         "description": "Implement the Discovery step with project fundamentals and integrate the existing ProjectSummaryPanel component for real-time updates",
         "details": "Create Discovery step schema with fields in specific order: Live Summary Panel (columnSpanFull at top), Company selection (first - establishes context), Customer/Partner selection, Project Name (large font), Project Address section with toggle for customer address vs custom address, auto-generated Project Number (read-only), Description (RichEditor), Project Manager, Project Type selection. Use Grid layouts for proper field positioning. Implement conditional visibility for project address fields based on use_customer_address toggle.",
@@ -648,7 +648,7 @@
         "updatedAt": "2025-10-16T17:55:16.965Z"
       },
       {
-        "id": 14,
+        "id": "14",
         "title": "Project Number Auto-Generation System",
         "description": "Implement the complex project number auto-generation logic based on company acronym, project ID, and address parsing",
         "details": "Implement generateProjectNumber() method with format: {COMPANY_ACRONYM}{UNIQUE_ID}-{STREET_NUMBER}-{STREET_NAME}. Parse company acronym from code field or company name first 3 letters. Extract street number using regex from street1 field. Clean street name by removing number prefix, street type suffixes, special characters, limit to 15 chars. Handle edge cases: no address (use UNNAMED/0), customer address vs project address. Implement in afterCreate() hook since project ID needed. Update mutateFormDataBeforeCreate() to defer generation.",
@@ -723,7 +723,7 @@
         "updatedAt": "2025-10-16T17:55:18.112Z"
       },
       {
-        "id": 15,
+        "id": "15",
         "title": "Design Step Implementation",
         "description": "Create the Design step with project timeline and resource allocation fields including dates, hours, and tags",
         "details": "Implement Design step with DatePicker fields for start_date and end_date (native: false for FilamentPHP pickers). Add allocated_hours TextInput with numeric type, step 0.5, min 0, suffix translation, helper text for hour format. Implement tags Select with belongsToMany relationship, multiple selection, searchable/preloadable, create option. Use two-column Grid layout for date fields, full width for others. Preserve all existing field configurations from ProjectResource.",
@@ -787,7 +787,7 @@
         "updatedAt": "2025-10-16T17:56:58.008Z"
       },
       {
-        "id": 16,
+        "id": "16",
         "title": "Sourcing Step Implementation",
         "description": "Implement the Sourcing step with vendor and company information plus custom fields integration",
         "details": "Create Sourcing step with Company selection field (company_id) with relationship to 'company', searchable/preloadable, create option linking to CompanyResource::form(). Integrate custom fields using HasCustomFields::mergeCustomFormFields() method with sourcing context. Wrap in Section titled 'Sourcing Information'. Ensure proper field ordering and layout consistency with other steps.",
@@ -851,7 +851,7 @@
         "updatedAt": "2025-10-16T17:56:59.068Z"
       },
       {
-        "id": 17,
+        "id": "17",
         "title": "Production Step Implementation",
         "description": "Create the Production step with task management settings and milestone configuration",
         "details": "Implement Production step with Task Management section containing allow_milestones Toggle (default true, helper text about monitoring milestones, conditional visibility on TaskSettings::enable_milestones). Integrate custom fields using HasCustomFields::mergeCustomFormFields() with production context. Use Fieldset or Section wrapper for task management group. Ensure proper conditional logic for milestone visibility.",
@@ -961,7 +961,7 @@
         "updatedAt": "2025-10-16T17:57:00.403Z"
       },
       {
-        "id": 18,
+        "id": "18",
         "title": "Delivery Step Implementation",
         "description": "Create the final Delivery step with project visibility settings and timesheet configuration",
         "details": "Implement Delivery step with Settings section containing visibility Radio field with three options (Private/Internal/Public) with descriptions, default Internal. Add Time Management section with allow_timesheets Toggle (default false, helper text, conditional on TimeSettings::enable_timesheets). Use vertical radio layout and proper section grouping. Preserve all existing ProjectVisibility enum values and helper texts.",
@@ -1025,7 +1025,7 @@
         "updatedAt": "2025-10-16T17:57:01.661Z"
       },
       {
-        "id": 19,
+        "id": "19",
         "title": "Live Summary Panel Integration and Real-time Updates",
         "description": "Enhance the existing ProjectSummaryPanel component to work with wizard fields and implement real-time updates using Livewire and Alpine.js",
         "details": "Update ProjectSummaryPanel component to handle new wizard fields: project_type, company_id, partner_id relationships. Implement Alpine.js watchers for real-time field updates without server roundtrips. Add formatters for displaying friendly values (company names vs IDs). Handle project number display showing 'Will be assigned on save' during creation. Position panel using Livewire::make() component with columnSpanFull() in Discovery step. Ensure proper reactive updates as users type/select.",
@@ -1113,7 +1113,7 @@
         "updatedAt": "2025-10-16T17:57:02.757Z"
       },
       {
-        "id": 20,
+        "id": "20",
         "title": "Project Address Management and Conditional Logic",
         "description": "Implement the project address system with conditional fields and proper data handling for customer vs custom addresses",
         "details": "Implement use_customer_address toggle with default true value. Add conditional project address fields (street1, street2, city, state, zip, country) with visible() callback checking toggle state. Update mutateFormDataBeforeCreate() to handle address logic: if using customer address, don't create ProjectAddress record; if custom address, create related ProjectAddress record. Integrate address data into Live Summary Panel and project number generation. Use Grid layout for address fields.",
@@ -1201,7 +1201,7 @@
         "updatedAt": "2025-10-16T17:57:03.888Z"
       },
       {
-        "id": 21,
+        "id": "21",
         "title": "Create Tag Selector Panel Blade Component",
         "description": "Create the main Blade view component for the tag selector panel following FilamentPHP v4 patterns",
         "details": "Create `resources/views/forms/components/tag-selector-panel.blade.php` using the `<x-dynamic-component>` wrapper pattern. Implement Alpine.js state management for panel visibility, search input, expanded categories, and selected tags. Use existing `project-type-cards.blade.php` as reference for Livewire entanglement. Include slide-in panel layout (400px width, right-side, z-index 50), auto-focused search bar, and mobile-responsive design (full-screen modal on <768px). Follow current FilamentPHP v4 component conventions and use Tailwind CSS classes consistent with existing codebase.",
@@ -1213,7 +1213,7 @@
         "updatedAt": "2025-10-04T00:49:54.985Z"
       },
       {
-        "id": 22,
+        "id": "22",
         "title": "Implement Tag Data Loading and Caching",
         "description": "Set up tag data loading with proper caching and grouping by type",
         "status": "done",
@@ -1227,7 +1227,7 @@
         "updatedAt": "2025-10-04T00:52:20.641Z"
       },
       {
-        "id": 23,
+        "id": "23",
         "title": "Build Client-Side Search and Filtering",
         "description": "Implement instant client-side search with fuzzy matching and highlighting",
         "details": "Create Alpine.js reactive search functionality with instant filtering (<50ms response). Implement fuzzy string matching across tag names using JavaScript `includes()` or `indexOf()` for simplicity and speed. Add search text highlighting with yellow background using `<mark>` tags or CSS highlighting. Include clear search button (X icon) to reset filter. Ensure search is case-insensitive and works across all tag types. Store search state in Alpine component data and reactive filters for tag display.",
@@ -1241,7 +1241,7 @@
         "updatedAt": "2025-10-04T00:52:47.156Z"
       },
       {
-        "id": 24,
+        "id": "24",
         "title": "Implement Current Phase Tag Prioritization",
         "description": "Add smart phase detection and current phase tag prioritization logic",
         "details": "Detect current project stage from Livewire component context (create vs edit pages). Map stage_id to appropriate tag type using existing mapping (13=>phase_discovery, etc.). Display current phase tags in always-visible section with header '⭐ CURRENT PHASE → [Icon] [Phase Name]'. Use phase colors from `projects_project_stages` table for section styling. Fall back to Priority+Health tags if no stage is set. Ensure current phase tags appear first in display order and are never collapsed.",
@@ -1255,7 +1255,7 @@
         "updatedAt": "2025-10-04T00:52:47.160Z"
       },
       {
-        "id": 25,
+        "id": "25",
         "title": "Create Visual Tag Pills with Color Coding",
         "description": "Design and implement color-coded tag pills with selection states",
         "details": "Create tag pill components using existing tag colors at 20% opacity for unselected state and 40% opacity for selected state. Add checkmark icon for selected tags using heroicon checkmark. Implement hover effects (scale 1.02, darker border) and one-click toggle functionality. Use flex-wrap layout with max 2 pills per row for optimal ADHD-friendly viewing. Apply consistent spacing and typography following FilamentPHP design system. Include loading skeleton states for better perceived performance.",
@@ -1269,7 +1269,7 @@
         "updatedAt": "2025-10-04T00:52:47.164Z"
       },
       {
-        "id": 26,
+        "id": "26",
         "title": "Add Recent Tags Memory with LocalStorage",
         "description": "Implement localStorage-based recent tags memory system",
         "details": "Create localStorage system with key pattern `tcs_recent_tags_user_{id}` storing last 5 used tags across all projects. Implement JSON serialization/deserialization for tag objects with id, name, and color. Update recent tags on every tag selection with automatic deduplication and LRU (Least Recently Used) eviction. Display recent tags in dedicated horizontal-scroll section near top of panel. Handle localStorage errors gracefully with fallback to session-only memory. Include user ID in key for multi-user systems.",
@@ -1283,7 +1283,7 @@
         "updatedAt": "2025-10-04T00:52:47.166Z"
       },
       {
-        "id": 27,
+        "id": "27",
         "title": "Build Collapsible Category Sections",
         "description": "Create expandable/collapsible sections for non-current tag categories",
         "details": "Implement collapsible sections for all tag categories except current phase (Priority, Health, Risk, Complexity, Work Scope, Special Status, Lifecycle). Use Alpine.js state management for expand/collapse with smooth CSS transitions. Start all sections in collapsed state to reduce cognitive load. Add click handlers to category headers with expand/collapse icons (chevron-down/chevron-up). Hide phase categories that are already shown in Current Phase section to avoid duplication. Include section tag counts in headers for quick reference.",
@@ -1297,7 +1297,7 @@
         "updatedAt": "2025-10-04T00:52:47.167Z"
       },
       {
-        "id": 28,
+        "id": "28",
         "title": "Add Selection Counter and Validation Warnings",
         "description": "Implement dynamic selection counter with warning system for too many tags",
         "details": "Create bottom bar showing '✓ X tags selected' with real-time updates. Add warning indicator '⚠️ Many tags - consider simplifying' when more than 5 tags selected. Style warnings with appropriate colors (amber/yellow) following FilamentPHP design system. Update counter instantly on any tag toggle without debounce. Include subtle animations for counter changes to provide feedback. Position counter as sticky bottom bar for constant visibility during tag selection.",
@@ -1311,7 +1311,7 @@
         "updatedAt": "2025-10-04T00:52:47.169Z"
       },
       {
-        "id": 29,
+        "id": "29",
         "title": "Integrate with ProjectResource Form",
         "description": "Replace existing Select field with custom tag selector panel in ProjectResource",
         "details": "Modify `plugins/webkul/projects/src/Filament/Resources/ProjectResource.php` line 433 to replace the existing `Select::make('tags')` with the new tag selector panel component. Maintain existing relationship mapping and option handling. Ensure proper Livewire state binding using `$wire.$entangle('{$getStatePath()}')`. Add trigger button showing 'Select Tags (X selected)' with dynamic count. Preserve existing functionality for search results grouping and current phase detection. Test both create and edit form contexts.",
@@ -1325,7 +1325,7 @@
         "updatedAt": "2025-10-04T00:52:47.171Z"
       },
       {
-        "id": 30,
+        "id": "30",
         "title": "Add Keyboard Navigation and Accessibility",
         "description": "Implement full keyboard navigation and accessibility features",
         "details": "Add comprehensive keyboard support: Tab navigation through all interactive elements, Enter to select/deselect tags, Escape to close panel, Arrow keys for tag navigation within sections. Implement ARIA labels, roles, and states for screen readers. Add focus management ensuring logical tab order and visible focus indicators. Include aria-expanded for collapsible sections and aria-selected for tag states. Ensure panel opens with focus on search input and closes with focus return to trigger button. Follow WCAG 2.1 AA guidelines for accessibility compliance.",
@@ -1339,7 +1339,7 @@
         "subtasks": []
       },
       {
-        "id": 31,
+        "id": "31",
         "title": "Create LeadInquiryResource for mobile-first contact capture",
         "description": "Develop mobile-responsive FilamentPHP 4 resource for initial lead capture, optimized for Mark's remote sales on Nantucket",
         "details": "Build a FilamentPHP 4 Resource with mobile-first responsive design using Livewire 3.x and Alpine.js 3.x. Include contact information fields, project location with ferry access flag, photo upload with AWS S3 storage, voice note recording with OpenAI Whisper transcription, estimated Linear Feet slider (10-500 LF), budget dropdown, timeline calendar picker, and draft save functionality. Auto-create Project model with 'inquiry' stage on submission. Use Laravel notifications for Bryan alerts. Implement offline-first functionality with service worker for draft persistence.",
@@ -1350,7 +1350,7 @@
         "subtasks": []
       },
       {
-        "id": 32,
+        "id": "32",
         "title": "Create ArchitectDrawingIntakeResource with AI PDF extraction",
         "description": "Build comprehensive PDF architectural plan review system with AI-assisted room extraction and Linear Feet calculation for professional credibility",
         "details": "Implement FilamentPHP 4 Resource with Nutrient PSPDFKit for PDF viewing, integrate OpenAI GPT-4 Vision API for room data extraction, create room-by-room systematic review interface with manual verification capabilities. Add Linear Feet calculation engine for upper/lower cabinets, tall units, island/peninsula with complexity factor tagging (curved elements 1.5x, custom materials 1.3x, high ceilings 1.2x, special finishes 1.4x). Include version control for plan revisions and total project LF aggregation. Enhance existing projects_rooms table with pricing columns and complexity_factors table creation.",
@@ -1363,7 +1363,7 @@
         "subtasks": []
       },
       {
-        "id": 33,
+        "id": "33",
         "title": "Develop ThursdayMeetingDashboardResource for structured project reviews",
         "description": "Create structured 15-minute project review interface to solve Bryan's meeting chaos and improve Thursday meeting efficiency",
         "details": "Build FilamentPHP 4 Widget Dashboard with auto-generated meeting agenda from pending projects, priority sorting algorithm, 15-minute timer with browser notifications, three-tier review structure (Overview 2min, Scope Review 3min, Technical Details 5min). Implement decision capture system for Go/No-Go decisions, drawing hours allocation, material procurement needs, team assignments. Add real-time notes taking with auto-save, parking lot for off-topic items, meeting summary auto-generation, and email recap system. Create thursday_meetings and meeting_decisions database tables.",
@@ -1376,7 +1376,7 @@
         "subtasks": []
       },
       {
-        "id": 34,
+        "id": "34",
         "title": "Build ComplexityScoringResource for automated project analysis",
         "description": "Implement pricing level selection system integrated with existing PriceList infrastructure for accurate project pricing based on complexity factors",
         "status": "done",
@@ -1447,7 +1447,7 @@
         "updatedAt": "2025-10-28T21:01:55.408Z"
       },
       {
-        "id": 35,
+        "id": "35",
         "title": "Create ProjectQualificationResource for Go/No-Go decisions",
         "description": "Build systematic Go/No-Go decision framework with automatic scoring and professional decline templates",
         "details": "Develop FilamentPHP 4 Resource with automatic scoring criteria including project size thresholds (minimum 50 LF), estimated revenue (minimum $15k), profitability margin targets (35%+), strategic fit assessment, resource capacity checks, and geographic considerations. Implement weighted scoring algorithm with Go/No-Go recommendations, professional decline email templates, referral tracking system, and decision history analytics dashboard.",
@@ -1460,7 +1460,7 @@
         "subtasks": []
       },
       {
-        "id": 36,
+        "id": "36",
         "title": "Enhance QuotationResource with Linear Feet pricing integration",
         "description": "Enhance existing quotation functionality with Linear Feet pricing engine and professional proposal packages",
         "details": "Extend existing QuotationResource in AureusERP with Linear Feet + complexity multiplier pricing engine, room-by-room cost breakdown capabilities, automatic quote generation from project data, professional proposal package attachment system, portfolio of similar projects auto-selection using similarity matching algorithm. Add quote version control, expiration date tracking, electronic signature integration with DocuSign or HelloSign, and auto-convert to Order on acceptance workflow.",
@@ -1473,7 +1473,7 @@
         "subtasks": []
       },
       {
-        "id": 37,
+        "id": "37",
         "title": "Create LinearFeetPricingCalculatorResource as core pricing engine",
         "description": "Build the foundational pricing engine using Base LF × Complexity = Final Rate formula as the universal business language",
         "status": "done",
@@ -1636,7 +1636,7 @@
         "updatedAt": "2025-10-28T21:06:53.644Z"
       },
       {
-        "id": 38,
+        "id": "38",
         "title": "Build ProposalPackageGeneratorResource for 24-hour professional responses",
         "description": "Create automated professional PDF package generation system to establish architect credibility through systematic 24-hour responses",
         "details": "Implement FilamentPHP 4 Resource with Laravel TCPDF or DomPDF for generating professional proposal packages containing: Executive Summary, Room-by-Room Breakdown, LF-based Pricing with complexity breakdown, Timeline with Milestones, Similar Project Portfolio (3-5 comparable projects), Next Steps Document, and Company Credentials. Use Blade template engine for customization, integrate photo gallery management, implement auto-send email delivery within 24 hours of Thursday meeting approval.",
@@ -1649,7 +1649,7 @@
         "subtasks": []
       },
       {
-        "id": 39,
+        "id": "39",
         "title": "Develop ScopeOfWorkResource for detailed specifications and change management",
         "description": "Create comprehensive project scope documentation system with change order workflow management",
         "details": "Build FilamentPHP 4 Resource for room-by-room specifications including cabinet types/quantities, door styles/materials, finish specifications, hardware selections, special features (glass doors, lighting). Implement material selection tracking, hardware specification management, special requirements documentation. Create change order workflow with impact analysis (LF, cost, timeline), approval routing system, updated scope documentation, version control, and client approval signatures using electronic signature integration.",
@@ -1662,7 +1662,7 @@
         "subtasks": []
       },
       {
-        "id": 40,
+        "id": "40",
         "title": "Create ProfitMarginAnalyzerResource for real-time profitability tracking",
         "description": "Build real-time profitability analysis system with margin protection and variance tracking",
         "details": "Develop FilamentPHP 4 Resource for material cost estimation from BOM, labor hour projections by Linear Feet, overhead allocation algorithms (shop, equipment, utilities), target margin comparison with 35% target tracking. Implement actual vs estimated tracking during production, historical project comparison analytics, profitability alerts when margin below threshold, what-if scenario analysis, and cost variance reporting dashboard.",
@@ -1675,7 +1675,7 @@
         "subtasks": []
       },
       {
-        "id": 41,
+        "id": "41",
         "title": "Enhance OrderResource with quote conversion and LF tracking",
         "description": "Enhance existing order management with automatic quote conversion and Linear Feet tracking integration",
         "details": "Extend existing OrderResource in AureusERP with auto-convert functionality from accepted Quotation, Linear Feet tracking and validation throughout order lifecycle, order stage workflow automation, material procurement triggers, production schedule integration, delivery timeline coordination, invoice generation from order data, and client portal for order status tracking. Implement quote-to-order conversion workflow with <30 second processing time.",
@@ -1688,7 +1688,7 @@
         "subtasks": []
       },
       {
-        "id": 42,
+        "id": "42",
         "title": "Enhance ProjectResource with complete workflow integration",
         "description": "Extend existing project management with comprehensive workflow state machine and Linear Feet integration",
         "details": "Enhance existing ProjectResource with workflow state machine implementation (Inquiry → Quote → Order → Production → Delivery → Complete), Linear Feet rollup aggregation from all rooms, Thursday meeting notes integration, team assignment automation based on project stage, timeline management with dependencies using constraint satisfaction, resource capacity integration, document management system for PDFs/photos/specs, client communication history tracking, and profit tracking throughout project lifecycle.",
@@ -1701,7 +1701,7 @@
         "subtasks": []
       },
       {
-        "id": 43,
+        "id": "43",
         "title": "Create CADDrawingWorkflowResource for drawing hours planning",
         "description": "Build JG/Carlos drawing hours estimation, assignment, and progress tracking system",
         "details": "Develop FilamentPHP 4 Resource for drawing hours estimation algorithms by room complexity (simple kitchen 2-3 hours, complex kitchen with island 5-8 hours, full house 20-40 hours). Implement assignment system to JG or Carlos, progress tracking with percentage completion, drawing approval workflow, revision management with version control, client review and feedback system, final approval signatures, and integration with CAD software for DWG/PDF export functionality.",
@@ -1714,7 +1714,7 @@
         "subtasks": []
       },
       {
-        "id": 44,
+        "id": "44",
         "title": "Enhance BillOfMaterialsResource with auto-generation from LF",
         "description": "Build upon the completed BOM foundation (CabinetMaterialsBomResource) to add advanced auto-generation capabilities from Linear Feet calculations and intelligent material optimization features",
         "status": "done",
@@ -1813,7 +1813,7 @@
         "updatedAt": "2025-10-28T21:08:38.399Z"
       },
       {
-        "id": 45,
+        "id": "45",
         "title": "Create MaterialProcurementResource for purchasing workflow",
         "description": "Build comprehensive purchasing workflow from BOM generation through receiving and payment",
         "details": "Develop FilamentPHP 4 Resource for purchase order generation from approved BOM, supplier selection with pricing comparison algorithms, delivery schedule coordination, PO approval workflow ($5k+ requires Bryan approval), order tracking system, receiving workflow with quality inspection checklists, invoice matching logic (3-way: PO, Receipt, Invoice), payment tracking, and supplier performance metrics dashboard for future decision making.",
@@ -1826,7 +1826,7 @@
         "subtasks": []
       },
       {
-        "id": 46,
+        "id": "46",
         "title": "Build ProductionScheduleResource for shop capacity planning",
         "description": "Create comprehensive shop capacity planning and project sequencing system with Linear Feet capacity management",
         "details": "Develop FilamentPHP 4 Resource for Linear Feet capacity management by week (current capacity ~150 LF/week), project sequencing with dependency management, crew assignment by project phase, material availability checking before scheduling, timeline visualization using Gantt chart library (e.g., DHTMLX Gantt), capacity utilization reporting, bottleneck identification algorithms, what-if scenario planning, resource leveling, and overtime planning. Create production_capacity and production_schedule database tables.",
@@ -1839,7 +1839,7 @@
         "subtasks": []
       },
       {
-        "id": 47,
+        "id": "47",
         "title": "Enhance ProjectStageResource with automated transitions",
         "description": "Enhance existing stage configuration with automated transitions and quality gate checklists",
         "details": "Extend existing ProjectStageResource with automated stage transition algorithms based on completion criteria, stage-specific checklist requirements with quality gates, notification triggers on stage change using Laravel notifications, stage-specific views and permissions with FilamentShield, timeline tracking per stage for analytics, and bottleneck detection algorithms to identify process inefficiencies.",
@@ -1852,7 +1852,7 @@
         "subtasks": []
       },
       {
-        "id": 48,
+        "id": "48",
         "title": "Create QualityCheckpointResource for Levi's quality control",
         "description": "Build comprehensive quality control tracking and issue management system for production phases",
         "details": "Develop FilamentPHP 4 Resource for QC checklist management by project phase (material inspection at receipt, pre-production setup, in-progress checks for doors/drawer boxes/assembly, pre-finishing inspection, post-finishing quality check, pre-delivery final inspection). Implement photo documentation requirements with annotation capabilities, issue tracking with severity levels (critical, major, minor), rework management workflow, root cause analysis tools, quality metrics dashboard, and craftsman accountability tracking.",
@@ -1865,7 +1865,7 @@
         "subtasks": []
       },
       {
-        "id": 49,
+        "id": "49",
         "title": "Develop WorkOrderResource for daily shop floor management",
         "description": "Create daily shop floor task management system with progress tracking and material usage monitoring",
         "details": "Build FilamentPHP 4 Resource for task assignment to specific craftsmen, priority sequencing algorithms, time tracking integration with start/stop functionality, material usage tracking for job costing, progress percentage updates, issue reporting system (quality, material, equipment), task completion signoff workflow, daily production reporting dashboard, and mobile-friendly interface optimized for shop floor use with touch-friendly controls.",
@@ -1878,7 +1878,7 @@
         "subtasks": []
       },
       {
-        "id": 50,
+        "id": "50",
         "title": "Create TeamAssignmentResource for crew scheduling and skill matching",
         "description": "Build comprehensive crew scheduling system with skill matching and workload balancing capabilities",
         "details": "Develop FilamentPHP 4 Resource for craftsman availability calendar management, skill profile management with competency levels, skill matching algorithms to project requirements, workload balancing across team members, timesheet integration with existing analytics system, performance tracking with fair metrics, training needs identification based on skill gaps, vacation and time-off planning with capacity impact analysis.",
@@ -1891,7 +1891,7 @@
         "subtasks": []
       },
       {
-        "id": 51,
+        "id": "51",
         "title": "Build DeliveryScheduleResource for logistics coordination",
         "description": "Create JG's delivery logistics planning system focused on delivery coordination without installation services",
         "details": "Develop FilamentPHP 4 Resource for delivery calendar with capacity planning, route optimization algorithms for multiple deliveries, crew assignment for delivery team, truck capacity planning by Linear Feet calculations, client coordination and confirmation system, delivery window scheduling, weather contingency planning with alternate dates, delivery notes and special instructions management, photo documentation requirements, and client signature capture using mobile-friendly interface.",
@@ -1904,7 +1904,7 @@
         "subtasks": []
       },
       {
-        "id": 52,
+        "id": "52",
         "title": "Create SiteAccessPlanningResource for Nantucket ferry logistics",
         "description": "Build specialized site access planning system for unique Nantucket ferry logistics and site constraints",
         "details": "Develop FilamentPHP 4 Resource for ferry schedule integration with Steamship Authority API (if available), ferry booking management system, truck size validation for ferry capacity constraints, comprehensive site access requirements capture (driveway width/clearance, stairs/elevator considerations, maximum piece dimensions, access restrictions for time windows/noise). Include staging area planning, equipment needs checklist (dollies, straps, blankets), weather API integration for conditions, backup plan documentation, and island logistics coordination. Create site_access_plans database table.",
@@ -1917,7 +1917,7 @@
         "subtasks": []
       },
       {
-        "id": 53,
+        "id": "53",
         "title": "Develop LoadPlanningResource for truck optimization",
         "description": "Create truck loading optimization system using Linear Feet calculations and protection requirements",
         "details": "Build FilamentPHP 4 Resource for Linear Feet capacity calculation by truck type, load sequence planning algorithms (LIFO for multiple deliveries), cabinet protection requirements system (blanket wrapping, corner protectors, strapping/securing protocols), weight distribution calculations for safety, fragile item identification and special handling, loading checklist with quality gates, photo documentation before loading for damage prevention, and pre-delivery inspection workflow.",
@@ -1930,7 +1930,7 @@
         "subtasks": []
       },
       {
-        "id": 54,
+        "id": "54",
         "title": "Create DeliveryChecklistResource for pre-delivery verification",
         "description": "Build comprehensive pre-delivery verification and quality assurance checklist system",
         "details": "Develop FilamentPHP 4 Resource for quality final inspection checklist, completeness verification system (all pieces, hardware, specifications), packaging quality check protocols, documentation preparation automation (delivery receipt, warranty information, care and maintenance guide, installation recommendations for client's installer), client notification system for delivery reminders, delivery team briefing protocols, and emergency contact information management.",
@@ -1943,7 +1943,7 @@
         "subtasks": []
       },
       {
-        "id": 55,
+        "id": "55",
         "title": "Build ProjectCompletionResource for final handoff and relationship management",
         "description": "Create final project handoff system with documentation archival and client relationship building",
         "details": "Develop FilamentPHP 4 Resource for delivery photo documentation management (before/during/after), client sign-off and satisfaction survey system, warranty documentation generation, comprehensive project archive system (all drawings, process photos, material specifications, invoice and payment records), lessons learned capture for team improvement, referral request workflow automation, follow-up scheduling system (30/60/90 day check-ins), testimonial request management, and portfolio addition workflow with client permission.",
@@ -1956,29 +1956,32 @@
         "subtasks": []
       },
       {
-        "id": 56,
+        "id": "56",
         "title": "Create Weekly Hours Report Widget for Owner Dashboard",
         "description": "Build a Filament TableWidget showing weekly hours per employee with daily breakdown (Mon-Thu), overtime highlighting, and missing punch alerts. This addresses US-3.2 for Bryan's quick weekly overview.",
         "details": "Create WeeklyHoursReportWidget.php in plugins/webkul/timesheets/src/Filament/Widgets/. Use existing ClockingService::getWeeklySummary() method. Implementation: 1) Extend Filament\\Widgets\\TableWidget, 2) Query all active employees via Employee model, 3) For each employee call ClockingService->getWeeklySummary(), 4) Columns: Employee Name | Mon | Tue | Wed | Thu | Total | Overtime | Status, 5) Conditional coloring: red for overtime (>8h/day or >32h/week), yellow for missing punches, 6) Date range picker filter, 7) Export action button linking to ClockController::exportTeamSummary(), 8) 60-second polling for auto-refresh. Reference TodayAttendanceWidget.php pattern. Register in TimesheetPlugin.php widgets array.",
         "testStrategy": "1. Verify widget appears on timesheet dashboard. 2. Test with multiple employees having varying hours. 3. Verify overtime highlighting for >8h/day and >32h/week. 4. Test date range filter. 5. Verify export button generates correct CSV. 6. Test auto-refresh updates data every 60 seconds.",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
-        "subtasks": []
+        "status": "done",
+        "subtasks": [],
+        "updatedAt": "2025-12-17T14:49:44.828Z"
       },
       {
-        "id": 57,
+        "id": "57",
         "title": "Create Project Labor Hours Report Page",
         "description": "Build a Filament Page showing total labor hours per project with employee breakdown, actual vs. estimated hours comparison, and cost analysis. This addresses US-3.3 for tracking job profitability.",
         "details": "Create ProjectHoursReport.php as Filament Page in plugins/webkul/timesheets/src/Filament/Pages/. Query Timesheet model grouped by project_id, join with projects_projects for details. Calculate: SUM(unit_amount) grouped by project, employee, task. Display: Project Name | Total Hours | Allocated Hours | Variance | % Complete. Add drill-down table for per-employee breakdown. Include task-level breakdown if task_id populated. Date range filter. Calculate labor cost: hours x average hourly rate. Add navigation in TimesheetPlugin::getNavigation().",
         "testStrategy": "1. Create test data with hours across multiple projects. 2. Verify totals match sum of individual entries. 3. Test variance calculation. 4. Verify drill-down shows employee breakdown. 5. Test date range filtering. 6. Test with projects having no time entries.",
         "priority": "high",
-        "dependencies": ["56"],
+        "dependencies": [
+          "56"
+        ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 58,
+        "id": "58",
         "title": "Implement AI Time Clock Command Execution Handler",
         "description": "Create handler service that executes time clock commands from AI responses (clock_in, clock_out, get_clock_status, etc.) by connecting GeminiCabinetAssistantService tool calls to ClockingService methods.",
         "details": "Create TimeClockAiHandler.php in app/Services/. GeminiCabinetAssistantService already defines tools. Implementation: 1) Create handler with execute(array $command, ?int $currentUserId), 2) Resolve employee_name to user_id using Employee model, 3) Map commands: clock_in to clockIn(), clock_out to clockOut(), get_clock_status to getStatus(), get_weekly_hours to getWeeklySummary(), add_manual_entry to addManualEntry(), get_team_attendance to getTodayAttendance(), 4) Resolve project_name to project_id, 5) Return formatted response for AI. Integrate in CabinetAiAssistant Livewire handleAiCommand() method.",
@@ -1989,7 +1992,7 @@
         "subtasks": []
       },
       {
-        "id": 59,
+        "id": "59",
         "title": "Add Training Time Tracking for Apprentices",
         "description": "Extend Timesheet model and UI to track training vs. production time for apprentices. Includes time_type field, training categories, and mentor association. Addresses US-4.1.",
         "details": "Migration: Add to analytic_records: time_type ENUM (production, training), training_category STRING nullable, mentor_id FK users. Timesheet model: Add scopeTraining(), scopeProduction(), belongsTo mentor(), getTrainingRatio(). Kiosk UI: Add time_type toggle on clock-out for apprentice role, training category dropdown, mentor selection. FilamentPHP form: Add time_type/training_category fields with conditional visibility. Add training report widget showing ratio.",
@@ -2000,18 +2003,20 @@
         "subtasks": []
       },
       {
-        "id": 60,
+        "id": "60",
         "title": "Create Punctuality and Late Arrival Report",
         "description": "Build report showing early/late arrival patterns by employee with configurable on-time window. Helps Bryan identify attendance issues. Addresses US-5.3.",
         "details": "Create PunctualityReportWidget.php in plugins/webkul/timesheets/src/Filament/Widgets/. Config: on-time window 7:45am-8:15am via env. Query clock entries, classify: early, on-time, late. Calculate per-employee: percent on-time, avg arrival time, late count. Display: Employee | On-Time Percent | Avg Arrival | Late Days | Early Days. Week/month filter. Highlight below 80 percent on-time in red. Extend Timesheet model with getArrivalStatus() method.",
         "testStrategy": "1. Create test entries with various arrival times. 2. Verify classification works correctly. 3. Test percentage calculations. 4. Verify date range filter. 5. Test highlighting for low on-time percentage.",
         "priority": "medium",
-        "dependencies": ["56"],
+        "dependencies": [
+          "56"
+        ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 61,
+        "id": "61",
         "title": "Implement Forgot to Clock Out Notification System",
         "description": "Create scheduled job sending notifications at 5:30pm to employees still clocked in, and prompts for correction next day. Addresses US-5.1.",
         "details": "Create SendClockOutReminders command: Find users clocked in after 5:15pm, send notification via Laravel notifications. Create ClockOutReminderNotification.php. Schedule in Kernel.php: weekdays at 17:15. Create MissedClockOutJob for next-day handling: Run at 7am, find incomplete entries, notify employee and supervisor, flag for correction. Add Filament notification bell integration.",
@@ -2022,18 +2027,20 @@
         "subtasks": []
       },
       {
-        "id": 62,
+        "id": "62",
         "title": "Add Mentor Check-In Feature for Apprentices",
         "description": "Create end-of-day prompt for apprentices to record mentor check-ins with notes field. Visible to mentors and owner. Addresses US-4.2.",
         "details": "Migration: Create apprentice_checkins table (id, apprentice_user_id, mentor_user_id, date, learnings, questions, mentor_verified, timestamps). Kiosk integration: On clock-out for apprentice, show optional check-in prompt with Yes/No/Skip, text field for learnings. FilamentPHP: Create ApprenticeCheckinResource, mentor dashboard widget, owner report. AI integration: Add log_training_activity execution to TimeClockAiHandler.",
         "testStrategy": "1. Verify prompt shows only for apprentice role. 2. Test saving with/without notes. 3. Verify mentor sees apprentice check-ins. 4. Test owner views all check-ins. 5. Verify skip does not create record. 6. Test AI creates check-in.",
         "priority": "low",
-        "dependencies": ["59"],
+        "dependencies": [
+          "59"
+        ],
         "status": "pending",
         "subtasks": []
       },
       {
-        "id": 63,
+        "id": "63",
         "title": "Create Kiosk Security and IP Restriction Middleware",
         "description": "Enhance kiosk security with IP whitelisting middleware, configurable PIN requirements, and audit logging for all clock actions.",
         "details": "Create KioskIpMiddleware.php: Check request IP against config whitelist, log denied access, abort 403 if not allowed. Config file config/kiosk.php: allowed_ips, pin_required, pin_length, session_timeout. Audit logging: Create clock_audit_logs table, log all actions with user_id, action, ip, user_agent, timestamp. Add ClockAuditListener. Register middleware as kiosk.ip in Kernel.php.",
@@ -2044,7 +2051,7 @@
         "subtasks": []
       },
       {
-        "id": 64,
+        "id": "64",
         "title": "Add Split Time Across Multiple Projects Feature",
         "description": "Enable employees to split daily hours across multiple projects at clock-out time. Supports US-2.1 requirement for working on multiple jobs in one day.",
         "details": "Kiosk blade: Add Split between projects toggle, dynamic form with Project selector plus Hours input, add row button, validate total equals worked hours. ClockingService::clockOut(): Accept array of project assignments, if multiple create one Timesheet entry per project with split hours. Livewire: Add projectSplits array, addProjectSplit()/removeProjectSplit() methods, validate totals.",
@@ -2055,28 +2062,27 @@
         "subtasks": []
       },
       {
-        "id": 65,
+        "id": "65",
         "title": "Implement Offline Support and PWA for Kiosk",
         "description": "Add PWA capabilities to kiosk with offline queue for clock actions, auto-sync when connection restored, and installable app for shop tablets.",
         "details": "PWA: Create manifest.json for TCS Time Clock, create service-worker.js to cache kiosk assets and intercept /api/clock/* requests. IndexedDB queue: Store offline clock actions with action, user_id, timestamp, data, synced flag. Sync logic: On reconnect process queue in order, update UI with sync status, handle conflicts. Update kiosk blade: Register service worker, show offline indicator, display pending sync count.",
         "testStrategy": "1. Test kiosk loads while offline. 2. Test clock-in queues when offline. 3. Verify sync occurs on reconnect. 4. Test conflict handling. 5. Verify pending count displays. 6. Test PWA installable on tablet. 7. Test service worker updates.",
         "priority": "low",
-        "dependencies": ["63"],
+        "dependencies": [
+          "63"
+        ],
         "status": "pending",
         "subtasks": []
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-12-17T14:10:00.000Z",
+      "lastModified": "2025-12-17T14:49:44.829Z",
       "taskCount": 65,
-      "completedCount": 24,
+      "completedCount": 26,
       "tags": [
         "master"
-      ],
-      "created": "2025-12-01T01:39:31.043Z",
-      "description": "Tasks for master context",
-      "updated": "2025-12-17T14:10:00.000Z"
+      ]
     }
   }
 }

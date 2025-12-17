@@ -16,14 +16,14 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -36,7 +36,7 @@ use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
@@ -113,15 +113,16 @@ class ProductResource extends Resource
 
                         Section::make(__('products::filament/resources/product.form.sections.images.title'))
                             ->schema([
-                                FileUpload::make('images')
-                                    ->image()
+                                SpatieMediaLibraryFileUpload::make('product-images')
+                                    ->collection('product-images')
                                     ->multiple()
-                                    ->disk('public')
-                                    ->directory('products/images')
-                                    ->visibility('public')
                                     ->reorderable()
+                                    ->responsiveImages()
                                     ->openable()
-                                    ->downloadable(),
+                                    ->downloadable()
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+                                    ->maxSize(10240)
+                                    ->helperText('Images will be automatically optimized with responsive sizes (thumbnail, small, medium, large)'),
                             ]),
 
                         Section::make(__('products::filament/resources/product.form.sections.inventory.title'))
@@ -350,10 +351,10 @@ class ProductResource extends Resource
                             'is_favorite' => ! $record->is_favorite,
                         ]);
                     }),
-                ImageColumn::make('images')
+                SpatieMediaLibraryImageColumn::make('product-images')
+                    ->collection('product-images')
                     ->label(__('products::filament/resources/product.table.columns.images'))
-                    ->placeholder('—')
-                    ->disk('public')
+                    ->conversion('thumbnail')
                     ->circular()
                     ->stacked()
                     ->limit(3)
@@ -670,11 +671,12 @@ class ProductResource extends Resource
 
                         Section::make(__('products::filament/resources/product.infolist.sections.images.title'))
                             ->schema([
-                                ImageEntry::make('images')
-                                    ->disk('public')
+                                SpatieMediaLibraryImageEntry::make('product-images')
+                                    ->collection('product-images')
+                                    ->conversion('medium')
                                     ->hiddenLabel(),
                             ])
-                            ->visible(fn ($record): bool => ! empty($record->images)),
+                            ->visible(fn ($record): bool => $record->hasMedia('product-images')),
 
                         Section::make(__('products::filament/resources/product.infolist.sections.inventory.title'))
                             ->schema([
