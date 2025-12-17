@@ -32,6 +32,14 @@ class WeeklyHoursReportWidget extends BaseWidget
 
     public ?Carbon $weekStart = null;
 
+    /**
+     * Determine if the widget can be viewed.
+     */
+    public static function canView(): bool
+    {
+        return true;
+    }
+
     public function mount(): void
     {
         $this->weekStart = Carbon::now()->startOfWeek();
