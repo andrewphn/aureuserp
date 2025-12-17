@@ -3,10 +3,9 @@
 namespace Webkul\Timesheet\Filament\Widgets;
 
 use App\Services\ClockingService;
-use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -25,8 +24,6 @@ use Webkul\Project\Models\Timesheet;
  */
 class WeeklyHoursReportWidget extends BaseWidget
 {
-    use HasWidgetShield;
-
     protected static ?int $sort = 3;
 
     protected int | string | array $columnSpan = 'full';

@@ -353,6 +353,7 @@ class ProductResource extends Resource
                 ImageColumn::make('images')
                     ->label(__('products::filament/resources/product.table.columns.images'))
                     ->placeholder('—')
+                    ->disk('public')
                     ->circular()
                     ->stacked()
                     ->limit(3)
@@ -670,6 +671,7 @@ class ProductResource extends Resource
                         Section::make(__('products::filament/resources/product.infolist.sections.images.title'))
                             ->schema([
                                 ImageEntry::make('images')
+                                    ->disk('public')
                                     ->hiddenLabel(),
                             ])
                             ->visible(fn ($record): bool => ! empty($record->images)),
