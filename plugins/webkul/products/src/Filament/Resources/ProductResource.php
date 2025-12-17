@@ -117,7 +117,7 @@ class ProductResource extends Resource
                                     ->image()
                                     ->multiple()
                                     ->disk('public')
-                                    ->directory('products')
+                                    ->directory('products/images')
                                     ->visibility('public')
                                     ->reorderable()
                                     ->openable()

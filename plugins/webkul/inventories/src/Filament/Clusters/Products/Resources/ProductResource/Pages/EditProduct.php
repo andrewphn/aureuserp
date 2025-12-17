@@ -175,7 +175,8 @@ class EditProduct extends BaseEditProduct
                                 if (!is_array($existingImages)) {
                                     $existingImages = [];
                                 }
-                                $existingImages[] = $downloadedImage;
+                                // Store just the filename - FileUpload's directory() setting will handle the path
+                                $existingImages[] = basename($downloadedImage);
                                 $updates['images'] = $existingImages;
                             }
                         }
@@ -314,6 +315,7 @@ class EditProduct extends BaseEditProduct
                         );
 
                         // Move image to permanent location if it's in temp
+                        // Use 'products/images/' directory to match FileUpload component configuration
                         $permanentPath = 'products/images/' . basename($imagePath);
                         $permanentFullPath = storage_path('app/public/' . $permanentPath);
 
@@ -424,7 +426,8 @@ class EditProduct extends BaseEditProduct
                         if (!is_array($existingImages)) {
                             $existingImages = [];
                         }
-                        $existingImages[] = $permanentPath;
+                        // Store just the filename - FileUpload's directory() setting will handle the path
+                        $existingImages[] = basename($permanentPath);
 
                         // Also download AI-suggested product image if available
                         if (!empty($aiData['image_url'])) {
@@ -433,7 +436,8 @@ class EditProduct extends BaseEditProduct
                                 $aiData['identified_product_name'] ?? null
                             );
                             if ($downloadedImage) {
-                                $existingImages[] = $downloadedImage;
+                                // Store just the filename
+                                $existingImages[] = basename($downloadedImage);
                             }
                         }
                         $updates['images'] = $existingImages;
