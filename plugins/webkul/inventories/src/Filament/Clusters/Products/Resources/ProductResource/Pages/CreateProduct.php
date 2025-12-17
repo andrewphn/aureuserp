@@ -378,7 +378,8 @@ class CreateProduct extends BaseCreateProduct
                         );
 
                         // Move image to permanent location if it's in temp
-                        $permanentPath = 'products/images/' . basename($imagePath);
+                        // Use 'products/' directory to match FileUpload component configuration
+                        $permanentPath = 'products/' . basename($imagePath);
                         $permanentFullPath = storage_path('app/public/' . $permanentPath);
 
                         if ($fullPath !== $permanentFullPath) {
@@ -827,8 +828,21 @@ class CreateProduct extends BaseCreateProduct
         if (!is_array($existingImages)) {
             $existingImages = [];
         }
+
+        Log::info('AI Photo - Adding image to product', [
+            'pending_image_path' => $pendingImagePath,
+            'existing_images' => $existingImages,
+        ]);
+
         if (!empty($pendingImagePath)) {
-            $existingImages[] = $pendingImagePath;
+            // Verify the file exists
+            $fullImagePath = storage_path('app/public/' . $pendingImagePath);
+            if (file_exists($fullImagePath)) {
+                $existingImages[] = $pendingImagePath;
+                Log::info('AI Photo - Image file verified', ['path' => $pendingImagePath]);
+            } else {
+                Log::warning('AI Photo - Image file not found', ['expected_path' => $fullImagePath]);
+            }
         }
 
         // Also download AI-suggested product image if available
@@ -839,9 +853,12 @@ class CreateProduct extends BaseCreateProduct
             );
             if ($downloadedImage) {
                 $existingImages[] = $downloadedImage;
+                Log::info('AI Photo - Downloaded AI-suggested image', ['path' => $downloadedImage]);
             }
         }
+
         $updates['images'] = $existingImages;
+        Log::info('AI Photo - Final images array', ['images' => $existingImages]);
 
         // Quantity from user input
         if (!empty($aiData['_user_quantity']) && $aiData['_user_quantity'] > 0) {

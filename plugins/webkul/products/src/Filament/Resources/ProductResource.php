@@ -116,7 +116,12 @@ class ProductResource extends Resource
                                 FileUpload::make('images')
                                     ->image()
                                     ->multiple()
-                                    ->storeFileNamesIn('products'),
+                                    ->disk('public')
+                                    ->directory('products')
+                                    ->visibility('public')
+                                    ->reorderable()
+                                    ->openable()
+                                    ->downloadable(),
                             ]),
 
                         Section::make(__('products::filament/resources/product.form.sections.inventory.title'))
