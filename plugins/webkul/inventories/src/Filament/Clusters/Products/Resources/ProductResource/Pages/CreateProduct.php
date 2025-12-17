@@ -755,7 +755,12 @@ class CreateProduct extends BaseCreateProduct
             $updates['description'] = $fullDescription;
         }
 
-        // Barcode - only update if empty (use barcode or SKU from AI)
+        // Reference/Item Code - populate from SKU
+        if (empty($currentData['reference']) && !empty($aiData['sku'])) {
+            $updates['reference'] = $aiData['sku'];
+        }
+
+        // Barcode - only update if empty (use barcode, or SKU as fallback)
         if (empty($currentData['barcode'])) {
             if (!empty($aiData['barcode'])) {
                 $updates['barcode'] = $aiData['barcode'];
