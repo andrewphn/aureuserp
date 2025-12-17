@@ -8,9 +8,9 @@ use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Hydrat\TableLayoutToggle\Concerns\HasToggleableTable;
@@ -136,9 +136,10 @@ class ListProducts extends ListRecords
                 ->action(function (Product $record): void {
                     $record->update(['is_favorite' => ! $record->is_favorite]);
                 }),
-            ImageColumn::make('images')
+            SpatieMediaLibraryImageColumn::make('product-images')
+                ->collection('product-images')
                 ->label(__('products::filament/resources/product.table.columns.images'))
-                ->placeholder('—')
+                ->conversion('thumbnail')
                 ->circular()
                 ->stacked()
                 ->limit(3)
@@ -182,7 +183,9 @@ class ListProducts extends ListRecords
         return [
             Stack::make([
                 // Product image - hero element (dynamic height based on grid size)
-                ImageColumn::make('images')
+                SpatieMediaLibraryImageColumn::make('product-images')
+                    ->collection('product-images')
+                    ->conversion('medium')
                     ->height($imageHeight)
                     ->width('100%')
                     ->extraImgAttributes(['class' => 'object-contain w-full rounded-t-lg bg-gray-50'])
