@@ -131,10 +131,12 @@ class MigrateProductImagesToSpatie extends Command
         foreach ($images as $imagePath) {
             // Try multiple possible locations for the image
             $possiblePaths = [
+                storage_path("app/public/products/images/{$imagePath}"),  // Staging location
                 storage_path("app/private/{$imagePath}"),
                 storage_path("app/public/{$imagePath}"),
                 storage_path("app/{$imagePath}"),
                 public_path("storage/{$imagePath}"),
+                public_path("storage/products/images/{$imagePath}"),
             ];
 
             $foundPath = null;
