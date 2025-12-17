@@ -2,6 +2,7 @@
 
 namespace Webkul\Product;
 
+use Webkul\Product\Console\Commands\MigrateProductImagesToSpatie;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -75,6 +76,11 @@ class ProductServiceProvider extends PackageServiceProvider
      */
     public function packageBooted(): void
     {
-        //
+        // Register console commands
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                MigrateProductImagesToSpatie::class,
+            ]);
+        }
     }
 }

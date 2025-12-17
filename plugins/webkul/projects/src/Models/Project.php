@@ -21,6 +21,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
 use Webkul\Project\Database\Factories\ProjectFactory;
+use Webkul\Project\Models\Timesheet;
 use Webkul\Security\Models\Scopes\UserPermissionScope;
 use Webkul\Security\Models\User;
 use Webkul\Support\Models\Company;
@@ -66,6 +67,7 @@ use Webkul\Support\Models\Company;
  * @property-read \Illuminate\Database\Eloquent\Collection $addresses
  * @property-read \Illuminate\Database\Eloquent\Collection $productionEstimates
  * @property-read \Illuminate\Database\Eloquent\Collection $tasks
+ * @property-read \Illuminate\Database\Eloquent\Collection $timesheets
  * @property-read \Illuminate\Database\Eloquent\Collection $orders
  * @property-read \Illuminate\Database\Eloquent\Collection $rooms
  * @property-read \Illuminate\Database\Eloquent\Collection $cabinets
@@ -368,6 +370,16 @@ class Project extends Model implements HasMedia, Sortable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class);
+    }
+
+    /**
+     * Timesheets
+     *
+     * @return HasMany
+     */
+    public function timesheets(): HasMany
+    {
+        return $this->hasMany(Timesheet::class);
     }
 
     /**
