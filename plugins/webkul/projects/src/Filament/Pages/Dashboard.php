@@ -18,6 +18,8 @@ use Webkul\Project\Filament\Widgets\TaskByStateChart;
 use Webkul\Project\Filament\Widgets\TopAssigneesWidget;
 use Webkul\Project\Filament\Widgets\TopProjectsWidget;
 use Webkul\Project\Models\Project;
+use Webkul\Timesheet\Filament\Widgets\TodayAttendanceWidget;
+use Webkul\Timesheet\Filament\Widgets\WeeklyHoursReportWidget;
 use Webkul\Project\Models\Tag;
 use Webkul\Security\Models\User;
 
@@ -120,6 +122,8 @@ class Dashboard extends BaseDashboard
             TaskByStateChart::class,
             TopAssigneesWidget::class,
             TopProjectsWidget::class,
+            TodayAttendanceWidget::class,
+            WeeklyHoursReportWidget::class,
         ];
     }
 }

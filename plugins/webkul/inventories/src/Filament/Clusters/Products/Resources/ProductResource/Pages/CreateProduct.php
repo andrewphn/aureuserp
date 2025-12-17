@@ -378,8 +378,8 @@ class CreateProduct extends BaseCreateProduct
                         );
 
                         // Move image to permanent location if it's in temp
-                        // Use 'products/' directory to match FileUpload component configuration
-                        $permanentPath = 'products/' . basename($imagePath);
+                        // Use 'products/images/' directory to match FileUpload component configuration
+                        $permanentPath = 'products/images/' . basename($imagePath);
                         $permanentFullPath = storage_path('app/public/' . $permanentPath);
 
                         if ($fullPath !== $permanentFullPath) {
@@ -838,8 +838,9 @@ class CreateProduct extends BaseCreateProduct
             // Verify the file exists
             $fullImagePath = storage_path('app/public/' . $pendingImagePath);
             if (file_exists($fullImagePath)) {
-                $existingImages[] = $pendingImagePath;
-                Log::info('AI Photo - Image file verified', ['path' => $pendingImagePath]);
+                // Store just the filename - FileUpload's directory() setting will handle the path
+                $existingImages[] = basename($pendingImagePath);
+                Log::info('AI Photo - Image file verified', ['path' => $pendingImagePath, 'stored_as' => basename($pendingImagePath)]);
             } else {
                 Log::warning('AI Photo - Image file not found', ['expected_path' => $fullImagePath]);
             }
@@ -852,8 +853,9 @@ class CreateProduct extends BaseCreateProduct
                 $aiData['identified_product_name'] ?? null
             );
             if ($downloadedImage) {
-                $existingImages[] = $downloadedImage;
-                Log::info('AI Photo - Downloaded AI-suggested image', ['path' => $downloadedImage]);
+                // Store just the filename - FileUpload's directory() setting will handle the path
+                $existingImages[] = basename($downloadedImage);
+                Log::info('AI Photo - Downloaded AI-suggested image', ['path' => $downloadedImage, 'stored_as' => basename($downloadedImage)]);
             }
         }
 
