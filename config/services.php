@@ -44,4 +44,21 @@ return [
         'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
     ],
 
+    'hubspot' => [
+        'api_key' => env('HUBSPOT_API_KEY'),
+        'access_token' => env('HUBSPOT_ACCESS_TOKEN'),
+        'owner_id' => env('HUBSPOT_OWNER_ID'),
+        'questionnaire_workflow_id' => env('HUBSPOT_QUESTIONNAIRE_WORKFLOW_ID'),
+    ],
+
+    'turnstile' => [
+        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'secret_key' => env('TURNSTILE_SECRET_KEY'),
+    ],
+
+    'leads' => [
+        'notification_email' => env('LEAD_NOTIFICATION_EMAIL', 'info@tcswoodwork.com'),
+        'api_key' => env('LEADS_API_KEY'),
+    ],
+
 ];
