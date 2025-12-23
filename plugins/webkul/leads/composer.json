@@ -1,0 +1,30 @@
+{
+    "name": "webkul/leads",
+    "description": "Lead management and contact form system for TCS Woodwork ERP",
+    "authors": [
+        {
+            "name": "TCS Woodwork",
+            "email": "info@tcswoodwork.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\Lead\\LeadServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\Lead\\": "src/",
+            "Webkul\\Lead\\Database\\Factories\\": "database/factories/",
+            "Webkul\\Lead\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\Lead\\Tests\\": "tests/"
+        }
+    }
+}

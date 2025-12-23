@@ -28,4 +28,7 @@ return [
     Webkul\FullCalendar\FullCalendarServiceProvider::class,
     Webkul\Timesheet\TimesheetServiceProvider::class,
     Webkul\Website\WebsiteServiceProvider::class,
+    Webkul\TcsCms\TcsCmsServiceProvider::class,
+    Webkul\TcsHubspot\TcsHubspotServiceProvider::class,
+    Webkul\Lead\LeadServiceProvider::class,
 ];
