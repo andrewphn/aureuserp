@@ -454,6 +454,38 @@ class Project extends Model implements HasMedia, Sortable
     }
 
     /**
+     * Projects that this project depends on (must complete before this one can start/progress)
+     *
+     * @return BelongsToMany
+     */
+    public function dependsOn(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Project::class,
+            'projects_project_dependencies',
+            'project_id',
+            'depends_on_id'
+        )->withPivot(['dependency_type', 'lag_days'])
+         ->withTimestamps();
+    }
+
+    /**
+     * Projects that depend on this project (must wait for this project to complete)
+     *
+     * @return BelongsToMany
+     */
+    public function dependents(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Project::class,
+            'projects_project_dependencies',
+            'depends_on_id',
+            'project_id'
+        )->withPivot(['dependency_type', 'lag_days'])
+         ->withTimestamps();
+    }
+
+    /**
      * Pdf Documents
      *
      * @return MorphMany

@@ -1,0 +1,14 @@
+# Grain Pattern Images Directory
+
+This directory contains static wood grain photographs used for the unique grain pattern navigation system.
+
+Required images:
+- oak-horizontal.jpg (1400x64px minimum) - Primary navigation grain pattern
+- walnut-horizontal.jpg (1400x64px minimum) - Alternative grain pattern
+- cherry-horizontal.jpg (1400x64px minimum) - Secondary grain pattern
+
+## Low-Maintenance Design Notes
+- These are permanent static assets requiring no updates
+- Optimized for horizontal repeat patterns
+- Consistent 64px height for desktop, 48px for mobile
+- Sepia/warm toned for authentic wood appearance

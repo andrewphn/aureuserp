@@ -14,6 +14,7 @@
         "awcodes/filament-badgeable-column": "^3.0",
         "barryvdh/laravel-dompdf": "^3.1",
         "bezhansalleh/filament-shield": "^4.0",
+        "coderflex/filament-turnstile": "^2.4",
         "filament/filament": "^4.0",
         "filament/spatie-laravel-media-library-plugin": "^4.0",
         "filament/spatie-laravel-settings-plugin": "^4.0",
@@ -26,6 +27,7 @@
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
         "milon/barcode": "^11.0",
+        "mokhosh/filament-kanban": "dev-main",
         "njxqlus/filament-lightbox": "^4.0",
         "smalot/pdfparser": "^2.12",
         "spatie/eloquent-sortable": "^4.4",
@@ -104,5 +106,10 @@
         "forum": "https://forums.aureuserp.com",
         "source": "https://github.com/aureuserp/aureuserp",
         "docs": "https://devdocs.aureuserp.com"
-    }
+    },
+    "repositories": [{
+        "name": "filament-kanban",
+        "type": "vcs",
+        "url": "https://github.com/coolsam726/filament-kanban.git"
+    }]
 }

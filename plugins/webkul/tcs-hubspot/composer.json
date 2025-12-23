@@ -1,0 +1,22 @@
+{
+    "name": "webkul/tcs-hubspot",
+    "description": "TCS Woodwork HubSpot CRM Integration Plugin",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Webkul\\TcsHubspot\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\TcsHubspot\\TcsHubspotServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "hubspot/api-client": "^10.0||^11.0||^12.0"
+    }
+}

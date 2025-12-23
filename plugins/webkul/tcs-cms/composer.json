@@ -1,0 +1,30 @@
+{
+    "name": "webkul/tcs-cms",
+    "description": "TCS Woodwork CMS - Full content management system with page builder, portfolio, journal, and more",
+    "authors": [
+        {
+            "name": "TCS Woodwork",
+            "email": "info@tcswoodwork.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Webkul\\TcsCms\\TcsCmsServiceProvider"
+            ],
+            "aliases": {}
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Webkul\\TcsCms\\": "src/",
+            "Webkul\\TcsCms\\Database\\Factories\\": "database/factories/",
+            "Webkul\\TcsCms\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Webkul\\TcsCms\\Tests\\": "tests/"
+        }
+    }
+}

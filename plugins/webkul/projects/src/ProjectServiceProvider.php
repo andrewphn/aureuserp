@@ -111,6 +111,7 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_11_29_000001_rename_hardware_columns_to_generic',
                 '2025_10_02_141007_create_project_inspiration_images_table',
                 '2025_11_29_180000_add_room_id_and_title_to_project_inspiration_images',
+                '2025_12_20_000001_create_projects_project_dependencies_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -151,6 +152,9 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('pdf-document-manager', \Webkul\Project\Livewire\PdfDocumentManagerComponent::class);
         \Livewire\Livewire::component('cabinet-spec-builder', \Webkul\Project\Livewire\CabinetSpecBuilder::class);
         \Livewire\Livewire::component('cabinet-ai-assistant', \Webkul\Project\Livewire\CabinetAiAssistant::class);
+        \Livewire\Livewire::component('project-gantt-chart', \Webkul\Project\Livewire\ProjectGanttChart::class);
+        // Old Livewire Kanban archived - now using mokhosh/filament-kanban package
+        // \Livewire\Livewire::component('project-kanban-board', \Webkul\Project\Livewire\ProjectKanbanBoard::class);
 
         // Register event listeners for project stage changes
         Event::listen(ProjectStageChanged::class, HandleProjectStageChange::class);

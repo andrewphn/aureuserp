@@ -1,0 +1,232 @@
+<?php
+
+namespace Webkul\Project\Livewire;
+
+use Filament\Notifications\Notification;
+use Illuminate\Support\Collection;
+use Livewire\Attributes\On;
+use Livewire\Component;
+use Webkul\Partner\Models\Partner;
+use Webkul\Project\Models\Project;
+use Webkul\Project\Models\ProjectStage;
+
+class ProjectKanbanBoard extends Component
+{
+    public Collection $stages;
+    public Collection $projects;
+
+    // Filter properties
+    public ?int $customerFilter = null;
+    public ?string $dateRangeStart = null;
+    public ?string $dateRangeEnd = null;
+    public bool $showOverdueOnly = false;
+
+    // Customers for filter dropdown
+    public array $customers = [];
+
+    public function mount(): void
+    {
+        $this->loadCustomers();
+        $this->loadData();
+    }
+
+    public function loadCustomers(): void
+    {
+        // Get partners that have projects
+        $partnerIds = Project::query()
+            ->whereNotNull('partner_id')
+            ->distinct()
+            ->pluck('partner_id');
+
+        $this->customers = Partner::query()
+            ->whereIn('id', $partnerIds)
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->toArray();
+    }
+
+    public function loadData(): void
+    {
+        $this->stages = ProjectStage::query()
+            ->where('is_active', true)
+            ->orderBy('sort')
+            ->get();
+
+        $query = Project::query()
+            ->with([
+                'partner',
+                'stage',
+                'milestones',
+                'orders' => fn($q) => $q->orderBy('id', 'desc')->limit(1),
+                'tasks' => fn($q) => $q
+                    ->whereNull('parent_id')
+                    ->whereIn('state', ['pending', 'in_progress', 'done'])
+                    ->orderByRaw("FIELD(state, 'in_progress', 'pending', 'done')")
+                    ->limit(5),
+            ])
+            ->whereNotNull('stage_id');
+
+        // Apply customer filter
+        if ($this->customerFilter) {
+            $query->where('partner_id', $this->customerFilter);
+        }
+
+        // Apply date range filter
+        if ($this->dateRangeStart) {
+            $query->where('desired_completion_date', '>=', $this->dateRangeStart);
+        }
+        if ($this->dateRangeEnd) {
+            $query->where('desired_completion_date', '<=', $this->dateRangeEnd);
+        }
+
+        // Apply overdue filter
+        if ($this->showOverdueOnly) {
+            $query->where('desired_completion_date', '<', now());
+        }
+
+        $this->projects = $query->orderBy('sort')->get();
+    }
+
+    // Filter change handlers
+    public function updatedCustomerFilter(): void
+    {
+        $this->loadData();
+    }
+
+    public function updatedDateRangeStart(): void
+    {
+        $this->loadData();
+    }
+
+    public function updatedDateRangeEnd(): void
+    {
+        $this->loadData();
+    }
+
+    public function updatedShowOverdueOnly(): void
+    {
+        $this->loadData();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->customerFilter = null;
+        $this->dateRangeStart = null;
+        $this->dateRangeEnd = null;
+        $this->showOverdueOnly = false;
+        $this->loadData();
+    }
+
+    #[On('kanban-move')]
+    public function moveProject(int $projectId, int $stageId, int $position): void
+    {
+        $project = Project::find($projectId);
+
+        if (!$project) {
+            return;
+        }
+
+        $oldStage = $project->stage;
+        $newStage = ProjectStage::find($stageId);
+
+        $project->update([
+            'stage_id' => $stageId,
+            'sort' => $position,
+        ]);
+
+        // Re-sort other projects in the new stage
+        $projectsInStage = Project::where('stage_id', $stageId)
+            ->where('id', '!=', $projectId)
+            ->orderBy('sort')
+            ->get();
+
+        $sortIndex = 0;
+        foreach ($projectsInStage as $p) {
+            if ($sortIndex === $position) {
+                $sortIndex++;
+            }
+            $p->update(['sort' => $sortIndex]);
+            $sortIndex++;
+        }
+
+        $this->loadData();
+
+        Notification::make()
+            ->title('Project Moved')
+            ->body("{$project->name} moved to {$newStage?->name}")
+            ->success()
+            ->send();
+    }
+
+    public function viewProject(int $projectId): void
+    {
+        $this->redirect(
+            route('filament.admin.project.resources.projects.view', ['record' => $projectId])
+        );
+    }
+
+    public function getProjectsByStage(int $stageId): Collection
+    {
+        return $this->projects->where('stage_id', $stageId)->sortBy('sort');
+    }
+
+    /**
+     * Check if a stage is over its WIP limit
+     */
+    public function isStageOverCapacity(int $stageId): bool
+    {
+        $stage = $this->stages->firstWhere('id', $stageId);
+        if (!$stage || !$stage->wip_limit) {
+            return false;
+        }
+
+        $projectCount = $this->getProjectsByStage($stageId)->count();
+        return $projectCount > $stage->wip_limit;
+    }
+
+    /**
+     * Get the WIP status for a stage (count/limit format)
+     */
+    public function getWipStatus(int $stageId): ?string
+    {
+        $stage = $this->stages->firstWhere('id', $stageId);
+        if (!$stage || !$stage->wip_limit) {
+            return null;
+        }
+
+        $projectCount = $this->getProjectsByStage($stageId)->count();
+        return "{$projectCount}/{$stage->wip_limit}";
+    }
+
+    /**
+     * Get priority label based on complexity score
+     */
+    public function getProjectPriority(Project $project): ?string
+    {
+        $score = $project->complexity_score;
+        if (!$score) {
+            return null;
+        }
+
+        if ($score >= 8) {
+            return 'high';
+        } elseif ($score >= 5) {
+            return 'medium';
+        }
+        return 'low';
+    }
+
+    /**
+     * Get blockers for a project based on stage gates
+     */
+    public function getProjectBlockers(Project $project): array
+    {
+        $gateStatus = $project->getStageGateStatus();
+        return $gateStatus['blockers'] ?? [];
+    }
+
+    public function render()
+    {
+        return view('webkul-project::livewire.project-kanban-board');
+    }
+}
