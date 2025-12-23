@@ -13,6 +13,8 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectAddress;
 use Webkul\Project\Models\ProjectStage;
+use Webkul\Support\Models\Country;
+use Webkul\Support\Models\State;
 
 /**
  * Service for converting leads to Partners and Projects
@@ -90,6 +92,10 @@ class LeadConversionService
             }
         }
 
+        // Look up state and country IDs
+        $countryId = $this->lookupCountryId($lead->country);
+        $stateId = $this->lookupStateId($lead->state, $countryId);
+
         // Create new partner
         $partner = Partner::create([
             'account_type' => $lead->company_name ? AccountType::COMPANY : AccountType::INDIVIDUAL,
@@ -97,10 +103,14 @@ class LeadConversionService
             'name' => $lead->company_name ?: $lead->full_name,
             'email' => $lead->email,
             'phone' => $lead->phone,
+            'mobile' => $lead->phone, // Also set mobile from phone
             'street1' => $lead->street1,
             'street2' => $lead->street2,
             'city' => $lead->city,
             'zip' => $lead->zip,
+            'state_id' => $stateId,
+            'country_id' => $countryId,
+            'company_id' => $lead->company_id ?? Auth::user()?->default_company_id,
             'creator_id' => Auth::id(),
             'user_id' => $lead->assigned_user_id ?? Auth::id(),
         ]);
@@ -298,15 +308,19 @@ class LeadConversionService
      */
     protected function createProjectAddress(Lead $lead, Project $project): ProjectAddress
     {
+        // Look up state and country IDs
+        $countryId = $this->lookupCountryId($lead->country);
+        $stateId = $this->lookupStateId($lead->state, $countryId);
+
         return ProjectAddress::create([
             'project_id' => $project->id,
-            'name' => 'Project Site',
+            'type' => 'project_site',
             'street1' => $lead->street1,
             'street2' => $lead->street2,
             'city' => $lead->city,
-            'state' => $lead->state,
+            'state_id' => $stateId,
             'zip' => $lead->zip,
-            'country' => $lead->country ?? 'United States',
+            'country_id' => $countryId,
             'notes' => $lead->project_address_notes,
             'is_primary' => true,
         ]);
@@ -331,5 +345,79 @@ class LeadConversionService
         foreach ($lead->getMedia('project_documents') as $media) {
             $media->copy($project, 'project_documents');
         }
+    }
+
+    /**
+     * Look up country ID from country name or code
+     * Returns null if not found, defaults to United States if no input
+     */
+    protected function lookupCountryId(?string $country): ?int
+    {
+        if (empty($country)) {
+            // Default to United States
+            $country = 'United States';
+        }
+
+        // Try exact name match first
+        $countryModel = Country::where('name', $country)->first();
+
+        if (! $countryModel) {
+            // Try code match (e.g., "US", "USA")
+            $countryModel = Country::where('code', strtoupper($country))->first();
+        }
+
+        if (! $countryModel) {
+            // Try partial name match
+            $countryModel = Country::where('name', 'like', "%{$country}%")->first();
+        }
+
+        if (! $countryModel) {
+            // Last resort - try to find United States
+            $countryModel = Country::where('name', 'like', '%United States%')
+                ->orWhere('code', 'US')
+                ->first();
+        }
+
+        return $countryModel?->id;
+    }
+
+    /**
+     * Look up state ID from state name or code
+     * Uses country_id for context when available
+     */
+    protected function lookupStateId(?string $state, ?int $countryId = null): ?int
+    {
+        if (empty($state)) {
+            return null;
+        }
+
+        $query = State::query();
+
+        // If we have a country_id, filter by it
+        if ($countryId) {
+            $query->where('country_id', $countryId);
+        }
+
+        // Try exact name match first
+        $stateModel = (clone $query)->where('name', $state)->first();
+
+        if (! $stateModel) {
+            // Try code match (e.g., "CA", "NY")
+            $stateModel = (clone $query)->where('code', strtoupper($state))->first();
+        }
+
+        if (! $stateModel) {
+            // Try partial name match
+            $stateModel = (clone $query)->where('name', 'like', "%{$state}%")->first();
+        }
+
+        // If no country filter and still not found, try without filter
+        if (! $stateModel && $countryId) {
+            $stateModel = State::where('name', $state)
+                ->orWhere('code', strtoupper($state))
+                ->first();
+        }
+
+        return $stateModel?->id;
     }
 }
