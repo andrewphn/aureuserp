@@ -2,6 +2,7 @@
 
 namespace Webkul\Lead\Filament\Resources;
 
+use BackedEnum;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -11,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use UnitEnum;
 use Webkul\Lead\Enums\LeadSource;
 use Webkul\Lead\Enums\LeadStatus;
 use Webkul\Lead\Filament\Resources\LeadResource\Pages;
@@ -21,9 +23,9 @@ class LeadResource extends Resource
 {
     protected static ?string $model = Lead::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-inbox-arrow-down';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-inbox-arrow-down';
 
-    protected static ?string $navigationGroup = 'Sales';
+    protected static string|UnitEnum|null $navigationGroup = 'Sales';
 
     protected static ?int $navigationSort = 1;
 
