@@ -5,7 +5,6 @@ namespace Webkul\Lead\Filament\Resources;
 use BackedEnum;
 use Filament\Forms;
 use Filament\Infolists;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
@@ -347,9 +346,9 @@ class LeadResource extends Resource
             ]);
     }
 
-    public static function infolist(Infolist $infolist): Infolist
+    public static function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 Infolists\Components\Section::make('Contact Information')
                     ->schema([
