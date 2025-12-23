@@ -1,0 +1,43 @@
+<?php
+
+namespace Webkul\Project\Filament\Pages;
+
+use BackedEnum;
+use Filament\Pages\Page;
+use Illuminate\Contracts\Support\Htmlable;
+
+class ProjectKanban extends Page
+{
+    protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-view-columns';
+
+    protected string $view = 'webkul-project::filament.pages.project-kanban';
+
+    protected static ?string $slug = 'project/kanban';
+
+    protected static ?int $navigationSort = 4;
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Kanban Board';
+    }
+
+    public static function getNavigationGroup(): string
+    {
+        return __('webkul-project::filament/resources/project.navigation.group');
+    }
+
+    public function getTitle(): string|Htmlable
+    {
+        return 'Project Kanban Board';
+    }
+
+    public function getHeading(): string|Htmlable
+    {
+        return 'Project Kanban Board';
+    }
+
+    public function getSubheading(): string|Htmlable|null
+    {
+        return 'Drag and drop projects between stages to update their workflow status';
+    }
+}

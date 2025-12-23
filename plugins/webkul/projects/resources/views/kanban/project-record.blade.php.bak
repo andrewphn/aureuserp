@@ -1,0 +1,96 @@
+@php
+    $daysRemaining = null;
+    $isOverdue = false;
+
+    if ($record->desired_completion_date) {
+        $days = now()->diffInDays($record->desired_completion_date, false);
+        $daysRemaining = abs((int) $days);
+        $isOverdue = $days < 0;
+    }
+
+    $totalMilestones = $record->milestones->count();
+    $completedMilestones = $record->milestones->where('is_completed', true)->count();
+    $progress = $totalMilestones > 0 ? round(($completedMilestones / $totalMilestones) * 100) : 0;
+
+    $hasDependencies = $record->dependsOn->count() > 0;
+@endphp
+
+<div
+    id="{{ $record->getKey() }}"
+    wire:click="recordClicked('{{ $record->getKey() }}', {{ @json_encode(['id' => $record->id]) }})"
+    class="record bg-white dark:bg-gray-700 rounded-lg px-4 py-3 cursor-grab shadow-sm hover:shadow-md transition-shadow border border-gray-100 dark:border-gray-600"
+    @if($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3)
+        x-data
+        x-init="
+            $el.classList.add('animate-pulse-twice', 'bg-primary-100', 'dark:bg-primary-800')
+            $el.classList.remove('bg-white', 'dark:bg-gray-700')
+            setTimeout(() => {
+                $el.classList.remove('bg-primary-100', 'dark:bg-primary-800')
+                $el.classList.add('bg-white', 'dark:bg-gray-700')
+            }, 3000)
+        "
+    @endif
+>
+    {{-- Project Name --}}
+    <div class="font-semibold text-gray-800 dark:text-gray-100 mb-1">
+        {{ $record->name }}
+    </div>
+
+    {{-- Project Number --}}
+    @if($record->display_identifier)
+        <div class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+            {{ $record->display_identifier }}
+        </div>
+    @endif
+
+    {{-- Customer --}}
+    @if($record->partner)
+        <div class="text-sm text-gray-600 dark:text-gray-300 mb-2 flex items-center gap-1">
+            <x-heroicon-m-user class="w-4 h-4" />
+            {{ $record->partner->name }}
+        </div>
+    @endif
+
+    {{-- Days Remaining --}}
+    @if($daysRemaining !== null)
+        <div class="text-xs mb-2 {{ $isOverdue ? 'text-red-600 dark:text-red-400' : ($daysRemaining < 7 ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-600 dark:text-gray-400') }}">
+            <x-heroicon-m-clock class="w-3 h-3 inline" />
+            {{ $isOverdue ? $daysRemaining . ' days overdue' : $daysRemaining . ' days remaining' }}
+        </div>
+    @endif
+
+    {{-- Milestone Progress --}}
+    @if($totalMilestones > 0)
+        <div class="mt-2">
+            <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                <span>Progress</span>
+                <span>{{ $completedMilestones }}/{{ $totalMilestones }}</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-1.5">
+                <div
+                    class="h-1.5 rounded-full {{ $progress === 100 ? 'bg-green-500' : 'bg-blue-500' }}"
+                    style="width: {{ $progress }}%"
+                ></div>
+            </div>
+        </div>
+    @endif
+
+    {{-- Bottom Row: Linear Feet & Dependencies --}}
+    <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100 dark:border-gray-600">
+        @if($record->estimated_linear_feet)
+            <span class="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                <x-heroicon-m-ruler-square class="w-3 h-3" />
+                {{ $record->estimated_linear_feet }} LF
+            </span>
+        @else
+            <span></span>
+        @endif
+
+        @if($hasDependencies)
+            <span class="text-xs text-orange-500 flex items-center gap-1" title="Has dependencies">
+                <x-heroicon-m-link class="w-3 h-3" />
+                Depends
+            </span>
+        @endif
+    </div>
+</div>

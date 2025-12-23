@@ -45,6 +45,7 @@
         "chart.js": "^4.5.0",
         "chartjs-adapter-date-fns": "^3.0.0",
         "date-fns": "^4.1.0",
+        "frappe-gantt": "^1.0.4",
         "imagesloaded": "^5.0.0",
         "masonry-layout": "^4.2.2",
         "pdfjs-dist": "^5.4.296",

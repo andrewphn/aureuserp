@@ -54,6 +54,7 @@ class ProjectStage extends Model implements Sortable
         'color',
         'is_active',
         'is_collapsed',
+        'wip_limit',
         'sort',
         'company_id',
         'creator_id',

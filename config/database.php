@@ -62,6 +62,23 @@ return [
             ]) : [],
         ],
 
+        // TCS Website source database for content migration
+        'tcswebsite' => [
+            'driver'         => 'mysql',
+            'host'           => env('TCS_DB_HOST', '127.0.0.1'),
+            'port'           => env('TCS_DB_PORT', '3306'),
+            'database'       => env('TCS_DB_DATABASE', 'tcswebsite'),
+            'username'       => env('TCS_DB_USERNAME', 'root'),
+            'password'       => env('TCS_DB_PASSWORD', ''),
+            'unix_socket'    => env('DB_SOCKET', ''),
+            'charset'        => 'utf8mb4',
+            'collation'      => 'utf8mb4_unicode_ci',
+            'prefix'         => '',
+            'prefix_indexes' => true,
+            'strict'         => false,
+            'engine'         => null,
+        ],
+
         'mariadb' => [
             'driver'         => 'mariadb',
             'url'            => env('DB_URL'),

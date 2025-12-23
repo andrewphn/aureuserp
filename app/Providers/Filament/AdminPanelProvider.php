@@ -256,6 +256,12 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::SCRIPTS_BEFORE,
                 fn (): string => view('filament.scripts.global-app-js')->render()
             )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_END,
+                fn (): string => auth()->check()
+                    ? Blade::render('@livewire(\App\Livewire\HeaderClockWidget::class)')
+                    : ''
+            )
             // TEMPORARILY DISABLED: Global footer bar
             // ->renderHook(
             //     PanelsRenderHook::BODY_END,
