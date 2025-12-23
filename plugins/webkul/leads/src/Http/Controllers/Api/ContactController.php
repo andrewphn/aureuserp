@@ -37,9 +37,27 @@ class ContactController extends Controller
             // Create lead from form data
             $lead = Lead::createFromContactForm($request->all());
 
+            // Handle file uploads
+            if ($request->hasFile('project_inspiration_images')) {
+                foreach ($request->file('project_inspiration_images') as $file) {
+                    $lead->addMedia($file)->toMediaCollection('inspiration_images');
+                }
+            }
+            if ($request->hasFile('project_technical_drawings')) {
+                foreach ($request->file('project_technical_drawings') as $file) {
+                    $lead->addMedia($file)->toMediaCollection('technical_drawings');
+                }
+            }
+            if ($request->hasFile('project_documents')) {
+                foreach ($request->file('project_documents') as $file) {
+                    $lead->addMedia($file)->toMediaCollection('project_documents');
+                }
+            }
+
             Log::info('Lead created from contact form', [
                 'lead_id' => $lead->id,
                 'email' => $lead->email,
+                'files_count' => $lead->getMedia()->count(),
             ]);
 
             // Dispatch async jobs
@@ -147,6 +165,7 @@ class ContactController extends Controller
             'contactpreferred' => 'nullable|string|max:50',
             'source' => 'nullable|array',
             'source.*' => 'string|max:100',
+            'referralsourceother' => 'nullable|string|max:255',
 
             // Optional project fields
             'project_type' => 'nullable|array',
@@ -157,6 +176,8 @@ class ContactController extends Controller
             'design_style' => 'nullable|array',
             'design_style.*' => 'string|max:100',
             'design_style_other' => 'nullable|string|max:255',
+            'finish_choices' => 'nullable|array',
+            'finish_choices.*' => 'string|max:100',
             'wood_species' => 'nullable|string|max:100',
             'budget_range' => 'nullable|string|max:100',
             'timeline_start_date' => 'nullable|date',
@@ -170,6 +191,14 @@ class ContactController extends Controller
             'project_address_zip' => 'nullable|string|max:20',
             'project_address_country' => 'nullable|string|max:255',
             'project_address_notes' => 'nullable|string|max:1000',
+
+            // File uploads
+            'project_inspiration_images' => 'nullable|array',
+            'project_inspiration_images.*' => 'file|mimes:jpeg,png,webp,gif|max:10240',
+            'project_technical_drawings' => 'nullable|array',
+            'project_technical_drawings.*' => 'file|mimes:pdf,jpeg,png|max:20480',
+            'project_documents' => 'nullable|array',
+            'project_documents.*' => 'file|mimes:pdf,doc,docx|max:20480',
 
             // Additional fields
             'additional_information' => ['nullable', 'string', 'max:5000', new SpamProtection('message')],

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Lead\Enums\LeadSource;
@@ -46,9 +49,9 @@ use Webkul\Support\Models\Company;
  * @property-read Project|null $project
  * @property-read Company|null $company
  */
-class Lead extends Model
+class Lead extends Model implements HasMedia
 {
-    use HasChatter, HasFactory, HasLogActivity, SoftDeletes;
+    use HasChatter, HasFactory, HasLogActivity, InteractsWithMedia, SoftDeletes;
 
     /**
      * Table name.
@@ -80,11 +83,18 @@ class Lead extends Model
 
         // Project Details
         'project_type',
+        'project_phase',
         'budget_range',
         'timeline',
+        'timeline_start_date',
+        'timeline_completion_date',
         'project_description',
+        'additional_information',
         'design_style',
+        'design_style_other',
+        'finish_choices',
         'wood_species',
+        'referral_source_other',
 
         // JSON Data
         'form_data',
@@ -109,6 +119,12 @@ class Lead extends Model
         'state',
         'zip',
         'country',
+        'project_address_notes',
+
+        // File attachments
+        'inspiration_images',
+        'technical_drawings',
+        'project_documents',
 
         // Consent
         'processing_consent',
@@ -128,10 +144,31 @@ class Lead extends Model
         'form_data' => 'array',
         'questionnaire_data' => 'array',
         'ai_analysis_results' => 'array',
+        'finish_choices' => 'array',
+        'inspiration_images' => 'array',
+        'technical_drawings' => 'array',
+        'project_documents' => 'array',
+        'timeline_start_date' => 'date',
+        'timeline_completion_date' => 'date',
         'converted_at' => 'datetime',
         'processing_consent' => 'boolean',
         'communication_consent' => 'boolean',
     ];
+
+    /**
+     * Register media collections for file uploads
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('inspiration_images')
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+
+        $this->addMediaCollection('technical_drawings')
+            ->acceptsMimeTypes(['application/pdf', 'image/jpeg', 'image/png', 'application/vnd.dwg']);
+
+        $this->addMediaCollection('project_documents')
+            ->acceptsMimeTypes(['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document']);
+    }
 
     /**
      * Log activity attributes
@@ -244,19 +281,28 @@ class Lead extends Model
 
             'status' => LeadStatus::NEW,
             'source' => self::determineSource($data),
+            'referral_source_other' => $data['referralsourceother'] ?? $data['referral_source_other'] ?? null,
             'message' => $data['message'] ?? $data['project_description'] ?? null,
 
             'preferred_contact_method' => $data['contactpreferred'] ?? $data['preferred_contact_method'] ?? null,
+            'lead_source_detail' => $data['previous_woodworking_experience'] ?? null,
 
+            // Project details
             'project_type' => is_array($data['project_type'] ?? null)
                 ? implode(', ', $data['project_type'])
                 : ($data['project_type'] ?? null),
+            'project_phase' => $data['project_phase'] ?? null,
             'budget_range' => $data['budget_range'] ?? null,
             'timeline' => $data['timeline_start_date'] ?? $data['timeline'] ?? null,
+            'timeline_start_date' => $data['timeline_start_date'] ?? null,
+            'timeline_completion_date' => $data['timeline_completion_date'] ?? null,
             'project_description' => $data['project_description'] ?? null,
+            'additional_information' => $data['additional_information'] ?? null,
             'design_style' => is_array($data['design_style'] ?? null)
                 ? implode(', ', $data['design_style'])
                 : ($data['design_style'] ?? null),
+            'design_style_other' => $data['design_style_other'] ?? null,
+            'finish_choices' => $data['finish_choices'] ?? null,
             'wood_species' => $data['wood_species'] ?? null,
 
             // Address
@@ -266,6 +312,7 @@ class Lead extends Model
             'state' => $data['project_address_state'] ?? $data['state'] ?? null,
             'zip' => $data['project_address_zip'] ?? $data['zip'] ?? null,
             'country' => $data['project_address_country'] ?? $data['country'] ?? 'United States',
+            'project_address_notes' => $data['project_address_notes'] ?? null,
 
             // Consent
             'processing_consent' => (bool) ($data['processing_consent'] ?? false),

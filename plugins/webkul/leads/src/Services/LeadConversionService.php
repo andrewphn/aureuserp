@@ -42,7 +42,12 @@ class LeadConversionService
                 $this->createProjectAddress($lead, $project);
             }
 
-            // Step 4: Update lead status
+            // Step 4: Transfer media files from lead to project
+            if ($lead->hasMedia()) {
+                $this->transferMediaToProject($lead, $project);
+            }
+
+            // Step 5: Update lead status
             $lead->update([
                 'status' => LeadStatus::CONVERTED,
                 'partner_id' => $partner->id,
@@ -135,6 +140,9 @@ class LeadConversionService
             'project_type' => $lead->project_type,
             'budget_range' => $lead->budget_range,
             'description' => $this->buildProjectDescription($lead),
+            // Map timeline dates
+            'start_date' => $lead->timeline_start_date,
+            'desired_completion_date' => $lead->timeline_completion_date,
             'user_id' => $lead->assigned_user_id ?? Auth::id(),
             'creator_id' => Auth::id(),
             'company_id' => $lead->company_id ?? Auth::user()?->default_company_id,
@@ -182,26 +190,47 @@ class LeadConversionService
     {
         $description = [];
 
+        // Primary inquiry message
         if ($lead->message) {
-            $description[] = "**Original Inquiry:**\n{$lead->message}";
+            $description[] = "## Original Inquiry\n{$lead->message}";
         }
 
+        // Project details section
+        $projectDetails = [];
         if ($lead->project_description) {
-            $description[] = "**Project Description:**\n{$lead->project_description}";
+            $projectDetails[] = "**Project Description:**\n{$lead->project_description}";
+        }
+        if ($lead->project_phase) {
+            $projectDetails[] = "**Project Phase:** {$lead->project_phase}";
+        }
+        if ($lead->additional_information) {
+            $projectDetails[] = "**Additional Information:**\n{$lead->additional_information}";
+        }
+        if (! empty($projectDetails)) {
+            $description[] = "## Project Details\n" . implode("\n\n", $projectDetails);
         }
 
+        // Design preferences section
+        $designPrefs = [];
         if ($lead->design_style) {
-            $description[] = "**Design Style:** {$lead->design_style}";
+            $style = $lead->design_style;
+            if ($lead->design_style_other) {
+                $style .= " ({$lead->design_style_other})";
+            }
+            $designPrefs[] = "**Design Style:** {$style}";
         }
-
         if ($lead->wood_species) {
-            $description[] = "**Wood Species Preference:** {$lead->wood_species}";
+            $designPrefs[] = "**Wood Species:** {$lead->wood_species}";
+        }
+        if ($lead->finish_choices && is_array($lead->finish_choices)) {
+            $designPrefs[] = "**Finish Preferences:** " . implode(', ', $lead->finish_choices);
+        }
+        if (! empty($designPrefs)) {
+            $description[] = "## Design Preferences\n" . implode("\n", $designPrefs);
         }
 
-        if ($lead->timeline) {
-            $description[] = "**Timeline:** {$lead->timeline}";
-        }
-
+        // Budget and timeline section
+        $budgetTimeline = [];
         if ($lead->budget_range) {
             $budgetLabel = match ($lead->budget_range) {
                 'under_10k' => 'Under $10,000',
@@ -212,10 +241,46 @@ class LeadConversionService
                 'unsure' => 'Not Sure',
                 default => $lead->budget_range,
             };
-            $description[] = "**Budget:** {$budgetLabel}";
+            $budgetTimeline[] = "**Budget Range:** {$budgetLabel}";
+        }
+        if ($lead->timeline_start_date || $lead->timeline_completion_date) {
+            $timeline = '';
+            if ($lead->timeline_start_date) {
+                $timeline .= "Start: " . $lead->timeline_start_date->format('M d, Y');
+            }
+            if ($lead->timeline_completion_date) {
+                $timeline .= ($timeline ? ' | ' : '') . "Complete by: " . $lead->timeline_completion_date->format('M d, Y');
+            }
+            $budgetTimeline[] = "**Timeline:** {$timeline}";
+        } elseif ($lead->timeline) {
+            $budgetTimeline[] = "**Timeline:** {$lead->timeline}";
+        }
+        if (! empty($budgetTimeline)) {
+            $description[] = "## Budget & Timeline\n" . implode("\n", $budgetTimeline);
         }
 
-        $description[] = "\n---\n*Converted from Lead #{$lead->id} on " . now()->format('M d, Y') . '*';
+        // Contact preferences
+        if ($lead->preferred_contact_method) {
+            $description[] = "## Contact Preference\n**Preferred Method:** " . ucfirst($lead->preferred_contact_method);
+        }
+
+        // Lead source info
+        $sourceInfo = [];
+        if ($lead->source) {
+            $sourceInfo[] = "**Lead Source:** " . $lead->source->getLabel();
+        }
+        if ($lead->referral_source_other) {
+            $sourceInfo[] = "**Referral Details:** {$lead->referral_source_other}";
+        }
+        if ($lead->lead_source_detail) {
+            $sourceInfo[] = "**Previous Experience:** {$lead->lead_source_detail}";
+        }
+        if (! empty($sourceInfo)) {
+            $description[] = "## Lead Source\n" . implode("\n", $sourceInfo);
+        }
+
+        // Footer
+        $description[] = "---\n*Converted from Lead #{$lead->id} on " . now()->format('M d, Y') . '*';
 
         return implode("\n\n", $description);
     }
@@ -242,7 +307,29 @@ class LeadConversionService
             'state' => $lead->state,
             'zip' => $lead->zip,
             'country' => $lead->country ?? 'United States',
+            'notes' => $lead->project_address_notes,
             'is_primary' => true,
         ]);
+    }
+
+    /**
+     * Transfer media files from lead to project
+     */
+    protected function transferMediaToProject(Lead $lead, Project $project): void
+    {
+        // Copy inspiration images
+        foreach ($lead->getMedia('inspiration_images') as $media) {
+            $media->copy($project, 'inspiration_images');
+        }
+
+        // Copy technical drawings
+        foreach ($lead->getMedia('technical_drawings') as $media) {
+            $media->copy($project, 'technical_drawings');
+        }
+
+        // Copy project documents
+        foreach ($lead->getMedia('project_documents') as $media) {
+            $media->copy($project, 'project_documents');
+        }
     }
 }

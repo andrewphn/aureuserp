@@ -3,11 +3,20 @@
 namespace Webkul\Lead\Filament\Resources;
 
 use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Infolists;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -278,11 +287,11 @@ class LeadResource extends Resource
                     ->label('New Today')
                     ->query(fn (Builder $query) => $query->whereDate('created_at', today())),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
 
-                Tables\Actions\Action::make('assign')
+                Action::make('assign')
                     ->label('Assign')
                     ->icon('heroicon-o-user-plus')
                     ->form([
@@ -293,10 +302,14 @@ class LeadResource extends Resource
                     ])
                     ->action(function (Lead $record, array $data) {
                         $record->update(['assigned_user_id' => $data['assigned_user_id']]);
+                        Notification::make()
+                            ->success()
+                            ->title('Lead assigned')
+                            ->send();
                     })
                     ->visible(fn (Lead $record) => ! $record->is_converted),
 
-                Tables\Actions\Action::make('convert')
+                Action::make('convert')
                     ->label('Convert to Project')
                     ->icon('heroicon-o-arrow-right-circle')
                     ->color('success')
@@ -304,16 +317,20 @@ class LeadResource extends Resource
                     ->modalHeading('Convert Lead to Project')
                     ->modalDescription('This will create a Partner and Project from this lead. The lead will be marked as converted.')
                     ->action(function (Lead $record) {
-                        // This will be handled by LeadConversionService
                         app(\Webkul\Lead\Services\LeadConversionService::class)->convert($record);
+                        Notification::make()
+                            ->success()
+                            ->title('Lead converted')
+                            ->body('Partner and Project have been created.')
+                            ->send();
                     })
                     ->visible(fn (Lead $record) => $record->canConvert()),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
 
-                    Tables\Actions\BulkAction::make('bulk_assign')
+                    Action::make('bulk_assign')
                         ->label('Assign to User')
                         ->icon('heroicon-o-user-plus')
                         ->form([
@@ -326,9 +343,13 @@ class LeadResource extends Resource
                             $records->each(fn ($record) => $record->update([
                                 'assigned_user_id' => $data['assigned_user_id'],
                             ]));
+                            Notification::make()
+                                ->success()
+                                ->title('Leads assigned')
+                                ->send();
                         }),
 
-                    Tables\Actions\BulkAction::make('bulk_status')
+                    Action::make('bulk_status')
                         ->label('Change Status')
                         ->icon('heroicon-o-tag')
                         ->form([
@@ -341,6 +362,10 @@ class LeadResource extends Resource
                             $records->each(fn ($record) => $record->update([
                                 'status' => $data['status'],
                             ]));
+                            Notification::make()
+                                ->success()
+                                ->title('Lead status updated')
+                                ->send();
                         }),
                 ]),
             ]);
