@@ -131,24 +131,53 @@ class CreateProduct extends BaseCreateProduct
 
         // Add any AI-collected images to Spatie media library
         $aiImages = $this->getAiImagesToAdd();
+
+        Log::info('handleRecordCreation: Checking AI images', [
+            'product_id' => $record->id,
+            'product_exists' => $record->exists,
+            'ai_images_count' => count($aiImages),
+            'ai_images' => $aiImages,
+        ]);
+
         if (!empty($aiImages)) {
             foreach ($aiImages as $imagePath) {
                 $fullPath = storage_path('app/public/' . $imagePath);
-                if (file_exists($fullPath)) {
+                $fileExists = file_exists($fullPath);
+                $fileSize = $fileExists ? filesize($fullPath) : 0;
+
+                Log::info('handleRecordCreation: Processing image', [
+                    'product_id' => $record->id,
+                    'image_path' => $imagePath,
+                    'full_path' => $fullPath,
+                    'file_exists' => $fileExists,
+                    'file_size' => $fileSize,
+                ]);
+
+                if ($fileExists) {
                     try {
-                        $record->addMedia($fullPath)
+                        $media = $record->addMedia($fullPath)
                             ->toMediaCollection('product-images');
+
                         Log::info('Added AI image to Spatie media', [
                             'product_id' => $record->id,
                             'image_path' => $imagePath,
+                            'media_id' => $media ? $media->id : 'null',
+                            'media_file' => $media ? $media->file_name : 'null',
                         ]);
                     } catch (\Exception $e) {
                         Log::error('Failed to add AI image to Spatie', [
                             'product_id' => $record->id,
                             'image_path' => $imagePath,
                             'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
+                } else {
+                    Log::warning('handleRecordCreation: Image file not found', [
+                        'product_id' => $record->id,
+                        'image_path' => $imagePath,
+                        'full_path' => $fullPath,
+                    ]);
                 }
             }
             // Clear the session
