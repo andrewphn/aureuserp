@@ -33,11 +33,11 @@
                 <div
                     x-show="!inboxOpen"
                     @click="toggleInbox()"
-                    class="w-10 h-full cursor-pointer flex flex-col items-center py-4 rounded-lg transition-all duration-150 bg-white border-2 border-gray-900 hover:bg-gray-50"
+                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 bg-white border-2 border-gray-900 hover:bg-gray-50"
                     title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
                     <span
-                        class="text-xs font-medium text-gray-900"
+                        class="text-xs font-medium text-gray-900 whitespace-nowrap"
                         style="writing-mode: vertical-rl; text-orientation: mixed;"
                     >
                         Inbox ({{ $inboxCount }})
@@ -54,7 +54,7 @@
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
                     {{-- Header - Black outlined, no fill --}}
-                    <div class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150 bg-white border-2 border-gray-900 border-b-0">
+                    <div class="flex items-center justify-between px-4 py-2 transition-all duration-150 bg-white border-2 border-gray-900 border-b-0">
                         <h3 class="font-medium text-gray-900 text-sm flex items-center gap-1.5">
                             <span>Inbox</span>
                             <span class="text-gray-400">/</span>
@@ -81,7 +81,7 @@
                     </div>
 
                     {{-- Lead Cards - Black outlined container --}}
-                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 rounded-b-lg border-2 border-t-0 border-gray-900 dark:border-gray-700">
+                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 border-2 border-t-0 border-gray-900 dark:border-gray-700">
                         @forelse($leads ?? [] as $lead)
                             <div
                                 wire:click="openLeadDetails({{ $lead->id }})"
