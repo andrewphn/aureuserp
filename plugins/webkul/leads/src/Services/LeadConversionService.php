@@ -128,15 +128,20 @@ class LeadConversionService
      */
     protected function createProject(Lead $lead, Partner $partner): Project
     {
-        // Get the "To Do" / Inbox stage
-        $inboxStage = ProjectStage::where('stage_key', 'todo')
-            ->orWhere('name', 'like', '%To Do%')
-            ->orWhere('name', 'like', '%Inbox%')
+        // Get the first WORKFLOW stage (skip "To Do" which is the leads inbox)
+        // Projects converted from leads go directly into the workflow
+        $firstWorkflowStage = ProjectStage::where('is_active', true)
+            ->where('name', 'not like', '%To Do%')
+            ->where('name', 'not like', '%Inbox%')
+            ->orderBy('sort')
             ->first();
 
-        if (! $inboxStage) {
-            // Fallback to first stage
-            $inboxStage = ProjectStage::orderBy('sort')->first();
+        if (! $firstWorkflowStage) {
+            // Fallback to second stage or first if only one exists
+            $firstWorkflowStage = ProjectStage::where('is_active', true)
+                ->orderBy('sort')
+                ->skip(1)
+                ->first() ?? ProjectStage::orderBy('sort')->first();
         }
 
         // Generate project name
@@ -145,7 +150,7 @@ class LeadConversionService
         $project = Project::create([
             'name' => $projectName,
             'partner_id' => $partner->id,
-            'stage_id' => $inboxStage?->id,
+            'stage_id' => $firstWorkflowStage?->id,
             'lead_source' => $lead->source?->value ?? 'website',
             'project_type' => $lead->project_type,
             'project_type_other' => $lead->project_type_other ?? null,
