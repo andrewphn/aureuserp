@@ -2,7 +2,7 @@
 
 namespace App\Filament\Forms\Components;
 
-use Filament\Forms\Components\Component;
+use Filament\Schemas\Components\Component;
 
 /**
  * AI-Powered Vendor Lookup Component
