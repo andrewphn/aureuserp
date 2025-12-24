@@ -9,6 +9,27 @@
 @endphp
 
 <x-filament-panels::page class="!p-0">
+    {{-- Status Legend - Simple, at-a-glance reference --}}
+    <div class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-6 text-xs">
+            <span class="text-gray-500 font-medium">Status:</span>
+            <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm" style="background-color: #e5e7eb;"></span>
+                <span class="text-gray-600 dark:text-gray-400">Normal</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm" style="background-color: #ea580c;"></span>
+                <span class="text-gray-600 dark:text-gray-400">Urgent</span>
+                <span class="text-gray-400 text-[10px]">(overdue/due soon)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <span class="w-3 h-3 rounded-sm" style="background-color: #7c3aed;"></span>
+                <span class="text-gray-600 dark:text-gray-400">Blocked</span>
+                <span class="text-gray-400 text-[10px]">(can't progress)</span>
+            </div>
+        </div>
+    </div>
+
     {{-- Main Kanban Board - Full Height --}}
     <div
         x-data="{
@@ -19,7 +40,7 @@
                 $wire.leadsInboxOpen = this.inboxOpen;
             }
         }"
-        class="h-[calc(100vh-140px)]"
+        class="h-[calc(100vh-180px)]"
     >
         {{-- Single Flex Container for ALL columns (Inbox + Workflow Stages) --}}
         <div

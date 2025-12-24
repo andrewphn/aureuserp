@@ -37,15 +37,17 @@
     $showMilestones = $settings['show_milestones'] ?? true;
     $compactMode = $settings['compact_mode'] ?? false;
 
-    // Border color for card - instant visual status
-    // Red = overdue, Purple = blocked, Orange = urgent, Gray = normal
-    $borderColor = null;
-    if ($isOverdue) {
-        $borderColor = '#ef4444'; // red-500
-    } elseif ($hasBlockers) {
-        $borderColor = '#a855f7'; // purple-500
-    } elseif ($priority === 'high') {
-        $borderColor = '#f97316'; // orange-500
+    // Simplified 3-state color system (Don't Make Me Think)
+    // - Normal: gray (no issues)
+    // - Urgent: orange (time-based: overdue OR due soon)
+    // - Blocked: purple (dependency: can't progress)
+    $isUrgent = $isOverdue || ($daysLeft !== null && $daysLeft <= 7 && $daysLeft >= 0) || $priority === 'high';
+
+    $borderColor = null; // Normal = gray border
+    if ($hasBlockers) {
+        $borderColor = '#7c3aed'; // purple-600 - Blocked (can't progress)
+    } elseif ($isUrgent) {
+        $borderColor = '#ea580c'; // orange-600 - Urgent (time issue)
     }
 @endphp
 
@@ -127,28 +129,32 @@
         {{-- Divider --}}
         <div class="border-t border-gray-100 dark:border-gray-700 my-2.5"></div>
 
-        {{-- Key Metrics Row --}}
-        <div class="flex items-center justify-between text-xs">
-            {{-- Timeline with visual emphasis --}}
-            @if($showDays && $daysLeft !== null)
+        {{-- Due Date + Days --}}
+        @if($record->desired_completion_date)
+            <div class="flex items-center justify-between text-xs mb-1">
+                <span class="text-gray-500">
+                    Due: {{ $record->desired_completion_date->format('M j') }}
+                </span>
                 @if($isOverdue)
                     <span class="font-bold px-2 py-0.5 rounded" style="color: #dc2626; background-color: #fef2f2;">
                         {{ abs($daysLeft) }}d late
                     </span>
-                @else
-                    <span class="font-medium text-gray-600">
+                @elseif($daysLeft !== null && $daysLeft <= 7)
+                    <span class="font-bold px-2 py-0.5 rounded" style="color: #ea580c; background-color: #fff7ed;">
                         {{ $daysLeft }}d left
                     </span>
+                @else
+                    <span class="text-gray-500">{{ $daysLeft }}d left</span>
                 @endif
-            @else
-                <span></span>
-            @endif
+            </div>
+        @endif
 
-            {{-- Scope --}}
-            @if($showLinearFeet && $linearFeet)
-                <span class="text-gray-500 font-medium">{{ number_format($linearFeet, 1) }} LF</span>
-            @endif
-        </div>
+        {{-- Linear Feet --}}
+        @if($showLinearFeet && $linearFeet)
+            <div class="text-xs text-gray-500">
+                <span class="font-medium">{{ number_format($linearFeet, 1) }} LF</span>
+            </div>
+        @endif
 
         {{-- Blocked badge - prominent warning style --}}
         @if($hasBlockers)
