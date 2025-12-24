@@ -1,142 +1,109 @@
 @php
-    // Separate Inbox (To Do) from workflow stages
-    $inboxStatus = $statuses->firstWhere('title', 'To Do');
+    // Exclude "To Do" from workflow stages - leads are the inbox now
     $boardStatuses = $statuses->reject(fn($s) => $s['title'] === 'To Do');
-    $inboxCount = $inboxStatus ? count($inboxStatus['records'] ?? []) : 0;
 
-    // Check for new items (created in last 24 hours)
-    $newInboxCount = 0;
-    if ($inboxStatus && !empty($inboxStatus['records'])) {
-        foreach ($inboxStatus['records'] as $record) {
-            if ($record->created_at && $record->created_at->gt(now()->subDay())) {
-                $newInboxCount++;
-            }
-        }
-    }
-
-    // Leads inbox data (passed from controller)
-    $leadsInboxOpen = $this->leadsInboxOpen ?? true;
+    // Leads are now the inbox
+    $inboxOpen = $this->leadsInboxOpen ?? true;
+    $inboxCount = $leadsCount ?? 0;
+    $newInboxCount = $newLeadsCount ?? 0;
 @endphp
 
 <x-filament-panels::page class="!p-0">
     {{-- Main Kanban Board - Full Height --}}
     <div
         x-data="{
-            inboxOpen: localStorage.getItem('kanban_inbox_open') === 'true',
-            lastViewed: localStorage.getItem('kanban_inbox_last_viewed') || null,
+            inboxOpen: {{ $inboxOpen ? 'true' : 'false' }},
             hasNewItems: {{ $newInboxCount > 0 ? 'true' : 'false' }},
             toggleInbox() {
                 this.inboxOpen = !this.inboxOpen;
-                localStorage.setItem('kanban_inbox_open', this.inboxOpen);
-                if (this.inboxOpen) {
-                    this.markAsViewed();
-                }
-            },
-            markAsViewed() {
-                this.lastViewed = Date.now();
-                localStorage.setItem('kanban_inbox_last_viewed', this.lastViewed);
-                this.hasNewItems = false;
+                $wire.leadsInboxOpen = this.inboxOpen;
             }
         }"
-        x-init="inboxOpen && markAsViewed()"
         class="h-[calc(100vh-140px)]"
     >
-        {{-- Single Flex Container for ALL columns (Leads Inbox + Project Inbox + Workflow Stages) --}}
+        {{-- Single Flex Container for ALL columns (Inbox + Workflow Stages) --}}
         <div
             wire:ignore.self
             class="flex gap-3 h-full overflow-x-auto overflow-y-hidden px-3 py-2"
             style="scrollbar-width: thin;"
         >
-            {{-- LEADS INBOX (First Column - New Inquiries) --}}
-            @if(isset($leads))
+            {{-- INBOX COLUMN (Leads / New Inquiries) --}}
+            <div class="flex-shrink-0 h-full">
+                {{-- Collapsed State --}}
                 <div
-                    x-data="{ leadsOpen: {{ $leadsInboxOpen ? 'true' : 'false' }} }"
-                    class="flex-shrink-0 h-full"
+                    x-show="!inboxOpen"
+                    @click="toggleInbox()"
+                    class="w-10 h-full cursor-pointer flex flex-col items-center py-4 rounded-lg transition-all duration-150"
+                    style="background-color: #f59e0b;"
+                    title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
-                    {{-- Collapsed State --}}
-                    <div
-                        x-show="!leadsOpen"
-                        @click="leadsOpen = true; $wire.leadsInboxOpen = true"
-                        class="w-12 h-full cursor-pointer flex flex-col items-center py-3 rounded-lg transition-all duration-200 bg-amber-600 hover:bg-amber-700"
-                        title="Open Leads Inbox ({{ $leadsCount ?? 0 }} leads)"
+                    <span
+                        class="text-xs font-medium text-white"
+                        style="writing-mode: vertical-rl; text-orientation: mixed;"
                     >
-                        {{-- Lead Icon with Count --}}
-                        <div class="relative mb-1">
-                            <x-heroicon-m-user-plus class="w-6 h-6 text-white" />
-                            <span class="absolute -top-1.5 -right-2.5 min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold rounded-full px-1 {{ ($newLeadsCount ?? 0) > 0 ? 'bg-yellow-300 text-yellow-900 animate-pulse' : 'bg-white text-amber-700' }}">
-                                {{ $leadsCount ?? 0 }}
-                            </span>
-                        </div>
+                        Inbox ({{ $inboxCount }})
+                    </span>
+                </div>
 
-                        @if(($newLeadsCount ?? 0) > 0)
-                            <span class="bg-yellow-300 text-yellow-900 text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 animate-bounce">NEW</span>
-                        @endif
-
-                        <div class="flex-1 flex items-center justify-center" style="writing-mode: vertical-rl; text-orientation: mixed;">
-                            <span class="text-xs font-black text-white tracking-[0.2em] uppercase">LEADS</span>
-                        </div>
-                        <x-heroicon-m-chevron-right class="w-4 h-4 text-white/80 mt-2" />
-                    </div>
-
-                    {{-- Expanded Leads Panel --}}
+                {{-- Expanded Inbox Panel --}}
+                <div
+                    x-show="inboxOpen"
+                    x-transition:enter="transition ease-out duration-150"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    class="flex flex-col h-full"
+                    style="width: 280px; min-width: 280px; max-width: 280px;"
+                >
+                    {{-- Header - Monday.com style matching other columns --}}
                     <div
-                        x-show="leadsOpen"
-                        x-transition:enter="transition ease-out duration-300"
-                        x-transition:enter-start="opacity-0 -translate-x-8"
-                        x-transition:enter-end="opacity-100 translate-x-0"
-                        class="flex flex-col h-full"
-                        style="width: 280px; min-width: 280px;"
+                        class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150"
+                        style="background-color: #f59e0b;"
                     >
-                        {{-- Header --}}
-                        <div class="flex items-center justify-between px-4 py-2 rounded-t-lg shrink-0 bg-amber-600">
-                            <h3 class="font-medium text-white text-sm flex items-center gap-1.5">
-                                <x-heroicon-s-user-plus class="w-4 h-4" />
-                                <span>Leads</span>
-                                <span class="text-white/60">/</span>
-                                <span class="text-white/90">{{ $leadsCount ?? 0 }}</span>
-                                @if(($newLeadsCount ?? 0) > 0)
-                                    <span class="text-yellow-300 text-xs">({{ $newLeadsCount }} new)</span>
-                                @endif
-                            </h3>
-                            <button
-                                @click="leadsOpen = false; $wire.leadsInboxOpen = false"
-                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1"
+                        <h3 class="font-medium text-white text-sm flex items-center gap-1.5">
+                            <span>Inbox</span>
+                            <span class="text-white/60">/</span>
+                            <span class="text-white/90">{{ $inboxCount }}</span>
+                        </h3>
+                        <div class="flex items-center gap-1">
+                            {{-- Add Lead Button --}}
+                            <a
+                                href="{{ route('filament.admin.resources.leads.create') }}"
+                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
+                                title="Add new lead"
                             >
-                                <x-heroicon-m-chevron-left class="w-4 h-4" />
+                                <x-heroicon-m-plus class="w-4 h-4" />
+                            </a>
+                            {{-- Collapse Button --}}
+                            <button
+                                @click="toggleInbox()"
+                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
+                                title="Collapse inbox"
+                            >
+                                <x-heroicon-m-chevron-double-left class="w-4 h-4" />
                             </button>
                         </div>
+                    </div>
 
-                        {{-- Leads Cards --}}
-                        <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-amber-50 dark:bg-amber-900/20 rounded-b-lg border border-t-0 border-amber-200 dark:border-amber-800">
-                            @forelse($leads ?? [] as $lead)
-                                @php
-                                    $isNewLead = $lead->created_at && $lead->created_at->gt(now()->subDay());
-                                @endphp
-                                <div
-                                    wire:click="openLeadDetails({{ $lead->id }})"
-                                    class="relative bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-amber-200 dark:border-amber-700 p-3 cursor-pointer hover:shadow-md hover:border-amber-400 transition-all"
-                                >
-                                    @if($isNewLead)
-                                        <span class="absolute -top-1 -left-1 z-10 bg-yellow-400 text-yellow-900 text-[8px] font-bold px-1 py-0.5 rounded shadow">NEW</span>
-                                    @endif
+                    {{-- Lead Cards - Matching other column containers --}}
+                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-gray-100/70 dark:bg-gray-800/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700">
+                        @forelse($leads ?? [] as $lead)
+                            <div
+                                wire:click="openLeadDetails({{ $lead->id }})"
+                                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 cursor-pointer hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all"
+                            >
+                                {{-- Lead Header --}}
+                                <div class="flex items-start justify-between mb-1">
+                                    <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate flex-1">
+                                        {{ $lead->full_name }}
+                                    </h4>
+                                </div>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate mb-2">
+                                    {{ $lead->email }}
+                                </p>
 
-                                    {{-- Lead Header --}}
-                                    <div class="flex items-start justify-between mb-2">
-                                        <div class="flex-1 min-w-0">
-                                            <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate">
-                                                {{ $lead->full_name }}
-                                            </h4>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                {{ $lead->email }}
-                                            </p>
-                                        </div>
-                                        <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">
-                                            {{ $lead->created_at->diffForHumans(null, true) }}
-                                        </span>
-                                    </div>
-
-                                    {{-- Lead Info --}}
-                                    <div class="space-y-1 text-xs text-gray-600 dark:text-gray-300">
+                                {{-- Lead Info --}}
+                                @if($lead->project_type || $lead->budget_range)
+                                    <div class="space-y-1 text-xs text-gray-600 dark:text-gray-300 mb-2">
                                         @if($lead->project_type)
                                             <div class="flex items-center gap-1">
                                                 <x-heroicon-m-briefcase class="w-3 h-3 text-gray-400" />
@@ -159,159 +126,30 @@
                                             </div>
                                         @endif
                                     </div>
-
-                                    {{-- Source Badge --}}
-                                    @if($lead->source)
-                                        <div class="mt-2">
-                                            <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-                                                {{ $lead->source->getLabel() }}
-                                            </span>
-                                        </div>
-                                    @endif
-                                </div>
-                            @empty
-                                <div class="flex-1 flex flex-col items-center justify-center text-gray-400 py-8 px-4">
-                                    <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/50 rounded-full flex items-center justify-center mb-3">
-                                        <x-heroicon-o-user-plus class="w-6 h-6 text-amber-500 opacity-50" />
-                                    </div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 text-center">No pending leads</p>
-                                    <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 text-center">New inquiries will appear here</p>
-                                </div>
-                            @endforelse
-                        </div>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Project Inbox Sidebar (Left Side - Start of Pipeline) --}}
-            @if($inboxStatus)
-                {{-- Collapsed State (Vertical Tab) --}}
-                <div
-                    x-show="!inboxOpen"
-                    x-transition:enter="transition ease-out duration-200"
-                    x-transition:enter-start="opacity-0 -translate-x-4"
-                    x-transition:enter-end="opacity-100 translate-x-0"
-                    x-transition:leave="transition ease-in duration-150"
-                    x-transition:leave-start="opacity-100 translate-x-0"
-                    x-transition:leave-end="opacity-0 -translate-x-4"
-                    @click="toggleInbox()"
-                    class="w-12 flex-shrink-0 cursor-pointer flex flex-col items-center py-3 rounded-lg transition-all duration-200 h-full bg-gray-500 hover:bg-gray-600"
-                    title="Open Inbox ({{ $inboxCount }} items)"
-                >
-                    {{-- Inbox Icon with Count Badge --}}
-                    <div class="relative mb-1">
-                        <x-heroicon-m-inbox-arrow-down class="w-6 h-6 text-white rotate-180" />
-                        {{-- Count Badge (always visible) --}}
-                        <span
-                            class="absolute -top-1.5 -right-2.5 min-w-[20px] h-[20px] flex items-center justify-center text-[11px] font-bold rounded-full px-1"
-                            :class="hasNewItems ? 'bg-yellow-400 text-yellow-900 animate-pulse' : '{{ $inboxCount > 0 ? "bg-red-500 text-white" : "bg-white text-gray-600" }}'"
-                        >
-                            {{ $inboxCount }}
-                        </span>
-                    </div>
-
-                    {{-- NEW Badge (when there are new items) --}}
-                    <template x-if="hasNewItems">
-                        <span class="bg-yellow-400 text-yellow-900 text-[8px] font-bold px-1.5 py-0.5 rounded mt-1 animate-bounce">
-                            NEW
-                        </span>
-                    </template>
-
-                    {{-- Vertical Label - Large and Prominent --}}
-                    <div
-                        class="flex-1 flex items-center justify-center"
-                        style="writing-mode: vertical-rl; text-orientation: mixed;"
-                    >
-                        <span class="text-xs font-black text-white tracking-[0.2em] uppercase">
-                            INBOX
-                        </span>
-                    </div>
-
-                    {{-- Expand Arrow --}}
-                    <x-heroicon-m-chevron-right class="w-4 h-4 text-white/80 mt-2" />
-                </div>
-
-                {{-- Expanded Inbox Panel --}}
-                <div
-                    x-show="inboxOpen"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 -translate-x-8"
-                    x-transition:enter-end="opacity-100 translate-x-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-x-0"
-                    x-transition:leave-end="opacity-0 -translate-x-8"
-                    class="flex-shrink-0 flex flex-col h-full"
-                    style="width: 280px; min-width: 280px; max-width: 280px;"
-                >
-                    {{-- Inbox Header (matching column headers) --}}
-                    <div class="flex items-center justify-between px-4 py-2 rounded-t-lg shrink-0" style="background-color: #6b7280;">
-                        <h3 class="font-medium text-white text-sm flex items-center gap-1.5">
-                            <span>Inbox</span>
-                            <span class="text-white/60">/</span>
-                            <span class="text-white/90">{{ $inboxCount }}</span>
-                            @if($newInboxCount > 0)
-                                <span class="text-yellow-300 text-xs">({{ $newInboxCount }} new)</span>
-                            @endif
-                        </h3>
-                        <div class="flex items-center gap-1">
-                            {{-- Add Project Button --}}
-                            <button
-                                wire:click="openCreateModal('{{ $inboxStatus['id'] }}')"
-                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
-                                title="Add project"
-                            >
-                                <x-heroicon-m-plus class="w-4 h-4" />
-                            </button>
-                            {{-- Collapse Button --}}
-                            <button
-                                @click="toggleInbox()"
-                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
-                                title="Collapse inbox"
-                            >
-                                <x-heroicon-m-chevron-left class="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {{-- Inbox Cards (Draggable) --}}
-                    <div
-                        data-status-id="{{ $inboxStatus['id'] }}"
-                        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-gray-100/70 dark:bg-gray-800/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700"
-                        style="scrollbar-width: thin;"
-                    >
-                        @php $status = $inboxStatus; @endphp
-                        @forelse($inboxStatus['records'] as $record)
-                            @php
-                                $isNewItem = $record->created_at && $record->created_at->gt(now()->subDay());
-                            @endphp
-                            <div class="relative">
-                                @if($isNewItem)
-                                    <span class="absolute -top-1 -left-1 z-10 bg-yellow-400 text-yellow-900 text-[8px] font-bold px-1 py-0.5 rounded shadow">
-                                        NEW
-                                    </span>
                                 @endif
-                                @include(static::$recordView)
+
+                                {{-- Footer with source and time --}}
+                                <div class="flex items-center justify-between text-[10px]">
+                                    @if($lead->source)
+                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                            {{ $lead->source->getLabel() }}
+                                        </span>
+                                    @else
+                                        <span></span>
+                                    @endif
+                                    <span class="text-gray-400">{{ $lead->created_at->diffForHumans(null, true) }}</span>
+                                </div>
                             </div>
                         @empty
-                            <div class="flex-1 flex flex-col items-center justify-center text-gray-400 py-8 px-4">
-                                <div class="w-12 h-12 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center mb-3">
-                                    <x-heroicon-o-inbox class="w-6 h-6 opacity-50" />
-                                </div>
-                                <p class="text-xs font-medium text-gray-500 dark:text-gray-400 text-center">Inbox is empty</p>
-                                <p class="text-[11px] text-gray-400 dark:text-gray-500 mt-1 text-center leading-relaxed">New projects will appear here</p>
-                                <button
-                                    wire:click="openCreateModal('{{ $inboxStatus['id'] }}')"
-                                    class="mt-3 text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1"
-                                >
-                                    <x-heroicon-m-plus class="w-3.5 h-3.5" />
-                                    Add project
-                                </button>
+                            {{-- Empty State - Matching other columns --}}
+                            <div class="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-8">
+                                <x-heroicon-o-inbox class="w-8 h-8 mb-2 opacity-40" />
+                                <p class="text-xs">No leads</p>
                             </div>
                         @endforelse
                     </div>
-
                 </div>
-            @endif
+            </div>
 
             {{-- Workflow Stage Columns --}}
             @foreach($boardStatuses as $status)

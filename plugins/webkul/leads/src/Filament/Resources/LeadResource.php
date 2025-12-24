@@ -8,10 +8,14 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Infolists;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -52,34 +56,34 @@ class LeadResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Forms\Components\Section::make('Contact Information')
+            ->components([
+                Section::make('Contact Information')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('first_name')
+                                TextInput::make('first_name')
                                     ->label('First Name')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('last_name')
+                                TextInput::make('last_name')
                                     ->label('Last Name')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('email')
+                                TextInput::make('email')
                                     ->label('Email')
                                     ->email()
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('phone')
+                                TextInput::make('phone')
                                     ->label('Phone')
                                     ->tel()
                                     ->maxLength(20),
 
-                                Forms\Components\TextInput::make('company_name')
+                                TextInput::make('company_name')
                                     ->label('Company')
                                     ->maxLength(255),
 
-                                Forms\Components\Select::make('preferred_contact_method')
+                                Select::make('preferred_contact_method')
                                     ->label('Preferred Contact Method')
                                     ->options([
                                         'email' => 'Email',
@@ -89,47 +93,47 @@ class LeadResource extends Resource
                             ]),
                     ]),
 
-                Forms\Components\Section::make('Lead Details')
+                Section::make('Lead Details')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\Select::make('status')
+                                Select::make('status')
                                     ->label('Status')
                                     ->options(LeadStatus::class)
                                     ->default(LeadStatus::NEW)
                                     ->required(),
 
-                                Forms\Components\Select::make('source')
+                                Select::make('source')
                                     ->label('Source')
                                     ->options(LeadSource::class),
 
-                                Forms\Components\Select::make('assigned_user_id')
+                                Select::make('assigned_user_id')
                                     ->label('Assigned To')
                                     ->relationship('assignedUser', 'name')
                                     ->searchable()
                                     ->preload(),
 
-                                Forms\Components\TextInput::make('disqualification_reason')
+                                TextInput::make('disqualification_reason')
                                     ->label('Disqualification Reason')
                                     ->maxLength(255)
                                     ->visible(fn ($get) => $get('status') === LeadStatus::DISQUALIFIED->value),
                             ]),
 
-                        Forms\Components\Textarea::make('message')
+                        Textarea::make('message')
                             ->label('Message')
                             ->rows(4)
                             ->columnSpanFull(),
                     ]),
 
-                Forms\Components\Section::make('Project Information')
+                Section::make('Project Information')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('project_type')
+                                TextInput::make('project_type')
                                     ->label('Project Type')
                                     ->maxLength(255),
 
-                                Forms\Components\Select::make('budget_range')
+                                Select::make('budget_range')
                                     ->label('Budget Range')
                                     ->options([
                                         'under_10k' => 'Under $10,000',
@@ -140,51 +144,51 @@ class LeadResource extends Resource
                                         'unsure' => 'Not Sure',
                                     ]),
 
-                                Forms\Components\TextInput::make('timeline')
+                                TextInput::make('timeline')
                                     ->label('Timeline')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('design_style')
+                                TextInput::make('design_style')
                                     ->label('Design Style')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('wood_species')
+                                TextInput::make('wood_species')
                                     ->label('Wood Species')
                                     ->maxLength(255),
                             ]),
 
-                        Forms\Components\Textarea::make('project_description')
+                        Textarea::make('project_description')
                             ->label('Project Description')
                             ->rows(4)
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
 
-                Forms\Components\Section::make('Address')
+                Section::make('Address')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('street1')
+                                TextInput::make('street1')
                                     ->label('Street Address')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('street2')
+                                TextInput::make('street2')
                                     ->label('Street Address 2')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('city')
+                                TextInput::make('city')
                                     ->label('City')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('state')
+                                TextInput::make('state')
                                     ->label('State')
                                     ->maxLength(255),
 
-                                Forms\Components\TextInput::make('zip')
+                                TextInput::make('zip')
                                     ->label('ZIP Code')
                                     ->maxLength(20),
 
-                                Forms\Components\TextInput::make('country')
+                                TextInput::make('country')
                                     ->label('Country')
                                     ->maxLength(255)
                                     ->default('United States'),
@@ -193,15 +197,15 @@ class LeadResource extends Resource
                     ->collapsible()
                     ->collapsed(),
 
-                Forms\Components\Section::make('CRM Integration')
+                Section::make('CRM Integration')
                     ->schema([
-                        Forms\Components\Grid::make(2)
+                        Grid::make(2)
                             ->schema([
-                                Forms\Components\TextInput::make('hubspot_contact_id')
+                                TextInput::make('hubspot_contact_id')
                                     ->label('HubSpot Contact ID')
                                     ->disabled(),
 
-                                Forms\Components\TextInput::make('hubspot_deal_id')
+                                TextInput::make('hubspot_deal_id')
                                     ->label('HubSpot Deal ID')
                                     ->disabled(),
                             ]),
@@ -295,7 +299,7 @@ class LeadResource extends Resource
                     ->label('Assign')
                     ->icon('heroicon-o-user-plus')
                     ->form([
-                        Forms\Components\Select::make('assigned_user_id')
+                        Select::make('assigned_user_id')
                             ->label('Assign To')
                             ->options(User::pluck('name', 'id'))
                             ->required(),
@@ -334,7 +338,7 @@ class LeadResource extends Resource
                         ->label('Assign to User')
                         ->icon('heroicon-o-user-plus')
                         ->form([
-                            Forms\Components\Select::make('assigned_user_id')
+                            Select::make('assigned_user_id')
                                 ->label('Assign To')
                                 ->options(User::pluck('name', 'id'))
                                 ->required(),
@@ -353,7 +357,7 @@ class LeadResource extends Resource
                         ->label('Change Status')
                         ->icon('heroicon-o-tag')
                         ->form([
-                            Forms\Components\Select::make('status')
+                            Select::make('status')
                                 ->label('Status')
                                 ->options(LeadStatus::class)
                                 ->required(),
