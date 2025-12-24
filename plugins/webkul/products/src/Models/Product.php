@@ -360,4 +360,49 @@ class Product extends Model implements Sortable, HasMedia
             ->optimize()
             ->nonQueued();
     }
+
+    /**
+     * Get all numeric specifications for this product as a keyed collection.
+     *
+     * Used for hardware products (drawer slides, hinges) to retrieve specs like:
+     * - Slide Length (in)
+     * - Side Clearance (mm)
+     * - Weight Capacity (lbs)
+     *
+     * @return \Illuminate\Support\Collection<string, array{value: float|null, formatted: string, unit: string|null}>
+     */
+    public function getNumericSpecifications(): \Illuminate\Support\Collection
+    {
+        return $this->attribute_values()
+            ->with('attribute')
+            ->whereHas('attribute', function ($query) {
+                $query->whereIn('type', [
+                    \Webkul\Product\Enums\AttributeType::NUMBER->value,
+                    \Webkul\Product\Enums\AttributeType::DIMENSION->value,
+                ]);
+            })
+            ->get()
+            ->mapWithKeys(function ($value) {
+                return [
+                    $value->attribute->name => [
+                        'value'     => $value->numeric_value,
+                        'formatted' => $value->getFormattedValue(),
+                        'unit'      => $value->attribute->unit_symbol,
+                    ],
+                ];
+            });
+    }
+
+    /**
+     * Get a specific numeric specification value by attribute name.
+     *
+     * @param string $attributeName The name of the attribute (e.g., "Slide Length")
+     * @return float|null The numeric value, or null if not found
+     */
+    public function getSpecValue(string $attributeName): ?float
+    {
+        $specs = $this->getNumericSpecifications();
+
+        return $specs->get($attributeName)['value'] ?? null;
+    }
 }
