@@ -1717,6 +1717,74 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
+     * Convert fractional dimension input to decimal
+     * Supports formats: "10-3/4", "10 3/4", "3/4", "10.5", "10"
+     *
+     * @param string|float|null $input The dimension input
+     * @return float|null The decimal value
+     */
+    protected function parseFractionalDimension($input): ?float
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        // If already a number, return it
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        $input = trim((string) $input);
+
+        // Pattern: "10-3/4" or "10 3/4" (whole number with fraction)
+        if (preg_match('/^(\d+)[\s\-]+(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+            if ($denominator > 0) {
+                return $whole + ($numerator / $denominator);
+            }
+        }
+
+        // Pattern: "3/4" (fraction only)
+        if (preg_match('/^(\d+)\/(\d+)$/', $input, $matches)) {
+            $numerator = (int) $matches[1];
+            $denominator = (int) $matches[2];
+            if ($denominator > 0) {
+                return $numerator / $denominator;
+            }
+        }
+
+        // Try to parse as float
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get dimension input field with fraction support
+     * Allows entering "10-3/4" or "10 3/4" and converts to 10.75
+     */
+    protected function getDimensionInput(string $name, string $label): \Filament\Forms\Components\TextInput
+    {
+        return TextInput::make($name)
+            ->label($label)
+            ->placeholder('e.g. 10-3/4')
+            ->suffix('"')
+            ->reactive()
+            ->afterStateUpdated(function ($state, callable $set) use ($name) {
+                if ($state !== null && $state !== '') {
+                    $decimal = $this->parseFractionalDimension($state);
+                    if ($decimal !== null && $decimal != $state) {
+                        $set($name, round($decimal, 4));
+                    }
+                }
+            });
+    }
+
+    /**
      * Simplified customer creation form for createOptionForm()
      *
      * This version avoids ->relationship() calls which don't work
@@ -3043,13 +3111,104 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Get section schema (doors, drawers, shelves, etc.)
+     * Get section/opening schema
+     * An opening is a space in the cabinet that can contain doors, drawers, shelves, etc.
      */
     protected function getSectionSchema(): array
     {
         return [
-            Grid::make(5)->schema([
-                Select::make('section_type')
+            // Row 1: Opening name and dimensions
+            Grid::make(6)->schema([
+                TextInput::make('name')
+                    ->label('Opening')
+                    ->placeholder('e.g. Upper, Lower, Drawer Bank')
+                    ->columnSpan(2),
+
+                TextInput::make('width_inches')
+                    ->label('W')
+                    ->suffix('"')
+                    ->placeholder('e.g. 10-3/4')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state !== null && $state !== '') {
+                            $decimal = $this->parseFractionalDimension($state);
+                            if ($decimal !== null && $decimal != $state) {
+                                $set('width_inches', round($decimal, 4));
+                            }
+                        }
+                    })
+                    ->columnSpan(1),
+
+                TextInput::make('height_inches')
+                    ->label('H')
+                    ->suffix('"')
+                    ->placeholder('e.g. 30-1/2')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state !== null && $state !== '') {
+                            $decimal = $this->parseFractionalDimension($state);
+                            if ($decimal !== null && $decimal != $state) {
+                                $set('height_inches', round($decimal, 4));
+                            }
+                        }
+                    })
+                    ->columnSpan(1),
+
+                TextInput::make('depth_inches')
+                    ->label('D')
+                    ->suffix('"')
+                    ->placeholder('e.g. 24')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state !== null && $state !== '') {
+                            $decimal = $this->parseFractionalDimension($state);
+                            if ($decimal !== null && $decimal != $state) {
+                                $set('depth_inches', round($decimal, 4));
+                            }
+                        }
+                    })
+                    ->columnSpan(1),
+
+                // Compact adjustment for whole opening
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+            ]),
+
+            // Contents - what's inside this opening (doors, drawers, shelves)
+            // Each content item has its own hardware
+            Repeater::make('contents')
+                ->label('Contents')
+                ->schema($this->getOpeningContentsSchema())
+                ->addActionLabel('+ Add Door/Drawer/Shelf')
+                ->collapsible()
+                ->collapsed()
+                ->cloneable()
+                ->itemLabel(fn (array $state) => $this->getContentsLabel($state))
+                ->defaultItems(0)
+                ->reactive(),
+        ];
+    }
+
+    /**
+     * Get opening contents schema (doors, drawers, shelves)
+     * Each content item can have its own hardware components
+     */
+    protected function getOpeningContentsSchema(): array
+    {
+        return [
+            Grid::make(7)->schema([
+                Select::make('type')
                     ->label('Type')
                     ->options([
                         'door' => 'Door',
@@ -3058,15 +3217,63 @@ class CreateProject extends Page implements HasForms
                         'pullout' => 'Pull-out',
                         'panel' => 'Panel',
                         'appliance' => 'Appliance Opening',
-                        'other' => 'Other',
+                        'divider' => 'Divider',
                     ])
                     ->native(false)
                     ->required()
+                    ->reactive()
                     ->columnSpan(1),
 
                 TextInput::make('name')
                     ->label('Name')
-                    ->placeholder('e.g. Upper Door')
+                    ->placeholder('e.g. Top drawer')
+                    ->columnSpan(fn (callable $get) => in_array($get('type'), ['drawer', 'pullout']) ? 1 : 2),
+
+                TextInput::make('width_inches')
+                    ->label('W')
+                    ->suffix('"')
+                    ->placeholder('e.g. 10-3/4')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state !== null && $state !== '') {
+                            $decimal = $this->parseFractionalDimension($state);
+                            if ($decimal !== null && $decimal != $state) {
+                                $set('width_inches', round($decimal, 4));
+                            }
+                        }
+                    })
+                    ->columnSpan(1),
+
+                TextInput::make('height_inches')
+                    ->label('H')
+                    ->suffix('"')
+                    ->placeholder('e.g. 6-1/2')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state !== null && $state !== '') {
+                            $decimal = $this->parseFractionalDimension($state);
+                            if ($decimal !== null && $decimal != $state) {
+                                $set('height_inches', round($decimal, 4));
+                            }
+                        }
+                    })
+                    ->columnSpan(1),
+
+                TextInput::make('depth_inches')
+                    ->label('D')
+                    ->suffix('"')
+                    ->placeholder('Auto from slide')
+                    ->helperText(fn (callable $get) => $get('type') === 'drawer' ? 'Auto-calculated when slide selected' : null)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state !== null && $state !== '') {
+                            $decimal = $this->parseFractionalDimension($state);
+                            if ($decimal !== null && $decimal != $state) {
+                                $set('depth_inches', round($decimal, 4));
+                            }
+                        }
+                    })
+                    ->visible(fn (callable $get) => in_array($get('type'), ['drawer', 'pullout']))
                     ->columnSpan(1),
 
                 TextInput::make('quantity')
@@ -3090,21 +3297,13 @@ class CreateProject extends Page implements HasForms
                     ->native(false)
                     ->reactive()
                     ->columnSpan(1),
-
-                TextInput::make('adjustment_value')
-                    ->label('Amt')
-                    ->numeric()
-                    ->step(0.01)
-                    ->placeholder('0')
-                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
-                    ->columnSpan(1),
             ]),
 
-            // Nested components
-            Repeater::make('components')
-                ->label('Components')
+            // Hardware for this specific content item (door gets hinges, drawer gets slides, etc.)
+            Repeater::make('hardware')
+                ->label('Hardware')
                 ->schema($this->getComponentSchema())
-                ->addActionLabel('+ Component')
+                ->addActionLabel('+ Add Hardware')
                 ->collapsible()
                 ->collapsed()
                 ->cloneable()
@@ -3112,6 +3311,39 @@ class CreateProject extends Page implements HasForms
                 ->defaultItems(0)
                 ->reactive(),
         ];
+    }
+
+    /**
+     * Get contents label for display
+     */
+    protected function getContentsLabel(array $state): string
+    {
+        $type = $state['type'] ?? 'Item';
+        $name = $state['name'] ?? '';
+        $width = $state['width_inches'] ?? 0;
+        $height = $state['height_inches'] ?? 0;
+        $qty = (int) ($state['quantity'] ?? 1);
+
+        $label = ucfirst($type);
+        if ($name) {
+            $label .= ": {$name}";
+        }
+
+        if ($width && $height) {
+            $label .= " ({$width}\"×{$height}\")";
+        }
+
+        if ($qty > 1) {
+            $label .= " ×{$qty}";
+        }
+
+        // Show hardware count
+        $hwCount = count($state['hardware'] ?? []);
+        if ($hwCount > 0) {
+            $label .= " [{$hwCount} hw]";
+        }
+
+        return $label;
     }
 
     /**
@@ -3182,13 +3414,51 @@ class CreateProject extends Page implements HasForms
                         return $product ? "{$product->name} ({$product->reference})" : null;
                     })
                     ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set) {
+                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
                         if ($state) {
                             $product = \Webkul\Product\Models\Product::find($state);
                             if ($product) {
                                 $set('name', $product->name);
                                 $set('sku', $product->reference);
                                 $set('unit_cost', $product->cost);
+
+                                // Auto-calculate drawer dimensions when slide is selected
+                                $componentType = $get('component_type');
+                                $contentType = $get('../../type'); // Parent content type (drawer, door, etc.)
+
+                                if ($componentType === 'slide' && $contentType === 'drawer') {
+                                    // Get slide specifications from product attributes
+                                    $specs = $product->getNumericSpecifications();
+
+                                    // Get opening dimensions from section (grandparent of content)
+                                    $openingWidth = (float) ($get('../../../../width_inches') ?? 0);
+                                    $openingDepth = (float) ($get('../../../../depth_inches') ?? 0);
+
+                                    // Calculate drawer box dimensions based on slide specs
+                                    // Blum LEGRABOX formula: width = opening - total clearance (35mm ≈ 1.378")
+                                    $totalClearance = $specs->get('Total Width Clearance')['value'] ?? null;
+                                    if ($totalClearance !== null) {
+                                        // Convert mm to inches if clearance is in mm
+                                        $clearanceInches = $totalClearance > 10 ? $totalClearance / 25.4 : $totalClearance;
+                                        $drawerWidth = $openingWidth - $clearanceInches;
+                                        if ($drawerWidth > 0) {
+                                            $set('../../width_inches', round($drawerWidth, 4));
+                                        }
+                                    }
+
+                                    // Drawer depth = slide length - depth offset
+                                    $slideLength = $specs->get('Slide Length')['value'] ?? null;
+                                    $depthOffset = $specs->get('Depth Offset')['value'] ?? null;
+                                    if ($slideLength !== null) {
+                                        $depthOffsetInches = $depthOffset !== null
+                                            ? ($depthOffset > 10 ? $depthOffset / 25.4 : $depthOffset)
+                                            : 0.394; // Default 10mm offset
+                                        $drawerDepth = $slideLength - $depthOffsetInches;
+                                        if ($drawerDepth > 0) {
+                                            $set('../../depth_inches', round($drawerDepth, 4));
+                                        }
+                                    }
+                                }
                             }
                         }
                     })
@@ -3266,20 +3536,38 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Get section label for display
+     * Get section/opening label for display
      */
     protected function getSectionLabel(array $state): string
     {
-        $type = $state['section_type'] ?? 'Section';
-        $name = $state['name'] ?? '';
-        $qty = (int) ($state['quantity'] ?? 1);
+        $name = $state['name'] ?? 'Opening';
+        $width = $state['width_inches'] ?? 0;
+        $height = $state['height_inches'] ?? 0;
+        $contents = $state['contents'] ?? [];
 
-        $label = ucfirst(str_replace('_', ' ', $type));
-        if ($name) {
-            $label .= ": {$name}";
+        // Start with name
+        $label = $name ?: 'Opening';
+
+        // Add dimensions if available
+        if ($width && $height) {
+            $label .= " ({$width}\"×{$height}\")";
         }
-        if ($qty > 1) {
-            $label .= " (×{$qty})";
+
+        // Show contents summary (now it's an array of content items)
+        if (!empty($contents) && is_array($contents)) {
+            $contentSummary = [];
+            foreach ($contents as $content) {
+                if (is_array($content)) {
+                    $type = $content['type'] ?? '';
+                    $qty = (int) ($content['quantity'] ?? 1);
+                    if ($type) {
+                        $contentSummary[] = $qty > 1 ? "{$qty} {$type}s" : $type;
+                    }
+                }
+            }
+            if (!empty($contentSummary)) {
+                $label .= " | " . implode(', ', $contentSummary);
+            }
         }
 
         // Show adjustment indicator

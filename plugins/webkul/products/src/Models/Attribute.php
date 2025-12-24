@@ -21,8 +21,13 @@ use Webkul\Security\Models\User;
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon|null $deleted_at
  * @property string|null $name
- * @property mixed $type
+ * @property AttributeType $type
  * @property string|null $sort
+ * @property string|null $unit_symbol
+ * @property string|null $unit_label
+ * @property float|null $min_value
+ * @property float|null $max_value
+ * @property int $decimal_places
  * @property int $creator_id
  * @property-read \Illuminate\Database\Eloquent\Collection $options
  * @property-read \Illuminate\Database\Eloquent\Model|null $creator
@@ -49,15 +54,23 @@ class Attribute extends Model implements Sortable
         'type',
         'sort',
         'creator_id',
+        'unit_symbol',
+        'unit_label',
+        'min_value',
+        'max_value',
+        'decimal_places',
     ];
 
     /**
-     * Table name.
+     * Attribute casts.
      *
-     * @var string
+     * @var array
      */
     protected $casts = [
-        'type' => AttributeType::class,
+        'type'           => AttributeType::class,
+        'min_value'      => 'decimal:4',
+        'max_value'      => 'decimal:4',
+        'decimal_places' => 'integer',
     ];
 
     public $sortable = [
@@ -93,5 +106,52 @@ class Attribute extends Model implements Sortable
     protected static function newFactory(): AttributeFactory
     {
         return AttributeFactory::new();
+    }
+
+    /**
+     * Check if this attribute stores numeric values (NUMBER or DIMENSION type)
+     */
+    public function isNumeric(): bool
+    {
+        return $this->type->isNumeric();
+    }
+
+    /**
+     * Check if this attribute requires predefined options (RADIO, SELECT, COLOR)
+     */
+    public function requiresOptions(): bool
+    {
+        return $this->type->requiresOptions();
+    }
+
+    /**
+     * Format a numeric value with the attribute's unit symbol
+     *
+     * @param float|null $value The numeric value to format
+     * @return string The formatted value with unit (e.g., "21.5 in")
+     */
+    public function formatValue(?float $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        $formatted = number_format($value, $this->decimal_places ?? 2);
+
+        return $this->unit_symbol
+            ? "{$formatted} {$this->unit_symbol}"
+            : $formatted;
+    }
+
+    /**
+     * Get the label with unit for form fields
+     *
+     * @return string The attribute name with unit (e.g., "Slide Length (in)")
+     */
+    public function getLabelWithUnit(): string
+    {
+        return $this->unit_symbol
+            ? "{$this->name} ({$this->unit_symbol})"
+            : $this->name;
     }
 }

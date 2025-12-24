@@ -1044,6 +1044,46 @@ PROMPT;
     }
 
     /**
+     * Find a product image from alternative sources when Richelieu direct extraction fails
+     *
+     * @param string $sku The product SKU to search for
+     * @return string|null A valid image URL, or null if not found
+     */
+    public static function findAlternateProductImage(string $sku): ?string
+    {
+        $sku = strtoupper(trim($sku));
+
+        if (strlen($sku) < 4) {
+            return null;
+        }
+
+        Log::info('GeminiProductService: Searching alternate sources for product image', ['sku' => $sku]);
+
+        // Try build.com - they have good product images
+        $buildComUrl = "https://www.build.com/blum-{$sku}/s869746";
+        try {
+            $response = Http::timeout(10)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                ])
+                ->get("https://www.build.com/search?term={$sku}");
+
+            if ($response->successful()) {
+                $html = $response->body();
+                // Look for product images
+                if (preg_match('/src="(https:\/\/[^"]*img-b\.com[^"]*' . preg_quote($sku, '/') . '[^"]*\.(?:jpg|png|webp))"/i', $html, $matches)) {
+                    Log::info('GeminiProductService: Found image from build.com', ['image_url' => $matches[1]]);
+                    return $matches[1];
+                }
+            }
+        } catch (\Exception $e) {
+            Log::debug('GeminiProductService: build.com search failed', ['error' => $e->getMessage()]);
+        }
+
+        return null;
+    }
+
+    /**
      * Extract the product image URL from a Richelieu product page
      *
      * @param string $pageUrl The Richelieu product page URL
@@ -1058,7 +1098,20 @@ PROMPT;
         try {
             Log::info('GeminiProductService: Extracting image from Richelieu page', ['url' => $pageUrl]);
 
-            // Fetch the page
+            // Extract SKU from URL first - we'll need it for direct image URL construction
+            $sku = null;
+            if (preg_match('/term=([A-Z0-9]{6,12})/i', $pageUrl, $skuMatch) ||
+                preg_match('/\/([A-Z0-9]{6,12})(?:$|[\/\?])/', $pageUrl, $skuMatch) ||
+                preg_match('/sku[=-]([A-Z0-9]{6,12})/i', $pageUrl, $skuMatch)) {
+                $sku = strtoupper($skuMatch[1]);
+                Log::info('GeminiProductService: Extracted SKU from URL', ['sku' => $sku]);
+            }
+
+            // NOTE: Richelieu image URLs use internal product group IDs, NOT SKUs
+            // We must fetch the product page to find the actual image URL
+            // The image URL pattern is: static.richelieu.com/documents/docsGr/{groupId}/.../{imageId}_700.jpg
+
+            // FALLBACK: Try to fetch the page and scrape the image
             $response = Http::timeout(30)
                 ->withHeaders([
                     'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -1068,82 +1121,87 @@ PROMPT;
                 ->get($pageUrl);
 
             if (!$response->successful()) {
-                Log::warning('GeminiProductService: Failed to fetch Richelieu page, trying search fallback', [
+                Log::warning('GeminiProductService: Failed to fetch Richelieu page', [
                     'url' => $pageUrl,
                     'status' => $response->status(),
                 ]);
-
-                // Try to extract SKU from the URL and search instead
-                // URLs like: /product/.../sku-DP10F61S or /product/.../DP10F61S
-                if (preg_match('/\/([A-Z0-9]{6,12})(?:$|[\/\?])/', $pageUrl, $skuMatch) ||
-                    preg_match('/sku[=-]([A-Z0-9]{6,12})/i', $pageUrl, $skuMatch)) {
-                    $sku = $skuMatch[1];
-                    $searchUrl = "https://www.richelieu.com/us/en/search?term={$sku}";
-                    Log::info('GeminiProductService: Trying search URL fallback', ['sku' => $sku, 'search_url' => $searchUrl]);
-
-                    $response = Http::timeout(30)
-                        ->withHeaders([
-                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                        ])
-                        ->get($searchUrl);
-
-                    if (!$response->successful()) {
-                        Log::warning('GeminiProductService: Search fallback also failed');
-                        return null;
-                    }
-
-                    $pageUrl = $searchUrl; // Update for logging
-                } else {
-                    return null;
-                }
+                return null;
             }
 
             $html = $response->body();
 
-            // If this is a search results page, first find and navigate to the actual product page
-            if (str_contains($pageUrl, '/search?') || str_contains($pageUrl, '/search/')) {
-                Log::info('GeminiProductService: Detected search results page, looking for product link');
+            // If we have a SKU, try to find an image URL that contains it
+            if ($sku) {
+                // Look for image URLs containing our SKU
+                $skuPattern = '/src=["\']([^"\']*static\.richelieu\.com[^"\']*' . preg_quote($sku, '/') . '[^"\']*\.(?:jpg|jpeg|png|webp))["\']/' ;
+                if (preg_match($skuPattern, $html, $matches)) {
+                    $imageUrl = $matches[1];
+                    if (str_starts_with($imageUrl, '//')) {
+                        $imageUrl = 'https:' . $imageUrl;
+                    }
+                    Log::info('GeminiProductService: Found Richelieu image matching SKU', [
+                        'sku' => $sku,
+                        'image_url' => $imageUrl,
+                    ]);
+                    return $imageUrl;
+                }
 
-                // Look for product links in search results
-                // Richelieu product URLs typically look like: /us/en/category/subcategory/product-name/SKUCODE
-                $productLinkPatterns = [
-                    // Product card links with SKU in the URL
-                    '/href=["\']([^"\']*richelieu\.com\/us\/en\/[^"\']+\/[A-Z0-9]{6,12})["\']/',
-                    // Product links in search results grid
-                    '/href=["\']([^"\']*\/us\/en\/[^"\']*?\/[A-Z0-9]{6,12})["\']/',
-                    // Any product detail page link
-                    '/href=["\']([^"\']*richelieu\.com[^"\']*product[^"\']*)["\']/',
-                ];
+                // Also check data-src for lazy loaded images
+                $dataSrcPattern = '/data-src=["\']([^"\']*static\.richelieu\.com[^"\']*' . preg_quote($sku, '/') . '[^"\']*\.(?:jpg|jpeg|png|webp))["\']/';
+                if (preg_match($dataSrcPattern, $html, $matches)) {
+                    $imageUrl = $matches[1];
+                    if (str_starts_with($imageUrl, '//')) {
+                        $imageUrl = 'https:' . $imageUrl;
+                    }
+                    Log::info('GeminiProductService: Found Richelieu lazy-loaded image matching SKU', [
+                        'sku' => $sku,
+                        'image_url' => $imageUrl,
+                    ]);
+                    return $imageUrl;
+                }
+            }
+
+            // If this is a search results page, try to find a link to the actual product page
+            // Richelieu product URLs have the pattern: /sku-{SKU} at the end
+            if (str_contains($pageUrl, '/search?') || str_contains($pageUrl, '/search/')) {
+                Log::info('GeminiProductService: Detected search page, looking for product link with SKU');
 
                 $productPageUrl = null;
-                foreach ($productLinkPatterns as $pattern) {
-                    if (preg_match($pattern, $html, $matches)) {
-                        $productPageUrl = $matches[1];
-                        // Make sure it's a full URL
+
+                // Look for product page links that contain our SKU
+                if ($sku) {
+                    // Pattern: href="...sku-{SKU}" or href=".../{SKU}"
+                    $skuLinkPattern = '/href=["\']([^"\']*\/sku-' . preg_quote($sku, '/') . ')["\']|href=["\']([^"\']*\/' . preg_quote($sku, '/') . ')["\']/' ;
+                    if (preg_match($skuLinkPattern, $html, $matches)) {
+                        $productPageUrl = $matches[1] ?: $matches[2];
                         if (str_starts_with($productPageUrl, '/')) {
                             $productPageUrl = 'https://www.richelieu.com' . $productPageUrl;
-                        } elseif (!str_starts_with($productPageUrl, 'http')) {
-                            $productPageUrl = 'https://' . $productPageUrl;
                         }
-
-                        Log::info('GeminiProductService: Found product page link', ['product_url' => $productPageUrl]);
-                        break;
+                        Log::info('GeminiProductService: Found product page link with SKU', ['url' => $productPageUrl]);
                     }
                 }
 
+                // If no SKU-specific link found, search results are JS-rendered - try alternate sources
+                if (!$productPageUrl && $sku) {
+                    Log::info('GeminiProductService: Search results are JS-rendered, trying alternate image source');
+                    $alternateImage = self::findAlternateProductImage($sku);
+                    if ($alternateImage) {
+                        return $alternateImage;
+                    }
+                }
+
+                // If we found a product page, fetch it
                 if ($productPageUrl) {
-                    // Fetch the actual product page
                     $productResponse = Http::timeout(30)
                         ->withHeaders([
-                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                         ])
                         ->get($productPageUrl);
 
                     if ($productResponse->successful()) {
                         $html = $productResponse->body();
-                        $pageUrl = $productPageUrl; // Update for logging
+                        $pageUrl = $productPageUrl;
                         Log::info('GeminiProductService: Fetched product page successfully');
                     } else {
                         Log::warning('GeminiProductService: Failed to fetch product page', [
@@ -1151,8 +1209,6 @@ PROMPT;
                             'status' => $productResponse->status(),
                         ]);
                     }
-                } else {
-                    Log::warning('GeminiProductService: No product link found in search results');
                 }
             }
 

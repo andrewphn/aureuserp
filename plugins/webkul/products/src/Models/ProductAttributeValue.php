@@ -13,10 +13,11 @@ use Webkul\Security\Models\User;
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property float $extra_price
+ * @property float|null $numeric_value
  * @property int $product_id
  * @property int $attribute_id
  * @property int $product_attribute_id
- * @property int $attribute_option_id
+ * @property int|null $attribute_option_id
  * @property-read \Illuminate\Database\Eloquent\Model|null $product
  * @property-read \Illuminate\Database\Eloquent\Model|null $attribute
  * @property-read \Illuminate\Database\Eloquent\Model|null $productAttribute
@@ -47,10 +48,21 @@ class ProductAttributeValue extends Model
      */
     protected $fillable = [
         'extra_price',
+        'numeric_value',
         'product_id',
         'attribute_id',
         'product_attribute_id',
         'attribute_option_id',
+    ];
+
+    /**
+     * Attribute casts.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'extra_price'   => 'decimal:4',
+        'numeric_value' => 'decimal:4',
     ];
 
     /**
@@ -101,5 +113,41 @@ class ProductAttributeValue extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the effective value (option name for SELECT/RADIO/COLOR, numeric for NUMBER/DIMENSION)
+     *
+     * @return string|float|null
+     */
+    public function getValue(): string|float|null
+    {
+        if ($this->attribute?->isNumeric()) {
+            return $this->numeric_value;
+        }
+
+        return $this->attributeOption?->name;
+    }
+
+    /**
+     * Get formatted value with unit (for display)
+     *
+     * @return string
+     */
+    public function getFormattedValue(): string
+    {
+        if ($this->attribute?->isNumeric()) {
+            return $this->attribute->formatValue($this->numeric_value);
+        }
+
+        return $this->attributeOption?->name ?? '';
+    }
+
+    /**
+     * Check if this value is for a numeric attribute
+     */
+    public function isNumeric(): bool
+    {
+        return $this->attribute?->isNumeric() ?? false;
     }
 }

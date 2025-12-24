@@ -13,6 +13,7 @@ use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -71,6 +72,49 @@ class AttributeResource extends Resource
                             ->live(),
                     ]),
 
+                // Unit Configuration Section (for NUMBER/DIMENSION types)
+                Section::make('Unit Configuration')
+                    ->description('Configure the unit of measurement for numeric attributes')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('unit_symbol')
+                                ->label('Unit Symbol')
+                                ->placeholder('e.g., in, mm, lbs')
+                                ->maxLength(10)
+                                ->helperText('Short symbol displayed after the value'),
+                            TextInput::make('unit_label')
+                                ->label('Unit Label')
+                                ->placeholder('e.g., inches, millimeters, pounds')
+                                ->maxLength(50)
+                                ->helperText('Full unit name for display'),
+                        ]),
+                        Grid::make(3)->schema([
+                            TextInput::make('min_value')
+                                ->label('Minimum Value')
+                                ->numeric()
+                                ->step(0.0001)
+                                ->helperText('Optional validation minimum'),
+                            TextInput::make('max_value')
+                                ->label('Maximum Value')
+                                ->numeric()
+                                ->step(0.0001)
+                                ->helperText('Optional validation maximum'),
+                            TextInput::make('decimal_places')
+                                ->label('Decimal Places')
+                                ->numeric()
+                                ->default(2)
+                                ->minValue(0)
+                                ->maxValue(4)
+                                ->helperText('Precision for display (0-4)'),
+                        ]),
+                    ])
+                    ->visible(fn (Get $get): bool => in_array($get('type'), [
+                        AttributeType::NUMBER->value,
+                        AttributeType::DIMENSION->value,
+                    ]))
+                    ->collapsible(),
+
+                // Options Section (for RADIO/SELECT/COLOR types)
                 Section::make(__('products::filament/resources/attribute.form.sections.options.title'))
                     ->schema([
                         Repeater::make(__('products::filament/resources/attribute.form.sections.options.title'))
@@ -94,7 +138,12 @@ class AttributeResource extends Resource
                                     ->maxValue(99999999999),
                             ])
                             ->columns(3),
-                    ]),
+                    ])
+                    ->visible(fn (Get $get): bool => in_array($get('type'), [
+                        AttributeType::RADIO->value,
+                        AttributeType::SELECT->value,
+                        AttributeType::COLOR->value,
+                    ])),
             ]);
     }
 
