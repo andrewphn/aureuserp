@@ -59,6 +59,11 @@ class SpamProtectionMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Bypass spam protection for trusted API sources (server-to-server calls)
+        if ($this->isFromTrustedApiSource($request)) {
+            return $next($request);
+        }
+
         $ip = $request->ip();
 
         // Check if IP is blocked
@@ -201,5 +206,20 @@ class SpamProtectionMiddleware
         $submissionTime = time() - (int) $timestamp;
 
         return $submissionTime < $this->minSubmissionTime;
+    }
+
+    /**
+     * Check if request is from a trusted API source (has valid API key)
+     */
+    protected function isFromTrustedApiSource(Request $request): bool
+    {
+        $apiKey = $request->header('X-API-Key');
+        $configuredKey = config('services.leads.api_key');
+
+        if (empty($configuredKey) || empty($apiKey)) {
+            return false;
+        }
+
+        return $apiKey === $configuredKey;
     }
 }
