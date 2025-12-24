@@ -3,6 +3,9 @@
     $projectCount = count($status['records'] ?? []);
     $wipLimit = $status['wip_limit'] ?? null;
     $isOverCapacity = $wipLimit && $projectCount > $wipLimit;
+
+    // Calculate total linear feet for all projects in this column
+    $totalLinearFeet = collect($status['records'] ?? [])->sum('estimated_linear_feet');
 @endphp
 
 {{-- Monday.com Style Header Bar --}}
@@ -10,20 +13,27 @@
     class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150"
     style="background-color: {{ $color }};"
 >
-    {{-- Stage Name / Count --}}
-    <h3 class="font-medium text-white text-sm flex items-center gap-1.5">
-        <span>{{ $status['title'] }}</span>
-        <span class="text-white/60">/</span>
-        <span @class([
-            'text-white/90',
-            'text-red-200 font-bold' => $isOverCapacity,
-        ])>
-            {{ $projectCount }}
-        </span>
-        @if($wipLimit && $isOverCapacity)
-            <span class="text-white/50 text-xs">(max {{ $wipLimit }})</span>
+    {{-- Stage Name / Count / Linear Feet --}}
+    <div class="flex flex-col">
+        <h3 class="font-medium text-white text-sm flex items-center gap-1.5">
+            <span>{{ $status['title'] }}</span>
+            <span class="text-white/60">/</span>
+            <span @class([
+                'text-white/90',
+                'text-red-200 font-bold' => $isOverCapacity,
+            ])>
+                {{ $projectCount }}
+            </span>
+            @if($wipLimit && $isOverCapacity)
+                <span class="text-white/50 text-xs">(max {{ $wipLimit }})</span>
+            @endif
+        </h3>
+        @if($totalLinearFeet > 0)
+            <span class="text-white/70 text-xs">
+                {{ number_format($totalLinearFeet, 1) }} LF
+            </span>
         @endif
-    </h3>
+    </div>
 
     {{-- Add button --}}
     <button

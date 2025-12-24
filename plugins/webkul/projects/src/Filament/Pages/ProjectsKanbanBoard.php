@@ -339,23 +339,30 @@ class ProjectsKanbanBoard extends KanbanBoard
     }
 
     /**
-     * Get project blockers
+     * Get project blockers - checks tasks with "blocked" status first,
+     * then other blocking conditions
      */
     public function getProjectBlockers(Project $project): array
     {
         $blockers = [];
 
-        // Check for missing order
-        if (!$project->orders()->exists()) {
+        // PRIMARY: Check for blocked tasks
+        $blockedTasks = $project->tasks()->where('state', 'blocked')->count();
+        if ($blockedTasks > 0) {
+            $blockers[] = $blockedTasks . ' task(s) blocked';
+        }
+
+        // SECONDARY: Check for missing order (only if no blocked tasks)
+        if (empty($blockers) && !$project->orders()->exists()) {
             $blockers[] = 'No sales order linked';
         }
 
-        // Check for missing customer
-        if (!$project->partner_id) {
+        // SECONDARY: Check for missing customer
+        if (empty($blockers) && !$project->partner_id) {
             $blockers[] = 'No customer assigned';
         }
 
-        // Check for dependencies
+        // Check for project dependencies
         if ($project->dependsOn->where('is_completed', false)->count() > 0) {
             $blockers[] = 'Waiting on dependencies';
         }

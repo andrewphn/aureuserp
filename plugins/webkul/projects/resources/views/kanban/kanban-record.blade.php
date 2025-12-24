@@ -37,23 +37,20 @@
     $showMilestones = $settings['show_milestones'] ?? true;
     $compactMode = $settings['compact_mode'] ?? false;
 
-    // Determine urgency color for top bar
-    // Red = overdue, Orange = high priority/due soon, Stage color = normal
-    $urgencyColor = $stageColor;
+    // Border color for card - instant visual status
+    $borderClass = 'border-gray-200 dark:border-gray-700';
     if ($isOverdue) {
-        $urgencyColor = '#ef4444'; // red-500
+        $borderClass = 'border-l-4 border-l-red-500 border-t-0 border-r-0 border-b-0';
     } elseif ($hasBlockers) {
-        $urgencyColor = '#9333ea'; // purple-600 for blocked
-    } elseif ($priority === 'high') {
-        $urgencyColor = '#f97316'; // orange-500
+        $borderClass = 'border-l-4 border-l-purple-500 border-t-0 border-r-0 border-b-0';
     }
 @endphp
 
 <div
     id="{{ $record->getKey() }}"
-    class="group bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md
+    class="group bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-lg
            transition-all duration-150 cursor-grab active:cursor-grabbing
-           border border-gray-200 dark:border-gray-700 overflow-hidden"
+           border {{ $borderClass }} overflow-hidden"
     @if($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3)
         x-data
         x-init="
@@ -62,14 +59,11 @@
         "
     @endif
 >
-    {{-- Urgency color bar at top - instant visual priority --}}
-    <div class="h-1.5" style="background-color: {{ $urgencyColor }};"></div>
-
-    <div class="{{ $compactMode ? 'p-2 space-y-1' : 'p-3 space-y-2' }}">
+    <div class="p-3">
         {{-- Title + Actions --}}
         <div class="flex items-start justify-between gap-2">
             <h4
-                class="flex-1 font-semibold text-gray-900 dark:text-white {{ $compactMode ? 'text-xs' : 'text-sm' }} leading-tight line-clamp-2 cursor-pointer hover:text-primary-600"
+                class="flex-1 font-bold text-gray-900 dark:text-white text-[13px] leading-snug line-clamp-2 cursor-pointer hover:text-primary-600"
                 wire:click="recordClicked('{{ $record->getKey() }}', { id: {{ $record->id }} })"
             >
                 {{ $record->name }}
@@ -119,53 +113,61 @@
             </div>
         </div>
 
-        {{-- Customer - plain text, no icon --}}
+        {{-- Customer --}}
         @if($showCustomer && $record->partner)
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <p class="text-[11px] text-gray-500 dark:text-gray-400 truncate mt-1">
                 {{ $record->partner->name }}
             </p>
         @endif
 
-        {{-- Key Metrics - Clean 2-column, NO icons --}}
-        <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-            {{-- Timeline --}}
+        {{-- Divider --}}
+        <div class="border-t border-gray-100 dark:border-gray-700 my-2.5"></div>
+
+        {{-- Key Metrics Row --}}
+        <div class="flex items-center justify-between text-xs">
+            {{-- Timeline with visual emphasis --}}
             @if($showDays && $daysLeft !== null)
-                <span class="{{ $isOverdue ? 'text-red-600 font-semibold' : 'text-gray-600' }}">
-                    @if($isOverdue)
+                @if($isOverdue)
+                    <span class="font-bold px-2 py-0.5 rounded" style="color: #dc2626; background-color: #fef2f2;">
                         {{ abs($daysLeft) }}d late
-                    @else
+                    </span>
+                @else
+                    <span class="font-medium text-gray-600">
                         {{ $daysLeft }}d left
-                    @endif
-                </span>
+                    </span>
+                @endif
             @else
                 <span></span>
             @endif
 
             {{-- Scope --}}
             @if($showLinearFeet && $linearFeet)
-                <span class="text-gray-600 text-right">{{ number_format($linearFeet, 1) }} LF</span>
-            @else
-                <span></span>
+                <span class="text-gray-500 font-medium">{{ number_format($linearFeet, 1) }} LF</span>
             @endif
         </div>
 
-        {{-- Blocked badge - only if truly blocked --}}
+        {{-- Blocked badge - prominent warning style --}}
         @if($hasBlockers)
-            <span class="inline-flex text-[10px] font-medium text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded" title="{{ implode(', ', $blockers) }}">
-                Blocked
-            </span>
+            <div class="mt-2.5">
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-1 rounded" style="color: #92400e; background-color: #fef3c7;" title="{{ implode(', ', $blockers) }}">
+                    <x-heroicon-m-exclamation-triangle class="w-3.5 h-3.5" />
+                    Blocked
+                </span>
+            </div>
         @endif
 
-        {{-- Single Progress Bar - milestone-based overall progress --}}
+        {{-- Progress Bar - hero element --}}
         @if($showMilestones && $totalMilestones > 0 && !$compactMode)
-            <div class="flex items-center gap-2 pt-1">
-                <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                        class="h-full rounded-full transition-all duration-300"
-                        style="width: {{ $milestoneProgress }}%; background-color: {{ $stageColor }};"
-                    ></div>
+            <div class="mt-3 pt-3 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="flex-1 h-3 rounded-full overflow-hidden shadow-inner" style="background-color: #9ca3af;">
+                        <div
+                            class="h-full rounded-full"
+                            style="width: {{ max($milestoneProgress, 8) }}%; background-color: {{ $stageColor }};"
+                        ></div>
+                    </div>
+                    <span class="text-sm font-bold tabular-nums shrink-0" style="color: {{ $stageColor }};">{{ $milestoneProgress }}%</span>
                 </div>
-                <span class="text-xs font-semibold tabular-nums text-gray-600 w-8 text-right">{{ $milestoneProgress }}%</span>
             </div>
         @endif
     </div>
