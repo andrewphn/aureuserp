@@ -1,4 +1,4 @@
-<x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
+<div>
     <div
         x-data="aiVendorLookup({
             apiEndpoint: '{{ url('/admin/vendor-ai/lookup') }}',
@@ -378,4 +378,4 @@
             </script>
         @endpush
     @endonce
-</x-dynamic-component>
+</div>
