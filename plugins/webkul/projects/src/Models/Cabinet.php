@@ -80,6 +80,12 @@ class Cabinet extends Model
         'quantity',
         'unit_price_per_lf',
         'total_price',
+        // Line item adjustments
+        'adjustment_type',
+        'adjustment_value',
+        'adjustment_reason',
+        'adjustment_amount',
+        'final_price',
         'cabinet_level',
         'material_category',
         'finish_option',
@@ -121,6 +127,9 @@ class Cabinet extends Model
         'quantity' => 'integer',
         'unit_price_per_lf' => 'decimal:2',
         'total_price' => 'decimal:2',
+        'adjustment_value' => 'decimal:2',
+        'adjustment_amount' => 'decimal:2',
+        'final_price' => 'decimal:2',
         'position_in_run' => 'integer',
         'wall_position_start_inches' => 'decimal:2',
         // Production tracking timestamps

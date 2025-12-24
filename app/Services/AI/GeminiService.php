@@ -5,10 +5,13 @@ namespace App\Services\AI;
 use Gemini\Laravel\Facades\Gemini;
 use Gemini\Data\GenerationConfig;
 use Gemini\Data\Content;
+use Gemini\Data\Blob;
+use Gemini\Enums\MimeType;
 use Gemini\Resources\GenerativeModel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\UploadedFile;
 use Exception;
 
 /**
@@ -160,8 +163,134 @@ class GeminiService
     }
     
     /**
+     * Analyze an image with a text prompt
+     *
+     * @param string|UploadedFile $image Image path, base64 data, or UploadedFile
+     * @param string $prompt The prompt describing what to extract/analyze
+     * @param string|null $mimeType The MIME type of the image (auto-detected if null)
+     * @return string The generated response text
+     * @throws Exception
+     */
+    public function analyzeImage($image, string $prompt, ?string $mimeType = null): string
+    {
+        try {
+            // Apply rate limiting
+            $this->checkRateLimit();
+
+            // Get image data and mime type
+            $imageData = $this->prepareImageData($image, $mimeType);
+
+            // Create the blob for the image
+            $blob = new Blob(
+                mimeType: $imageData['mimeType'],
+                data: $imageData['data']
+            );
+
+            // Generate response with image and text
+            $response = $this->model->generateContent([
+                $prompt,
+                $blob
+            ]);
+
+            // Extract text from response
+            $text = $this->extractTextFromResponse($response);
+
+            // Log the interaction
+            Log::info('Gemini Image Analysis', [
+                'model' => $this->modelName,
+                'prompt_length' => strlen($prompt),
+                'response_length' => strlen($text),
+                'image_size' => strlen($imageData['data']),
+                'mime_type' => $imageData['mimeType'],
+                'timestamp' => now()->toIso8601String()
+            ]);
+
+            return $text;
+
+        } catch (Exception $e) {
+            Log::error('Gemini Image Analysis Error', [
+                'prompt' => $prompt,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            throw new Exception('Failed to analyze image: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Prepare image data for API request
+     *
+     * @param string|UploadedFile $image
+     * @param string|null $mimeType
+     * @return array ['data' => base64, 'mimeType' => string]
+     */
+    protected function prepareImageData($image, ?string $mimeType = null): array
+    {
+        // Handle UploadedFile
+        if ($image instanceof UploadedFile) {
+            $data = base64_encode(file_get_contents($image->getRealPath()));
+            $detectedMime = $image->getMimeType();
+
+            return [
+                'data' => $data,
+                'mimeType' => $this->mapMimeType($mimeType ?? $detectedMime)
+            ];
+        }
+
+        // Handle file path
+        if (file_exists($image)) {
+            $data = base64_encode(file_get_contents($image));
+            $detectedMime = mime_content_type($image);
+
+            return [
+                'data' => $data,
+                'mimeType' => $this->mapMimeType($mimeType ?? $detectedMime)
+            ];
+        }
+
+        // Handle base64 data (with or without data URI prefix)
+        if (str_starts_with($image, 'data:')) {
+            // Parse data URI
+            preg_match('/^data:([^;]+);base64,(.+)$/', $image, $matches);
+            if (count($matches) === 3) {
+                return [
+                    'data' => $matches[2],
+                    'mimeType' => $this->mapMimeType($mimeType ?? $matches[1])
+                ];
+            }
+        }
+
+        // Assume it's raw base64 data
+        return [
+            'data' => $image,
+            'mimeType' => $this->mapMimeType($mimeType ?? 'image/jpeg')
+        ];
+    }
+
+    /**
+     * Map string MIME type to Gemini MimeType enum
+     *
+     * @param string $mimeType
+     * @return MimeType
+     */
+    protected function mapMimeType(string $mimeType): MimeType
+    {
+        return match (strtolower($mimeType)) {
+            'image/jpeg', 'image/jpg' => MimeType::IMAGE_JPEG,
+            'image/png' => MimeType::IMAGE_PNG,
+            'image/gif' => MimeType::IMAGE_GIF,
+            'image/webp' => MimeType::IMAGE_WEBP,
+            'image/heic' => MimeType::IMAGE_HEIC,
+            'image/heif' => MimeType::IMAGE_HEIF,
+            'application/pdf' => MimeType::APPLICATION_PDF,
+            default => MimeType::IMAGE_JPEG,
+        };
+    }
+
+    /**
      * Generate a streaming response for real-time interaction
-     * 
+     *
      * @param string $prompt The user's input prompt
      * @param array $context Additional context data
      * @return \Generator Yields response chunks

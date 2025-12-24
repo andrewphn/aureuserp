@@ -83,6 +83,9 @@ class ProjectsKanbanBoard extends KanbanBoard
 
     public ?int $selectedLeadId = null;
 
+    // Widget filter
+    public ?string $widgetFilter = 'all';
+
     public static function getNavigationGroup(): string
     {
         return __('webkul-project::filament/resources/project.navigation.group');
@@ -130,6 +133,19 @@ class ProjectsKanbanBoard extends KanbanBoard
     }
 
     /**
+     * Toggle widget filter
+     */
+    public function toggleWidgetFilter(string $filter): void
+    {
+        // If clicking the same filter, reset to 'all'
+        if ($this->widgetFilter === $filter && $filter !== 'all') {
+            $this->widgetFilter = 'all';
+        } else {
+            $this->widgetFilter = $filter;
+        }
+    }
+
+    /**
      * Get eloquent query with eager loading
      */
     protected function getEloquentQuery(): Builder
@@ -139,6 +155,32 @@ class ProjectsKanbanBoard extends KanbanBoard
             ->when($this->customerFilter, fn($q) => $q->where('partner_id', $this->customerFilter))
             ->when($this->personFilter, fn($q) => $q->where('user_id', $this->personFilter))
             ->when($this->overdueOnly, fn($q) => $q->where('desired_completion_date', '<', now()))
+            // Widget filters
+            ->when($this->widgetFilter === 'blocked', function ($q) {
+                $q->where(function ($query) {
+                    // Projects with blocked tasks
+                    $query->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
+                        // OR projects without sales orders
+                        ->orWhereDoesntHave('orders')
+                        // OR projects without customers
+                        ->orWhereNull('partner_id');
+                });
+            })
+            ->when($this->widgetFilter === 'overdue', fn($q) => $q->where('desired_completion_date', '<', now()))
+            ->when($this->widgetFilter === 'due_soon', fn($q) => $q->whereBetween('desired_completion_date', [now(), now()->addDays(7)]))
+            ->when($this->widgetFilter === 'on_track', function ($q) {
+                $q->where(function ($query) {
+                    // Not overdue
+                    $query->where(function ($q2) {
+                        $q2->whereNull('desired_completion_date')
+                            ->orWhere('desired_completion_date', '>=', now());
+                    })
+                    // Not blocked
+                    ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
+                    ->whereHas('orders')
+                    ->whereNotNull('partner_id');
+                });
+            })
             ->when($this->sortBy, fn($q) => $q->orderBy($this->sortBy, $this->sortDirection ?? 'asc'));
     }
 

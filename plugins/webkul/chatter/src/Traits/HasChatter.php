@@ -143,13 +143,22 @@ trait HasChatter
     {
         $message = new Message;
 
-        $user = filament()->auth()->user();
+        // Get user safely - may be null in console/queue contexts
+        $user = null;
+        try {
+            $user = filament()->auth()->user();
+        } catch (\Exception $e) {
+            // Filament not available
+        }
 
-        $message->fill(array_merge([
-            'creator_id'    => $user->id,
+        // Build defaults, allowing $data to override
+        $defaults = [
+            'creator_id'    => $user?->id ?? ($data['creator_id'] ?? 1),
             'date_deadline' => $data['date_deadline'] ?? now(),
-            'company_id'    => $data['company_id'] ?? ($user->defaultCompany?->id ?? null),
-        ], $data));
+            'company_id'    => $data['company_id'] ?? ($user?->defaultCompany?->id ?? null),
+        ];
+
+        $message->fill(array_merge($defaults, $data));
 
         $this->messages()->save($message);
 

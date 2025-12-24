@@ -9,24 +9,123 @@
 @endphp
 
 <x-filament-panels::page class="!p-0">
-    {{-- Status Legend - Simple, at-a-glance reference --}}
-    <div class="px-3 py-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-        <div class="flex items-center gap-6 text-xs">
-            <span class="text-gray-500 font-medium">Status:</span>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-sm" style="background-color: #e5e7eb;"></span>
-                <span class="text-gray-600 dark:text-gray-400">Normal</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-sm" style="background-color: #ea580c;"></span>
-                <span class="text-gray-600 dark:text-gray-400">Urgent</span>
-                <span class="text-gray-400 text-[10px]">(overdue/due soon)</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-sm" style="background-color: #7c3aed;"></span>
-                <span class="text-gray-600 dark:text-gray-400">Blocked</span>
-                <span class="text-gray-400 text-[10px]">(can't progress)</span>
-            </div>
+    {{-- Filter Widgets - Clickable to toggle filters --}}
+    @php
+        $totalProjects = \Webkul\Project\Models\Project::count();
+
+        // Blocked = has blocked tasks OR no orders OR no customer (using OR, no double-count)
+        $blockedCount = \Webkul\Project\Models\Project::where(function($q) {
+            $q->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
+              ->orWhereDoesntHave('orders')
+              ->orWhereNull('partner_id');
+        })->count();
+
+        $overdueCount = \Webkul\Project\Models\Project::where('desired_completion_date', '<', now())->count();
+        $dueSoonCount = \Webkul\Project\Models\Project::whereBetween('desired_completion_date', [now(), now()->addDays(7)])->count();
+
+        // On Track = not overdue AND not blocked (must satisfy both conditions)
+        $onTrackCount = \Webkul\Project\Models\Project::where(function($q) {
+            $q->whereNull('desired_completion_date')
+              ->orWhere('desired_completion_date', '>=', now());
+        })
+        ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
+        ->whereHas('orders')
+        ->whereNotNull('partner_id')
+        ->count();
+    @endphp
+    <div class="px-3 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-3">
+            {{-- All Projects Widget --}}
+            <button
+                wire:click="toggleWidgetFilter('all')"
+                @class([
+                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                    'border-primary-500 bg-primary-50 dark:bg-primary-900/20' => ($this->widgetFilter ?? 'all') === 'all',
+                    'border-gray-200 dark:border-gray-700 hover:border-gray-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? 'all') !== 'all',
+                ])
+            >
+                <div class="text-left">
+                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalProjects }}</div>
+                    <div class="text-xs text-gray-500">All Projects</div>
+                </div>
+            </button>
+
+            {{-- Blocked Widget --}}
+            <button
+                wire:click="toggleWidgetFilter('blocked')"
+                @class([
+                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                    'border-purple-500 bg-purple-50 dark:bg-purple-900/20' => ($this->widgetFilter ?? null) === 'blocked',
+                    'border-gray-200 dark:border-gray-700 hover:border-purple-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'blocked',
+                ])
+            >
+                <div class="w-3 h-8 rounded-sm" style="background-color: #7c3aed;"></div>
+                <div class="text-left">
+                    <div class="text-2xl font-bold" style="color: #7c3aed;">{{ $blockedCount }}</div>
+                    <div class="text-xs text-gray-500">Blocked</div>
+                </div>
+            </button>
+
+            {{-- Overdue Widget --}}
+            <button
+                wire:click="toggleWidgetFilter('overdue')"
+                @class([
+                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                    'border-red-500 bg-red-50 dark:bg-red-900/20' => ($this->widgetFilter ?? null) === 'overdue',
+                    'border-gray-200 dark:border-gray-700 hover:border-red-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'overdue',
+                ])
+            >
+                <div class="w-3 h-8 rounded-sm" style="background-color: #dc2626;"></div>
+                <div class="text-left">
+                    <div class="text-2xl font-bold" style="color: #dc2626;">{{ $overdueCount }}</div>
+                    <div class="text-xs text-gray-500">Overdue</div>
+                </div>
+            </button>
+
+            {{-- Due Soon Widget --}}
+            <button
+                wire:click="toggleWidgetFilter('due_soon')"
+                @class([
+                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                    'border-orange-500 bg-orange-50 dark:bg-orange-900/20' => ($this->widgetFilter ?? null) === 'due_soon',
+                    'border-gray-200 dark:border-gray-700 hover:border-orange-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'due_soon',
+                ])
+            >
+                <div class="w-3 h-8 rounded-sm" style="background-color: #ea580c;"></div>
+                <div class="text-left">
+                    <div class="text-2xl font-bold" style="color: #ea580c;">{{ $dueSoonCount }}</div>
+                    <div class="text-xs text-gray-500">Due Soon</div>
+                </div>
+            </button>
+
+            {{-- On Track Widget --}}
+            <button
+                wire:click="toggleWidgetFilter('on_track')"
+                @class([
+                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                    'border-green-500 bg-green-50 dark:bg-green-900/20' => ($this->widgetFilter ?? null) === 'on_track',
+                    'border-gray-200 dark:border-gray-700 hover:border-green-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'on_track',
+                ])
+            >
+                <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
+                <div class="text-left">
+                    <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
+                    <div class="text-xs text-gray-500">On Track</div>
+                </div>
+            </button>
+
+            {{-- Active Filter Indicator --}}
+            @if(($this->widgetFilter ?? 'all') !== 'all')
+                <div class="ml-auto flex items-center gap-2">
+                    <span class="text-xs text-gray-500">Filtering by:</span>
+                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                        {{ ucfirst(str_replace('_', ' ', $this->widgetFilter ?? 'all')) }}
+                        <button wire:click="toggleWidgetFilter('all')" class="ml-1 hover:text-red-500">
+                            <x-heroicon-m-x-mark class="w-3 h-3" />
+                        </button>
+                    </span>
+                </div>
+            @endif
         </div>
     </div>
 

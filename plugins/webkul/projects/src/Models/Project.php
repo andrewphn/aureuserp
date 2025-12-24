@@ -156,6 +156,11 @@ class Project extends Model implements HasMedia, Sortable
         'initial_consultation_notes',
         'design_revision_number',
         'design_notes',
+        // Google Drive integration
+        'google_drive_root_folder_id',
+        'google_drive_folder_url',
+        'google_drive_synced_at',
+        'google_drive_enabled',
     ];
 
     /**
@@ -189,6 +194,9 @@ class Project extends Model implements HasMedia, Sortable
         // LOW priority fields
         'initial_consultation_date' => 'date',
         'design_revision_number'    => 'integer',
+        // Google Drive integration
+        'google_drive_synced_at' => 'datetime',
+        'google_drive_enabled'   => 'boolean',
     ];
 
     protected array $logAttributes = [
