@@ -65,3 +65,9 @@ Route::middleware(['auth', 'web'])->prefix('admin')->name('filament.admin.beacon
     Route::get('/beacon/status', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'status'])->name('status');
     Route::post('/beacon/calculate', [\Webkul\Inventory\Http\Controllers\BeaconController::class, 'calculatePosition'])->name('calculate');
 });
+
+// AI Vendor Lookup Routes (for session-based auth from Filament admin)
+Route::middleware(['auth', 'web'])->prefix('admin/vendor-ai')->group(function () {
+    Route::post('lookup', [\App\Http\Controllers\Api\v1\VendorAiController::class, 'lookup'])->name('admin.vendor.ai-lookup');
+    Route::post('suggest-industry', [\App\Http\Controllers\Api\v1\VendorAiController::class, 'suggestIndustry'])->name('admin.vendor.suggest-industry');
+});

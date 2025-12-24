@@ -19,6 +19,8 @@
         "filament/spatie-laravel-media-library-plugin": "^4.0",
         "filament/spatie-laravel-settings-plugin": "^4.0",
         "flowframe/laravel-trend": "^0.3.0",
+        "google-gemini-php/laravel": "^2.0",
+        "google/apiclient": "^2.0",
         "guava/filament-icon-picker": "^3.0",
         "hugomyb/filament-media-action": "^4.0",
         "hydrat/filament-table-layout-toggle": "^3.0",
