@@ -65,6 +65,11 @@ class Room extends Model
         'quoted_price',
         'estimated_project_value',
         'estimated_cabinet_value',
+        'total_linear_feet_tier_1',
+        'total_linear_feet_tier_2',
+        'total_linear_feet_tier_3',
+        'total_linear_feet_tier_4',
+        'total_linear_feet_tier_5',
     ];
 
     protected $casts = [

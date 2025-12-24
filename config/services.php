@@ -44,6 +44,14 @@ return [
         'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
     ],
 
+    'google_drive' => [
+        'client_id' => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
+        'redirect_uri' => env('GOOGLE_DRIVE_REDIRECT_URI'),
+        'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
+        'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
+    ],
+
     'hubspot' => [
         'api_key' => env('HUBSPOT_API_KEY'),
         'access_token' => env('HUBSPOT_ACCESS_TOKEN'),

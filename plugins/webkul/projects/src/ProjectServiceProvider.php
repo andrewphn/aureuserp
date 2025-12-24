@@ -8,7 +8,13 @@ use Webkul\Project\Console\Commands\CleanupExpiredDrafts;
 use Webkul\Project\Events\ProjectStageChanged;
 use Webkul\Project\Listeners\HandleProjectStageChange;
 use Webkul\Project\Models\HardwareRequirement;
+use Webkul\Project\Models\Project;
 use Webkul\Project\Observers\HardwareRequirementObserver;
+use Webkul\Project\Observers\ProjectObserver;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveAuthService;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveFolderService;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveSyncService;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -112,6 +118,7 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_10_02_141007_create_project_inspiration_images_table',
                 '2025_11_29_180000_add_room_id_and_title_to_project_inspiration_images',
                 '2025_12_20_000001_create_projects_project_dependencies_table',
+                '2025_12_24_100000_add_google_drive_columns_to_projects_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -161,6 +168,30 @@ class ProjectServiceProvider extends PackageServiceProvider
 
         // Register model observers for auto-syncing hardware totals
         HardwareRequirement::observe(HardwareRequirementObserver::class);
+
+        // Register Project observer for Google Drive folder creation
+        Project::observe(ProjectObserver::class);
+
+        // Register Google Drive services as singletons
+        $this->app->singleton(GoogleDriveAuthService::class);
+        $this->app->singleton(GoogleDriveFolderService::class, function ($app) {
+            return new GoogleDriveFolderService($app->make(GoogleDriveAuthService::class));
+        });
+        $this->app->singleton(GoogleDriveSyncService::class, function ($app) {
+            return new GoogleDriveSyncService(
+                $app->make(GoogleDriveAuthService::class),
+                $app->make(GoogleDriveFolderService::class)
+            );
+        });
+        $this->app->singleton(GoogleDriveService::class, function ($app) {
+            $service = new GoogleDriveService(
+                $app->make(GoogleDriveAuthService::class),
+                $app->make(GoogleDriveFolderService::class)
+            );
+            // Inject sync service after construction to avoid circular dependency
+            $service->setSyncService($app->make(GoogleDriveSyncService::class));
+            return $service;
+        });
 
         // Register console commands
         if ($this->app->runningInConsole()) {

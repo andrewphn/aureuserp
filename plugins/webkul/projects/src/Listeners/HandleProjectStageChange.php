@@ -4,6 +4,7 @@ namespace Webkul\Project\Listeners;
 
 use Illuminate\Support\Facades\Log;
 use Webkul\Project\Events\ProjectStageChanged;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
 use Webkul\Project\Services\InventoryReservationService;
 
 /**
@@ -14,14 +15,20 @@ use Webkul\Project\Services\InventoryReservationService;
  * - material_reserved: Materials should be reserved in inventory
  * - material_issued: Materials should be issued (moved from stock)
  * - production: Building phase begins
+ * - delivery: Final stage before completion
+ * - completed: Project is done (archived in Google Drive)
  */
 class HandleProjectStageChange
 {
     protected InventoryReservationService $reservationService;
+    protected GoogleDriveService $driveService;
 
-    public function __construct(InventoryReservationService $reservationService)
-    {
+    public function __construct(
+        InventoryReservationService $reservationService,
+        GoogleDriveService $driveService
+    ) {
         $this->reservationService = $reservationService;
+        $this->driveService = $driveService;
     }
 
     /**
@@ -33,11 +40,15 @@ class HandleProjectStageChange
         $newStageKey = $event->getNewStageKey();
         $previousStageKey = $event->getPreviousStageKey();
 
+        // Get stage names for checking completed/cancelled
+        $newStageName = strtolower($event->newStage?->name ?? '');
+        $previousStageName = strtolower($event->previousStage?->name ?? '');
+
         Log::info('Project stage changed', [
             'project_id' => $project->id,
             'project_number' => $project->project_number,
-            'from_stage' => $previousStageKey,
-            'to_stage' => $newStageKey,
+            'from_stage' => $previousStageKey ?: $previousStageName,
+            'to_stage' => $newStageKey ?: $newStageName,
         ]);
 
         // Handle stage-specific actions
@@ -46,8 +57,20 @@ class HandleProjectStageChange
             'material_issued' => $this->handleMaterialIssued($event),
             'sourcing' => $this->handleSourcing($event),
             'production' => $this->handleProduction($event),
+            'completed' => $this->handleCompleted($event),
             default => null,
         };
+
+        // Check for Done/Cancelled by stage name (when stage_key is empty)
+        if (in_array($newStageName, ['done', 'cancelled', 'completed'])) {
+            $this->handleCompleted($event);
+        }
+
+        // Handle reactivation: moving FROM done/cancelled to active stage
+        if (in_array($previousStageName, ['done', 'cancelled', 'completed'])
+            && !in_array($newStageName, ['done', 'cancelled', 'completed'])) {
+            $this->handleReactivated($event);
+        }
 
         // Handle transitions away from certain stages (cleanup)
         if ($previousStageKey === 'material_reserved' && $newStageKey !== 'material_issued') {
@@ -169,5 +192,45 @@ class HandleProjectStageChange
                 'reservations_released' => $released,
             ]);
         }
+    }
+
+    /**
+     * Handle project completion - archive Google Drive folder.
+     */
+    protected function handleCompleted(ProjectStageChanged $event): void
+    {
+        $project = $event->project;
+
+        // Skip if Google Drive not configured or no folder
+        if (!$project->google_drive_enabled || !$project->google_drive_root_folder_id) {
+            return;
+        }
+
+        Log::info('Project completed - archiving Google Drive folder', [
+            'project_id' => $project->id,
+            'project_number' => $project->project_number,
+        ]);
+
+        $this->driveService->archiveProject($project);
+    }
+
+    /**
+     * Handle project reactivation - move folder back to Active.
+     */
+    protected function handleReactivated(ProjectStageChanged $event): void
+    {
+        $project = $event->project;
+
+        // Skip if Google Drive not configured or no folder
+        if (!$project->google_drive_enabled || !$project->google_drive_root_folder_id) {
+            return;
+        }
+
+        Log::info('Project reactivated - moving folder back to Active', [
+            'project_id' => $project->id,
+            'project_number' => $project->project_number,
+        ]);
+
+        $this->driveService->reactivateProject($project);
     }
 }

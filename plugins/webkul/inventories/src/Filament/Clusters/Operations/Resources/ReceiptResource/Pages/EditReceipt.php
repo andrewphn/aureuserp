@@ -2,6 +2,7 @@
 
 namespace Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource\Pages;
 
+use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
@@ -13,6 +14,7 @@ use Webkul\Inventory\Filament\Clusters\Operations\Actions as OperationActions;
 use Webkul\Inventory\Filament\Clusters\Operations\Resources\ReceiptResource;
 use Webkul\Inventory\Models\Receipt;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
+use App\Filament\Forms\Components\AiDocumentScanner;
 
 /**
  * Edit Receipt class
@@ -43,6 +45,7 @@ class EditReceipt extends EditRecord
         return [
             ChatterAction::make()
                 ->setResource(static::$resource),
+            $this->getScanDocumentAction(),
             OperationActions\TodoAction::make(),
             OperationActions\ValidateAction::make(),
             OperationActions\CancelAction::make(),
@@ -91,5 +94,29 @@ class EditReceipt extends EditRecord
     public function updateForm(): void
     {
         $this->fillForm();
+    }
+
+    /**
+     * Get the AI Document Scanner action for receiving
+     *
+     * @return Action
+     */
+    protected function getScanDocumentAction(): Action
+    {
+        return Action::make('scanDocument')
+            ->label('Scan Document')
+            ->icon('heroicon-o-camera')
+            ->color('info')
+            ->visible(fn () => !in_array($this->getRecord()->state, [OperationState::DONE, OperationState::CANCELED]))
+            ->modalHeading('AI Document Scanner')
+            ->modalDescription('Upload a packing slip or invoice to auto-populate receiving quantities')
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Close')
+            ->modalWidth('4xl')
+            ->slideOver()
+            ->form([
+                AiDocumentScanner::make()
+                    ->forReceiving(),
+            ]);
     }
 }

@@ -71,3 +71,11 @@ Route::middleware(['auth', 'web'])->prefix('admin/vendor-ai')->group(function ()
     Route::post('lookup', [\App\Http\Controllers\Api\v1\VendorAiController::class, 'lookup'])->name('admin.vendor.ai-lookup');
     Route::post('suggest-industry', [\App\Http\Controllers\Api\v1\VendorAiController::class, 'suggestIndustry'])->name('admin.vendor.suggest-industry');
 });
+
+// AI Document Scanner Routes (for session-based auth from Filament admin)
+Route::middleware(['auth', 'web'])->prefix('admin/document-scanner')->group(function () {
+    Route::post('scan', [\App\Http\Controllers\Api\v1\DocumentScannerController::class, 'scan'])->name('admin.document.scan');
+    Route::post('scan-product', [\App\Http\Controllers\Api\v1\DocumentScannerController::class, 'scanProduct'])->name('admin.document.scan-product');
+    Route::post('scan-receiving', [\App\Http\Controllers\Api\v1\DocumentScannerController::class, 'scanReceiving'])->name('admin.document.scan-receiving');
+    Route::get('types', [\App\Http\Controllers\Api\v1\DocumentScannerController::class, 'getDocumentTypes'])->name('admin.document.types');
+});

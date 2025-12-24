@@ -26,6 +26,7 @@ use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Filament\Resources\ProjectResource\Actions\CloneProjectAction;
 use Webkul\Project\Models\Cabinet;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
 use Webkul\Project\Services\MaterialBomService;
 use Webkul\Project\Services\ProjectReportService;
 use Webkul\Support\Models\ActivityPlan;
@@ -54,6 +55,54 @@ class ViewProject extends ViewRecord
             'entityType' => 'project',
             'entityId' => $this->record->id,
         ]);
+
+        // Auto-sync with Google Drive if enabled and needs sync
+        $this->autoSyncGoogleDrive();
+    }
+
+    /**
+     * Auto-sync with Google Drive when viewing project
+     */
+    protected function autoSyncGoogleDrive(): void
+    {
+        // Only sync if project has Google Drive enabled and configured
+        if (!$this->record->google_drive_enabled || !$this->record->google_drive_root_folder_id) {
+            return;
+        }
+
+        try {
+            $driveService = app(GoogleDriveService::class);
+
+            // Only sync if it's been more than 5 minutes since last sync
+            if ($driveService->projectNeedsSync($this->record, 5)) {
+                $result = $driveService->syncProject($this->record);
+
+                // Show notification if changes were found
+                if ($result['success'] && !empty($result['changes'])) {
+                    $added = count($result['changes']['added'] ?? []);
+                    $deleted = count($result['changes']['deleted'] ?? []);
+                    $modified = count($result['changes']['modified'] ?? []);
+
+                    if ($added > 0 || $deleted > 0 || $modified > 0) {
+                        $changes = [];
+                        if ($added > 0) $changes[] = "{$added} added";
+                        if ($deleted > 0) $changes[] = "{$deleted} deleted";
+                        if ($modified > 0) $changes[] = "{$modified} modified";
+
+                        Notification::make()
+                            ->info()
+                            ->title('Google Drive Synced')
+                            ->body('Changes detected: ' . implode(', ', $changes))
+                            ->send();
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Auto-sync failed for project', [
+                'project_id' => $this->record->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     protected function getHeaderActions(): array
@@ -296,6 +345,53 @@ class ViewProject extends ViewRecord
                 Section::make('Quick Actions')
                     ->schema([
                         Actions::make([
+                            Action::make('syncGoogleDrive')
+                                ->label('Sync Drive')
+                                ->icon('heroicon-o-arrow-path')
+                                ->color('gray')
+                                ->visible(fn () => $this->record->google_drive_enabled && $this->record->google_drive_root_folder_id)
+                                ->action(function () {
+                                    $driveService = app(GoogleDriveService::class);
+                                    $result = $driveService->syncProject($this->record);
+
+                                    if ($result['success']) {
+                                        $added = count($result['changes']['added'] ?? []);
+                                        $deleted = count($result['changes']['deleted'] ?? []);
+                                        $modified = count($result['changes']['modified'] ?? []);
+
+                                        if ($added > 0 || $deleted > 0 || $modified > 0) {
+                                            $changes = [];
+                                            if ($added > 0) $changes[] = "{$added} added";
+                                            if ($deleted > 0) $changes[] = "{$deleted} deleted";
+                                            if ($modified > 0) $changes[] = "{$modified} modified";
+
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Google Drive Synced')
+                                                ->body('Changes: ' . implode(', ', $changes) . '. Check chatter for details.')
+                                                ->send();
+                                        } else {
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Google Drive Synced')
+                                                ->body('No changes detected. ' . $result['total_files'] . ' files in Drive.')
+                                                ->send();
+                                        }
+                                    } else {
+                                        Notification::make()
+                                            ->danger()
+                                            ->title('Sync Failed')
+                                            ->body($result['message'] ?? 'Unknown error')
+                                            ->send();
+                                    }
+                                }),
+                            Action::make('openGoogleDrive')
+                                ->label('Open Drive')
+                                ->icon('heroicon-o-folder-open')
+                                ->color('info')
+                                ->visible(fn () => $this->record->google_drive_folder_url)
+                                ->url(fn () => $this->record->google_drive_folder_url)
+                                ->openUrlInNewTab(),
                             Action::make('exportBom')
                                 ->label('Export BOM')
                                 ->icon('heroicon-o-document-arrow-down')

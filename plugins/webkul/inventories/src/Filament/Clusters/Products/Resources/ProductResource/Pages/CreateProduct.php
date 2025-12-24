@@ -388,6 +388,10 @@ class CreateProduct extends BaseCreateProduct
                                 $downloadedPath = 'products/images/' . $downloadedImage;
                                 $this->addAiImageToAdd($downloadedPath);
                                 Log::info('AI Populate - Image queued for Spatie', ['path' => $downloadedPath]);
+
+                                // Also add to form state so it shows in preview
+                                // The SpatieMediaLibraryFileUpload expects file paths relative to storage/app/public
+                                $aiUpdates['product-images'] = [$downloadedPath];
                             }
                         }
 
