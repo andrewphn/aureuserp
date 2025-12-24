@@ -4,12 +4,15 @@ namespace Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource\
 
 use App\Services\GeminiProductService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\View;
 use Filament\Notifications\Notification;
+use Illuminate\Support\HtmlString;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Webkul\Product\Models\Tag;
@@ -164,19 +167,44 @@ class CreateProduct extends BaseCreateProduct
                 ->color('info')
                 ->requiresConfirmation()
                 ->modalHeading('Generate Product Details with AI')
-                ->modalDescription('Enter a product name first, then AI will search the web and generate product details. This may take up to 30 seconds. You can review and edit before saving.')
+                ->modalDescription('AI will search using any data you\'ve entered (name, supplier SKU, barcode, etc.) to find product information. Richelieu products are prioritized. This may take up to 30 seconds.')
                 ->modalSubmitActionLabel('Generate')
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
                 ->action(function () {
                     try {
                         // Get current form data WITHOUT triggering validation
                         $currentData = $this->form->getRawState();
+
+                        // Build search context from ALL available fields
+                        $searchContext = [];
+                        if (!empty($currentData['supplier_sku'])) {
+                            $searchContext['supplier_sku'] = $currentData['supplier_sku'];
+                        }
+                        if (!empty($currentData['barcode'])) {
+                            $searchContext['barcode'] = $currentData['barcode'];
+                        }
+                        if (!empty($currentData['reference'])) {
+                            $searchContext['reference'] = $currentData['reference'];
+                        }
+                        // Try to get brand from tags or other fields if available
+
+                        // Determine primary search term - prioritize supplier_sku for Richelieu lookup
                         $productName = $currentData['name'] ?? '';
 
-                        if (empty($productName)) {
+                        // If no name but we have supplier SKU, use that as primary search
+                        if (empty($productName) && !empty($searchContext['supplier_sku'])) {
+                            $productName = $searchContext['supplier_sku'];
+                        }
+
+                        // If still nothing, check barcode
+                        if (empty($productName) && !empty($searchContext['barcode'])) {
+                            $productName = $searchContext['barcode'];
+                        }
+
+                        if (empty($productName) && empty($searchContext)) {
                             Notification::make()
-                                ->title('Product name required')
-                                ->body('Please enter a product name first before using AI Populate.')
+                                ->title('No search data')
+                                ->body('Please enter a product name, supplier SKU, or barcode before using AI Populate.')
                                 ->warning()
                                 ->persistent()
                                 ->send();
@@ -189,7 +217,7 @@ class CreateProduct extends BaseCreateProduct
                         if (is_array($existingDesc)) {
                             $existingDesc = $existingDesc['content'] ?? ($existingDesc[0] ?? null);
                         }
-                        $data = $service->generateProductDetails($productName, is_string($existingDesc) ? $existingDesc : null);
+                        $data = $service->generateProductDetails($productName, is_string($existingDesc) ? $existingDesc : null, $searchContext);
 
                         if (isset($data['error'])) {
                             Notification::make()
@@ -201,138 +229,218 @@ class CreateProduct extends BaseCreateProduct
                             return;
                         }
 
-                        // Build updates array
-                        $updates = [];
+                        // Build AI updates and detect conflicts with existing data
+                        $aiUpdates = [];
+                        $conflicts = [];
+
+                        // Helper to check if field has existing non-empty value
+                        $hasExistingValue = function ($field) use ($currentData) {
+                            $value = $currentData[$field] ?? null;
+                            if ($value === null || $value === '' || $value === 0 || $value === 0.0) {
+                                return false;
+                            }
+                            if (is_string($value) && trim(strip_tags($value)) === '') {
+                                return false;
+                            }
+                            return true;
+                        };
 
                         // Build rich description with technical specs and source
                         if (!empty($data['description'])) {
                             $fullDescription = $data['description'];
 
-                            // Append technical specs if available
                             if (!empty($data['technical_specs'])) {
                                 $fullDescription .= "\n<p><strong>Technical Specs:</strong> " . htmlspecialchars($data['technical_specs']) . "</p>";
                             }
-
-                            // Append brand if available
                             if (!empty($data['brand'])) {
                                 $fullDescription .= "\n<p><strong>Brand:</strong> " . htmlspecialchars($data['brand']) . "</p>";
                             }
-
-                            // Append source URL if available
                             if (!empty($data['source_url'])) {
                                 $fullDescription .= "\n<p><em>Source: <a href=\"" . htmlspecialchars($data['source_url']) . "\" target=\"_blank\">" . htmlspecialchars($data['source_url']) . "</a></em></p>";
                             }
 
-                            $updates['description'] = $fullDescription;
-                        }
-
-                        // Barcode - only update if empty (use barcode or SKU from AI)
-                        if (empty($currentData['barcode'])) {
-                            if (!empty($data['barcode'])) {
-                                $updates['barcode'] = $data['barcode'];
-                            } elseif (!empty($data['sku'])) {
-                                $updates['barcode'] = $data['sku'];
+                            if ($hasExistingValue('description')) {
+                                // Handle RichEditor array format
+                                $currentDesc = $currentData['description'];
+                                if (is_array($currentDesc)) {
+                                    $currentDesc = $currentDesc['content'] ?? ($currentDesc[0] ?? '');
+                                }
+                                if (is_string($currentDesc) && !empty(trim(strip_tags($currentDesc)))) {
+                                    $conflicts['description'] = ['current' => substr(strip_tags($currentDesc), 0, 100) . '...', 'ai' => substr(strip_tags($fullDescription), 0, 100) . '...'];
+                                }
                             }
+                            $aiUpdates['description'] = $fullDescription;
                         }
 
-                        // Set both price and cost to the COST value (user can override with markup later)
+                        // Barcode/SKU
+                        $aiBarcode = $data['barcode'] ?? ($data['sku'] ?? null);
+                        if (!empty($aiBarcode)) {
+                            if ($hasExistingValue('barcode')) {
+                                $conflicts['barcode'] = ['current' => $currentData['barcode'], 'ai' => $aiBarcode];
+                            }
+                            $aiUpdates['barcode'] = $aiBarcode;
+                        }
+
+                        // Supplier SKU from AI
+                        if (!empty($data['sku'])) {
+                            if ($hasExistingValue('supplier_sku')) {
+                                $conflicts['supplier_sku'] = ['current' => $currentData['supplier_sku'], 'ai' => $data['sku']];
+                            }
+                            $aiUpdates['supplier_sku'] = $data['sku'];
+                        }
+
+                        // Price and Cost
                         $costValue = $data['suggested_cost'] ?? $data['suggested_price'] ?? 0;
                         if ($costValue > 0) {
-                            $updates['price'] = $costValue;
-                            $updates['cost'] = $costValue;
+                            if ($hasExistingValue('price')) {
+                                $conflicts['price'] = ['current' => '$' . number_format($currentData['price'], 2), 'ai' => '$' . number_format($costValue, 2)];
+                            }
+                            if ($hasExistingValue('cost')) {
+                                $conflicts['cost'] = ['current' => '$' . number_format($currentData['cost'], 2), 'ai' => '$' . number_format($costValue, 2)];
+                            }
+                            $aiUpdates['price'] = $costValue;
+                            $aiUpdates['cost'] = $costValue;
                         }
 
+                        // Weight
                         if (!empty($data['weight']) && $data['weight'] > 0) {
-                            $updates['weight'] = $data['weight'];
+                            if ($hasExistingValue('weight')) {
+                                $conflicts['weight'] = ['current' => $currentData['weight'] . ' kg', 'ai' => $data['weight'] . ' kg'];
+                            }
+                            $aiUpdates['weight'] = $data['weight'];
                         }
 
+                        // Volume
                         if (!empty($data['volume']) && $data['volume'] > 0) {
-                            $updates['volume'] = $data['volume'];
+                            if ($hasExistingValue('volume')) {
+                                $conflicts['volume'] = ['current' => $currentData['volume'] . ' L', 'ai' => $data['volume'] . ' L'];
+                            }
+                            $aiUpdates['volume'] = $data['volume'];
                         }
 
-                        // Box/Package pricing from AI
+                        // Box/Package pricing
                         if (!empty($data['box_cost']) && $data['box_cost'] > 0) {
-                            $updates['box_cost'] = $data['box_cost'];
+                            $aiUpdates['box_cost'] = $data['box_cost'];
                         }
                         if (!empty($data['units_per_box']) && $data['units_per_box'] > 0) {
-                            $updates['units_per_box'] = $data['units_per_box'];
-                            // Auto-calculate unit cost if we have box cost
+                            $aiUpdates['units_per_box'] = $data['units_per_box'];
                             if (!empty($data['box_cost']) && $data['box_cost'] > 0) {
                                 $unitCost = round($data['box_cost'] / $data['units_per_box'], 4);
-                                $updates['cost'] = $unitCost;
-                                $updates['price'] = $unitCost; // Default price to cost, user can mark up
+                                $aiUpdates['cost'] = $unitCost;
+                                $aiUpdates['price'] = $unitCost;
                             }
                         }
                         if (!empty($data['package_description'])) {
-                            $updates['package_description'] = $data['package_description'];
+                            $aiUpdates['package_description'] = $data['package_description'];
                         }
 
-                        // Handle tags - find or create and get IDs
+                        // Category
+                        if (!empty($data['category_id']) && $data['category_id'] > 0) {
+                            if ($hasExistingValue('category_id')) {
+                                $conflicts['category_id'] = ['current' => 'ID: ' . $currentData['category_id'], 'ai' => 'ID: ' . $data['category_id']];
+                            }
+                            $aiUpdates['category_id'] = $data['category_id'];
+                        }
+
+                        // Reference Type Code
+                        if (!empty($data['reference_type_code_id']) && $data['reference_type_code_id'] > 0) {
+                            if ($hasExistingValue('reference_type_code_id')) {
+                                $conflicts['reference_type_code_id'] = ['current' => 'ID: ' . $currentData['reference_type_code_id'], 'ai' => 'ID: ' . $data['reference_type_code_id']];
+                            }
+                            $aiUpdates['reference_type_code_id'] = $data['reference_type_code_id'];
+                        }
+
+                        // Handle tags - always merge, never conflict
                         if (!empty($data['tags']) && is_array($data['tags'])) {
                             $tagIds = [];
                             foreach ($data['tags'] as $tagName) {
                                 $tagName = trim($tagName);
                                 if (empty($tagName)) continue;
-
-                                // Find or create the tag
-                                $tag = Tag::firstOrCreate(
-                                    ['name' => $tagName],
-                                    ['name' => $tagName]
-                                );
+                                $tag = Tag::firstOrCreate(['name' => $tagName], ['name' => $tagName]);
                                 $tagIds[] = $tag->id;
                             }
-
                             if (!empty($tagIds)) {
-                                // Merge with existing tags
                                 $existingTagIds = $currentData['tags'] ?? [];
-                                $updates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
+                                $aiUpdates['tags'] = array_unique(array_merge($existingTagIds, $tagIds));
                             }
                         }
 
-                        // Category and Reference Type Code from AI
-                        if (!empty($data['category_id']) && $data['category_id'] > 0) {
-                            $updates['category_id'] = $data['category_id'];
-                        }
-                        if (!empty($data['reference_type_code_id']) && $data['reference_type_code_id'] > 0) {
-                            $updates['reference_type_code_id'] = $data['reference_type_code_id'];
+                        // Download product image from URL
+                        // For Richelieu products, extract the real image URL from the product page
+                        $imageUrl = $data['image_url'] ?? null;
+                        $sourceUrl = $data['source_url'] ?? null;
+
+                        if (!empty($sourceUrl) && str_contains($sourceUrl, 'richelieu.com')) {
+                            Log::info('AI Populate - Attempting to extract image from Richelieu page', ['source_url' => $sourceUrl]);
+                            $extractedImageUrl = GeminiProductService::extractRichelieuImageUrl($sourceUrl);
+                            if ($extractedImageUrl) {
+                                $imageUrl = $extractedImageUrl;
+                                Log::info('AI Populate - Using extracted Richelieu image', ['image_url' => $imageUrl]);
+                            }
                         }
 
-                        // Download product image from URL if provided - queue for Spatie
-                        if (!empty($data['image_url'])) {
+                        if (!empty($imageUrl)) {
                             $downloadedImage = GeminiProductService::downloadProductImage(
-                                $data['image_url'],
+                                $imageUrl,
                                 $data['identified_product_name'] ?? $productName
                             );
                             if ($downloadedImage) {
-                                // Queue for Spatie media addition after creation
                                 $downloadedPath = 'products/images/' . $downloadedImage;
                                 $this->addAiImageToAdd($downloadedPath);
                                 Log::info('AI Populate - Image queued for Spatie', ['path' => $downloadedPath]);
                             }
                         }
 
-                        if (!empty($updates)) {
-                            $this->form->fill(array_merge($currentData, $updates));
+                        // If there are conflicts, store data and show confirmation modal
+                        if (!empty($conflicts)) {
+                            $this->setPendingAiData([
+                                'ai_updates' => $aiUpdates,
+                                'conflicts' => $conflicts,
+                                'current_data' => $currentData,
+                            ]);
 
+                            $conflictFields = array_keys($conflicts);
                             Notification::make()
-                                ->title('Product details generated')
-                                ->body('Review the changes below and click Create when ready.')
-                                ->success()
-                                ->persistent()
-                                ->send();
-                        } else {
-                            Notification::make()
-                                ->title('No updates made')
-                                ->body('AI could not find additional information for this product.')
+                                ->title('AI found data - Review conflicts')
+                                ->body('Fields with existing data: ' . implode(', ', $conflictFields) . '. Click "Review AI Conflicts" to choose which to update.')
                                 ->warning()
                                 ->persistent()
                                 ->send();
-                        }
 
-                        Log::info('AI Populate completed for new product: ' . $productName, [
-                            'updates' => array_keys($updates),
-                            'ai_data' => $data,
-                        ]);
+                            // Apply only non-conflicting updates
+                            $safeUpdates = array_diff_key($aiUpdates, $conflicts);
+                            if (!empty($safeUpdates)) {
+                                $this->form->fill(array_merge($currentData, $safeUpdates));
+                            }
+
+                            Log::info('AI Populate - Conflicts detected', [
+                                'conflicts' => $conflictFields,
+                                'safe_updates' => array_keys($safeUpdates),
+                            ]);
+                        } else {
+                            // No conflicts - apply all updates
+                            if (!empty($aiUpdates)) {
+                                $this->form->fill(array_merge($currentData, $aiUpdates));
+                                Notification::make()
+                                    ->title('Product details generated')
+                                    ->body('Review the changes below and click Create when ready.')
+                                    ->success()
+                                    ->persistent()
+                                    ->send();
+                            } else {
+                                Notification::make()
+                                    ->title('No updates made')
+                                    ->body('AI could not find additional information for this product.')
+                                    ->warning()
+                                    ->persistent()
+                                    ->send();
+                            }
+
+                            Log::info('AI Populate completed for new product: ' . $productName, [
+                                'updates' => array_keys($aiUpdates),
+                                'ai_data' => $data,
+                            ]);
+                        }
 
                     } catch (\Exception $e) {
                         Log::error('AI Populate error: ' . $e->getMessage(), [
@@ -344,6 +452,68 @@ class CreateProduct extends BaseCreateProduct
                             ->body('An unexpected error occurred. Please try again.')
                             ->danger()
                             ->persistent()
+                            ->send();
+                    }
+                }),
+            // Conflict Review Action - shown when AI found data that conflicts with existing values
+            Action::make('reviewAiConflicts')
+                ->label('Review AI Conflicts')
+                ->icon('heroicon-o-exclamation-triangle')
+                ->color('warning')
+                ->visible(fn () => !empty($this->getPendingAiData()['conflicts'] ?? []))
+                ->modalHeading('Review AI Data Conflicts')
+                ->modalDescription('AI found new data for fields that already have values. Select which fields you want to update with AI data.')
+                ->modalWidth('lg')
+                ->form(fn () => $this->buildConflictReviewForm())
+                ->modalSubmitActionLabel('Apply Selected Updates')
+                ->action(function (array $data) {
+                    try {
+                        $pendingData = $this->getPendingAiData();
+                        if (empty($pendingData)) {
+                            Notification::make()
+                                ->title('No pending AI data')
+                                ->warning()
+                                ->send();
+                            return;
+                        }
+
+                        $aiUpdates = $pendingData['ai_updates'] ?? [];
+                        $conflicts = $pendingData['conflicts'] ?? [];
+                        $selectedFields = $data['fields_to_update'] ?? [];
+
+                        $currentData = $this->form->getRawState();
+                        $updates = [];
+
+                        // Apply only the selected conflicting fields
+                        foreach ($selectedFields as $field) {
+                            if (isset($aiUpdates[$field])) {
+                                $updates[$field] = $aiUpdates[$field];
+                            }
+                        }
+
+                        if (!empty($updates)) {
+                            $this->form->fill(array_merge($currentData, $updates));
+
+                            Notification::make()
+                                ->title('Fields updated')
+                                ->body('Updated: ' . implode(', ', array_keys($updates)))
+                                ->success()
+                                ->send();
+
+                            Log::info('AI Conflict Resolution - Applied updates', [
+                                'updated_fields' => array_keys($updates),
+                            ]);
+                        }
+
+                        // Clear pending data
+                        $this->clearPendingAiSession();
+
+                    } catch (\Exception $e) {
+                        Log::error('AI Conflict Resolution error: ' . $e->getMessage());
+                        Notification::make()
+                            ->title('Error applying updates')
+                            ->body($e->getMessage())
+                            ->danger()
                             ->send();
                     }
                 }),
@@ -724,6 +894,81 @@ class CreateProduct extends BaseCreateProduct
     }
 
     /**
+     * Build the form for reviewing AI field conflicts
+     */
+    protected function buildConflictReviewForm(): array
+    {
+        $pendingData = $this->getPendingAiData();
+        $conflicts = $pendingData['conflicts'] ?? [];
+
+        if (empty($conflicts)) {
+            return [
+                Placeholder::make('no_conflicts')
+                    ->content('No conflicts to review.')
+            ];
+        }
+
+        // Build comparison table as HTML
+        $tableHtml = '<table class="w-full text-sm border-collapse">';
+        $tableHtml .= '<thead><tr class="bg-gray-100 dark:bg-gray-800">';
+        $tableHtml .= '<th class="p-2 border text-left">Field</th>';
+        $tableHtml .= '<th class="p-2 border text-left">Current Value</th>';
+        $tableHtml .= '<th class="p-2 border text-left">AI Suggested</th>';
+        $tableHtml .= '</tr></thead><tbody>';
+
+        $fieldLabels = [
+            'description' => 'Description',
+            'barcode' => 'Barcode',
+            'supplier_sku' => 'Supplier SKU',
+            'price' => 'Price',
+            'cost' => 'Cost',
+            'weight' => 'Weight',
+            'volume' => 'Volume',
+            'category_id' => 'Category',
+            'reference_type_code_id' => 'Reference Type',
+        ];
+
+        foreach ($conflicts as $field => $values) {
+            $label = $fieldLabels[$field] ?? ucfirst(str_replace('_', ' ', $field));
+            $current = htmlspecialchars($values['current'] ?? 'N/A');
+            $ai = htmlspecialchars($values['ai'] ?? 'N/A');
+
+            $tableHtml .= '<tr class="border-b">';
+            $tableHtml .= "<td class=\"p-2 border font-medium\">{$label}</td>";
+            $tableHtml .= "<td class=\"p-2 border text-gray-600 dark:text-gray-400\">{$current}</td>";
+            $tableHtml .= "<td class=\"p-2 border text-primary-600 dark:text-primary-400 font-medium\">{$ai}</td>";
+            $tableHtml .= '</tr>';
+        }
+
+        $tableHtml .= '</tbody></table>';
+
+        // Build checkbox options
+        $options = [];
+        foreach ($conflicts as $field => $values) {
+            $label = $fieldLabels[$field] ?? ucfirst(str_replace('_', ' ', $field));
+            $options[$field] = $label . ': ' . ($values['ai'] ?? 'AI value');
+        }
+
+        return [
+            Placeholder::make('comparison_table')
+                ->label('Field Comparison')
+                ->content(new HtmlString($tableHtml)),
+
+            CheckboxList::make('fields_to_update')
+                ->label('Select fields to update with AI data')
+                ->options($options)
+                ->descriptions(
+                    collect($conflicts)->mapWithKeys(function ($values, $field) use ($fieldLabels) {
+                        return [$field => 'Replace "' . ($values['current'] ?? '') . '" with "' . ($values['ai'] ?? '') . '"'];
+                    })->toArray()
+                )
+                ->columns(1)
+                ->bulkToggleable()
+                ->helperText('Check the fields you want to replace with AI-suggested values. Unchecked fields will keep their current values.'),
+        ];
+    }
+
+    /**
      * Show variant selection for a configurable parent
      */
     protected function showVariantSelection(int $parentId): void
@@ -910,9 +1155,22 @@ class CreateProduct extends BaseCreateProduct
         }
 
         // Also download AI-suggested product image if available
-        if (!empty($aiData['image_url'])) {
+        // For Richelieu products, extract the real image URL from the product page
+        $imageUrl = $aiData['image_url'] ?? null;
+        $sourceUrl = $aiData['source_url'] ?? null;
+
+        if (!empty($sourceUrl) && str_contains($sourceUrl, 'richelieu.com')) {
+            Log::info('AI Photo - Attempting to extract image from Richelieu page', ['source_url' => $sourceUrl]);
+            $extractedImageUrl = GeminiProductService::extractRichelieuImageUrl($sourceUrl);
+            if ($extractedImageUrl) {
+                $imageUrl = $extractedImageUrl;
+                Log::info('AI Photo - Using extracted Richelieu image', ['image_url' => $imageUrl]);
+            }
+        }
+
+        if (!empty($imageUrl)) {
             $downloadedImage = GeminiProductService::downloadProductImage(
-                $aiData['image_url'],
+                $imageUrl,
                 $aiData['identified_product_name'] ?? null
             );
             if ($downloadedImage) {

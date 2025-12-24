@@ -25,16 +25,17 @@ class GeminiProductService
      *
      * @param string $productName The name of the product to research
      * @param string|null $existingDescription Optional existing description for context
+     * @param array $searchContext Additional search fields (supplier_sku, barcode, brand, etc.)
      * @return array Structured product data
      */
-    public function generateProductDetails(string $productName, ?string $existingDescription = null): array
+    public function generateProductDetails(string $productName, ?string $existingDescription = null, array $searchContext = []): array
     {
         if (empty($this->geminiKey)) {
             Log::warning('GeminiProductService: No Gemini API key configured');
             return ['error' => 'Gemini API key not configured. Add GOOGLE_API_KEY to .env'];
         }
 
-        $prompt = $this->buildPrompt($productName, $existingDescription);
+        $prompt = $this->buildPrompt($productName, $existingDescription, $searchContext);
 
         Log::info("GeminiProductService: Generating details for product: {$productName}");
 
@@ -187,11 +188,63 @@ class GeminiProductService
     /**
      * Build the prompt for Gemini
      */
-    protected function buildPrompt(string $productName, ?string $existingDescription): string
+    protected function buildPrompt(string $productName, ?string $existingDescription, array $searchContext = []): string
     {
         $contextSection = '';
         if (!empty($existingDescription)) {
-            $contextSection = "\nExisting Description: {$existingDescription}\n";
+            $contextSection .= "\nExisting Description: {$existingDescription}\n";
+        }
+
+        // Build search context section for multi-field lookup
+        $searchFields = [];
+        $hasRichelieuCode = false;
+
+        if (!empty($searchContext['supplier_sku'])) {
+            $searchFields[] = "Supplier/Manufacturer SKU: {$searchContext['supplier_sku']}";
+            // Check if it looks like a Richelieu code (alphanumeric patterns common for Richelieu)
+            if (preg_match('/^[A-Z0-9]{5,15}$/i', $searchContext['supplier_sku'])) {
+                $hasRichelieuCode = true;
+            }
+        }
+        if (!empty($searchContext['barcode'])) {
+            $searchFields[] = "Barcode/UPC: {$searchContext['barcode']}";
+        }
+        if (!empty($searchContext['brand'])) {
+            $searchFields[] = "Brand: {$searchContext['brand']}";
+        }
+        if (!empty($searchContext['reference'])) {
+            $searchFields[] = "Internal Reference: {$searchContext['reference']}";
+        }
+
+        $searchFieldsText = '';
+        if (!empty($searchFields)) {
+            $searchFieldsText = "\n\n### SEARCH WITH THESE IDENTIFIERS (use ALL of them):\n" . implode("\n", $searchFields) . "\n";
+        }
+
+        // If we have a supplier SKU, prioritize Richelieu even more
+        $richelieuPriority = '';
+        if ($hasRichelieuCode || !empty($searchContext['supplier_sku'])) {
+            $richelieuPriority = <<<RICHELIEU
+
+⚠️ CRITICAL: A Supplier SKU was provided. This is likely a Richelieu product code.
+FIRST, search Richelieu.com directly for this SKU: {$searchContext['supplier_sku']}
+URL pattern to try: https://www.richelieu.com/us/en/search?term={$searchContext['supplier_sku']}
+
+If you find a match on Richelieu.com:
+- Use the Richelieu price as the suggested_cost (this is our wholesale supplier)
+- Use the Richelieu product description and specs
+- Include the Richelieu URL as source_url
+
+🖼️ IMAGE EXTRACTION - VERY IMPORTANT:
+Richelieu product images are hosted on their CDN at static.richelieu.com
+Common patterns:
+- https://static.richelieu.com/documents/docsPr/XXXXX/YYYYYYY_300.jpg
+- https://static.richelieu.com/documents/docsGr/XXXXX/YYYYYYY_300.jpg
+Look for the main product image on the Richelieu product page and extract its direct URL.
+The image URL should start with https://static.richelieu.com/
+If you cannot find a Richelieu image, try the manufacturer's website for the product image.
+
+RICHELIEU;
         }
 
         $categoryOptions = $this->buildCategoryOptions();
@@ -202,15 +255,15 @@ You are a product data specialist for TCS Woodwork, a professional cabinet and f
 Search the web for accurate, real-world information about the following product.
 
 PRIORITY SOURCES - Search these FIRST for pricing and specs:
-1. Richelieu.com (primary hardware supplier)
+1. Richelieu.com (PRIMARY hardware supplier - check here FIRST)
 2. Woodworker's Supply
 3. Rockler.com
 4. Woodcraft.com
 5. Manufacturer website (Blum, Titebond, West System, etc.)
 AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
-
+{$richelieuPriority}
 Product Name: {$productName}
-{$contextSection}
+{$searchFieldsText}{$contextSection}
 
 AVAILABLE CATEGORIES (select ONE by ID):
 {$categoryOptions}
@@ -238,7 +291,7 @@ Return this exact JSON format:
     "technical_specs": "Key specifications as plain text",
     "tags": ["tag1", "tag2", "tag3"],
     "source_url": "URL where you found the main product info",
-    "image_url": "Direct URL to product image (prefer manufacturer or Richelieu images)"
+    "image_url": "REQUIRED: Direct URL to product image - look for richelieu CDN images like images.richelieu.com or manufacturer images. Must be a valid image URL ending in .jpg, .png, .webp"
 }
 
 TAG GUIDELINES - Use specific, searchable tags:
@@ -988,6 +1041,157 @@ PROMPT;
         }
 
         return $result;
+    }
+
+    /**
+     * Extract the product image URL from a Richelieu product page
+     *
+     * @param string $pageUrl The Richelieu product page URL
+     * @return string|null The extracted image URL, or null if not found
+     */
+    public static function extractRichelieuImageUrl(string $pageUrl): ?string
+    {
+        if (empty($pageUrl) || !str_contains($pageUrl, 'richelieu.com')) {
+            return null;
+        }
+
+        try {
+            Log::info('GeminiProductService: Extracting image from Richelieu page', ['url' => $pageUrl]);
+
+            // Fetch the page
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                ])
+                ->get($pageUrl);
+
+            if (!$response->successful()) {
+                Log::warning('GeminiProductService: Failed to fetch Richelieu page', [
+                    'url' => $pageUrl,
+                    'status' => $response->status(),
+                ]);
+                return null;
+            }
+
+            $html = $response->body();
+
+            // If this is a search results page, first find and navigate to the actual product page
+            if (str_contains($pageUrl, '/search?') || str_contains($pageUrl, '/search/')) {
+                Log::info('GeminiProductService: Detected search results page, looking for product link');
+
+                // Look for product links in search results
+                // Richelieu product URLs typically look like: /us/en/category/subcategory/product-name/SKUCODE
+                $productLinkPatterns = [
+                    // Product card links with SKU in the URL
+                    '/href=["\']([^"\']*richelieu\.com\/us\/en\/[^"\']+\/[A-Z0-9]{6,12})["\']/',
+                    // Product links in search results grid
+                    '/href=["\']([^"\']*\/us\/en\/[^"\']*?\/[A-Z0-9]{6,12})["\']/',
+                    // Any product detail page link
+                    '/href=["\']([^"\']*richelieu\.com[^"\']*product[^"\']*)["\']/',
+                ];
+
+                $productPageUrl = null;
+                foreach ($productLinkPatterns as $pattern) {
+                    if (preg_match($pattern, $html, $matches)) {
+                        $productPageUrl = $matches[1];
+                        // Make sure it's a full URL
+                        if (str_starts_with($productPageUrl, '/')) {
+                            $productPageUrl = 'https://www.richelieu.com' . $productPageUrl;
+                        } elseif (!str_starts_with($productPageUrl, 'http')) {
+                            $productPageUrl = 'https://' . $productPageUrl;
+                        }
+
+                        Log::info('GeminiProductService: Found product page link', ['product_url' => $productPageUrl]);
+                        break;
+                    }
+                }
+
+                if ($productPageUrl) {
+                    // Fetch the actual product page
+                    $productResponse = Http::timeout(30)
+                        ->withHeaders([
+                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        ])
+                        ->get($productPageUrl);
+
+                    if ($productResponse->successful()) {
+                        $html = $productResponse->body();
+                        $pageUrl = $productPageUrl; // Update for logging
+                        Log::info('GeminiProductService: Fetched product page successfully');
+                    } else {
+                        Log::warning('GeminiProductService: Failed to fetch product page', [
+                            'url' => $productPageUrl,
+                            'status' => $productResponse->status(),
+                        ]);
+                    }
+                } else {
+                    Log::warning('GeminiProductService: No product link found in search results');
+                }
+            }
+
+            // Try multiple patterns to find the product image
+            // Order matters - more specific patterns first
+            $patterns = [
+                // Product images from static.richelieu.com/documents (most specific for products)
+                '/src=["\']([^"\']*static\.richelieu\.com\/documents\/(?:docsPr|docsGr)[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
+                // Data-src for lazy loaded product images
+                '/data-src=["\']([^"\']*static\.richelieu\.com\/documents\/(?:docsPr|docsGr)[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
+                // Product image with size suffix
+                '/src=["\']([^"\']*static\.richelieu\.com[^"\']*(?:_800|_600|_300|_veryBig)\.(?:jpg|jpeg|png|webp))["\']/',
+                // og:image meta tag (may be logo on search pages, so check after product images)
+                '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']/',
+                '/<meta\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']\s+property=["\']og:image["\']/',
+            ];
+
+            foreach ($patterns as $pattern) {
+                if (preg_match($pattern, $html, $matches)) {
+                    $imageUrl = $matches[1];
+
+                    // Clean up the URL if needed
+                    if (str_starts_with($imageUrl, '//')) {
+                        $imageUrl = 'https:' . $imageUrl;
+                    }
+
+                    // Skip if it's clearly a logo or icon
+                    if (str_contains($imageUrl, 'Logo') || str_contains($imageUrl, 'logo') ||
+                        str_contains($imageUrl, 'icon') || str_contains($imageUrl, 'Icon') ||
+                        str_contains($imageUrl, '/images/') || str_contains($imageUrl, 'filiales')) {
+                        Log::info('GeminiProductService: Skipping logo/icon image', ['url' => $imageUrl]);
+                        continue;
+                    }
+
+                    // Prefer larger image sizes - try to get _800 or _veryBig version
+                    if (str_contains($imageUrl, '_300.')) {
+                        $largerUrl = str_replace('_300.', '_800.', $imageUrl);
+                        // Verify the larger image exists
+                        $checkResponse = Http::timeout(5)->head($largerUrl);
+                        if ($checkResponse->successful()) {
+                            $imageUrl = $largerUrl;
+                        }
+                    }
+
+                    Log::info('GeminiProductService: Found Richelieu product image', [
+                        'page_url' => $pageUrl,
+                        'image_url' => $imageUrl,
+                    ]);
+
+                    return $imageUrl;
+                }
+            }
+
+            Log::warning('GeminiProductService: No product image found on Richelieu page', ['url' => $pageUrl]);
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error('GeminiProductService: Error extracting Richelieu image', [
+                'url' => $pageUrl,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
     }
 
     /**
