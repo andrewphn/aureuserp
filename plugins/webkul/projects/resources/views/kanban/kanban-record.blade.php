@@ -20,15 +20,7 @@
     // Linear feet
     $linearFeet = $record->estimated_linear_feet;
 
-    // Order value
-    $orderValue = $record->orders->first()?->total ?? null;
-
-    // Task counts
-    $tasks = $record->tasks ?? collect();
-    $taskCount = $tasks->count();
-    $completedTasks = $tasks->where('state', 'done')->count();
-
-    // Milestone counts
+    // Milestone counts (used as overall progress)
     $milestones = $record->milestones ?? collect();
     $totalMilestones = $milestones->count();
     $completedMilestones = $milestones->where('is_completed', true)->count();
@@ -39,22 +31,29 @@
 
     // Card settings (from page)
     $settings = $this->cardSettings ?? [];
-    $showBadges = $settings['show_badges'] ?? true;
     $showCustomer = $settings['show_customer'] ?? true;
-    $showValue = $settings['show_value'] ?? true;
     $showDays = $settings['show_days'] ?? true;
     $showLinearFeet = $settings['show_linear_feet'] ?? true;
     $showMilestones = $settings['show_milestones'] ?? true;
-    $showTasks = $settings['show_tasks'] ?? true;
     $compactMode = $settings['compact_mode'] ?? false;
+
+    // Determine urgency color for top bar
+    // Red = overdue, Orange = high priority/due soon, Stage color = normal
+    $urgencyColor = $stageColor;
+    if ($isOverdue) {
+        $urgencyColor = '#ef4444'; // red-500
+    } elseif ($hasBlockers) {
+        $urgencyColor = '#9333ea'; // purple-600 for blocked
+    } elseif ($priority === 'high') {
+        $urgencyColor = '#f97316'; // orange-500
+    }
 @endphp
 
 <div
     id="{{ $record->getKey() }}"
     class="group bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md
            transition-all duration-150 cursor-grab active:cursor-grabbing
-           border border-gray-200 dark:border-gray-700"
-    style="border-left: 3px solid {{ $stageColor }};"
+           border border-gray-200 dark:border-gray-700 overflow-hidden"
     @if($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3)
         x-data
         x-init="
@@ -63,22 +62,20 @@
         "
     @endif
 >
-    <div class="{{ $compactMode ? 'p-2 space-y-1' : 'p-3 space-y-2' }}">
-        {{-- Header: Title + Actions --}}
-        <div class="flex items-start justify-between gap-2">
-            <div class="flex-1 min-w-0">
-                <h4
-                    class="font-medium text-gray-900 dark:text-white {{ $compactMode ? 'text-xs' : 'text-sm' }} leading-tight line-clamp-2 cursor-pointer hover:text-primary-600 dark:hover:text-primary-400"
-                    wire:click="recordClicked('{{ $record->getKey() }}', { id: {{ $record->id }} })"
-                >
-                    {{ $record->name }}
-                </h4>
-                @if($record->display_identifier)
-                    <span class="text-[10px] text-gray-400 dark:text-gray-500">{{ $record->display_identifier }}</span>
-                @endif
-            </div>
+    {{-- Urgency color bar at top - instant visual priority --}}
+    <div class="h-1.5" style="background-color: {{ $urgencyColor }};"></div>
 
-            {{-- Actions (visible on hover) --}}
+    <div class="{{ $compactMode ? 'p-2 space-y-1' : 'p-3 space-y-2' }}">
+        {{-- Title + Actions --}}
+        <div class="flex items-start justify-between gap-2">
+            <h4
+                class="flex-1 font-semibold text-gray-900 dark:text-white {{ $compactMode ? 'text-xs' : 'text-sm' }} leading-tight line-clamp-2 cursor-pointer hover:text-primary-600"
+                wire:click="recordClicked('{{ $record->getKey() }}', { id: {{ $record->id }} })"
+            >
+                {{ $record->name }}
+            </h4>
+
+            {{-- Actions on hover only --}}
             <div class="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                 <button
                     wire:click.stop="openChatter('{{ $record->getKey() }}')"
@@ -122,91 +119,53 @@
             </div>
         </div>
 
-        {{-- Badges Row (compact) --}}
-        @if($showBadges && ($isOverdue || $hasBlockers || $priority))
-            <div class="flex flex-wrap gap-1">
-                @if($isOverdue)
-                    <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-white bg-red-500 px-1.5 py-0.5 rounded">
-                        <x-heroicon-m-clock class="w-3 h-3" />
-                        {{ abs($daysLeft) }}d late
-                    </span>
-                @endif
-                @if($hasBlockers)
-                    <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-white bg-purple-600 px-1.5 py-0.5 rounded" title="{{ implode(', ', $blockers) }}">
-                        <x-heroicon-m-pause-circle class="w-3 h-3" />
-                        Blocked
-                    </span>
-                @endif
-                @if($priority === 'high')
-                    <span class="inline-flex items-center gap-0.5 text-[10px] font-semibold text-white bg-orange-500 px-1.5 py-0.5 rounded">
-                        <x-heroicon-m-fire class="w-3 h-3" />
-                        Urgent
-                    </span>
-                @elseif($priority === 'medium')
-                    <span class="text-[10px] font-semibold text-white bg-amber-500 px-1.5 py-0.5 rounded">
-                        Priority
-                    </span>
-                @endif
-            </div>
-        @endif
-
-        {{-- Customer --}}
+        {{-- Customer - plain text, no icon --}}
         @if($showCustomer && $record->partner)
-            <div class="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400">
-                <x-heroicon-m-building-office class="w-3.5 h-3.5 shrink-0" />
-                <span class="truncate">{{ $record->partner->name }}</span>
-            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {{ $record->partner->name }}
+            </p>
         @endif
 
-        {{-- Inline Metrics Row --}}
-        @php
-            $hasMetrics = ($showDays && $daysLeft !== null && !$isOverdue)
-                || ($showLinearFeet && $linearFeet)
-                || ($showValue && $orderValue)
-                || ($showTasks && $taskCount > 0);
-        @endphp
-        @if($hasMetrics)
-            <div class="flex items-center gap-3 text-[11px] text-gray-500 dark:text-gray-400">
-                @if($showDays && $daysLeft !== null && !$isOverdue)
-                    <span class="flex items-center gap-1" title="Days until due">
-                        <x-heroicon-m-calendar class="w-3 h-3" />
-                        {{ $daysLeft }}d
-                    </span>
-                @endif
-                @if($showLinearFeet && $linearFeet)
-                    <span class="flex items-center gap-1" title="Linear Feet">
-                        <x-heroicon-m-arrows-right-left class="w-3 h-3" />
-                        {{ $linearFeet }} LF
-                    </span>
-                @endif
-                @if($showValue && $orderValue)
-                    <span class="flex items-center gap-1 text-green-600 dark:text-green-400" title="Order Value">
-                        <x-heroicon-m-currency-dollar class="w-3 h-3" />
-                        {{ number_format($orderValue / 1000, 1) }}k
-                    </span>
-                @endif
-                @if($showTasks && $taskCount > 0)
-                    <span class="flex items-center gap-1" title="Tasks">
-                        <x-heroicon-m-queue-list class="w-3 h-3" />
-                        {{ $completedTasks }}/{{ $taskCount }}
-                    </span>
-                @endif
-            </div>
+        {{-- Key Metrics - Clean 2-column, NO icons --}}
+        <div class="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
+            {{-- Timeline --}}
+            @if($showDays && $daysLeft !== null)
+                <span class="{{ $isOverdue ? 'text-red-600 font-semibold' : 'text-gray-600' }}">
+                    @if($isOverdue)
+                        {{ abs($daysLeft) }}d late
+                    @else
+                        {{ $daysLeft }}d left
+                    @endif
+                </span>
+            @else
+                <span></span>
+            @endif
+
+            {{-- Scope --}}
+            @if($showLinearFeet && $linearFeet)
+                <span class="text-gray-600 text-right">{{ number_format($linearFeet, 1) }} LF</span>
+            @else
+                <span></span>
+            @endif
+        </div>
+
+        {{-- Blocked badge - only if truly blocked --}}
+        @if($hasBlockers)
+            <span class="inline-flex text-[10px] font-medium text-purple-700 bg-purple-100 px-1.5 py-0.5 rounded" title="{{ implode(', ', $blockers) }}">
+                Blocked
+            </span>
         @endif
 
-        {{-- Milestone Progress --}}
+        {{-- Single Progress Bar - milestone-based overall progress --}}
         @if($showMilestones && $totalMilestones > 0 && !$compactMode)
-            <div class="space-y-1">
-                <div class="flex justify-between text-[10px] text-gray-500 dark:text-gray-400">
-                    <span>{{ $completedMilestones }}/{{ $totalMilestones }} milestones</span>
-                    <span style="color: {{ $stageColor }};">{{ $milestoneProgress }}%</span>
-                </div>
-                <div class="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div class="flex items-center gap-2 pt-1">
+                <div class="flex-1 h-2 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
                     <div
                         class="h-full rounded-full transition-all duration-300"
                         style="width: {{ $milestoneProgress }}%; background-color: {{ $stageColor }};"
                     ></div>
                 </div>
+                <span class="text-xs font-semibold tabular-nums text-gray-600 w-8 text-right">{{ $milestoneProgress }}%</span>
             </div>
         @endif
     </div>

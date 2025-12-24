@@ -66,15 +66,12 @@ class ProjectsKanbanBoard extends KanbanBoard
 
     public ?string $sortDirection = 'asc';
 
-    // Card settings
+    // Card settings (simplified based on "Don't Make Me Think" principles)
     public array $cardSettings = [
         'show_customer' => true,
-        'show_value' => true,
         'show_days' => true,
         'show_linear_feet' => true,
         'show_milestones' => true,
-        'show_tasks' => true,
-        'show_badges' => true,
         'compact_mode' => false,
     ];
 
@@ -177,11 +174,8 @@ class ProjectsKanbanBoard extends KanbanBoard
                         ->description('Choose which fields to display on cards')
                         ->schema([
                             Toggle::make('show_customer')
-                                ->label('Customer')
+                                ->label('Customer Name')
                                 ->default(fn() => $this->cardSettings['show_customer']),
-                            Toggle::make('show_value')
-                                ->label('Value')
-                                ->default(fn() => $this->cardSettings['show_value']),
                             Toggle::make('show_days')
                                 ->label('Days Left/Late')
                                 ->default(fn() => $this->cardSettings['show_days']),
@@ -189,14 +183,8 @@ class ProjectsKanbanBoard extends KanbanBoard
                                 ->label('Linear Feet')
                                 ->default(fn() => $this->cardSettings['show_linear_feet']),
                             Toggle::make('show_milestones')
-                                ->label('Milestone Progress')
+                                ->label('Progress Bar')
                                 ->default(fn() => $this->cardSettings['show_milestones']),
-                            Toggle::make('show_tasks')
-                                ->label('Tasks')
-                                ->default(fn() => $this->cardSettings['show_tasks']),
-                            Toggle::make('show_badges')
-                                ->label('Status Badges')
-                                ->default(fn() => $this->cardSettings['show_badges']),
                         ])->columns(2),
                     \Filament\Schemas\Components\Section::make('Display Options')
                         ->schema([
