@@ -11,10 +11,12 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Webkul\Project\Services\TcsPricingService;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Livewire\Attributes\On;
@@ -24,6 +26,7 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
@@ -75,6 +78,18 @@ class CreateProject extends Page implements HasForms
      * Format: "X minutes ago" or "just now"
      */
     public ?string $lastSavedAt = null;
+
+    /**
+     * Active specification path for accordion/breadcrumb navigation
+     * Format: ['spec_rooms.0', 'spec_rooms.0.locations.1', ...]
+     */
+    public array $activeSpecPath = [];
+
+    /**
+     * Breadcrumb items for current active path
+     * Format: [['label' => 'Kitchen', 'key' => 'spec_rooms.0'], ...]
+     */
+    public array $specBreadcrumbs = [];
 
     /**
      * Mount the wizard
@@ -440,37 +455,321 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Step 2: Scope & Budget - Linear Feet, Budget Range, Complexity Score
+     * Step 2: Scope & Budget - Quick estimate, room-by-room, or detailed spec
      */
     protected function getStep2Schema(): array
     {
+        $pricingService = app(TcsPricingService::class);
+
         return [
-            Grid::make(2)->schema([
-                TextInput::make('estimated_linear_feet')
-                    ->label('Estimated Linear Feet')
-                    ->suffix('LF')
-                    ->numeric()
-                    ->step(0.01)
-                    ->minValue(0)
-                    ->reactive()
-                    ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                        $this->calculateEstimatedProductionTime($state, $get, $set);
-                        if ($state && $get('company_id')) {
-                            $estimate = ProductionEstimatorService::calculate($state, $get('company_id'));
-                            if ($estimate) {
-                                $set('allocated_hours', $estimate['hours']);
+            // Pricing Mode Toggle
+            Radio::make('pricing_mode')
+                ->label('Pricing Mode')
+                ->options([
+                    'quick' => 'Quick Estimate (total linear feet)',
+                    'rooms' => 'Room-by-Room (rooms with pricing)',
+                    'detailed' => 'Detailed Spec (Room → Location → Run → Cabinet)',
+                ])
+                ->default('quick')
+                ->inline()
+                ->reactive()
+                ->columnSpanFull(),
+
+            // ============================================
+            // QUICK ESTIMATE MODE
+            // ============================================
+            Grid::make(2)
+                ->schema([
+                    TextInput::make('estimated_linear_feet')
+                        ->label('Total Linear Feet')
+                        ->suffix('LF')
+                        ->numeric()
+                        ->step(0.01)
+                        ->minValue(0)
+                        ->live(debounce: 500)
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            $this->calculateEstimatedProductionTime($state, $get, $set);
+                            if ($state && $get('company_id')) {
+                                $estimate = ProductionEstimatorService::calculate($state, $get('company_id'));
+                                if ($estimate) {
+                                    $set('allocated_hours', $estimate['hours']);
+                                }
                             }
-                        }
-                    })
-                    ->helperText('Enter the estimated total linear feet for this project'),
+                        })
+                        ->helperText('Enter total linear feet for quick estimate'),
 
-                Select::make('budget_range')
-                    ->label('Budget Range')
-                    ->options(BudgetRange::options())
-                    ->native(false)
-                    ->helperText('Approximate project budget'),
-            ]),
+                    Select::make('budget_range')
+                        ->label('Budget Range')
+                        ->options(BudgetRange::options())
+                        ->native(false)
+                        ->helperText('Approximate project budget'),
+                ])
+                ->visible(fn (callable $get) => $get('pricing_mode') === 'quick'),
 
+            // Quick mode pricing options (applies to entire project)
+            Grid::make(3)
+                ->schema([
+                    Select::make('default_cabinet_level')
+                        ->label('Cabinet Level')
+                        ->options(fn () => $pricingService->getCabinetLevelOptions())
+                        ->default('3')
+                        ->native(false)
+                        ->live(),
+
+                    Select::make('default_material_category')
+                        ->label('Material')
+                        ->options(fn () => $pricingService->getMaterialCategoryOptions())
+                        ->default('stain_grade')
+                        ->native(false)
+                        ->live(),
+
+                    Select::make('default_finish_option')
+                        ->label('Finish')
+                        ->options(fn () => $pricingService->getFinishOptions())
+                        ->default('unfinished')
+                        ->native(false)
+                        ->live(),
+                ])
+                ->visible(fn (callable $get) => $get('pricing_mode') === 'quick'),
+
+            // ============================================
+            // ROOM-BY-ROOM MODE (Simple)
+            // ============================================
+            Section::make('Rooms')
+                ->description('Add rooms with linear feet and pricing options')
+                ->icon('heroicon-o-home')
+                ->schema([
+                    Repeater::make('rooms')
+                        ->label('')
+                        ->schema([
+                            Grid::make(6)->schema([
+                                Select::make('room_type')
+                                    ->label('Room')
+                                    ->options($this->getRoomTypeOptions())
+                                    ->native(false)
+                                    ->required()
+                                    ->columnSpan(1),
+
+                                TextInput::make('name')
+                                    ->label('Name')
+                                    ->placeholder('e.g. Master Bath')
+                                    ->columnSpan(1),
+
+                                TextInput::make('linear_feet')
+                                    ->label('LF')
+                                    ->numeric()
+                                    ->step(0.5)
+                                    ->suffix('LF')
+                                    ->required()
+                                    ->live(debounce: 500)
+                                    ->columnSpan(1),
+
+                                Select::make('cabinet_level')
+                                    ->label('Level')
+                                    ->options(fn () => $pricingService->getCabinetLevelOptions())
+                                    ->default('3')
+                                    ->native(false)
+                                    ->live()
+                                    ->columnSpan(1),
+
+                                Select::make('material_category')
+                                    ->label('Material')
+                                    ->options(fn () => $pricingService->getMaterialCategoryOptions())
+                                    ->default('stain_grade')
+                                    ->native(false)
+                                    ->live()
+                                    ->columnSpan(1),
+
+                                Select::make('finish_option')
+                                    ->label('Finish')
+                                    ->options(fn () => $pricingService->getFinishOptions())
+                                    ->default('unfinished')
+                                    ->native(false)
+                                    ->live()
+                                    ->columnSpan(1),
+                            ]),
+                        ])
+                        ->addActionLabel('+ Add Room')
+                        ->reorderable()
+                        ->collapsible()
+                        ->cloneable()
+                        ->itemLabel(function (array $state) use ($pricingService): string {
+                            $roomType = $state['room_type'] ?? 'Room';
+                            $name = $state['name'] ?? '';
+                            $lf = $state['linear_feet'] ?? 0;
+
+                            // Calculate price for this room
+                            $level = $state['cabinet_level'] ?? '3';
+                            $material = $state['material_category'] ?? 'stain_grade';
+                            $finish = $state['finish_option'] ?? 'unfinished';
+                            $unitPrice = $pricingService->calculateUnitPrice($level, $material, $finish);
+                            $roomTotal = $lf * $unitPrice;
+
+                            $label = ucfirst(str_replace('_', ' ', $roomType));
+                            if ($name) {
+                                $label .= " - {$name}";
+                            }
+                            if ($lf > 0) {
+                                $label .= " | {$lf} LF × \${$unitPrice}/LF = \$" . number_format($roomTotal, 0);
+                            }
+                            return $label;
+                        })
+                        ->defaultItems(0)
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            // Cascade: Room-by-Room → Quick Estimate
+                            $totalLf = 0;
+                            foreach ($state ?? [] as $room) {
+                                $totalLf += (float) ($room['linear_feet'] ?? 0);
+                            }
+                            $set('estimated_linear_feet', round($totalLf, 2));
+                        }),
+                ])
+                ->compact()
+                ->visible(fn (callable $get) => $get('pricing_mode') === 'rooms'),
+
+            // ============================================
+            // DETAILED SPEC MODE (Full Hierarchy)
+            // Room → Location → Run → Cabinet with Missing LF tracking
+            // ============================================
+            Section::make('Cabinet Specifications')
+                ->description('Build detailed specs: Room → Location → Run → Cabinet → Section → Component')
+                ->icon('heroicon-o-square-3-stack-3d')
+                ->schema([
+                    // Breadcrumb navigation
+                    View::make('webkul-project::filament.components.spec-breadcrumb')
+                        ->viewData(['path' => $this->specBreadcrumbs]),
+
+                    // Hierarchical spec builder
+                    Repeater::make('spec_rooms')
+                        ->label('Rooms')
+                        ->schema($this->getDetailedRoomSchema($pricingService))
+                        ->addActionLabel('+ Add Room')
+                        ->reorderable()
+                        ->collapsible()
+                        ->collapsed()
+                        ->cloneable()
+                        ->itemLabel(fn (array $state) => $this->getRoomLabel($state, $pricingService))
+                        ->defaultItems(0)
+                        ->live()
+                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                            // Cascade: Detailed Spec → Quick Estimate
+                            $totalLf = $this->calculateDetailedSpecTotalLf($state ?? []);
+                            $set('estimated_linear_feet', round($totalLf, 2));
+                        }),
+                ])
+                ->compact()
+                ->visible(fn (callable $get) => $get('pricing_mode') === 'detailed'),
+
+            // ============================================
+            // ESTIMATE SUMMARY (all modes - cascading updates)
+            // ============================================
+            Section::make('Estimate Summary')
+                ->schema([
+                    Placeholder::make('estimate_summary')
+                        ->label('')
+                        ->content(function (callable $get) use ($pricingService) {
+                            $mode = $get('pricing_mode') ?? 'quick';
+                            $companyId = $get('company_id');
+
+                            $linearFeet = 0;
+                            $totalEstimate = 0;
+                            $roomCount = null;
+
+                            if ($mode === 'quick') {
+                                // Quick Estimate: use direct linear feet input
+                                $linearFeet = (float) ($get('estimated_linear_feet') ?: 0);
+                                $level = $get('default_cabinet_level') ?? '3';
+                                $material = $get('default_material_category') ?? 'stain_grade';
+                                $finish = $get('default_finish_option') ?? 'unfinished';
+
+                                if (!$linearFeet) {
+                                    return 'Enter linear feet to see estimate';
+                                }
+
+                                $unitPrice = $pricingService->calculateUnitPrice($level, $material, $finish);
+                                $totalEstimate = $linearFeet * $unitPrice;
+
+                            } elseif ($mode === 'rooms') {
+                                // Room-by-room mode: sum from rooms
+                                $rooms = $get('rooms') ?? [];
+                                if (empty($rooms)) {
+                                    return 'Add rooms to see estimate';
+                                }
+
+                                foreach ($rooms as $room) {
+                                    $lf = (float) ($room['linear_feet'] ?? 0);
+                                    $level = $room['cabinet_level'] ?? '3';
+                                    $material = $room['material_category'] ?? 'stain_grade';
+                                    $finish = $room['finish_option'] ?? 'unfinished';
+
+                                    $unitPrice = $pricingService->calculateUnitPrice($level, $material, $finish);
+                                    $linearFeet += $lf;
+                                    $totalEstimate += ($lf * $unitPrice);
+                                }
+                                $roomCount = count($rooms);
+
+                            } else {
+                                // Detailed spec mode: calculate from hierarchy
+                                $specRooms = $get('spec_rooms') ?? [];
+                                if (empty($specRooms)) {
+                                    return 'Add rooms to see estimate';
+                                }
+
+                                $linearFeet = $this->calculateDetailedSpecTotalLf($specRooms);
+                                $roomCount = count($specRooms);
+
+                                // Calculate estimate using room-level cabinet levels
+                                foreach ($specRooms as $roomData) {
+                                    $roomLf = (float) ($roomData['estimated_lf'] ?? 0);
+                                    $level = $roomData['cabinet_level'] ?? '3';
+
+                                    // If no room estimate, calculate from children
+                                    if ($roomLf <= 0) {
+                                        foreach ($roomData['locations'] ?? [] as $loc) {
+                                            $locLf = (float) ($loc['estimated_lf'] ?? 0);
+                                            if ($locLf > 0) {
+                                                $roomLf += $locLf;
+                                            } else {
+                                                foreach ($loc['runs'] ?? [] as $run) {
+                                                    $runLf = (float) ($run['total_lf'] ?? 0);
+                                                    if ($runLf > 0) {
+                                                        $roomLf += $runLf;
+                                                    } else {
+                                                        foreach ($run['cabinets'] ?? [] as $cab) {
+                                                            $width = (float) ($cab['width_inches'] ?? 0);
+                                                            $qty = (int) ($cab['quantity'] ?? 1);
+                                                            $roomLf += ($width / 12) * $qty;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    $unitPrice = $pricingService->calculateUnitPrice($level, 'stain_grade', 'unfinished');
+                                    $totalEstimate += $roomLf * $unitPrice;
+                                }
+                            }
+
+                            $productionTime = 'N/A';
+                            if ($companyId && $linearFeet > 0) {
+                                $estimate = ProductionEstimatorService::calculate($linearFeet, $companyId);
+                                $productionTime = $estimate ? $estimate['formatted'] : 'N/A';
+                            }
+
+                            return view('webkul-project::filament.components.quick-estimate-panel', [
+                                'linearFeet' => $linearFeet,
+                                'baseRate' => round($totalEstimate / max($linearFeet, 1), 2),
+                                'quickEstimate' => $totalEstimate,
+                                'productionTime' => $productionTime,
+                                'roomCount' => $roomCount,
+                            ]);
+                        }),
+                ])
+                ->compact(),
+
+            // Complexity & allocated hours
             Grid::make(2)->schema([
                 TextInput::make('complexity_score')
                     ->label('Complexity Score')
@@ -479,7 +778,7 @@ class CreateProject extends Page implements HasForms
                     ->maxValue(10)
                     ->step(1)
                     ->placeholder('1-10')
-                    ->helperText('1 = Simple, 10 = Highly complex (affects production time)'),
+                    ->helperText('1 = Simple, 10 = Highly complex'),
 
                 TextInput::make('allocated_hours')
                     ->label('Allocated Hours')
@@ -490,51 +789,9 @@ class CreateProject extends Page implements HasForms
                     ->visible(app(TimeSettings::class)->enable_timesheets),
             ]),
 
-            // Quick Estimate Panel
-            Section::make('Quick Estimate')
-                ->schema([
-                    Placeholder::make('quick_estimate')
-                        ->label('')
-                        ->content(function (callable $get) {
-                            $linearFeet = $get('estimated_linear_feet');
-                            $companyId = $get('company_id');
-
-                            if (!$linearFeet || !$companyId) {
-                                return 'Enter linear feet to see estimate';
-                            }
-
-                            // Calculate estimate using TcsPricingService defaults ($348/LF)
-                            $baseRate = 348; // Level 3 + Stain Grade
-                            $quickEstimate = $linearFeet * $baseRate;
-
-                            $estimate = ProductionEstimatorService::calculate($linearFeet, $companyId);
-                            $productionTime = $estimate ? $estimate['formatted'] : 'N/A';
-
-                            return view('webkul-project::filament.components.quick-estimate-panel', [
-                                'linearFeet' => $linearFeet,
-                                'baseRate' => $baseRate,
-                                'quickEstimate' => $quickEstimate,
-                                'productionTime' => $productionTime,
-                            ]);
-                        }),
-                ])
-                ->compact(),
-
-            // Cabinet Spec Builder - Detailed hierarchical specification
-            Section::make('Detailed Cabinet Specification')
-                ->description('Optional: Build room-by-room cabinet spec with auto-calculated totals')
-                ->icon('heroicon-o-squares-2x2')
-                ->schema([
-                    Hidden::make('cabinet_spec_data')
-                        ->default('[]'),
-                    Placeholder::make('cabinet_spec_builder')
-                        ->label('')
-                        ->content(fn (callable $get) => view('webkul-project::filament.components.cabinet-spec-builder-wrapper', [
-                            'specData' => json_decode($get('cabinet_spec_data') ?? '[]', true) ?: [],
-                        ])),
-                ])
-                ->collapsible()
-                ->collapsed(),
+            // Hidden fields for cabinet spec data (legacy support)
+            Hidden::make('cabinet_spec_data')
+                ->default('[]'),
 
             // Customer History Panel (when customer selected)
             Section::make('Customer History')
@@ -765,6 +1022,49 @@ class CreateProject extends Page implements HasForms
             $data['name'] = $this->generateProjectName($data);
         }
 
+        // Calculate total linear feet based on pricing mode
+        $pricingMode = $data['pricing_mode'] ?? 'quick';
+
+        if ($pricingMode === 'rooms' && !empty($data['rooms'])) {
+            // Room-by-room mode: sum linear feet from rooms
+            $totalLf = 0;
+            foreach ($data['rooms'] as $room) {
+                $totalLf += (float) ($room['linear_feet'] ?? 0);
+            }
+            $data['estimated_linear_feet'] = $totalLf;
+        } elseif ($pricingMode === 'detailed' && !empty($data['spec_rooms'])) {
+            // Detailed spec mode: calculate from hierarchy (rooms → locations → runs → cabinets)
+            $totalLf = 0;
+            foreach ($data['spec_rooms'] as $roomData) {
+                $roomLf = (float) ($roomData['estimated_lf'] ?? 0);
+
+                // If no room-level estimate, calculate from children
+                if ($roomLf <= 0) {
+                    foreach ($roomData['locations'] ?? [] as $loc) {
+                        $locLf = (float) ($loc['estimated_lf'] ?? 0);
+                        if ($locLf > 0) {
+                            $roomLf += $locLf;
+                        } else {
+                            foreach ($loc['runs'] ?? [] as $run) {
+                                $runLf = (float) ($run['total_lf'] ?? 0);
+                                if ($runLf > 0) {
+                                    $roomLf += $runLf;
+                                } else {
+                                    foreach ($run['cabinets'] ?? [] as $cab) {
+                                        $width = (float) ($cab['width_inches'] ?? 0);
+                                        $qty = (int) ($cab['quantity'] ?? 1);
+                                        $roomLf += ($width / 12) * $qty;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                $totalLf += $roomLf;
+            }
+            $data['estimated_linear_feet'] = $totalLf;
+        }
+
         // Set creator
         $data['creator_id'] = Auth::id();
 
@@ -842,6 +1142,15 @@ class CreateProject extends Page implements HasForms
             if (!empty($specData)) {
                 $this->createEntitiesFromSpec($project, $specData);
             }
+        }
+
+        // Create rooms based on pricing mode
+        if ($pricingMode === 'rooms' && !empty($data['rooms'])) {
+            // Simple room-by-room mode
+            $this->createRoomsFromWizard($project, $data['rooms']);
+        } elseif ($pricingMode === 'detailed' && !empty($data['spec_rooms'])) {
+            // Detailed spec mode: create full hierarchy
+            $this->createEntitiesFromDetailedSpec($project, $data['spec_rooms']);
         }
 
         // Delete the draft
@@ -1066,6 +1375,50 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
+     * Create rooms from the wizard room-by-room pricing mode
+     *
+     * @param Project $project The project to attach rooms to
+     * @param array $rooms The rooms data from the repeater
+     */
+    protected function createRoomsFromWizard(Project $project, array $rooms): void
+    {
+        $sortOrder = 1;
+        $pricingService = app(TcsPricingService::class);
+
+        foreach ($rooms as $roomData) {
+            $linearFeet = (float) ($roomData['linear_feet'] ?? 0);
+            $cabinetLevel = $roomData['cabinet_level'] ?? '3';
+            $materialCategory = $roomData['material_category'] ?? 'stain_grade';
+            $finishOption = $roomData['finish_option'] ?? 'unfinished';
+
+            // Calculate the estimated value for this room
+            $unitPrice = $pricingService->calculateUnitPrice($cabinetLevel, $materialCategory, $finishOption);
+            $estimatedValue = $linearFeet * $unitPrice;
+
+            // Map cabinet level to the appropriate tier column
+            $tierColumn = "total_linear_feet_tier_{$cabinetLevel}";
+
+            // Create the room with pricing info
+            $project->rooms()->create([
+                'name' => $roomData['name'] ?? null,
+                'room_type' => $roomData['room_type'] ?? 'other',
+                'sort_order' => $sortOrder++,
+                'cabinet_level' => $cabinetLevel,
+                'material_category' => $materialCategory,
+                'finish_option' => $finishOption,
+                $tierColumn => $linearFeet,
+                'estimated_cabinet_value' => $estimatedValue,
+                'creator_id' => Auth::id(),
+            ]);
+        }
+
+        \Log::info('CreateProject: Created rooms from wizard', [
+            'project_id' => $project->id,
+            'rooms_count' => count($rooms),
+        ]);
+    }
+
+    /**
      * Generate project number
      */
     protected function generateProjectNumber(array $data): string
@@ -1238,6 +1591,49 @@ class CreateProject extends Page implements HasForms
                 // Silently fail
             }
         }
+    }
+
+    /**
+     * Calculate total linear feet from detailed spec hierarchy
+     * Traverses: Rooms → Locations → Runs → Cabinets
+     */
+    protected function calculateDetailedSpecTotalLf(array $specRooms): float
+    {
+        $totalLf = 0;
+
+        foreach ($specRooms as $roomData) {
+            $roomLf = (float) ($roomData['estimated_lf'] ?? 0);
+
+            // If room has explicit estimate, use it
+            if ($roomLf > 0) {
+                $totalLf += $roomLf;
+                continue;
+            }
+
+            // Otherwise, calculate from children (locations → runs → cabinets)
+            foreach ($roomData['locations'] ?? [] as $loc) {
+                $locLf = (float) ($loc['estimated_lf'] ?? 0);
+                if ($locLf > 0) {
+                    $totalLf += $locLf;
+                } else {
+                    foreach ($loc['runs'] ?? [] as $run) {
+                        $runLf = (float) ($run['total_lf'] ?? 0);
+                        if ($runLf > 0) {
+                            $totalLf += $runLf;
+                        } else {
+                            // Sum from individual cabinets
+                            foreach ($run['cabinets'] ?? [] as $cab) {
+                                $width = (float) ($cab['width_inches'] ?? 0);
+                                $qty = (int) ($cab['quantity'] ?? 1);
+                                $totalLf += ($width / 12) * $qty;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $totalLf;
     }
 
     /**
@@ -1717,5 +2113,1285 @@ class CreateProject extends Page implements HasForms
             Hidden::make('creator_id')
                 ->default(fn () => Auth::id()),
         ];
+    }
+
+    // ========================================
+    // HIERARCHICAL SPEC BUILDER HELPERS
+    // ========================================
+
+    /**
+     * Get room type options
+     */
+    protected function getRoomTypeOptions(): array
+    {
+        return [
+            'kitchen' => 'Kitchen',
+            'bathroom' => 'Bathroom',
+            'laundry' => 'Laundry',
+            'office' => 'Office',
+            'pantry' => 'Pantry',
+            'mudroom' => 'Mudroom',
+            'closet' => 'Closet',
+            'bedroom' => 'Bedroom',
+            'living_room' => 'Living Room',
+            'dining_room' => 'Dining Room',
+            'garage' => 'Garage',
+            'basement' => 'Basement',
+            'utility' => 'Utility',
+            'other' => 'Other',
+        ];
+    }
+
+    /**
+     * Get location type options
+     */
+    protected function getLocationTypeOptions(): array
+    {
+        return [
+            'wall' => 'Wall',
+            'island' => 'Island',
+            'peninsula' => 'Peninsula',
+            'sink_wall' => 'Sink Wall',
+            'range_wall' => 'Range Wall',
+            'fridge_wall' => 'Fridge Wall',
+            'pantry_wall' => 'Pantry Wall',
+            'corner' => 'Corner',
+        ];
+    }
+
+    /**
+     * Get cabinet run type options
+     */
+    protected function getRunTypeOptions(): array
+    {
+        return [
+            'base' => 'Base Cabinets',
+            'wall' => 'Wall Cabinets',
+            'tall' => 'Tall Cabinets',
+            'vanity' => 'Vanity',
+            'specialty' => 'Specialty',
+        ];
+    }
+
+    /**
+     * Navigate to a breadcrumb level
+     * Collapses all items below that level
+     */
+    public function navigateToBreadcrumb(int $level): void
+    {
+        // Keep only the breadcrumbs up to the clicked level
+        $this->specBreadcrumbs = array_slice($this->specBreadcrumbs, 0, $level + 1);
+        $this->activeSpecPath = array_slice($this->activeSpecPath, 0, $level + 1);
+    }
+
+    /**
+     * Set the active specification item at a given level
+     * Used for accordion behavior - only one item expanded per level
+     */
+    public function setActiveSpecItem(string $path, string $label, int $level): void
+    {
+        // Set path at this level, clearing deeper levels
+        $this->activeSpecPath = array_slice($this->activeSpecPath, 0, $level);
+        $this->activeSpecPath[$level] = $path;
+
+        // Update breadcrumbs
+        $this->specBreadcrumbs = array_slice($this->specBreadcrumbs, 0, $level);
+        $this->specBreadcrumbs[$level] = ['label' => $label, 'key' => $path];
+    }
+
+    /**
+     * Check if a spec item is active (expanded)
+     */
+    public function isSpecItemActive(string $path): bool
+    {
+        return in_array($path, $this->activeSpecPath);
+    }
+
+    /**
+     * Get compact adjustment schema - reusable across all hierarchy levels
+     * Shows as a collapsible inline section
+     */
+    protected function getAdjustmentSchema(): array
+    {
+        return [
+            Grid::make(6)->schema([
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_value')
+                    ->label('Amount')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_reason')
+                    ->label('Note')
+                    ->placeholder('Reason...')
+                    ->maxLength(50)
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+
+                Placeholder::make('adjustment_preview')
+                    ->label('')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none' && ($get('adjustment_value') ?? 0) > 0)
+                    ->content(function (callable $get) {
+                        $type = $get('adjustment_type') ?? 'none';
+                        $value = (float) ($get('adjustment_value') ?? 0);
+
+                        $label = match($type) {
+                            'discount_fixed' => "-\${$value}",
+                            'discount_percent' => "-{$value}%",
+                            'markup_fixed' => "+\${$value}",
+                            'markup_percent' => "+{$value}%",
+                            default => '',
+                        };
+
+                        $color = str_starts_with($type, 'discount') ? 'text-success-600' : 'text-warning-600';
+
+                        return new \Illuminate\Support\HtmlString(
+                            "<span class=\"text-sm font-medium {$color}\">{$label}</span>"
+                        );
+                    })
+                    ->columnSpan(2),
+            ]),
+        ];
+    }
+
+    /**
+     * Get detailed room schema for hierarchical spec builder
+     * Room level with estimated LF, pricing, and nested locations
+     */
+    protected function getDetailedRoomSchema(TcsPricingService $pricingService): array
+    {
+        return [
+            // Room header row 1: Type, Name, Est LF, Level, Material, Finish
+            Grid::make(6)->schema([
+                Select::make('room_type')
+                    ->label('Room Type')
+                    ->options($this->getRoomTypeOptions())
+                    ->native(false)
+                    ->required()
+                    ->columnSpan(1),
+
+                TextInput::make('name')
+                    ->label('Name')
+                    ->placeholder('e.g. Master Bath')
+                    ->columnSpan(1),
+
+                TextInput::make('estimated_lf')
+                    ->label('Est. LF')
+                    ->numeric()
+                    ->step(0.5)
+                    ->suffix('LF')
+                    ->reactive()
+                    ->live(debounce: 500)
+                    ->columnSpan(1),
+
+                Select::make('cabinet_level')
+                    ->label('Level')
+                    ->options(fn () => $pricingService->getCabinetLevelOptions())
+                    ->default('3')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                Select::make('material_category')
+                    ->label('Material')
+                    ->options(fn () => $pricingService->getMaterialCategoryOptions())
+                    ->default('stain_grade')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                Select::make('finish_option')
+                    ->label('Finish')
+                    ->options(fn () => $pricingService->getFinishOptions())
+                    ->default('unfinished')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+            ]),
+
+            // Room header row 2: Adjustment + Status
+            Grid::make(6)->schema([
+                // Compact adjustment inline
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_value')
+                    ->label('Adj.')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_reason')
+                    ->label('Reason')
+                    ->placeholder('Why?')
+                    ->maxLength(50)
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+
+                // Missing LF indicator
+                Placeholder::make('lf_status')
+                    ->label('LF Status')
+                    ->content(function (callable $get) {
+                        $estimated = (float) ($get('estimated_lf') ?? 0);
+                        $locations = $get('locations') ?? [];
+
+                        // Calculate allocated LF from children
+                        $allocated = 0;
+                        foreach ($locations as $loc) {
+                            $locLf = (float) ($loc['estimated_lf'] ?? 0);
+                            if ($locLf > 0) {
+                                $allocated += $locLf;
+                            } else {
+                                // Sum from runs if no location estimate
+                                foreach ($loc['runs'] ?? [] as $run) {
+                                    $runLf = (float) ($run['total_lf'] ?? 0);
+                                    if ($runLf > 0) {
+                                        $allocated += $runLf;
+                                    } else {
+                                        // Sum from cabinets
+                                        foreach ($run['cabinets'] ?? [] as $cab) {
+                                            $width = (float) ($cab['width_inches'] ?? 0);
+                                            $qty = (int) ($cab['quantity'] ?? 1);
+                                            $allocated += ($width / 12) * $qty;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($estimated <= 0) {
+                            return view('webkul-project::filament.components.lf-status-badge', [
+                                'status' => 'no-estimate',
+                                'text' => 'No estimate',
+                            ]);
+                        }
+
+                        $missing = $estimated - $allocated;
+                        if (abs($missing) < 0.1) {
+                            return view('webkul-project::filament.components.lf-status-badge', [
+                                'status' => 'complete',
+                                'text' => '✓ ' . number_format($allocated, 1) . ' LF',
+                            ]);
+                        } elseif ($missing > 0) {
+                            return view('webkul-project::filament.components.lf-status-badge', [
+                                'status' => 'missing',
+                                'text' => number_format($missing, 1) . ' LF missing',
+                                'allocated' => $allocated,
+                                'estimated' => $estimated,
+                            ]);
+                        } else {
+                            return view('webkul-project::filament.components.lf-status-badge', [
+                                'status' => 'over',
+                                'text' => number_format(abs($missing), 1) . ' LF over',
+                            ]);
+                        }
+                    })
+                    ->columnSpan(2),
+            ]),
+
+            // Nested locations - auto-calculates room's estimated_lf
+            Repeater::make('locations')
+                ->label('Locations')
+                ->schema($this->getLocationSchema($pricingService))
+                ->addActionLabel('+ Add Location')
+                ->collapsible()
+                ->collapsed()
+                ->cloneable()
+                ->itemLabel(fn (array $state) => $this->getLocationLabel($state))
+                ->defaultItems(0)
+                ->reactive()
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    // Calculate total LF from all locations and update parent room
+                    $totalLf = 0;
+                    foreach ($state ?? [] as $location) {
+                        $locLf = (float) ($location['estimated_lf'] ?? 0);
+                        if ($locLf > 0) {
+                            $totalLf += $locLf;
+                        } else {
+                            // Sum from runs if location estimate not set
+                            foreach ($location['runs'] ?? [] as $run) {
+                                $runLf = (float) ($run['total_lf'] ?? 0);
+                                if ($runLf > 0) {
+                                    $totalLf += $runLf;
+                                } else {
+                                    // Sum from cabinets
+                                    foreach ($run['cabinets'] ?? [] as $cabinet) {
+                                        $width = (float) ($cabinet['width_inches'] ?? 0);
+                                        $qty = (int) ($cabinet['quantity'] ?? 1);
+                                        $totalLf += ($width / 12) * $qty;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // Only auto-populate if no estimate was previously set
+                    $currentEstimate = (float) ($get('estimated_lf') ?? 0);
+                    if ($totalLf > 0 && $currentEstimate <= 0) {
+                        $set('estimated_lf', round($totalLf, 1));
+                    }
+                }),
+        ];
+    }
+
+    /**
+     * Get location schema with nested runs
+     */
+    protected function getLocationSchema(TcsPricingService $pricingService): array
+    {
+        return [
+            Grid::make(5)->schema([
+                Select::make('location_type')
+                    ->label('Location')
+                    ->options($this->getLocationTypeOptions())
+                    ->native(false)
+                    ->required()
+                    ->columnSpan(1),
+
+                TextInput::make('name')
+                    ->label('Name')
+                    ->placeholder('e.g. North Wall')
+                    ->columnSpan(1),
+
+                TextInput::make('estimated_lf')
+                    ->label('Est. LF')
+                    ->numeric()
+                    ->step(0.5)
+                    ->suffix('LF')
+                    ->reactive()
+                    ->live(debounce: 500)
+                    ->columnSpan(1),
+
+                // Compact adjustment
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                // LF Status for location
+                Placeholder::make('lf_status')
+                    ->label('Status')
+                    ->content(function (callable $get) {
+                        $estimated = (float) ($get('estimated_lf') ?? 0);
+                        $runs = $get('runs') ?? [];
+
+                        $allocated = 0;
+                        foreach ($runs as $run) {
+                            $runLf = (float) ($run['total_lf'] ?? 0);
+                            if ($runLf > 0) {
+                                $allocated += $runLf;
+                            } else {
+                                foreach ($run['cabinets'] ?? [] as $cab) {
+                                    $width = (float) ($cab['width_inches'] ?? 0);
+                                    $qty = (int) ($cab['quantity'] ?? 1);
+                                    $allocated += ($width / 12) * $qty;
+                                }
+                            }
+                        }
+
+                        if ($estimated <= 0 && $allocated <= 0) {
+                            return '—';
+                        }
+
+                        if ($estimated <= 0) {
+                            return number_format($allocated, 1) . ' LF';
+                        }
+
+                        $missing = $estimated - $allocated;
+                        if (abs($missing) < 0.1) {
+                            return '✓ ' . number_format($allocated, 1) . ' LF';
+                        } elseif ($missing > 0) {
+                            return '⚠ ' . number_format($missing, 1) . ' missing';
+                        } else {
+                            return '⚠ ' . number_format(abs($missing), 1) . ' over';
+                        }
+                    })
+                    ->columnSpan(1),
+            ]),
+
+            // Adjustment details (only when adjustment selected)
+            Grid::make(5)->schema([
+                Placeholder::make('loc_adj_spacer')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+
+                TextInput::make('adjustment_value')
+                    ->label('Adj. Amount')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0.00')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_reason')
+                    ->label('Reason')
+                    ->placeholder('Why?')
+                    ->maxLength(50)
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+            ]),
+
+            // Nested cabinet runs - auto-calculates location's estimated_lf
+            Repeater::make('runs')
+                ->label('Cabinet Runs')
+                ->schema($this->getCabinetRunSchema($pricingService))
+                ->addActionLabel('+ Add Run')
+                ->collapsible()
+                ->collapsed()
+                ->cloneable()
+                ->itemLabel(fn (array $state) => $this->getRunLabel($state))
+                ->defaultItems(0)
+                ->reactive()
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set, callable $get) {
+                    // Calculate total LF from all runs and update parent location
+                    $totalLf = 0;
+                    foreach ($state ?? [] as $run) {
+                        $runLf = (float) ($run['total_lf'] ?? 0);
+                        if ($runLf > 0) {
+                            $totalLf += $runLf;
+                        } else {
+                            // Sum from cabinets if run total not set
+                            foreach ($run['cabinets'] ?? [] as $cabinet) {
+                                $width = (float) ($cabinet['width_inches'] ?? 0);
+                                $qty = (int) ($cabinet['quantity'] ?? 1);
+                                $totalLf += ($width / 12) * $qty;
+                            }
+                        }
+                    }
+                    // Only auto-populate if no estimate was previously set
+                    $currentEstimate = (float) ($get('estimated_lf') ?? 0);
+                    if ($totalLf > 0 && $currentEstimate <= 0) {
+                        $set('estimated_lf', round($totalLf, 1));
+                    }
+                }),
+        ];
+    }
+
+    /**
+     * Get cabinet run schema with nested cabinets
+     */
+    protected function getCabinetRunSchema(TcsPricingService $pricingService): array
+    {
+        return [
+            Grid::make(5)->schema([
+                Select::make('run_type')
+                    ->label('Run Type')
+                    ->options($this->getRunTypeOptions())
+                    ->native(false)
+                    ->required()
+                    ->columnSpan(1),
+
+                TextInput::make('name')
+                    ->label('Name')
+                    ->placeholder('e.g. Base Run 1')
+                    ->columnSpan(1),
+
+                TextInput::make('total_lf')
+                    ->label('Total LF')
+                    ->numeric()
+                    ->step(0.5)
+                    ->suffix('LF')
+                    ->reactive()
+                    ->live(debounce: 500)
+                    ->columnSpan(1),
+
+                // Compact adjustment
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                // Calculated LF from cabinets
+                Placeholder::make('calc_lf')
+                    ->label('Calc. LF')
+                    ->content(function (callable $get) {
+                        $totalLf = (float) ($get('total_lf') ?? 0);
+                        $cabinets = $get('cabinets') ?? [];
+
+                        $calcLf = 0;
+                        foreach ($cabinets as $cab) {
+                            $width = (float) ($cab['width_inches'] ?? 0);
+                            $qty = (int) ($cab['quantity'] ?? 1);
+                            $calcLf += ($width / 12) * $qty;
+                        }
+
+                        if (empty($cabinets)) {
+                            return $totalLf > 0 ? number_format($totalLf, 1) . ' LF' : '—';
+                        }
+
+                        if ($totalLf > 0) {
+                            $missing = $totalLf - $calcLf;
+                            if (abs($missing) < 0.1) {
+                                return '✓ ' . number_format($calcLf, 1) . ' LF';
+                            } elseif ($missing > 0) {
+                                return number_format($calcLf, 1) . ' (' . number_format($missing, 1) . ' missing)';
+                            } else {
+                                return number_format($calcLf, 1) . ' (' . number_format(abs($missing), 1) . ' over)';
+                            }
+                        }
+
+                        return number_format($calcLf, 1) . ' LF';
+                    })
+                    ->columnSpan(1),
+            ]),
+
+            // Adjustment details (only when adjustment selected)
+            Grid::make(5)->schema([
+                Placeholder::make('run_adj_spacer')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+
+                TextInput::make('adjustment_value')
+                    ->label('Adj. Amount')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0.00')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_reason')
+                    ->label('Reason')
+                    ->placeholder('Why?')
+                    ->maxLength(50)
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+            ]),
+
+            // Nested cabinets - auto-calculates run's total_lf
+            Repeater::make('cabinets')
+                ->label('Cabinets')
+                ->schema($this->getCabinetSchema())
+                ->addActionLabel('+ Add Cabinet')
+                ->collapsible()
+                ->collapsed()
+                ->cloneable()
+                ->itemLabel(fn (array $state) => $this->getCabinetLabel($state))
+                ->defaultItems(0)
+                ->reactive()
+                ->live(debounce: 300)
+                ->afterStateUpdated(function ($state, callable $set) {
+                    // Calculate total LF from all cabinets and update parent run
+                    $totalLf = 0;
+                    foreach ($state ?? [] as $cabinet) {
+                        $width = (float) ($cabinet['width_inches'] ?? 0);
+                        $qty = (int) ($cabinet['quantity'] ?? 1);
+                        $totalLf += ($width / 12) * $qty;
+                    }
+                    if ($totalLf > 0) {
+                        $set('total_lf', round($totalLf, 1));
+                    }
+                })
+                ->grid(2),
+        ];
+    }
+
+    /**
+     * Get cabinet schema with compact adjustment and nested sections/components
+     */
+    protected function getCabinetSchema(): array
+    {
+        return [
+            // Row 1: Code, dimensions, quantity, adjustment
+            Grid::make(6)->schema([
+                TextInput::make('code')
+                    ->label('Code')
+                    ->placeholder('B24')
+                    ->maxLength(20)
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        // Parse cabinet code to extract width
+                        if (preg_match('/(\d+)$/', $state ?? '', $matches)) {
+                            $width = (int) $matches[1];
+                            if ($width <= 48) {
+                                $set('width_inches', $width);
+                            }
+                        }
+                    })
+                    ->columnSpan(1),
+
+                TextInput::make('width_inches')
+                    ->label('W')
+                    ->numeric()
+                    ->suffix('"')
+                    ->step(0.5)
+                    ->reactive()
+                    ->live(debounce: 500)
+                    ->columnSpan(1),
+
+                TextInput::make('height_inches')
+                    ->label('H')
+                    ->numeric()
+                    ->suffix('"')
+                    ->step(0.5)
+                    ->columnSpan(1),
+
+                TextInput::make('depth_inches')
+                    ->label('D')
+                    ->numeric()
+                    ->suffix('"')
+                    ->step(0.5)
+                    ->default(24)
+                    ->columnSpan(1),
+
+                TextInput::make('quantity')
+                    ->label('Qty')
+                    ->numeric()
+                    ->default(1)
+                    ->minValue(1)
+                    ->reactive()
+                    ->live(debounce: 500)
+                    ->columnSpan(1),
+
+                // Compact adjustment
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+            ]),
+
+            // Row 2: Adjustment details (only when adjustment selected)
+            Grid::make(6)->schema([
+                Placeholder::make('cab_adj_spacer')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(3),
+
+                TextInput::make('adjustment_value')
+                    ->label('Amount')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_reason')
+                    ->label('Reason')
+                    ->placeholder('Why?')
+                    ->maxLength(50)
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(2),
+            ]),
+
+            // Nested sections
+            Repeater::make('sections')
+                ->label('Sections')
+                ->schema($this->getSectionSchema())
+                ->addActionLabel('+ Section')
+                ->collapsible()
+                ->collapsed()
+                ->cloneable()
+                ->itemLabel(fn (array $state) => $this->getSectionLabel($state))
+                ->defaultItems(0)
+                ->reactive(),
+        ];
+    }
+
+    /**
+     * Get section schema (doors, drawers, shelves, etc.)
+     */
+    protected function getSectionSchema(): array
+    {
+        return [
+            Grid::make(5)->schema([
+                Select::make('section_type')
+                    ->label('Type')
+                    ->options([
+                        'door' => 'Door',
+                        'drawer' => 'Drawer',
+                        'shelf' => 'Shelf',
+                        'pullout' => 'Pull-out',
+                        'panel' => 'Panel',
+                        'appliance' => 'Appliance Opening',
+                        'other' => 'Other',
+                    ])
+                    ->native(false)
+                    ->required()
+                    ->columnSpan(1),
+
+                TextInput::make('name')
+                    ->label('Name')
+                    ->placeholder('e.g. Upper Door')
+                    ->columnSpan(1),
+
+                TextInput::make('quantity')
+                    ->label('Qty')
+                    ->numeric()
+                    ->default(1)
+                    ->minValue(1)
+                    ->columnSpan(1),
+
+                // Compact adjustment
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_value')
+                    ->label('Amt')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(1),
+            ]),
+
+            // Nested components
+            Repeater::make('components')
+                ->label('Components')
+                ->schema($this->getComponentSchema())
+                ->addActionLabel('+ Component')
+                ->collapsible()
+                ->collapsed()
+                ->cloneable()
+                ->itemLabel(fn (array $state) => $this->getComponentLabel($state))
+                ->defaultItems(0)
+                ->reactive(),
+        ];
+    }
+
+    /**
+     * Get component schema (hinges, slides, handles, etc.)
+     */
+    protected function getComponentSchema(): array
+    {
+        return [
+            Grid::make(5)->schema([
+                Select::make('component_type')
+                    ->label('Type')
+                    ->options([
+                        'hinge' => 'Hinge',
+                        'slide' => 'Drawer Slide',
+                        'handle' => 'Handle/Pull',
+                        'knob' => 'Knob',
+                        'soft_close' => 'Soft Close',
+                        'shelf_pin' => 'Shelf Pin',
+                        'bracket' => 'Bracket',
+                        'other' => 'Other',
+                    ])
+                    ->native(false)
+                    ->required()
+                    ->columnSpan(1),
+
+                TextInput::make('name')
+                    ->label('Name/SKU')
+                    ->placeholder('e.g. Blum 110°')
+                    ->columnSpan(2),
+
+                TextInput::make('quantity')
+                    ->label('Qty')
+                    ->numeric()
+                    ->default(1)
+                    ->minValue(1)
+                    ->columnSpan(1),
+
+                // Compact adjustment
+                Select::make('adjustment_type')
+                    ->label('±')
+                    ->options([
+                        'none' => '—',
+                        'discount_fixed' => '-$',
+                        'discount_percent' => '-%',
+                        'markup_fixed' => '+$',
+                        'markup_percent' => '+%',
+                    ])
+                    ->default('none')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(1),
+            ]),
+
+            // Adjustment value (only when type selected)
+            Grid::make(5)->schema([
+                Placeholder::make('comp_adj_spacer')
+                    ->label('')
+                    ->content('')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(3),
+
+                TextInput::make('adjustment_value')
+                    ->label('Amount')
+                    ->numeric()
+                    ->step(0.01)
+                    ->placeholder('0')
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(1),
+
+                TextInput::make('adjustment_reason')
+                    ->label('Note')
+                    ->placeholder('Why?')
+                    ->maxLength(30)
+                    ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
+                    ->columnSpan(1),
+            ]),
+        ];
+    }
+
+    /**
+     * Get section label for display
+     */
+    protected function getSectionLabel(array $state): string
+    {
+        $type = $state['section_type'] ?? 'Section';
+        $name = $state['name'] ?? '';
+        $qty = (int) ($state['quantity'] ?? 1);
+
+        $label = ucfirst(str_replace('_', ' ', $type));
+        if ($name) {
+            $label .= ": {$name}";
+        }
+        if ($qty > 1) {
+            $label .= " (×{$qty})";
+        }
+
+        // Show adjustment indicator
+        $adjType = $state['adjustment_type'] ?? 'none';
+        $adjValue = (float) ($state['adjustment_value'] ?? 0);
+        if ($adjType !== 'none' && $adjValue > 0) {
+            $label .= match($adjType) {
+                'discount_fixed' => " -\${$adjValue}",
+                'discount_percent' => " -{$adjValue}%",
+                'markup_fixed' => " +\${$adjValue}",
+                'markup_percent' => " +{$adjValue}%",
+                default => '',
+            };
+        }
+
+        return $label;
+    }
+
+    /**
+     * Get component label for display
+     */
+    protected function getComponentLabel(array $state): string
+    {
+        $type = $state['component_type'] ?? 'Component';
+        $name = $state['name'] ?? '';
+        $qty = (int) ($state['quantity'] ?? 1);
+
+        $label = ucfirst(str_replace('_', ' ', $type));
+        if ($name) {
+            $label .= ": {$name}";
+        }
+        if ($qty > 1) {
+            $label .= " (×{$qty})";
+        }
+
+        // Show adjustment indicator
+        $adjType = $state['adjustment_type'] ?? 'none';
+        $adjValue = (float) ($state['adjustment_value'] ?? 0);
+        if ($adjType !== 'none' && $adjValue > 0) {
+            $label .= match($adjType) {
+                'discount_fixed' => " -\${$adjValue}",
+                'discount_percent' => " -{$adjValue}%",
+                'markup_fixed' => " +\${$adjValue}",
+                'markup_percent' => " +{$adjValue}%",
+                default => '',
+            };
+        }
+
+        return $label;
+    }
+
+    /**
+     * Get room label with LF tracking for detailed mode
+     */
+    protected function getRoomLabel(array $state, TcsPricingService $pricingService): string
+    {
+        $roomType = $state['room_type'] ?? 'Room';
+        $name = $state['name'] ?? '';
+        $estimatedLf = (float) ($state['estimated_lf'] ?? 0);
+
+        // Calculate allocated LF from children
+        $allocatedLf = 0;
+        foreach ($state['locations'] ?? [] as $loc) {
+            $locLf = (float) ($loc['estimated_lf'] ?? 0);
+            if ($locLf > 0) {
+                $allocatedLf += $locLf;
+            } else {
+                foreach ($loc['runs'] ?? [] as $run) {
+                    $runLf = (float) ($run['total_lf'] ?? 0);
+                    if ($runLf > 0) {
+                        $allocatedLf += $runLf;
+                    } else {
+                        foreach ($run['cabinets'] ?? [] as $cab) {
+                            $width = (float) ($cab['width_inches'] ?? 0);
+                            $qty = (int) ($cab['quantity'] ?? 1);
+                            $allocatedLf += ($width / 12) * $qty;
+                        }
+                    }
+                }
+            }
+        }
+
+        $label = ucfirst(str_replace('_', ' ', $roomType));
+        if ($name) {
+            $label .= " - {$name}";
+        }
+
+        if ($estimatedLf > 0) {
+            $missing = $estimatedLf - $allocatedLf;
+            if (abs($missing) < 0.1) {
+                $label .= " | ✓ {$estimatedLf} LF";
+            } elseif ($missing > 0) {
+                $label .= " | {$allocatedLf}/{$estimatedLf} LF (" . number_format($missing, 1) . " missing)";
+            } else {
+                $label .= " | {$allocatedLf}/{$estimatedLf} LF (" . number_format(abs($missing), 1) . " over)";
+            }
+        } elseif ($allocatedLf > 0) {
+            $label .= " | {$allocatedLf} LF";
+        }
+
+        return $label;
+    }
+
+    /**
+     * Get location label
+     */
+    protected function getLocationLabel(array $state): string
+    {
+        $type = $state['location_type'] ?? 'location';
+        $name = $state['name'] ?? '';
+        $estimatedLf = (float) ($state['estimated_lf'] ?? 0);
+
+        // Calculate from runs/cabinets
+        $calcLf = 0;
+        foreach ($state['runs'] ?? [] as $run) {
+            $runLf = (float) ($run['total_lf'] ?? 0);
+            if ($runLf > 0) {
+                $calcLf += $runLf;
+            } else {
+                foreach ($run['cabinets'] ?? [] as $cab) {
+                    $width = (float) ($cab['width_inches'] ?? 0);
+                    $qty = (int) ($cab['quantity'] ?? 1);
+                    $calcLf += ($width / 12) * $qty;
+                }
+            }
+        }
+
+        $label = ucfirst(str_replace('_', ' ', $type));
+        if ($name) {
+            $label .= " - {$name}";
+        }
+
+        if ($estimatedLf > 0 || $calcLf > 0) {
+            $displayLf = $estimatedLf > 0 ? $estimatedLf : $calcLf;
+            $label .= " | " . number_format($displayLf, 1) . " LF";
+
+            if ($estimatedLf > 0 && $calcLf > 0) {
+                $diff = $estimatedLf - $calcLf;
+                if (abs($diff) >= 0.1) {
+                    $label .= $diff > 0 ? " ({$diff} missing)" : " (" . abs($diff) . " over)";
+                }
+            }
+        }
+
+        return $label;
+    }
+
+    /**
+     * Get run label
+     */
+    protected function getRunLabel(array $state): string
+    {
+        $type = $state['run_type'] ?? 'run';
+        $name = $state['name'] ?? '';
+        $totalLf = (float) ($state['total_lf'] ?? 0);
+
+        // Calculate from cabinets
+        $calcLf = 0;
+        foreach ($state['cabinets'] ?? [] as $cab) {
+            $width = (float) ($cab['width_inches'] ?? 0);
+            $qty = (int) ($cab['quantity'] ?? 1);
+            $calcLf += ($width / 12) * $qty;
+        }
+
+        $cabinetCount = count($state['cabinets'] ?? []);
+
+        $typeLabels = [
+            'base' => 'Base',
+            'wall' => 'Wall',
+            'tall' => 'Tall',
+            'vanity' => 'Vanity',
+            'specialty' => 'Specialty',
+        ];
+
+        $label = $typeLabels[$type] ?? ucfirst($type);
+        if ($name) {
+            $label .= " - {$name}";
+        }
+
+        $displayLf = $totalLf > 0 ? $totalLf : $calcLf;
+        if ($displayLf > 0) {
+            $label .= " | " . number_format($displayLf, 1) . " LF";
+        }
+
+        if ($cabinetCount > 0) {
+            $label .= " ({$cabinetCount} cabinet" . ($cabinetCount > 1 ? 's' : '') . ")";
+        }
+
+        return $label;
+    }
+
+    /**
+     * Get cabinet label
+     */
+    protected function getCabinetLabel(array $state): string
+    {
+        $code = $state['code'] ?? '';
+        $width = $state['width_inches'] ?? 0;
+        $qty = (int) ($state['quantity'] ?? 1);
+
+        if ($code) {
+            $label = $code;
+        } elseif ($width) {
+            $label = $width . '"';
+        } else {
+            $label = 'Cabinet';
+        }
+
+        if ($qty > 1) {
+            $label .= " ×{$qty}";
+        }
+
+        if ($width) {
+            $lf = ($width / 12) * $qty;
+            $label .= " = " . number_format($lf, 2) . " LF";
+        }
+
+        // Show adjustment indicator
+        $adjustmentType = $state['adjustment_type'] ?? 'none';
+        $adjustmentValue = (float) ($state['adjustment_value'] ?? 0);
+
+        if ($adjustmentType !== 'none' && $adjustmentValue > 0) {
+            switch ($adjustmentType) {
+                case 'discount_fixed':
+                    $label .= " (-\${$adjustmentValue})";
+                    break;
+                case 'discount_percent':
+                    $label .= " (-{$adjustmentValue}%)";
+                    break;
+                case 'markup_fixed':
+                    $label .= " (+\${$adjustmentValue})";
+                    break;
+                case 'markup_percent':
+                    $label .= " (+{$adjustmentValue}%)";
+                    break;
+            }
+        }
+
+        return $label;
+    }
+
+    /**
+     * Create entities from detailed spec mode
+     */
+    protected function createEntitiesFromDetailedSpec(Project $project, array $specRooms): void
+    {
+        $pricingService = app(TcsPricingService::class);
+        $roomSort = 1;
+
+        foreach ($specRooms as $roomData) {
+            // Calculate room's total LF
+            $roomLf = (float) ($roomData['estimated_lf'] ?? 0);
+            $cabinetLevel = $roomData['cabinet_level'] ?? '3';
+
+            // If no estimate, calculate from children
+            if ($roomLf <= 0) {
+                foreach ($roomData['locations'] ?? [] as $loc) {
+                    $locLf = (float) ($loc['estimated_lf'] ?? 0);
+                    if ($locLf > 0) {
+                        $roomLf += $locLf;
+                    } else {
+                        foreach ($loc['runs'] ?? [] as $run) {
+                            $runLf = (float) ($run['total_lf'] ?? 0);
+                            if ($runLf > 0) {
+                                $roomLf += $runLf;
+                            } else {
+                                foreach ($run['cabinets'] ?? [] as $cab) {
+                                    $width = (float) ($cab['width_inches'] ?? 0);
+                                    $qty = (int) ($cab['quantity'] ?? 1);
+                                    $roomLf += ($width / 12) * $qty;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            $tierColumn = "total_linear_feet_tier_{$cabinetLevel}";
+
+            // Create Room
+            $room = $project->rooms()->create([
+                'name' => $roomData['name'] ?? null,
+                'room_type' => $roomData['room_type'] ?? 'other',
+                'cabinet_level' => $cabinetLevel,
+                'sort_order' => $roomSort++,
+                $tierColumn => $roomLf,
+                'creator_id' => Auth::id(),
+            ]);
+
+            $locSort = 1;
+            foreach ($roomData['locations'] ?? [] as $locData) {
+                // Create Room Location
+                $location = $room->locations()->create([
+                    'name' => $locData['name'] ?? null,
+                    'location_type' => $locData['location_type'] ?? 'wall',
+                    'total_linear_feet' => (float) ($locData['estimated_lf'] ?? 0),
+                    'sort_order' => $locSort++,
+                    'creator_id' => Auth::id(),
+                ]);
+
+                $runSort = 1;
+                foreach ($locData['runs'] ?? [] as $runData) {
+                    // Create Cabinet Run
+                    $run = $location->cabinetRuns()->create([
+                        'name' => $runData['name'] ?? null,
+                        'run_type' => $runData['run_type'] ?? 'base',
+                        'total_linear_feet' => (float) ($runData['total_lf'] ?? 0),
+                        'sort_order' => $runSort++,
+                        'creator_id' => Auth::id(),
+                    ]);
+
+                    $cabSort = 1;
+                    foreach ($runData['cabinets'] ?? [] as $cabData) {
+                        // Create Cabinet
+                        $width = (float) ($cabData['width_inches'] ?? 0);
+                        $qty = (int) ($cabData['quantity'] ?? 1);
+                        $lf = ($width / 12) * $qty;
+
+                        // Calculate adjustment if present
+                        $adjustmentType = $cabData['adjustment_type'] ?? 'none';
+                        $adjustmentValue = (float) ($cabData['adjustment_value'] ?? 0);
+                        $adjustmentReason = $cabData['adjustment_reason'] ?? null;
+                        $adjustmentAmount = null;
+                        $finalPrice = null;
+
+                        // Get base pricing from room settings
+                        $baseRate = $pricingService->getBaseRate($cabinetLevel) ?? 192;
+                        $basePrice = $lf * $baseRate;
+
+                        if ($adjustmentType !== 'none' && $adjustmentValue > 0) {
+                            switch ($adjustmentType) {
+                                case 'discount_fixed':
+                                    $adjustmentAmount = -$adjustmentValue;
+                                    break;
+                                case 'discount_percent':
+                                    $adjustmentAmount = -($basePrice * ($adjustmentValue / 100));
+                                    break;
+                                case 'markup_fixed':
+                                    $adjustmentAmount = $adjustmentValue;
+                                    break;
+                                case 'markup_percent':
+                                    $adjustmentAmount = $basePrice * ($adjustmentValue / 100);
+                                    break;
+                            }
+                            $finalPrice = $basePrice + $adjustmentAmount;
+                        }
+
+                        $run->cabinets()->create([
+                            'project_id' => $project->id,
+                            'room_id' => $room->id,
+                            'cabinet_number' => $cabData['code'] ?? null,
+                            'length_inches' => $width,
+                            'width_inches' => $width,
+                            'height_inches' => $cabData['height_inches'] ?? 30,
+                            'depth_inches' => $cabData['depth_inches'] ?? 24,
+                            'linear_feet' => $width / 12,
+                            'quantity' => $qty,
+                            'position_in_run' => $cabSort++,
+                            'unit_price_per_lf' => $baseRate,
+                            'total_price' => $basePrice,
+                            'adjustment_type' => $adjustmentType,
+                            'adjustment_value' => $adjustmentValue > 0 ? $adjustmentValue : null,
+                            'adjustment_reason' => $adjustmentReason,
+                            'adjustment_amount' => $adjustmentAmount,
+                            'final_price' => $finalPrice,
+                            'creator_id' => Auth::id(),
+                        ]);
+                    }
+                }
+            }
+        }
+
+        \Log::info('CreateProject: Created entities from detailed spec', [
+            'project_id' => $project->id,
+            'rooms_count' => count($specRooms),
+        ]);
     }
 }

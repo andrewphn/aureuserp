@@ -1068,11 +1068,35 @@ PROMPT;
                 ->get($pageUrl);
 
             if (!$response->successful()) {
-                Log::warning('GeminiProductService: Failed to fetch Richelieu page', [
+                Log::warning('GeminiProductService: Failed to fetch Richelieu page, trying search fallback', [
                     'url' => $pageUrl,
                     'status' => $response->status(),
                 ]);
-                return null;
+
+                // Try to extract SKU from the URL and search instead
+                // URLs like: /product/.../sku-DP10F61S or /product/.../DP10F61S
+                if (preg_match('/\/([A-Z0-9]{6,12})(?:$|[\/\?])/', $pageUrl, $skuMatch) ||
+                    preg_match('/sku[=-]([A-Z0-9]{6,12})/i', $pageUrl, $skuMatch)) {
+                    $sku = $skuMatch[1];
+                    $searchUrl = "https://www.richelieu.com/us/en/search?term={$sku}";
+                    Log::info('GeminiProductService: Trying search URL fallback', ['sku' => $sku, 'search_url' => $searchUrl]);
+
+                    $response = Http::timeout(30)
+                        ->withHeaders([
+                            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        ])
+                        ->get($searchUrl);
+
+                    if (!$response->successful()) {
+                        Log::warning('GeminiProductService: Search fallback also failed');
+                        return null;
+                    }
+
+                    $pageUrl = $searchUrl; // Update for logging
+                } else {
+                    return null;
+                }
             }
 
             $html = $response->body();
