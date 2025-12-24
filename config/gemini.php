@@ -44,7 +44,7 @@ return [
     |
     | The default Gemini model to use for AI operations.
     */
-    'default_model' => env('GEMINI_DEFAULT_MODEL', 'gemini-1.5-flash'),
+    'default_model' => env('GEMINI_MODEL', env('GEMINI_DEFAULT_MODEL', 'gemini-pro')),
 
     /*
     |--------------------------------------------------------------------------
