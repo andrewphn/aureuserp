@@ -83,6 +83,7 @@ class Lead extends Model implements HasMedia
 
         // Project Details
         'project_type',
+        'project_type_other',
         'project_phase',
         'budget_range',
         'timeline',
@@ -291,6 +292,7 @@ class Lead extends Model implements HasMedia
             'project_type' => is_array($data['project_type'] ?? null)
                 ? implode(', ', $data['project_type'])
                 : ($data['project_type'] ?? null),
+            'project_type_other' => $data['project_type_other'] ?? null,
             'project_phase' => $data['project_phase'] ?? null,
             'budget_range' => $data['budget_range'] ?? null,
             'timeline' => $data['timeline_start_date'] ?? $data['timeline'] ?? null,
