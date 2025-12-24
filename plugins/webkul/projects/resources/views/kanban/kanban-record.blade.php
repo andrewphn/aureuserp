@@ -38,11 +38,14 @@
     $compactMode = $settings['compact_mode'] ?? false;
 
     // Border color for card - instant visual status
+    // Red = overdue, Purple = blocked, Orange = urgent, Gray = normal
     $borderClass = 'border-gray-200 dark:border-gray-700';
     if ($isOverdue) {
         $borderClass = 'border-l-4 border-l-red-500 border-t-0 border-r-0 border-b-0';
     } elseif ($hasBlockers) {
         $borderClass = 'border-l-4 border-l-purple-500 border-t-0 border-r-0 border-b-0';
+    } elseif ($priority === 'high') {
+        $borderClass = 'border-l-4 border-l-orange-500 border-t-0 border-r-0 border-b-0';
     }
 @endphp
 
