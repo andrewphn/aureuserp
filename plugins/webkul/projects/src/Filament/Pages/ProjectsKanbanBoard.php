@@ -53,6 +53,8 @@ class ProjectsKanbanBoard extends KanbanBoard
 
     protected static string $statusView = 'webkul-project::kanban.kanban-status';
 
+    protected static string $scriptsView = 'webkul-project::kanban.kanban-scripts';
+
     // Filters
     public ?int $customerFilter = null;
 
