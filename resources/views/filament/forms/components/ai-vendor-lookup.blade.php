@@ -291,17 +291,21 @@
                             // Apply field mappings via Livewire
                             Object.entries(this.fieldMappings).forEach(([aiField, formField]) => {
                                 const value = this.result[aiField];
-                                if (value !== null && value !== undefined) {
-                                    // Handle special cases
-                                    if (aiField === 'account_type') {
-                                        // Convert to enum value if needed
-                                        const accountType = value === 'company' ? 'company' : 'individual';
-                                        component.set(`data.${formField}`, accountType);
-                                    } else {
-                                        component.set(`data.${formField}`, value);
-                                    }
-                                    console.log(`Set ${formField} to:`, value);
+                                // Skip null, undefined, empty strings, and the literal string "null"
+                                if (value === null || value === undefined || value === '' || value === 'null') {
+                                    console.log(`Skipping ${formField} (null/empty value)`);
+                                    return;
                                 }
+
+                                // Handle special cases
+                                if (aiField === 'account_type') {
+                                    // Convert to enum value if needed
+                                    const accountType = value === 'company' ? 'company' : 'individual';
+                                    component.set(`data.${formField}`, accountType);
+                                } else {
+                                    component.set(`data.${formField}`, value);
+                                }
+                                console.log(`Set ${formField} to:`, value);
                             });
 
                             // Force component update
