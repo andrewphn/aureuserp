@@ -39,13 +39,13 @@
 
     // Border color for card - instant visual status
     // Red = overdue, Purple = blocked, Orange = urgent, Gray = normal
-    $borderClass = 'border-gray-200 dark:border-gray-700';
+    $borderColor = null;
     if ($isOverdue) {
-        $borderClass = 'border-l-4 border-l-red-500 border-t-0 border-r-0 border-b-0';
+        $borderColor = '#ef4444'; // red-500
     } elseif ($hasBlockers) {
-        $borderClass = 'border-l-4 border-l-purple-500 border-t-0 border-r-0 border-b-0';
+        $borderColor = '#a855f7'; // purple-500
     } elseif ($priority === 'high') {
-        $borderClass = 'border-l-4 border-l-orange-500 border-t-0 border-r-0 border-b-0';
+        $borderColor = '#f97316'; // orange-500
     }
 @endphp
 
@@ -53,7 +53,8 @@
     id="{{ $record->getKey() }}"
     class="group bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-lg
            transition-all duration-150 cursor-grab active:cursor-grabbing
-           border {{ $borderClass }} overflow-hidden"
+           overflow-hidden"
+    style="border-left: {{ $borderColor ? '4px solid ' . $borderColor : '1px solid #e5e7eb' }}; border-top: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;"
     @if($record->timestamps && now()->diffInSeconds($record->{$record::UPDATED_AT}, true) < 3)
         x-data
         x-init="
