@@ -148,11 +148,18 @@ class LeadConversionService
             'stage_id' => $inboxStage?->id,
             'lead_source' => $lead->source?->value ?? 'website',
             'project_type' => $lead->project_type,
+            'project_type_other' => $lead->project_type_other ?? null,
             'budget_range' => $lead->budget_range,
             'description' => $this->buildProjectDescription($lead),
             // Map timeline dates
             'start_date' => $lead->timeline_start_date,
             'desired_completion_date' => $lead->timeline_completion_date,
+            // Initial consultation from lead submission
+            'initial_consultation_date' => $lead->created_at?->toDateString(),
+            'initial_consultation_notes' => $this->buildInitialConsultationNotes($lead),
+            // Design preferences
+            'design_notes' => $this->buildDesignNotes($lead),
+            // Assignment
             'user_id' => $lead->assigned_user_id ?? Auth::id(),
             'creator_id' => Auth::id(),
             'company_id' => $lead->company_id ?? Auth::user()?->default_company_id,
@@ -345,6 +352,71 @@ class LeadConversionService
         foreach ($lead->getMedia('project_documents') as $media) {
             $media->copy($project, 'project_documents');
         }
+    }
+
+    /**
+     * Build initial consultation notes from lead data
+     */
+    protected function buildInitialConsultationNotes(Lead $lead): ?string
+    {
+        $notes = [];
+
+        if ($lead->message) {
+            $notes[] = "**Initial Message:**\n{$lead->message}";
+        }
+
+        if ($lead->project_phase) {
+            $notes[] = "**Project Phase:** {$lead->project_phase}";
+        }
+
+        if ($lead->preferred_contact_method) {
+            $notes[] = "**Preferred Contact:** " . ucfirst($lead->preferred_contact_method);
+        }
+
+        if ($lead->lead_source_detail) {
+            $notes[] = "**Previous Experience:** {$lead->lead_source_detail}";
+        }
+
+        if ($lead->referral_source_other) {
+            $notes[] = "**Referral Details:** {$lead->referral_source_other}";
+        }
+
+        // Store form_data as JSON reference
+        if ($lead->form_data && is_array($lead->form_data)) {
+            $notes[] = "\n---\n*Full form data stored in Lead #{$lead->id}*";
+        }
+
+        return ! empty($notes) ? implode("\n\n", $notes) : null;
+    }
+
+    /**
+     * Build design notes from lead preferences
+     */
+    protected function buildDesignNotes(Lead $lead): ?string
+    {
+        $notes = [];
+
+        if ($lead->design_style) {
+            $style = $lead->design_style;
+            if ($lead->design_style_other) {
+                $style .= " ({$lead->design_style_other})";
+            }
+            $notes[] = "**Design Style:** {$style}";
+        }
+
+        if ($lead->wood_species) {
+            $notes[] = "**Wood Species:** {$lead->wood_species}";
+        }
+
+        if ($lead->finish_choices && is_array($lead->finish_choices)) {
+            $notes[] = "**Finish Choices:** " . implode(', ', $lead->finish_choices);
+        }
+
+        if ($lead->additional_information) {
+            $notes[] = "**Additional Notes:**\n{$lead->additional_information}";
+        }
+
+        return ! empty($notes) ? implode("\n\n", $notes) : null;
     }
 
     /**

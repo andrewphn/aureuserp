@@ -29,6 +29,7 @@ class LeadServiceProvider extends PackageServiceProvider
             ->hasMigrations([
                 '2025_12_23_000001_create_leads_table',
                 '2025_12_23_200000_add_missing_contact_form_fields_to_leads_table',
+                '2025_12_23_210000_add_project_type_other_to_leads_table',
             ])
             ->runsMigrations();
     }
