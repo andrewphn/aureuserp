@@ -3120,7 +3120,7 @@ class CreateProject extends Page implements HasForms
     protected function getComponentSchema(): array
     {
         return [
-            Grid::make(5)->schema([
+            Grid::make(6)->schema([
                 Select::make('component_type')
                     ->label('Type')
                     ->options([
@@ -3135,12 +3135,70 @@ class CreateProject extends Page implements HasForms
                     ])
                     ->native(false)
                     ->required()
+                    ->reactive()
+                    ->afterStateUpdated(fn (callable $set) => $set('product_id', null))
                     ->columnSpan(1),
 
-                TextInput::make('name')
-                    ->label('Name/SKU')
-                    ->placeholder('e.g. Blum 110°')
+                // Product selector - searches products based on component type
+                Select::make('product_id')
+                    ->label('Product')
+                    ->placeholder('Search products...')
+                    ->searchable()
+                    ->getSearchResultsUsing(function (string $search, callable $get) {
+                        $componentType = $get('component_type');
+
+                        // Map component types to search keywords
+                        $searchTerms = match ($componentType) {
+                            'hinge' => ['hinge'],
+                            'slide' => ['slide', 'drawer slide'],
+                            'handle' => ['handle', 'pull'],
+                            'knob' => ['knob'],
+                            'soft_close' => ['soft close', 'blumotion'],
+                            'shelf_pin' => ['shelf pin', 'shelf support'],
+                            'bracket' => ['bracket'],
+                            default => [],
+                        };
+
+                        $query = \Webkul\Product\Models\Product::query()
+                            ->where(function ($q) use ($search, $searchTerms) {
+                                $q->where('name', 'like', "%{$search}%")
+                                  ->orWhere('reference', 'like', "%{$search}%");
+
+                                // Also include component-type-specific products
+                                foreach ($searchTerms as $term) {
+                                    $q->orWhere('name', 'like', "%{$term}%");
+                                }
+                            })
+                            ->limit(20);
+
+                        return $query->get()
+                            ->mapWithKeys(fn ($product) => [
+                                $product->id => "{$product->name} ({$product->reference})"
+                            ])
+                            ->toArray();
+                    })
+                    ->getOptionLabelUsing(function ($value) {
+                        $product = \Webkul\Product\Models\Product::find($value);
+                        return $product ? "{$product->name} ({$product->reference})" : null;
+                    })
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, callable $set) {
+                        if ($state) {
+                            $product = \Webkul\Product\Models\Product::find($state);
+                            if ($product) {
+                                $set('name', $product->name);
+                                $set('sku', $product->reference);
+                                $set('unit_cost', $product->cost);
+                            }
+                        }
+                    })
                     ->columnSpan(2),
+
+                // Manual name fallback (auto-filled from product or manual entry)
+                TextInput::make('name')
+                    ->label('Name')
+                    ->placeholder('Auto-filled or manual')
+                    ->columnSpan(1),
 
                 TextInput::make('quantity')
                     ->label('Qty')
@@ -3165,13 +3223,29 @@ class CreateProject extends Page implements HasForms
                     ->columnSpan(1),
             ]),
 
-            // Adjustment value (only when type selected)
-            Grid::make(5)->schema([
+            // Row 2: SKU, unit cost, and adjustment details
+            Grid::make(6)->schema([
+                TextInput::make('sku')
+                    ->label('SKU')
+                    ->placeholder('Auto-filled')
+                    ->disabled()
+                    ->dehydrated()
+                    ->columnSpan(1),
+
+                TextInput::make('unit_cost')
+                    ->label('Unit $')
+                    ->numeric()
+                    ->prefix('$')
+                    ->step(0.01)
+                    ->disabled()
+                    ->dehydrated()
+                    ->columnSpan(1),
+
                 Placeholder::make('comp_adj_spacer')
                     ->label('')
                     ->content('')
                     ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
-                    ->columnSpan(3),
+                    ->columnSpan(1),
 
                 TextInput::make('adjustment_value')
                     ->label('Amount')
@@ -3186,7 +3260,7 @@ class CreateProject extends Page implements HasForms
                     ->placeholder('Why?')
                     ->maxLength(30)
                     ->visible(fn (callable $get) => ($get('adjustment_type') ?? 'none') !== 'none')
-                    ->columnSpan(1),
+                    ->columnSpan(2),
             ]),
         ];
     }
@@ -3231,14 +3305,29 @@ class CreateProject extends Page implements HasForms
     {
         $type = $state['component_type'] ?? 'Component';
         $name = $state['name'] ?? '';
+        $sku = $state['sku'] ?? '';
         $qty = (int) ($state['quantity'] ?? 1);
+        $unitCost = (float) ($state['unit_cost'] ?? 0);
 
         $label = ucfirst(str_replace('_', ' ', $type));
+
+        // Show name and SKU
         if ($name) {
             $label .= ": {$name}";
         }
+        if ($sku) {
+            $label .= " [{$sku}]";
+        }
+
+        // Show quantity
         if ($qty > 1) {
-            $label .= " (×{$qty})";
+            $label .= " ×{$qty}";
+        }
+
+        // Show unit cost if available
+        if ($unitCost > 0) {
+            $totalCost = $unitCost * $qty;
+            $label .= " = \$" . number_format($totalCost, 2);
         }
 
         // Show adjustment indicator
