@@ -33,12 +33,11 @@
                 <div
                     x-show="!inboxOpen"
                     @click="toggleInbox()"
-                    class="w-10 h-full cursor-pointer flex flex-col items-center py-4 rounded-lg transition-all duration-150"
-                    style="background-color: #f59e0b;"
+                    class="w-10 h-full cursor-pointer flex flex-col items-center py-4 rounded-lg transition-all duration-150 bg-white border-2 border-gray-900 hover:bg-gray-50"
                     title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
                     <span
-                        class="text-xs font-medium text-white"
+                        class="text-xs font-medium text-gray-900"
                         style="writing-mode: vertical-rl; text-orientation: mixed;"
                     >
                         Inbox ({{ $inboxCount }})
@@ -54,21 +53,18 @@
                     class="flex flex-col h-full"
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
-                    {{-- Header - Monday.com style matching other columns --}}
-                    <div
-                        class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150"
-                        style="background-color: #f59e0b;"
-                    >
-                        <h3 class="font-medium text-white text-sm flex items-center gap-1.5">
+                    {{-- Header - Black outlined, no fill --}}
+                    <div class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150 bg-white border-2 border-gray-900 border-b-0">
+                        <h3 class="font-medium text-gray-900 text-sm flex items-center gap-1.5">
                             <span>Inbox</span>
-                            <span class="text-white/60">/</span>
-                            <span class="text-white/90">{{ $inboxCount }}</span>
+                            <span class="text-gray-400">/</span>
+                            <span class="text-gray-700">{{ $inboxCount }}</span>
                         </h3>
                         <div class="flex items-center gap-1">
                             {{-- Add Lead Button --}}
                             <a
                                 href="{{ route('filament.admin.resources.leads.create') }}"
-                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
+                                class="text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded p-1 transition-all duration-100"
                                 title="Add new lead"
                             >
                                 <x-heroicon-m-plus class="w-4 h-4" />
@@ -76,7 +72,7 @@
                             {{-- Collapse Button --}}
                             <button
                                 @click="toggleInbox()"
-                                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
+                                class="text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded p-1 transition-all duration-100"
                                 title="Collapse inbox"
                             >
                                 <x-heroicon-m-chevron-double-left class="w-4 h-4" />
@@ -84,8 +80,8 @@
                         </div>
                     </div>
 
-                    {{-- Lead Cards - Matching other column containers --}}
-                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-gray-100/70 dark:bg-gray-800/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700">
+                    {{-- Lead Cards - Black outlined container --}}
+                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 rounded-b-lg border-2 border-t-0 border-gray-900 dark:border-gray-700">
                         @forelse($leads ?? [] as $lead)
                             <div
                                 wire:click="openLeadDetails({{ $lead->id }})"
