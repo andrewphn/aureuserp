@@ -1637,6 +1637,86 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
+     * Resolve effective inherited value for Level/Material/Finish fields
+     * Walks up the hierarchy: Cabinet → Run → Location → Room
+     * Returns first non-"inherit" value found
+     *
+     * @param string $field The field to resolve (cabinet_level, material_category, finish_option)
+     * @param array $cabinetData The cabinet data array
+     * @param array $runData The parent run data array
+     * @param array $locationData The parent location data array
+     * @param array $roomData The parent room data array
+     * @return string|null The effective value or null if none set
+     */
+    protected function resolveInheritedValue(
+        string $field,
+        array $cabinetData = [],
+        array $runData = [],
+        array $locationData = [],
+        array $roomData = []
+    ): ?string {
+        // Check cabinet level first
+        $value = $cabinetData[$field] ?? 'inherit';
+        if ($value !== 'inherit' && $value !== null && $value !== '') {
+            return $value;
+        }
+
+        // Check run level
+        $value = $runData[$field] ?? 'inherit';
+        if ($value !== 'inherit' && $value !== null && $value !== '') {
+            return $value;
+        }
+
+        // Check location level
+        $value = $locationData[$field] ?? 'inherit';
+        if ($value !== 'inherit' && $value !== null && $value !== '') {
+            return $value;
+        }
+
+        // Check room level (always has actual value, not "inherit")
+        $value = $roomData[$field] ?? null;
+        if ($value !== null && $value !== '') {
+            return $value;
+        }
+
+        return null;
+    }
+
+    /**
+     * Get effective Level/Material/Finish values for a cabinet
+     * Used for pricing calculations and display
+     *
+     * @param array $cabinetData Cabinet data
+     * @param array $runData Parent run data
+     * @param array $locationData Parent location data
+     * @param array $roomData Parent room data
+     * @return array ['cabinet_level' => ?, 'material_category' => ?, 'finish_option' => ?]
+     */
+    protected function getEffectiveCabinetSpecs(
+        array $cabinetData,
+        array $runData,
+        array $locationData,
+        array $roomData
+    ): array {
+        return [
+            'cabinet_level' => $this->resolveInheritedValue('cabinet_level', $cabinetData, $runData, $locationData, $roomData),
+            'material_category' => $this->resolveInheritedValue('material_category', $cabinetData, $runData, $locationData, $roomData),
+            'finish_option' => $this->resolveInheritedValue('finish_option', $cabinetData, $runData, $locationData, $roomData),
+        ];
+    }
+
+    /**
+     * Check if a field value is inherited (vs manually set)
+     *
+     * @param string|null $value The field value
+     * @return bool True if inherited or empty
+     */
+    protected function isInheritedValue(?string $value): bool
+    {
+        return $value === 'inherit' || $value === null || $value === '';
+    }
+
+    /**
      * Simplified customer creation form for createOptionForm()
      *
      * This version avoids ->relationship() calls which don't work
@@ -2471,6 +2551,7 @@ class CreateProject extends Page implements HasForms
     protected function getLocationSchema(TcsPricingService $pricingService): array
     {
         return [
+            // Row 1: Location basics
             Grid::make(5)->schema([
                 Select::make('location_type')
                     ->label('Location')
@@ -2547,6 +2628,42 @@ class CreateProject extends Page implements HasForms
                         }
                     })
                     ->columnSpan(1),
+            ]),
+
+            // Row 2: Level/Material/Finish override (inherit from room by default)
+            Grid::make(6)->schema([
+                Select::make('cabinet_level')
+                    ->label('Level')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Room'],
+                        $pricingService->getCabinetLevelOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+
+                Select::make('material_category')
+                    ->label('Material')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Room'],
+                        $pricingService->getMaterialCategoryOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+
+                Select::make('finish_option')
+                    ->label('Finish')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Room'],
+                        $pricingService->getFinishOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
             ]),
 
             // Adjustment details (only when adjustment selected)
@@ -2688,6 +2805,42 @@ class CreateProject extends Page implements HasForms
                     ->columnSpan(1),
             ]),
 
+            // Row 2: Level/Material/Finish override (inherit from location by default)
+            Grid::make(6)->schema([
+                Select::make('cabinet_level')
+                    ->label('Level')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Location'],
+                        $pricingService->getCabinetLevelOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+
+                Select::make('material_category')
+                    ->label('Material')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Location'],
+                        $pricingService->getMaterialCategoryOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+
+                Select::make('finish_option')
+                    ->label('Finish')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Location'],
+                        $pricingService->getFinishOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+            ]),
+
             // Adjustment details (only when adjustment selected)
             Grid::make(5)->schema([
                 Placeholder::make('run_adj_spacer')
@@ -2716,7 +2869,7 @@ class CreateProject extends Page implements HasForms
             // Nested cabinets - auto-calculates run's total_lf
             Repeater::make('cabinets')
                 ->label('Cabinets')
-                ->schema($this->getCabinetSchema())
+                ->schema($this->getCabinetSchema($pricingService))
                 ->addActionLabel('+ Add Cabinet')
                 ->collapsible()
                 ->collapsed()
@@ -2744,7 +2897,7 @@ class CreateProject extends Page implements HasForms
     /**
      * Get cabinet schema with compact adjustment and nested sections/components
      */
-    protected function getCabinetSchema(): array
+    protected function getCabinetSchema(TcsPricingService $pricingService): array
     {
         return [
             // Row 1: Code, dimensions, quantity, adjustment
@@ -2814,7 +2967,43 @@ class CreateProject extends Page implements HasForms
                     ->columnSpan(1),
             ]),
 
-            // Row 2: Adjustment details (only when adjustment selected)
+            // Row 2: Level/Material/Finish override (inherit from run by default)
+            Grid::make(6)->schema([
+                Select::make('cabinet_level')
+                    ->label('Level')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Run'],
+                        $pricingService->getCabinetLevelOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+
+                Select::make('material_category')
+                    ->label('Material')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Run'],
+                        $pricingService->getMaterialCategoryOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+
+                Select::make('finish_option')
+                    ->label('Finish')
+                    ->options(fn () => array_merge(
+                        ['inherit' => '↑ From Run'],
+                        $pricingService->getFinishOptions()
+                    ))
+                    ->default('inherit')
+                    ->native(false)
+                    ->reactive()
+                    ->columnSpan(2),
+            ]),
+
+            // Row 3: Adjustment details (only when adjustment selected)
             Grid::make(6)->schema([
                 Placeholder::make('cab_adj_spacer')
                     ->label('')
@@ -3161,6 +3350,32 @@ class CreateProject extends Page implements HasForms
             }
         }
 
+        // Show Level/Material/Finish status
+        $level = $state['cabinet_level'] ?? 'inherit';
+        $material = $state['material_category'] ?? 'inherit';
+        $finish = $state['finish_option'] ?? 'inherit';
+
+        $allInherited = ($level === 'inherit' || $level === null || $level === '')
+            && ($material === 'inherit' || $material === null || $material === '')
+            && ($finish === 'inherit' || $finish === null || $finish === '');
+
+        if (!$allInherited) {
+            // Show abbreviated specs for overridden values
+            $specs = [];
+            if ($level && $level !== 'inherit') {
+                $specs[] = 'L' . $level;
+            }
+            if ($material && $material !== 'inherit') {
+                $specs[] = substr($material, 0, 3);
+            }
+            if ($finish && $finish !== 'inherit') {
+                $specs[] = substr($finish, 0, 3);
+            }
+            if (!empty($specs)) {
+                $label .= ' [' . implode('/', $specs) . ']';
+            }
+        }
+
         return $label;
     }
 
@@ -3205,6 +3420,32 @@ class CreateProject extends Page implements HasForms
             $label .= " ({$cabinetCount} cabinet" . ($cabinetCount > 1 ? 's' : '') . ")";
         }
 
+        // Show Level/Material/Finish status
+        $level = $state['cabinet_level'] ?? 'inherit';
+        $material = $state['material_category'] ?? 'inherit';
+        $finish = $state['finish_option'] ?? 'inherit';
+
+        $allInherited = ($level === 'inherit' || $level === null || $level === '')
+            && ($material === 'inherit' || $material === null || $material === '')
+            && ($finish === 'inherit' || $finish === null || $finish === '');
+
+        if (!$allInherited) {
+            // Show abbreviated specs for overridden values
+            $specs = [];
+            if ($level && $level !== 'inherit') {
+                $specs[] = 'L' . $level;
+            }
+            if ($material && $material !== 'inherit') {
+                $specs[] = substr($material, 0, 3);
+            }
+            if ($finish && $finish !== 'inherit') {
+                $specs[] = substr($finish, 0, 3);
+            }
+            if (!empty($specs)) {
+                $label .= ' [' . implode('/', $specs) . ']';
+            }
+        }
+
         return $label;
     }
 
@@ -3232,6 +3473,35 @@ class CreateProject extends Page implements HasForms
         if ($width) {
             $lf = ($width / 12) * $qty;
             $label .= " = " . number_format($lf, 2) . " LF";
+        }
+
+        // Show Level/Material/Finish status
+        $level = $state['cabinet_level'] ?? 'inherit';
+        $material = $state['material_category'] ?? 'inherit';
+        $finish = $state['finish_option'] ?? 'inherit';
+
+        // Check if all are inherited
+        $allInherited = ($level === 'inherit' || $level === null || $level === '')
+            && ($material === 'inherit' || $material === null || $material === '')
+            && ($finish === 'inherit' || $finish === null || $finish === '');
+
+        if ($allInherited) {
+            $label .= ' | ↑ specs';
+        } else {
+            // Show abbreviated specs for overridden values
+            $specs = [];
+            if ($level && $level !== 'inherit') {
+                $specs[] = 'L' . $level;
+            }
+            if ($material && $material !== 'inherit') {
+                $specs[] = substr($material, 0, 3);
+            }
+            if ($finish && $finish !== 'inherit') {
+                $specs[] = substr($finish, 0, 3);
+            }
+            if (!empty($specs)) {
+                $label .= ' | ' . implode('/', $specs);
+            }
         }
 
         // Show adjustment indicator
