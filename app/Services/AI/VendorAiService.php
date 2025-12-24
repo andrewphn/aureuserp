@@ -274,6 +274,9 @@ PROMPT;
             // Map industry to ID
             $data = $this->mapIndustryId($data);
 
+            // Filter out null values to prevent "null" strings in form fields
+            $data = $this->filterNullValues($data);
+
             Log::info('VendorAiService: Successfully parsed AI response', [
                 'lookup_type' => $lookupType,
                 'query' => $query,
@@ -308,20 +311,41 @@ PROMPT;
      */
     protected function mapLocationIds(array $data): array
     {
-        // Map country
+        // Map country - prefer exact match, then partial match
         if (!empty($data['country'])) {
-            $country = Country::where('name', 'like', '%' . $data['country'] . '%')
-                ->orWhere('code', strtoupper($data['country']))
-                ->first();
+            $countryName = trim($data['country']);
+
+            // Try exact match first
+            $country = Country::where('name', $countryName)->first();
+
+            // Try common variations for United States
+            if (!$country && in_array(strtolower($countryName), ['united states', 'usa', 'us', 'u.s.', 'u.s.a.', 'america', 'united states of america'])) {
+                $country = Country::where('name', 'United States')->first();
+            }
+
+            // Try by code
+            if (!$country && strlen($countryName) <= 3) {
+                $country = Country::where('code', strtoupper($countryName))->first();
+            }
+
+            // Fall back to partial match, but exclude "Minor Outlying Islands" variants
+            if (!$country) {
+                $country = Country::where('name', 'like', $countryName . '%')
+                    ->where('name', 'not like', '%Minor%')
+                    ->where('name', 'not like', '%Outlying%')
+                    ->first();
+            }
 
             $data['country_id'] = $country?->id;
             $data['country_name'] = $data['country'];
         }
 
-        // Map state
+        // Map state - prefer exact match, then partial match
         if (!empty($data['state'])) {
-            $stateQuery = State::where('name', 'like', '%' . $data['state'] . '%')
-                ->orWhere('code', strtoupper($data['state']));
+            $stateName = trim($data['state']);
+
+            // Try exact match first
+            $stateQuery = State::where('name', $stateName);
 
             // Filter by country if we have it
             if (!empty($data['country_id'])) {
@@ -329,6 +353,25 @@ PROMPT;
             }
 
             $state = $stateQuery->first();
+
+            // Try by code (e.g., "GA" for Georgia)
+            if (!$state && strlen($stateName) <= 3) {
+                $stateQuery = State::where('code', strtoupper($stateName));
+                if (!empty($data['country_id'])) {
+                    $stateQuery->where('country_id', $data['country_id']);
+                }
+                $state = $stateQuery->first();
+            }
+
+            // Fall back to partial match
+            if (!$state) {
+                $stateQuery = State::where('name', 'like', $stateName . '%');
+                if (!empty($data['country_id'])) {
+                    $stateQuery->where('country_id', $data['country_id']);
+                }
+                $state = $stateQuery->first();
+            }
+
             $data['state_id'] = $state?->id;
             $data['state_name'] = $data['state'];
         }
@@ -348,6 +391,30 @@ PROMPT;
         }
 
         return $data;
+    }
+
+    /**
+     * Filter out null values and the string "null" to prevent form field pollution
+     *
+     * Keeps important fields like confidence even if 0
+     */
+    protected function filterNullValues(array $data): array
+    {
+        $keysToPreserve = ['confidence', 'account_type'];
+
+        return array_filter($data, function ($value, $key) use ($keysToPreserve) {
+            // Always preserve certain keys
+            if (in_array($key, $keysToPreserve)) {
+                return true;
+            }
+
+            // Filter out null, empty strings, and the literal string "null"
+            if ($value === null || $value === '' || $value === 'null') {
+                return false;
+            }
+
+            return true;
+        }, ARRAY_FILTER_USE_BOTH);
     }
 
     /**
