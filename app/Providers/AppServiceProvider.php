@@ -53,10 +53,10 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'project' => \Webkul\Project\Models\Project::class,
             'projects' => \Webkul\Project\Models\Project::class,
-            // Product models - both base and inventory products use 'product' alias
-            // The Inventory Product extends the base Product, so they share the same table
-            // This ensures Spatie Media Library works correctly with both model classes
-            'product' => \Webkul\Product\Models\Product::class,
+            // Product models - use Inventory Product as it extends base Product
+            // The Inventory Product has additional attributes (on_hand_quantity, tracking)
+            // needed by the admin panel. Both use the same database table.
+            'product' => \Webkul\Inventory\Models\Product::class,
         ]);
     }
 
