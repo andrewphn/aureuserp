@@ -1617,13 +1617,68 @@ PROMPT;
                 $prices = array_unique($priceMatches[0]);
             }
 
-            // For Richelieu, look for specific price elements
+            // For Richelieu, look for specific price elements and product data
             if (str_contains($url, 'richelieu.com')) {
+                // Extract JSON-LD product data (contains price, name, sku, description)
+                if (preg_match('/<script[^>]*type=["\']application\/ld\+json["\'][^>]*>([^<]+)<\/script>/i', $html, $jsonMatch)) {
+                    $jsonData = json_decode($jsonMatch[1], true);
+                    if ($jsonData) {
+                        if (!empty($jsonData['name'])) {
+                            $specs[] = 'Product Name: ' . $jsonData['name'];
+                        }
+                        if (!empty($jsonData['sku'])) {
+                            $specs[] = 'Richelieu SKU: ' . $jsonData['sku'];
+                        }
+                        if (!empty($jsonData['description'])) {
+                            $specs[] = 'Description: ' . substr(strip_tags($jsonData['description']), 0, 500);
+                        }
+                        if (!empty($jsonData['offers']['price'])) {
+                            $prices[] = '$' . $jsonData['offers']['price'];
+                        }
+                        if (!empty($jsonData['brand']['name'])) {
+                            $specs[] = 'Brand: ' . $jsonData['brand']['name'];
+                        }
+                    }
+                }
+
+                // Price from data attributes
+                if (preg_match('/"price":([0-9.]+)/', $html, $matches)) {
+                    $prices[] = '$' . $matches[1];
+                }
                 if (preg_match('/data-price=["\']([^"\']+)["\']/i', $html, $matches)) {
                     $prices[] = '$' . $matches[1];
                 }
-                if (preg_match('/class=["\'][^"\']*price[^"\']*["\'][^>]*>([^<]*\$[\d,.]+[^<]*)</i', $html, $matches)) {
-                    $prices[] = trim(strip_tags($matches[1]));
+
+                // Extract SKU from URL
+                if (preg_match('/sku-([A-Z0-9]+)/i', $url, $skuMatch)) {
+                    $specs[] = 'SKU: ' . strtoupper($skuMatch[1]);
+                }
+
+                // Related documents (PDFs, installation guides)
+                $relatedDocs = [];
+                if (preg_match_all('/href=["\']([^"\']*\.pdf)["\'][^>]*>([^<]*)/i', $html, $pdfMatches, PREG_SET_ORDER)) {
+                    foreach ($pdfMatches as $pdf) {
+                        $docName = trim(strip_tags($pdf[2])) ?: 'Document';
+                        $relatedDocs[] = $docName . ': ' . $pdf[1];
+                    }
+                }
+                if (!empty($relatedDocs)) {
+                    $specs[] = 'Related Documents: ' . implode('; ', array_slice($relatedDocs, 0, 5));
+                }
+
+                // Catalog references
+                if (preg_match('/catalog=([0-9]+)/', $html, $catMatch)) {
+                    $specs[] = 'Richelieu Catalog ID: ' . $catMatch[1];
+                }
+
+                // Product specifications from the page (look for spec tables)
+                if (preg_match_all('/<li[^>]*class=["\'][^"\']*spec[^"\']*["\'][^>]*>([^<]+)/i', $html, $specMatches)) {
+                    foreach ($specMatches[1] as $spec) {
+                        $spec = trim($spec);
+                        if (strlen($spec) > 5 && strlen($spec) < 200) {
+                            $specs[] = $spec;
+                        }
+                    }
                 }
             }
 
