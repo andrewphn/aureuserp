@@ -1333,7 +1333,7 @@ PROMPT;
     }
 
     /**
-     * Extract high-quality product image URL from an Amazon product page
+     * Extract high-quality product image URL from an Amazon product page using ScrapeOps API
      *
      * @param string $pageUrl The Amazon product page URL
      * @return string|null The extracted image URL, or null if not found
@@ -1345,18 +1345,24 @@ PROMPT;
         }
 
         try {
-            Log::info('GeminiProductService: Extracting image from Amazon page', ['url' => $pageUrl]);
+            Log::info('GeminiProductService: Extracting image from Amazon via ScrapeOps', ['url' => $pageUrl]);
 
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language' => 'en-US,en;q=0.5',
-                ])
-                ->get($pageUrl);
+            $apiKey = config('services.scrapeops.api_key');
+            if (empty($apiKey)) {
+                Log::warning('GeminiProductService: ScrapeOps API key not configured');
+                return null;
+            }
+
+            // Use ScrapeOps Proxy API to fetch the Amazon page
+            $response = Http::timeout(60)
+                ->get('https://proxy.scrapeops.io/v1/', [
+                    'api_key' => $apiKey,
+                    'url' => $pageUrl,
+                    'render_js' => 'false', // Don't need JS rendering for images
+                ]);
 
             if (!$response->successful()) {
-                Log::warning('GeminiProductService: Failed to fetch Amazon page', [
+                Log::warning('GeminiProductService: ScrapeOps failed to fetch Amazon page', [
                     'url' => $pageUrl,
                     'status' => $response->status(),
                 ]);
@@ -1370,7 +1376,7 @@ PROMPT;
                 $imageUrl = $matches[1];
                 // Upgrade to larger size if possible (replace size suffix)
                 $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
-                Log::info('GeminiProductService: Found Amazon og:image', ['image_url' => $imageUrl]);
+                Log::info('GeminiProductService: Found Amazon og:image via ScrapeOps', ['image_url' => $imageUrl]);
                 return $imageUrl;
             }
 
@@ -1380,7 +1386,7 @@ PROMPT;
                 $imageUrl = $matches[1];
                 // Upgrade to larger size
                 $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
-                Log::info('GeminiProductService: Found Amazon landing image', ['image_url' => $imageUrl]);
+                Log::info('GeminiProductService: Found Amazon landing image via ScrapeOps', ['image_url' => $imageUrl]);
                 return $imageUrl;
             }
 
@@ -1389,15 +1395,15 @@ PROMPT;
                 $imageUrl = $matches[1];
                 // Upgrade to larger size
                 $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
-                Log::info('GeminiProductService: Found Amazon media image', ['image_url' => $imageUrl]);
+                Log::info('GeminiProductService: Found Amazon media image via ScrapeOps', ['image_url' => $imageUrl]);
                 return $imageUrl;
             }
 
-            Log::warning('GeminiProductService: No product image found on Amazon page', ['url' => $pageUrl]);
+            Log::warning('GeminiProductService: No product image found on Amazon page via ScrapeOps', ['url' => $pageUrl]);
             return null;
 
         } catch (\Exception $e) {
-            Log::error('GeminiProductService: Error extracting Amazon image', [
+            Log::error('GeminiProductService: Error extracting Amazon image via ScrapeOps', [
                 'url' => $pageUrl,
                 'error' => $e->getMessage(),
             ]);
