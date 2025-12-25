@@ -1501,6 +1501,7 @@ PROMPT;
     /**
      * Fetch and extract relevant content from a product page URL
      * Used to give Gemini the actual page content when user provides source_url
+     * Uses ScrapeOps for Amazon URLs to bypass anti-bot protection
      *
      * @param string $url The product page URL
      * @return string|null Extracted text content, or null on failure
@@ -1510,13 +1511,31 @@ PROMPT;
         try {
             Log::info('GeminiProductService: Fetching page content', ['url' => $url]);
 
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language' => 'en-US,en;q=0.5',
-                ])
-                ->get($url);
+            // Use ScrapeOps for Amazon URLs
+            if (str_contains($url, 'amazon.com')) {
+                $apiKey = config('services.scrapeops.api_key');
+                if (!empty($apiKey)) {
+                    Log::info('GeminiProductService: Using ScrapeOps for Amazon page', ['url' => $url]);
+                    $response = Http::timeout(60)
+                        ->get('https://proxy.scrapeops.io/v1/', [
+                            'api_key' => $apiKey,
+                            'url' => $url,
+                            'render_js' => 'false',
+                        ]);
+                } else {
+                    Log::warning('GeminiProductService: ScrapeOps API key not configured, skipping Amazon');
+                    return null;
+                }
+            } else {
+                // Direct fetch for non-Amazon URLs
+                $response = Http::timeout(30)
+                    ->withHeaders([
+                        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language' => 'en-US,en;q=0.5',
+                    ])
+                    ->get($url);
+            }
 
             if (!$response->successful()) {
                 Log::warning('GeminiProductService: Failed to fetch page', [
@@ -1566,8 +1585,45 @@ PROMPT;
                 }
             }
 
+            // For Amazon, look for specific price and product elements
+            if (str_contains($url, 'amazon.com')) {
+                // Amazon price selectors
+                if (preg_match('/class=["\'].*?a-price-whole["\'][^>]*>([^<]+)/', $html, $matches)) {
+                    $prices[] = '$' . trim($matches[1]);
+                }
+                if (preg_match('/id=["\']priceblock_ourprice["\'][^>]*>([^<]+)/', $html, $matches)) {
+                    $prices[] = trim($matches[1]);
+                }
+                if (preg_match('/id=["\']corePriceDisplay_desktop_feature_div["\'].*?\$[\d,.]+/s', $html, $matches)) {
+                    if (preg_match('/\$[\d,.]+/', $matches[0], $priceMatch)) {
+                        $prices[] = $priceMatch[0];
+                    }
+                }
+
+                // Amazon product features/bullet points
+                if (preg_match_all('/<span class=["\']a-list-item["\'][^>]*>([^<]+)<\/span>/i', $html, $featureMatches)) {
+                    foreach ($featureMatches[1] as $feature) {
+                        $feature = trim($feature);
+                        if (strlen($feature) > 10 && strlen($feature) < 500) {
+                            $specs[] = $feature;
+                        }
+                    }
+                }
+
+                // Amazon product details table
+                if (preg_match_all('/<th[^>]*class=["\'].*?prodDetSectionEntry["\'][^>]*>([^<]+)<\/th>\s*<td[^>]*>([^<]+)<\/td>/i', $html, $detailMatches, PREG_SET_ORDER)) {
+                    foreach ($detailMatches as $match) {
+                        $specs[] = trim($match[1]) . ': ' . trim($match[2]);
+                    }
+                }
+
+                // Amazon ASIN
+                if (preg_match('/\/dp\/([A-Z0-9]{10})/', $url, $asinMatch)) {
+                    $specs[] = 'ASIN: ' . $asinMatch[1];
+                }
+            }
+
             // Extract product specs - look for common patterns
-            $specs = [];
             // Look for definition lists or spec tables
             if (preg_match_all('/<dt[^>]*>([^<]+)<\/dt>\s*<dd[^>]*>([^<]+)<\/dd>/i', $html, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
