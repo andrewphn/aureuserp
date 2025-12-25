@@ -281,6 +281,7 @@ RICHELIEU;
 
         $categoryOptions = $this->buildCategoryOptions();
         $referenceCodeOptions = $this->buildReferenceCodeOptions();
+        $attributeOptions = $this->buildAttributeOptions();
 
         return <<<PROMPT
 You are a product data specialist for TCS Woodwork, a professional cabinet and furniture shop.
@@ -307,6 +308,14 @@ AVAILABLE CATEGORIES (select ONE by ID):
 AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
 {$referenceCodeOptions}
 
+AVAILABLE PRODUCT ATTRIBUTES (suggest values from the specifications above):
+{$attributeOptions}
+
+⚠️ IMPORTANT: Extract attribute values from the product specifications (scraped from the source URL above).
+For drawer slides: Look for "Slide Length" in mm or inches
+For hinges: Look for arm length, cup size, opening angle
+For hardware: Look for dimensions, weight capacity, material
+
 Generate product details that a PROFESSIONAL WOODWORKER would actually need to know.
 NOT marketing fluff - practical shop floor information.
 
@@ -327,7 +336,14 @@ Return this exact JSON format:
     "technical_specs": "Key specifications as plain text",
     "tags": ["tag1", "tag2", "tag3"],
     "source_url": "URL where you found the main product info",
-    "image_url": "REQUIRED: Direct URL to product image - look for richelieu CDN images like images.richelieu.com or manufacturer images. Must be a valid image URL ending in .jpg, .png, .webp"
+    "image_url": "REQUIRED: Direct URL to product image - look for richelieu CDN images like images.richelieu.com or manufacturer images. Must be a valid image URL ending in .jpg, .png, .webp",
+    "suggested_attributes": [
+        {
+            "attribute_id": 21,
+            "attribute_name": "Slide Length",
+            "value": "21 inch"
+        }
+    ]
 }
 
 TAG GUIDELINES - Use specific, searchable tags:
