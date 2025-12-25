@@ -629,34 +629,23 @@ class CreateProject extends Page implements HasForms
                 ->visible(fn (callable $get) => $get('pricing_mode') === 'rooms'),
 
             // ============================================
-            // DETAILED SPEC MODE (Full Hierarchy)
-            // Room → Location → Run → Cabinet with Missing LF tracking
+            // DETAILED SPEC MODE (Miller Columns Layout)
+            // Room → Location → Run → Cabinet with inline editing
             // ============================================
             Section::make('Cabinet Specifications')
                 ->description('Build detailed specs: Room → Location → Run → Cabinet → Section → Component')
                 ->icon('heroicon-o-square-3-stack-3d')
                 ->schema([
-                    // Breadcrumb navigation
-                    View::make('webkul-project::filament.components.spec-breadcrumb')
-                        ->viewData(['path' => $this->specBreadcrumbs]),
+                    // Hidden field to store spec data (synced from Livewire component)
+                    Hidden::make('spec_data')
+                        ->default([])
+                        ->dehydrated(),
 
-                    // Hierarchical spec builder
-                    Repeater::make('spec_rooms')
-                        ->label('Rooms')
-                        ->schema($this->getDetailedRoomSchema($pricingService))
-                        ->addActionLabel('+ Add Room')
-                        ->reorderable()
-                        ->collapsible()
-                        ->collapsed()
-                        ->cloneable()
-                        ->itemLabel(fn (array $state) => $this->getRoomLabel($state, $pricingService))
-                        ->defaultItems(0)
-                        ->live()
-                        ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                            // Cascade: Detailed Spec → Quick Estimate
-                            $totalLf = $this->calculateDetailedSpecTotalLf($state ?? []);
-                            $set('estimated_linear_feet', round($totalLf, 2));
-                        }),
+                    // Miller Columns Cabinet Spec Builder (Livewire Component)
+                    View::make('webkul-project::filament.components.cabinet-spec-builder-wrapper')
+                        ->viewData(fn (callable $get) => [
+                            'specData' => $get('spec_data') ?? [],
+                        ]),
                 ])
                 ->compact()
                 ->visible(fn (callable $get) => $get('pricing_mode') === 'detailed'),
@@ -710,45 +699,27 @@ class CreateProject extends Page implements HasForms
                                 $roomCount = count($rooms);
 
                             } else {
-                                // Detailed spec mode: calculate from hierarchy
-                                $specRooms = $get('spec_rooms') ?? [];
-                                if (empty($specRooms)) {
+                                // Detailed spec mode: calculate from CabinetSpecBuilder data
+                                $specData = $get('spec_data') ?? [];
+                                if (empty($specData)) {
                                     return 'Add rooms to see estimate';
                                 }
 
-                                $linearFeet = $this->calculateDetailedSpecTotalLf($specRooms);
-                                $roomCount = count($specRooms);
+                                $roomCount = count($specData);
 
-                                // Calculate estimate using room-level cabinet levels
-                                foreach ($specRooms as $roomData) {
-                                    $roomLf = (float) ($roomData['estimated_lf'] ?? 0);
-                                    $level = $roomData['cabinet_level'] ?? '3';
+                                // Calculate from spec data structure
+                                foreach ($specData as $roomData) {
+                                    $roomLf = (float) ($roomData['linear_feet'] ?? 0);
+                                    $linearFeet += $roomLf;
 
-                                    // If no room estimate, calculate from children
-                                    if ($roomLf <= 0) {
-                                        foreach ($roomData['locations'] ?? [] as $loc) {
-                                            $locLf = (float) ($loc['estimated_lf'] ?? 0);
-                                            if ($locLf > 0) {
-                                                $roomLf += $locLf;
-                                            } else {
-                                                foreach ($loc['runs'] ?? [] as $run) {
-                                                    $runLf = (float) ($run['total_lf'] ?? 0);
-                                                    if ($runLf > 0) {
-                                                        $roomLf += $runLf;
-                                                    } else {
-                                                        foreach ($run['cabinets'] ?? [] as $cab) {
-                                                            $width = (float) ($cab['width_inches'] ?? 0);
-                                                            $qty = (int) ($cab['quantity'] ?? 1);
-                                                            $roomLf += ($width / 12) * $qty;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
+                                    // Get location-level pricing
+                                    foreach ($roomData['children'] ?? [] as $location) {
+                                        $level = $location['cabinet_level'] ?? '2';
+                                        $locLf = (float) ($location['linear_feet'] ?? 0);
+
+                                        $unitPrice = $pricingService->calculateUnitPrice($level, 'stain_grade', 'unfinished');
+                                        $totalEstimate += $locLf * $unitPrice;
                                     }
-
-                                    $unitPrice = $pricingService->calculateUnitPrice($level, 'stain_grade', 'unfinished');
-                                    $totalEstimate += $roomLf * $unitPrice;
                                 }
                             }
 
@@ -1173,8 +1144,31 @@ class CreateProject extends Page implements HasForms
     #[On('spec-data-updated')]
     public function handleSpecDataUpdate(array $data): void
     {
+        // Store spec data in form state (for estimate summary)
+        $this->data['spec_data'] = $data;
+
+        // Also store as JSON for persistence
         $this->data['cabinet_spec_data'] = json_encode($data);
+
+        // Calculate total LF from spec data
+        $totalLf = $this->calculateSpecDataTotalLf($data);
+        $this->data['estimated_linear_feet'] = round($totalLf, 2);
+
         $this->saveDraft();
+    }
+
+    /**
+     * Calculate total linear feet from spec data structure
+     */
+    protected function calculateSpecDataTotalLf(array $specData): float
+    {
+        $totalLf = 0;
+
+        foreach ($specData as $room) {
+            $totalLf += (float) ($room['linear_feet'] ?? 0);
+        }
+
+        return $totalLf;
     }
 
     /**
@@ -1329,7 +1323,7 @@ class CreateProject extends Page implements HasForms
             $locationSort = 1;
             foreach ($roomData['children'] ?? [] as $locationData) {
                 // Create Room Location
-                $location = $room->roomLocations()->create([
+                $location = $room->locations()->create([
                     'project_id' => $project->id,
                     'name' => $locationData['name'] ?? 'Unnamed Location',
                     'location_type' => $locationData['location_type'] ?? 'wall',

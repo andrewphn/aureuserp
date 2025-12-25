@@ -1,7 +1,7 @@
 <div class="kiosk-container" x-data="{ time: '{{ $this->getCurrentTime() }}' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }), 1000)">
     {{-- Header --}}
     <div class="kiosk-header">
-        <h1 class="kiosk-title">TCS Woodwork</h1>
+        <img src="/tcs_logo.png" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);">
         <p class="kiosk-subtitle">Time Clock</p>
         <div class="kiosk-time" x-text="time"></div>
         <p class="kiosk-date">{{ $this->getCurrentDate() }}</p>
@@ -119,43 +119,116 @@
                         Clocked in at <span class="time">{{ $clockedInAt }}</span>
                     </p>
 
-                    {{-- Break Duration Selection --}}
-                    <div class="form-section">
-                        <label class="form-label">Lunch Break Duration</label>
-                        <div class="break-buttons">
-                            @foreach([30 => '30 min', 45 => '45 min', 60 => '1 hour'] as $minutes => $label)
-                                <button
-                                    wire:click="setBreakDuration({{ $minutes }})"
-                                    class="break-btn {{ $breakDurationMinutes === $minutes ? 'break-btn-active' : 'break-btn-inactive' }}"
-                                >
-                                    {{ $label }}
-                                </button>
-                            @endforeach
+                    {{-- ON LUNCH STATE --}}
+                    @if($isOnLunch)
+                        <div class="lunch-status" style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; text-align: center;">
+                            <p style="font-size: 1.25rem; color: #92400e; margin-bottom: 0.5rem;">
+                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.5rem; height: 1.5rem; display: inline; vertical-align: middle; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                On Lunch Break
+                            </p>
+                            <p style="color: #b45309; font-size: 1rem;">Started at {{ $lunchStartTime }}</p>
                         </div>
-                    </div>
 
-                    {{-- Project Selection (Optional) --}}
-                    @if(count($projects) > 0)
+                        {{-- End Lunch Button --}}
+                        <button
+                            wire:click="endLunch"
+                            wire:loading.attr="disabled"
+                            class="clock-in-btn"
+                            style="background: #059669; margin-top: 1rem;"
+                        >
+                            <span wire:loading.remove>End Lunch</span>
+                            <span wire:loading>Processing...</span>
+                        </button>
+
+                    {{-- LUNCH TAKEN - READY TO CLOCK OUT --}}
+                    @elseif($lunchTaken)
+                        <div class="lunch-summary" style="background: #d1fae5; border: 2px solid #10b981; border-radius: 12px; padding: 1rem; margin: 1rem 0;">
+                            <p style="color: #047857; font-size: 0.9rem; margin: 0;">
+                                Lunch: {{ $lunchStartTime }} - {{ $lunchEndTime }}
+                                ({{ $breakDurationMinutes }} min)
+                            </p>
+                        </div>
+
+                        {{-- Project Selection (Optional) --}}
+                        @if(count($projects) > 0)
+                            <div class="form-section">
+                                <label class="form-label">Project (Optional)</label>
+                                <select wire:model="selectedProjectId" class="project-select">
+                                    <option value="">No project</option>
+                                    @foreach($projects as $project)
+                                        <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
+                        {{-- Clock Out Button --}}
+                        <button
+                            wire:click="clockOut"
+                            wire:loading.attr="disabled"
+                            class="clock-out-btn"
+                        >
+                            <span wire:loading.remove>Clock Out</span>
+                            <span wire:loading>Processing...</span>
+                        </button>
+
+                    {{-- NO LUNCH YET - SHOW OPTIONS --}}
+                    @else
+                        {{-- Start Lunch Button --}}
+                        <button
+                            wire:click="startLunch"
+                            wire:loading.attr="disabled"
+                            class="lunch-btn"
+                            style="background: #f59e0b; color: white; font-size: 1.25rem; padding: 1rem 2rem; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin: 1rem 0; font-weight: 600;"
+                        >
+                            <span wire:loading.remove>Start Lunch</span>
+                            <span wire:loading>Processing...</span>
+                        </button>
+
+                        <p style="text-align: center; color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">
+                            Or clock out without lunch:
+                        </p>
+
+                        {{-- Manual Break Duration Selection (fallback) --}}
                         <div class="form-section">
-                            <label class="form-label">Project (Optional)</label>
-                            <select wire:model="selectedProjectId" class="project-select">
-                                <option value="">No project</option>
-                                @foreach($projects as $project)
-                                    <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
+                            <label class="form-label">Lunch Break Duration</label>
+                            <div class="break-buttons">
+                                @foreach([0 => 'No lunch', 30 => '30 min', 45 => '45 min', 60 => '1 hour'] as $minutes => $label)
+                                    <button
+                                        wire:click="setBreakDuration({{ $minutes }})"
+                                        class="break-btn {{ $breakDurationMinutes === $minutes ? 'break-btn-active' : 'break-btn-inactive' }}"
+                                    >
+                                        {{ $label }}
+                                    </button>
                                 @endforeach
-                            </select>
+                            </div>
                         </div>
-                    @endif
 
-                    {{-- Clock Out Button --}}
-                    <button
-                        wire:click="clockOut"
-                        wire:loading.attr="disabled"
-                        class="clock-out-btn"
-                    >
-                        <span wire:loading.remove>Clock Out</span>
-                        <span wire:loading>Processing...</span>
-                    </button>
+                        {{-- Project Selection (Optional) --}}
+                        @if(count($projects) > 0)
+                            <div class="form-section">
+                                <label class="form-label">Project (Optional)</label>
+                                <select wire:model="selectedProjectId" class="project-select">
+                                    <option value="">No project</option>
+                                    @foreach($projects as $project)
+                                        <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+
+                        {{-- Clock Out Button --}}
+                        <button
+                            wire:click="clockOut"
+                            wire:loading.attr="disabled"
+                            class="clock-out-btn"
+                        >
+                            <span wire:loading.remove>Clock Out</span>
+                            <span wire:loading>Processing...</span>
+                        </button>
+                    @endif
                 @else
                     <p class="clock-status">Not currently clocked in</p>
 

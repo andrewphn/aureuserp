@@ -352,6 +352,66 @@ class Timesheet extends Record
             'entry_type' => $this->entry_type,
             'needs_approval' => $this->needsApproval(),
             'project' => $this->project?->name,
+            'lunch_start' => $this->getFormattedLunchStart(),
+            'lunch_end' => $this->getFormattedLunchEnd(),
+            'is_on_lunch' => $this->isOnLunch(),
         ];
+    }
+
+    // =========================================================================
+    // LUNCH BREAK HELPER METHODS
+    // =========================================================================
+
+    /**
+     * Check if employee is currently on lunch break
+     */
+    public function isOnLunch(): bool
+    {
+        return $this->lunch_start_time && !$this->lunch_end_time;
+    }
+
+    /**
+     * Check if lunch break was already taken
+     */
+    public function hasLunchTaken(): bool
+    {
+        return $this->lunch_start_time && $this->lunch_end_time;
+    }
+
+    /**
+     * Format lunch start time for display
+     */
+    public function getFormattedLunchStart(): ?string
+    {
+        if (!$this->lunch_start_time) {
+            return null;
+        }
+        return Carbon::parse($this->lunch_start_time)->format('g:i A');
+    }
+
+    /**
+     * Format lunch end time for display
+     */
+    public function getFormattedLunchEnd(): ?string
+    {
+        if (!$this->lunch_end_time) {
+            return null;
+        }
+        return Carbon::parse($this->lunch_end_time)->format('g:i A');
+    }
+
+    /**
+     * Get actual lunch duration in minutes
+     */
+    public function getLunchDurationMinutes(): int
+    {
+        if (!$this->lunch_start_time || !$this->lunch_end_time) {
+            return 0;
+        }
+
+        $start = Carbon::parse($this->lunch_start_time);
+        $end = Carbon::parse($this->lunch_end_time);
+
+        return $end->diffInMinutes($start);
     }
 }

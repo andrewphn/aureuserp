@@ -109,7 +109,7 @@ class ClockingService
             $clockIn = Carbon::parse($entry->clock_in_time);
             $clockOut = Carbon::now();
 
-            $totalMinutes = $clockOut->diffInMinutes($clockIn);
+            $totalMinutes = $clockIn->diffInMinutes($clockOut, false);
             $workingMinutes = $totalMinutes - $breakDurationMinutes;
             $workingHours = round($workingMinutes / 60, 2);
 
@@ -166,6 +166,135 @@ class ClockingService
     }
 
     /**
+     * Start lunch break for an employee
+     */
+    public function startLunch(int $userId): array
+    {
+        try {
+            // Get current clock entry
+            $entry = Timesheet::getCurrentClockEntry($userId);
+
+            if (!$entry) {
+                return [
+                    'success' => false,
+                    'message' => 'Not currently clocked in',
+                ];
+            }
+
+            // Check if already on lunch
+            if ($entry->lunch_start_time && !$entry->lunch_end_time) {
+                return [
+                    'success' => false,
+                    'message' => 'Already on lunch break',
+                ];
+            }
+
+            // Check if lunch was already taken
+            if ($entry->lunch_start_time && $entry->lunch_end_time) {
+                return [
+                    'success' => false,
+                    'message' => 'Lunch break already taken today',
+                ];
+            }
+
+            // Start lunch
+            $entry->update([
+                'lunch_start_time' => Carbon::now()->format('H:i:s'),
+            ]);
+
+            Log::info('ClockingService: Employee started lunch', [
+                'user_id' => $userId,
+                'entry_id' => $entry->id,
+                'lunch_start_time' => $entry->lunch_start_time,
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Lunch break started',
+                'lunch_start_time' => Carbon::parse($entry->lunch_start_time)->format('g:i A'),
+            ];
+        } catch (\Exception $e) {
+            Log::error('ClockingService: Start lunch failed', [
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Failed to start lunch: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * End lunch break for an employee
+     */
+    public function endLunch(int $userId): array
+    {
+        try {
+            // Get current clock entry
+            $entry = Timesheet::getCurrentClockEntry($userId);
+
+            if (!$entry) {
+                return [
+                    'success' => false,
+                    'message' => 'Not currently clocked in',
+                ];
+            }
+
+            // Check if lunch was started
+            if (!$entry->lunch_start_time) {
+                return [
+                    'success' => false,
+                    'message' => 'Lunch break was not started',
+                ];
+            }
+
+            // Check if already ended lunch
+            if ($entry->lunch_end_time) {
+                return [
+                    'success' => false,
+                    'message' => 'Already returned from lunch',
+                ];
+            }
+
+            // End lunch and calculate duration
+            $lunchStart = Carbon::parse($entry->lunch_start_time);
+            $lunchEnd = Carbon::now();
+            $lunchDurationMinutes = $lunchEnd->diffInMinutes($lunchStart);
+
+            $entry->update([
+                'lunch_end_time' => $lunchEnd->format('H:i:s'),
+                'break_duration_minutes' => $lunchDurationMinutes,
+            ]);
+
+            Log::info('ClockingService: Employee ended lunch', [
+                'user_id' => $userId,
+                'entry_id' => $entry->id,
+                'lunch_end_time' => $entry->lunch_end_time,
+                'lunch_duration_minutes' => $lunchDurationMinutes,
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Welcome back from lunch!',
+                'lunch_end_time' => Carbon::parse($entry->lunch_end_time)->format('g:i A'),
+                'lunch_duration_minutes' => $lunchDurationMinutes,
+            ];
+        } catch (\Exception $e) {
+            Log::error('ClockingService: End lunch failed', [
+                'user_id' => $userId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Failed to end lunch: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
      * Get current clock status for a user
      */
     public function getStatus(int $userId): array
@@ -185,6 +314,23 @@ class ClockingService
             $runningHours = round($runningMinutes / 60, 2);
         }
 
+        // Check lunch status
+        $isOnLunch = false;
+        $lunchStartTime = null;
+        $lunchEndTime = null;
+        $lunchTaken = false;
+
+        if ($currentEntry) {
+            $isOnLunch = $currentEntry->lunch_start_time && !$currentEntry->lunch_end_time;
+            $lunchStartTime = $currentEntry->lunch_start_time
+                ? Carbon::parse($currentEntry->lunch_start_time)->format('g:i A')
+                : null;
+            $lunchEndTime = $currentEntry->lunch_end_time
+                ? Carbon::parse($currentEntry->lunch_end_time)->format('g:i A')
+                : null;
+            $lunchTaken = $currentEntry->lunch_start_time && $currentEntry->lunch_end_time;
+        }
+
         return [
             'is_clocked_in' => $isClockedIn,
             'clock_in_time' => $currentEntry?->getFormattedClockIn(),
@@ -196,6 +342,10 @@ class ClockingService
             'on_track' => $this->isOnTrack($userId),
             'current_entry_id' => $currentEntry?->id,
             'work_location' => $currentEntry?->workLocation?->name,
+            'is_on_lunch' => $isOnLunch,
+            'lunch_start_time' => $lunchStartTime,
+            'lunch_end_time' => $lunchEndTime,
+            'lunch_taken' => $lunchTaken,
         ];
     }
 

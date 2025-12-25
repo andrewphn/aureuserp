@@ -57,24 +57,41 @@ class HeaderClockWidget extends Component
         $status = $this->clockingService->getStatus($userId);
 
         if ($status['is_clocked_in']) {
-            $this->state = 'working';
+            // Check if on lunch
+            if ($status['is_on_lunch'] ?? false) {
+                $this->state = 'on_lunch';
+                if ($status['lunch_start_time']) {
+                    $today = Carbon::today();
+                    $lunchStartTime = Carbon::parse($status['lunch_start_time']);
+                    $this->lunchStartTimestamp = $today->setTimeFrom($lunchStartTime)->timestamp;
+                }
+            } else {
+                $this->state = 'working';
+            }
+
             if ($status['clock_in_time']) {
                 $today = Carbon::today();
                 $clockInTime = Carbon::parse($status['clock_in_time']);
                 $this->clockedInTimestamp = $today->setTimeFrom($clockInTime)->timestamp;
                 $this->clockedInAt = $status['clock_in_time'];
             }
+
+            // Check if lunch was already taken
+            $this->lunchTaken = $status['lunch_taken'] ?? false;
+            if ($this->lunchTaken && $status['lunch_start_time'] && $status['lunch_end_time']) {
+                $lunchStart = Carbon::parse($status['lunch_start_time']);
+                $lunchEnd = Carbon::parse($status['lunch_end_time']);
+                $this->lunchDuration = $lunchStart->diffInMinutes($lunchEnd, false);
+            }
         } else {
             $this->state = 'not_clocked_in';
             $this->clockedInTimestamp = null;
             $this->clockedInAt = null;
+            $this->lunchStartTimestamp = null;
+            $this->lunchReturnTimestamp = null;
+            $this->lunchTaken = false;
+            $this->lunchDuration = 0;
         }
-
-        // Reset lunch state on refresh (lunch is session-only)
-        $this->lunchStartTimestamp = null;
-        $this->lunchReturnTimestamp = null;
-        $this->lunchTaken = false;
-        $this->lunchDuration = 0;
     }
 
     /**
@@ -125,38 +142,56 @@ class HeaderClockWidget extends Component
     }
 
     /**
-     * Set lunch duration and start lunch
+     * Start lunch break (database-backed)
      */
-    public function startLunch(int $minutes): void
+    public function startLunch(int $minutes = 60): void
     {
-        $this->lunchDuration = $minutes;
-        $this->selectedLunchDuration = $minutes;
-        $this->lunchStartTimestamp = time();
-        $this->lunchReturnTimestamp = time() + ($minutes * 60);
-        $this->lunchTaken = true; // Mark that lunch was taken
-        $this->state = 'on_lunch';
-        $this->closeModal();
+        $userId = auth()->id();
+        if (!$userId) {
+            $this->notify('Not logged in', null, 'danger');
+            return;
+        }
 
-        $this->notify('On Lunch', "Back in {$minutes} minutes", 'warning');
+        $result = $this->clockingService->startLunch($userId);
+
+        if ($result['success']) {
+            $this->selectedLunchDuration = $minutes;
+            $this->lunchStartTimestamp = time();
+            $this->lunchReturnTimestamp = time() + ($minutes * 60);
+            $this->state = 'on_lunch';
+            $this->closeModal();
+
+            $this->notify('On Lunch', "Started at {$result['lunch_start_time']}", 'warning');
+        } else {
+            $this->notify('Lunch Failed', $result['message'] ?? 'Unknown error', 'danger');
+        }
     }
 
     /**
-     * Return from lunch early
+     * Return from lunch (database-backed)
      */
     public function returnFromLunch(): void
     {
-        // Calculate actual lunch time taken
-        if ($this->lunchStartTimestamp) {
-            $actualMinutes = (int) ceil((time() - $this->lunchStartTimestamp) / 60);
-            $this->lunchDuration = max(1, $actualMinutes);
+        $userId = auth()->id();
+        if (!$userId) {
+            $this->notify('Not logged in', null, 'danger');
+            return;
         }
 
-        $this->state = 'working';
-        $this->lunchStartTimestamp = null;
-        $this->lunchReturnTimestamp = null;
-        $this->closeModal();
+        $result = $this->clockingService->endLunch($userId);
 
-        $this->notify('Back to Work', "Lunch: {$this->lunchDuration} minutes", 'success');
+        if ($result['success']) {
+            $this->lunchDuration = $result['lunch_duration_minutes'] ?? 0;
+            $this->lunchTaken = true;
+            $this->state = 'working';
+            $this->lunchStartTimestamp = null;
+            $this->lunchReturnTimestamp = null;
+            $this->closeModal();
+
+            $this->notify('Back to Work', "Lunch: {$this->lunchDuration} minutes", 'success');
+        } else {
+            $this->notify('Return Failed', $result['message'] ?? 'Unknown error', 'danger');
+        }
     }
 
     /**
@@ -170,8 +205,18 @@ class HeaderClockWidget extends Component
             return;
         }
 
-        // Only use break time if lunch was actually taken
-        $breakMinutes = $this->lunchTaken ? $this->lunchDuration : 0;
+        // Get current status to check if lunch was tracked in database
+        $status = $this->clockingService->getStatus($userId);
+
+        // Use database-tracked lunch duration if available, otherwise use session value
+        if ($status['lunch_taken'] ?? false) {
+            // Lunch was tracked in database - the break_duration_minutes is already set
+            // Pass the duration that was recorded when endLunch was called
+            $breakMinutes = $this->lunchDuration;
+        } else {
+            // No lunch tracked - use 0
+            $breakMinutes = 0;
+        }
 
         $result = $this->clockingService->clockOut($userId, $breakMinutes);
 

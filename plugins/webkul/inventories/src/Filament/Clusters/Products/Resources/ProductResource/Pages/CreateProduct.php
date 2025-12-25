@@ -164,6 +164,16 @@ class CreateProduct extends BaseCreateProduct
                             'media_id' => $media ? $media->id : 'null',
                             'media_file' => $media ? $media->file_name : 'null',
                         ]);
+
+                        // Verify the media was actually saved to database
+                        $mediaCount = $record->getMedia('product-images')->count();
+                        Log::info('handleRecordCreation: Media verification', [
+                            'product_id' => $record->id,
+                            'media_count_after_add' => $mediaCount,
+                            'media_in_db' => \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_id', $record->id)
+                                ->where('model_type', get_class($record))
+                                ->count(),
+                        ]);
                     } catch (\Exception $e) {
                         Log::error('Failed to add AI image to Spatie', [
                             'product_id' => $record->id,
