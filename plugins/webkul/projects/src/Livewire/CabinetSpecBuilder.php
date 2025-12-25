@@ -152,24 +152,28 @@ class CabinetSpecBuilder extends Component
 
     /**
      * Open modal to edit an existing entity
+     * Supports both single-arg (path) and two-arg (type, path) calls
      */
-    public function openEdit(string $path): void
+    public function openEdit(string $typeOrPath, ?string $path = null): void
     {
-        $node = $this->getNodeByPath($path);
+        // Support both call styles: openEdit('path') and openEdit('type', 'path')
+        $actualPath = $path ?? $typeOrPath;
+
+        $node = $this->getNodeByPath($actualPath);
 
         if (!$node) {
-            Log::warning('CabinetSpecBuilder: Node not found for edit', ['path' => $path]);
+            Log::warning('CabinetSpecBuilder: Node not found for edit', ['path' => $actualPath]);
             return;
         }
 
         Log::info('CabinetSpecBuilder: Opening edit modal', [
-            'path' => $path,
+            'path' => $actualPath,
             'node' => $node,
         ]);
 
         $this->modalEntityType = $node['type'];
         $this->modalMode = 'edit';
-        $this->editPath = $path;
+        $this->editPath = $actualPath;
         $this->parentPath = null;
         $this->formData = $node;
         $this->showModal = true;
@@ -249,6 +253,16 @@ class CabinetSpecBuilder extends Component
         $this->deleteNodeByPath($path);
         $this->calculateTotals();
         $this->dispatchSpecDataUpdate();
+    }
+
+    /**
+     * Delete an entity by type and path (convenience method for UI)
+     * Supports both call styles: deleteByPath('type', 'path') and deleteByPath('path')
+     */
+    public function deleteByPath(string $typeOrPath, ?string $path = null): void
+    {
+        $actualPath = $path ?? $typeOrPath;
+        $this->delete($actualPath);
     }
 
     /**
@@ -1063,6 +1077,65 @@ class CabinetSpecBuilder extends Component
             'cabinet_level' => (string) ($data['cabinet_level'] ?? '2'),
         ]);
 
+        $this->calculateTotals();
+        $this->dispatchSpecDataUpdate();
+    }
+
+    // =========================================================================
+    // INLINE EDITING METHODS (for Miller Columns UI)
+    // =========================================================================
+
+    /**
+     * Update a single field on a cabinet (called from inline editing)
+     */
+    public function updateCabinetField(string $path, string $field, mixed $value): void
+    {
+        Log::info('CabinetSpecBuilder: Updating cabinet field', [
+            'path' => $path,
+            'field' => $field,
+            'value' => $value,
+        ]);
+
+        $node = $this->getNodeByPath($path);
+
+        if (!$node || ($node['type'] ?? '') !== 'cabinet') {
+            Log::warning('CabinetSpecBuilder: Invalid path for cabinet field update', ['path' => $path]);
+            return;
+        }
+
+        // Validate and cast numeric fields
+        if (in_array($field, ['length_inches', 'height_inches', 'depth_inches'])) {
+            $value = (float) $value;
+            if ($value <= 0) {
+                return; // Don't save invalid dimensions
+            }
+        } elseif ($field === 'quantity') {
+            $value = max(1, (int) $value);
+        }
+
+        // Update the specific field
+        $this->updateNodeByPath($path, [$field => $value]);
+
+        // Recalculate totals (LF changes when dimensions change)
+        $this->calculateTotals();
+        $this->dispatchSpecDataUpdate();
+    }
+
+    /**
+     * Delete a cabinet by its path (called from inline editing)
+     */
+    public function deleteCabinetByPath(string $path): void
+    {
+        Log::info('CabinetSpecBuilder: Deleting cabinet by path', ['path' => $path]);
+
+        $node = $this->getNodeByPath($path);
+
+        if (!$node) {
+            Log::warning('CabinetSpecBuilder: Node not found for deletion', ['path' => $path]);
+            return;
+        }
+
+        $this->deleteNodeByPath($path);
         $this->calculateTotals();
         $this->dispatchSpecDataUpdate();
     }

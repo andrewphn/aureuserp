@@ -47,30 +47,37 @@
         <button
             wire:click="openModal"
             x-data="{
+                startTime: {{ $lunchStartTimestamp ?? 'null' }},
                 returnTime: {{ $lunchReturnTimestamp ?? 'null' }},
-                remaining: '',
+                display: '',
                 init() {
-                    if (this.returnTime) {
-                        this.updateTimer();
-                        setInterval(() => this.updateTimer(), 1000);
-                    }
+                    this.updateTimer();
+                    setInterval(() => this.updateTimer(), 1000);
                 },
                 updateTimer() {
-                    if (!this.returnTime) return;
-                    const diff = Math.floor(this.returnTime - (Date.now() / 1000));
-                    if (diff <= 0) {
-                        this.remaining = 'Back!';
-                        return;
+                    // If we have a return time, show countdown
+                    if (this.returnTime) {
+                        const diff = Math.floor(this.returnTime - (Date.now() / 1000));
+                        if (diff <= 0) {
+                            this.display = 'Back!';
+                            return;
+                        }
+                        const mins = Math.floor(diff / 60);
+                        this.display = `${mins}m left`;
                     }
-                    const mins = Math.floor(diff / 60);
-                    this.remaining = `${mins}m left`;
+                    // Otherwise show elapsed time
+                    else if (this.startTime) {
+                        const diff = Math.floor((Date.now() / 1000) - this.startTime);
+                        const mins = Math.floor(diff / 60);
+                        this.display = `${mins}m`;
+                    }
                 }
             }"
             class="inline-flex items-center gap-2.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm"
             style="background-color: #f59e0b; color: white;"
         >
             <x-heroicon-m-pause class="w-4 h-4 flex-shrink-0" />
-            <span x-text="remaining">--</span>
+            <span x-text="display">Lunch</span>
         </button>
     @endif
 
@@ -97,8 +104,14 @@
                 <div class="flex items-center gap-3 px-4 py-3" style="background-color: #f59e0b; color: white;">
                     <x-heroicon-s-pause-circle class="w-5 h-5 flex-shrink-0" />
                     <div>
-                        <div class="text-xs" style="opacity: 0.8;">On break</div>
-                        <div class="font-semibold text-base">{{ $lunchDuration }} min lunch</div>
+                        <div class="text-xs" style="opacity: 0.8;">On lunch break</div>
+                        <div class="font-semibold text-base">
+                            @if($lunchDuration > 0)
+                                {{ $lunchDuration }} min
+                            @else
+                                Started {{ now()->diffForHumans(Carbon\Carbon::createFromTimestamp($lunchStartTimestamp), true) }} ago
+                            @endif
+                        </div>
                     </div>
                 </div>
             @endif

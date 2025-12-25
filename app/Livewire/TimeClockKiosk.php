@@ -45,6 +45,12 @@ class TimeClockKiosk extends Component
     public bool $isClockedIn = false;
     public ?string $clockedInAt = null;
 
+    // Lunch state
+    public bool $isOnLunch = false;
+    public bool $lunchTaken = false;
+    public ?string $lunchStartTime = null;
+    public ?string $lunchEndTime = null;
+
     // Form inputs
     public int $breakDurationMinutes = 60;
     public ?int $selectedProjectId = null;
@@ -250,6 +256,10 @@ class TimeClockKiosk extends Component
             $status = $this->clockingService->getStatus($this->selectedUserId);
             $this->isClockedIn = $status['is_clocked_in'];
             $this->clockedInAt = $status['clock_in_time'];
+            $this->isOnLunch = $status['is_on_lunch'] ?? false;
+            $this->lunchTaken = $status['lunch_taken'] ?? false;
+            $this->lunchStartTime = $status['lunch_start_time'];
+            $this->lunchEndTime = $status['lunch_end_time'];
         }
     }
 
@@ -337,6 +347,64 @@ class TimeClockKiosk extends Component
                 sprintf("Clocked out! Worked %.1f hours today.", $hoursWorked),
                 'success'
             );
+            $this->loadTodayAttendance();
+        } else {
+            $this->setStatus($result['message'], 'error');
+        }
+    }
+
+    /**
+     * Start lunch break
+     */
+    public function startLunch(): void
+    {
+        if (!$this->selectedUserId) {
+            $this->setStatus('No employee selected', 'error');
+            return;
+        }
+
+        if ($this->isPinRequired() && !$this->pinVerified) {
+            $this->setStatus('PIN verification required', 'error');
+            $this->mode = 'pin';
+            return;
+        }
+
+        $result = $this->clockingService->startLunch($this->selectedUserId);
+
+        if ($result['success']) {
+            $this->isOnLunch = true;
+            $this->lunchStartTime = $result['lunch_start_time'];
+            $this->setStatus("Lunch started at {$this->lunchStartTime}. Enjoy your break!", 'success');
+            $this->loadTodayAttendance();
+        } else {
+            $this->setStatus($result['message'], 'error');
+        }
+    }
+
+    /**
+     * End lunch break
+     */
+    public function endLunch(): void
+    {
+        if (!$this->selectedUserId) {
+            $this->setStatus('No employee selected', 'error');
+            return;
+        }
+
+        if ($this->isPinRequired() && !$this->pinVerified) {
+            $this->setStatus('PIN verification required', 'error');
+            $this->mode = 'pin';
+            return;
+        }
+
+        $result = $this->clockingService->endLunch($this->selectedUserId);
+
+        if ($result['success']) {
+            $this->isOnLunch = false;
+            $this->lunchTaken = true;
+            $this->lunchEndTime = $result['lunch_end_time'];
+            $this->breakDurationMinutes = $result['lunch_duration_minutes'];
+            $this->setStatus($result['message'], 'success');
             $this->loadTodayAttendance();
         } else {
             $this->setStatus($result['message'], 'error');
