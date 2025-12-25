@@ -311,20 +311,39 @@ AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
 AVAILABLE PRODUCT ATTRIBUTES (ONLY use values you find in the scraped content above):
 {$attributeOptions}
 
-🚨 CRITICAL - ATTRIBUTE RULES (DO NOT VIOLATE):
-1. ONLY suggest attributes if you find the EXACT value in the scraped content/technical documents above
-2. DO NOT GUESS, ESTIMATE, OR MAKE UP attribute values
-3. If you cannot find a specific measurement in the content, DO NOT include that attribute
-4. The suggested_attributes array should be EMPTY [] if no specs are found in the scraped content
-5. For numeric values (Slide Length, etc.) - only include if you see the exact number in the source
+🚨 CRITICAL - ATTRIBUTE RULES:
+1. ONLY suggest attributes if you find the EXACT value in the scraped content/technical documents
+2. DO NOT GUESS or MAKE UP values - only use what's in the source
+3. FIRST check if attribute exists in the list above - use existing attribute_id if found
+4. If attribute doesn't exist, you CAN suggest a NEW attribute with proper naming
 
-WHAT TO LOOK FOR (only if present in scraped content):
-- For drawer slides: "Slide Length", "Extension Length" (in mm or inches)
-- For hinges: arm length, cup diameter, opening angle
-- For hardware: dimensions, weight capacity, side clearance
+NAMING STANDARDS FOR NEW ATTRIBUTES:
+- Use Title Case: "Weight Capacity" not "weight capacity" or "WEIGHT CAPACITY"
+- Be specific: "Extension Length" not just "Length"
+- Include unit_symbol and unit_label for numeric attributes
+- Common units: in (inches), mm (millimeters), lbs (pounds), kg (kilograms)
 
-Example: If scraped content says "21 inch slide length" → include it
-Example: If content has no length mentioned → DO NOT add Slide Length attribute
+FORMAT FOR EXISTING ATTRIBUTES:
+- Numeric: value should be just the number (e.g., 21 not "21 inch")
+- Select: use EXACT option name from the list
+
+FORMAT FOR NEW ATTRIBUTES:
+{
+    "attribute_name": "Weight Capacity",
+    "value": 100,
+    "unit_symbol": "lbs",
+    "unit_label": "pounds"
+}
+
+DUPLICATE PREVENTION:
+- Check existing attributes FIRST before suggesting new ones
+- "Slide Length" and "slide length" are the SAME - use existing
+- Similar names like "Extension" vs "Extension Length" - use the more specific existing one
+
+WHAT TO LOOK FOR (only if in scraped content):
+- Drawer slides: Extension/Slide Length, Weight Capacity, Side Clearance
+- Hinges: Cup Diameter, Opening Angle, Arm Length
+- Hardware: Dimensions, Load Rating, Material
 
 Generate product details that a PROFESSIONAL WOODWORKER would actually need to know.
 NOT marketing fluff - practical shop floor information.

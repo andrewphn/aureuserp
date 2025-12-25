@@ -299,12 +299,64 @@ class EditProduct extends BaseEditProduct
                                     if (!empty($suggestedAttr['attribute_id'])) {
                                         $attribute = Attribute::find($suggestedAttr['attribute_id']);
                                     }
-                                    if (!$attribute && !empty($suggestedAttr['attribute_name'])) {
-                                        $attribute = Attribute::where('name', $suggestedAttr['attribute_name'])->first();
+                                    // Normalize attribute name for consistent matching
+                                    $suggestedName = !empty($suggestedAttr['attribute_name'])
+                                        ? ucwords(strtolower(trim($suggestedAttr['attribute_name'])))
+                                        : null;
+
+                                    // Case-insensitive search for existing attribute
+                                    if (!$attribute && $suggestedName) {
+                                        $attribute = Attribute::whereRaw('LOWER(name) = ?', [strtolower($suggestedName)])->first();
+                                    }
+
+                                    // If attribute doesn't exist, create it following naming standards
+                                    if (!$attribute && $suggestedName) {
+                                        $attrName = $suggestedName; // Already normalized
+
+                                        // Determine attribute type based on value format
+                                        $value = $suggestedAttr['value'] ?? null;
+                                        $isNumeric = is_numeric($value) || (is_string($value) && preg_match('/^[\d.]+$/', trim($value)));
+
+                                        // Detect unit from the suggested data
+                                        $unitSymbol = $suggestedAttr['unit_symbol'] ?? null;
+                                        $unitLabel = $suggestedAttr['unit_label'] ?? null;
+
+                                        // Common unit detection from attribute name
+                                        if (!$unitSymbol) {
+                                            $nameLower = strtolower($attrName);
+                                            if (str_contains($nameLower, 'length') || str_contains($nameLower, 'width') || str_contains($nameLower, 'height')) {
+                                                $unitSymbol = 'in';
+                                                $unitLabel = 'inches';
+                                            } elseif (str_contains($nameLower, 'weight') || str_contains($nameLower, 'capacity')) {
+                                                $unitSymbol = 'lbs';
+                                                $unitLabel = 'pounds';
+                                            } elseif (str_contains($nameLower, 'clearance') || str_contains($nameLower, 'offset')) {
+                                                $unitSymbol = 'mm';
+                                                $unitLabel = 'millimeters';
+                                            }
+                                        }
+
+                                        // Create the new attribute
+                                        $attrType = $isNumeric ? 'dimension' : 'select';
+                                        $attribute = Attribute::create([
+                                            'name' => ucwords($attrName), // Proper capitalization
+                                            'type' => $attrType,
+                                            'unit_symbol' => $unitSymbol,
+                                            'unit_label' => $unitLabel,
+                                            'decimal_places' => 2,
+                                            'creator_id' => Auth::id(),
+                                        ]);
+
+                                        Log::info('AI Populate - Created new attribute', [
+                                            'attribute_id' => $attribute->id,
+                                            'name' => $attribute->name,
+                                            'type' => $attrType,
+                                            'unit' => $unitSymbol,
+                                        ]);
                                     }
 
                                     if (!$attribute) {
-                                        Log::warning('AI Populate - Attribute not found', [
+                                        Log::warning('AI Populate - Could not find or create attribute', [
                                             'suggested' => $suggestedAttr,
                                         ]);
                                         continue;
@@ -716,8 +768,51 @@ class EditProduct extends BaseEditProduct
                                     if (!empty($suggestedAttr['attribute_id'])) {
                                         $attribute = Attribute::find($suggestedAttr['attribute_id']);
                                     }
-                                    if (!$attribute && !empty($suggestedAttr['attribute_name'])) {
-                                        $attribute = Attribute::where('name', $suggestedAttr['attribute_name'])->first();
+
+                                    // Normalize and search case-insensitively
+                                    $suggestedName = !empty($suggestedAttr['attribute_name'])
+                                        ? ucwords(strtolower(trim($suggestedAttr['attribute_name'])))
+                                        : null;
+
+                                    if (!$attribute && $suggestedName) {
+                                        $attribute = Attribute::whereRaw('LOWER(name) = ?', [strtolower($suggestedName)])->first();
+                                    }
+
+                                    // Create new attribute if not found
+                                    if (!$attribute && $suggestedName) {
+                                        $value = $suggestedAttr['value'] ?? null;
+                                        $isNumeric = is_numeric($value) || (is_string($value) && preg_match('/^[\d.]+$/', trim($value)));
+
+                                        $unitSymbol = $suggestedAttr['unit_symbol'] ?? null;
+                                        $unitLabel = $suggestedAttr['unit_label'] ?? null;
+
+                                        if (!$unitSymbol) {
+                                            $nameLower = strtolower($suggestedName);
+                                            if (str_contains($nameLower, 'length') || str_contains($nameLower, 'width') || str_contains($nameLower, 'height')) {
+                                                $unitSymbol = 'in';
+                                                $unitLabel = 'inches';
+                                            } elseif (str_contains($nameLower, 'weight') || str_contains($nameLower, 'capacity')) {
+                                                $unitSymbol = 'lbs';
+                                                $unitLabel = 'pounds';
+                                            } elseif (str_contains($nameLower, 'clearance') || str_contains($nameLower, 'offset')) {
+                                                $unitSymbol = 'mm';
+                                                $unitLabel = 'millimeters';
+                                            }
+                                        }
+
+                                        $attribute = Attribute::create([
+                                            'name' => $suggestedName,
+                                            'type' => $isNumeric ? 'dimension' : 'select',
+                                            'unit_symbol' => $unitSymbol,
+                                            'unit_label' => $unitLabel,
+                                            'decimal_places' => 2,
+                                            'creator_id' => Auth::id(),
+                                        ]);
+
+                                        Log::info('AI Photo - Created new attribute', [
+                                            'attribute_id' => $attribute->id,
+                                            'name' => $attribute->name,
+                                        ]);
                                     }
 
                                     if (!$attribute) {
