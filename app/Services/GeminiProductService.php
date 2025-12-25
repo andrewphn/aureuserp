@@ -1216,22 +1216,24 @@ PROMPT;
             // Order matters - docsPr (product-specific) takes priority over docsGr (group)
             // Note: Some URLs are relative (start with docsPr/) while others are absolute (static.richelieu.com)
             $patterns = [
-                // PRIORITY 1: Product-specific images with _hd or _700 suffix (highest quality) - relative or absolute
+                // PRIORITY 1: og:image meta tag with docsPr (best quality product image)
+                '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+)["\']/',
+                '/<meta\s+content=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+)["\']\s+property=["\']og:image["\']/',
+                // PRIORITY 2: Product-specific images with _hd or _700 suffix (highest quality) - relative or absolute
                 '/src=["\'](?:https?:\/\/static\.richelieu\.com\/documents\/)?(docsPr\/[^"\']+(?:_hd|_700)\.(?:jpg|jpeg|png|webp))["\']/',
                 '/data-src=["\'](?:https?:\/\/static\.richelieu\.com\/documents\/)?(docsPr\/[^"\']+(?:_hd|_700)\.(?:jpg|jpeg|png|webp))["\']/',
-                // PRIORITY 2: Product-specific images (docsPr) - any size
+                // PRIORITY 3: Product-specific images (docsPr) - any size
                 '/src=["\'](?:https?:\/\/static\.richelieu\.com\/documents\/)?(docsPr\/[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
                 '/data-src=["\'](?:https?:\/\/static\.richelieu\.com\/documents\/)?(docsPr\/[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
-                // PRIORITY 3: Absolute URL with docsPr
+                // PRIORITY 4: Absolute URL with docsPr
                 '/src=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
-                // PRIORITY 4: Group images (docsGr) - fallback only
+                // PRIORITY 5: og:image with any documents path (fallback)
+                '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']/',
+                // PRIORITY 6: Group images (docsGr) - fallback only
                 '/src=["\'](?:https?:\/\/static\.richelieu\.com\/documents\/)?(docsGr\/[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
                 '/data-src=["\'](?:https?:\/\/static\.richelieu\.com\/documents\/)?(docsGr\/[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
-                // PRIORITY 5: Product image with size suffix
+                // PRIORITY 7: Product image with size suffix
                 '/src=["\']([^"\']*static\.richelieu\.com[^"\']*(?:_800|_600|_300|_veryBig)\.(?:jpg|jpeg|png|webp))["\']/',
-                // PRIORITY 6: og:image meta tag (may be logo on search pages)
-                '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']/',
-                '/<meta\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']\s+property=["\']og:image["\']/',
             ];
 
             foreach ($patterns as $pattern) {
