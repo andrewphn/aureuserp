@@ -212,11 +212,45 @@ class EditProduct extends BaseEditProduct
                             }
                         }
 
-                        // PRIORITY 2: Only use AI image if source is NOT Richelieu
-                        // If source is Richelieu but extraction failed, don't fallback to AI's random image
-                        $isRichelieuSource = !empty($sourceUrlForImage) && str_contains($sourceUrlForImage, 'richelieu.com');
-                        if (!$imageDownloaded && !empty($data['image_url']) && !$isRichelieuSource) {
-                            Log::info('AI Populate - Using AI-provided image URL (non-Richelieu source)', ['image_url' => $data['image_url']]);
+                        // PRIORITY 2: If source_url is Amazon, extract image from Amazon
+                        if (!$imageDownloaded && !empty($sourceUrlForImage) && str_contains($sourceUrlForImage, 'amazon.com')) {
+                            Log::info('AI Populate - Extracting image from Amazon source', ['source_url' => $sourceUrlForImage]);
+                            $amazonImageUrl = GeminiProductService::extractAmazonImageUrl($sourceUrlForImage);
+                            if ($amazonImageUrl) {
+                                $downloadedImage = GeminiProductService::downloadProductImage(
+                                    $amazonImageUrl,
+                                    $data['identified_product_name'] ?? $productName
+                                );
+                                if ($downloadedImage) {
+                                    $downloadedFullPath = storage_path('app/public/products/images/' . $downloadedImage);
+                                    if (file_exists($downloadedFullPath)) {
+                                        try {
+                                            $record->addMedia($downloadedFullPath)
+                                                ->toMediaCollection('product-images');
+                                            Log::info('AI Populate - Added Amazon image to Spatie', [
+                                                'product_id' => $record->id,
+                                                'image_url' => $amazonImageUrl,
+                                            ]);
+                                            $imageDownloaded = true;
+                                        } catch (\Exception $e) {
+                                            Log::error('AI Populate - Failed to add Amazon image', [
+                                                'product_id' => $record->id,
+                                                'error' => $e->getMessage(),
+                                            ]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        // PRIORITY 3: Only use AI image if source is NOT a known vendor (Richelieu, Amazon)
+                        // If source is a known vendor but extraction failed, don't fallback to AI's random image
+                        $isKnownVendorSource = !empty($sourceUrlForImage) && (
+                            str_contains($sourceUrlForImage, 'richelieu.com') ||
+                            str_contains($sourceUrlForImage, 'amazon.com')
+                        );
+                        if (!$imageDownloaded && !empty($data['image_url']) && !$isKnownVendorSource) {
+                            Log::info('AI Populate - Using AI-provided image URL', ['image_url' => $data['image_url']]);
                             $downloadedImage = GeminiProductService::downloadProductImage(
                                 $data['image_url'],
                                 $data['identified_product_name'] ?? $productName
@@ -240,8 +274,8 @@ class EditProduct extends BaseEditProduct
                                     }
                                 }
                             }
-                        } elseif (!$imageDownloaded && $isRichelieuSource) {
-                            Log::info('AI Populate - Skipping AI image (Richelieu source but extraction failed)', [
+                        } elseif (!$imageDownloaded && $isKnownVendorSource) {
+                            Log::info('AI Populate - Skipping AI image (known vendor source but extraction failed)', [
                                 'source_url' => $sourceUrlForImage,
                             ]);
                         }
