@@ -69,4 +69,8 @@ return [
         'api_key' => env('LEADS_API_KEY'),
     ],
 
+    'scrapeops' => [
+        'api_key' => env('SCRAPEOPS_API_KEY'),
+    ],
+
 ];
