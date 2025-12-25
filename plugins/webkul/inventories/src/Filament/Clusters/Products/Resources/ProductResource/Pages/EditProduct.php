@@ -165,6 +165,7 @@ class EditProduct extends BaseEditProduct
                         }
 
                         // Download product image from URL if provided - add directly to Spatie
+                        $imageDownloaded = false;
                         if (!empty($data['image_url'])) {
                             $downloadedImage = GeminiProductService::downloadProductImage(
                                 $data['image_url'],
@@ -180,11 +181,42 @@ class EditProduct extends BaseEditProduct
                                             'product_id' => $record->id,
                                             'image_path' => $downloadedFullPath,
                                         ]);
+                                        $imageDownloaded = true;
                                     } catch (\Exception $e) {
                                         Log::error('AI Populate - Failed to add image to Spatie', [
                                             'product_id' => $record->id,
                                             'error' => $e->getMessage(),
                                         ]);
+                                    }
+                                }
+                            }
+                        }
+
+                        // Fallback: If AI image failed, try extracting from Richelieu source_url
+                        if (!$imageDownloaded && !empty($data['source_url']) && str_contains($data['source_url'], 'richelieu.com')) {
+                            Log::info('AI Populate - Attempting Richelieu image fallback', ['source_url' => $data['source_url']]);
+                            $richelieuImageUrl = GeminiProductService::extractRichelieuImageUrl($data['source_url']);
+                            if ($richelieuImageUrl) {
+                                $downloadedImage = GeminiProductService::downloadProductImage(
+                                    $richelieuImageUrl,
+                                    $data['identified_product_name'] ?? $productName
+                                );
+                                if ($downloadedImage) {
+                                    $downloadedFullPath = storage_path('app/public/products/images/' . $downloadedImage);
+                                    if (file_exists($downloadedFullPath)) {
+                                        try {
+                                            $record->addMedia($downloadedFullPath)
+                                                ->toMediaCollection('product-images');
+                                            Log::info('AI Populate - Added Richelieu fallback image to Spatie', [
+                                                'product_id' => $record->id,
+                                                'image_url' => $richelieuImageUrl,
+                                            ]);
+                                        } catch (\Exception $e) {
+                                            Log::error('AI Populate - Failed to add Richelieu fallback image', [
+                                                'product_id' => $record->id,
+                                                'error' => $e->getMessage(),
+                                            ]);
+                                        }
                                     }
                                 }
                             }
