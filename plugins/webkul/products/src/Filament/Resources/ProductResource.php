@@ -123,6 +123,15 @@ class ProductResource extends Resource
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
                                     ->maxSize(10240)
                                     ->helperText('Images will be automatically optimized with responsive sizes (thumbnail, small, medium, large)'),
+                                Select::make('image_source')
+                                    ->label('Image Source')
+                                    ->options([
+                                        'user_photo' => 'User Photo (custom/shop photo)',
+                                        'commercial' => 'Commercial (manufacturer/vendor)',
+                                        'ai_generated' => 'AI Generated',
+                                    ])
+                                    ->placeholder('Select image source...')
+                                    ->helperText('Categorize where the product image came from'),
                             ]),
 
                         Section::make(__('products::filament/resources/product.form.sections.inventory.title'))
