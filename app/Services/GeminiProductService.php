@@ -1390,18 +1390,29 @@ PROMPT;
 
             $html = $response->body();
 
-            // Priority 1: og:image meta tag (usually high quality)
-            if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/', $html, $matches)) {
-                $imageUrl = $matches[1];
-                // Upgrade to larger size if possible (replace size suffix)
-                $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
-                Log::info('GeminiProductService: Found Amazon og:image via ScrapeOps', ['image_url' => $imageUrl]);
+            // Priority 1: hiRes JSON field (highest quality main product image)
+            if (preg_match('/"hiRes":"([^"]+)"/', $html, $matches)) {
+                $imageUrl = stripslashes($matches[1]);
+                Log::info('GeminiProductService: Found Amazon hiRes image via ScrapeOps', ['image_url' => $imageUrl]);
                 return $imageUrl;
             }
 
-            // Priority 2: Main product image (landingImage or imgTagWrapperId)
-            if (preg_match('/id=["\']landingImage["\'][^>]*src=["\']([^"\']+)["\']/', $html, $matches) ||
-                preg_match('/id=["\']imgBlkFront["\'][^>]*src=["\']([^"\']+)["\']/', $html, $matches)) {
+            // Priority 2: data-old-hires attribute (fallback high-res)
+            if (preg_match('/data-old-hires="([^"]+)"/', $html, $matches)) {
+                $imageUrl = $matches[1];
+                Log::info('GeminiProductService: Found Amazon data-old-hires via ScrapeOps', ['image_url' => $imageUrl]);
+                return $imageUrl;
+            }
+
+            // Priority 3: mainUrl JSON field
+            if (preg_match('/"mainUrl":"([^"]+)"/', $html, $matches)) {
+                $imageUrl = stripslashes($matches[1]);
+                Log::info('GeminiProductService: Found Amazon mainUrl via ScrapeOps', ['image_url' => $imageUrl]);
+                return $imageUrl;
+            }
+
+            // Priority 4: Main product image (landingImage)
+            if (preg_match('/id=["\']landingImage["\'][^>]*src=["\']([^"\']+)["\']/', $html, $matches)) {
                 $imageUrl = $matches[1];
                 // Upgrade to larger size
                 $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
@@ -1409,12 +1420,11 @@ PROMPT;
                 return $imageUrl;
             }
 
-            // Priority 3: Any m.media-amazon.com image with product pattern
-            if (preg_match('/src=["\']([^"\']*m\.media-amazon\.com\/images\/I\/[^"\']+\.jpg)["\']/', $html, $matches)) {
+            // Priority 5: og:image meta tag (may not be main product image)
+            if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/', $html, $matches)) {
                 $imageUrl = $matches[1];
-                // Upgrade to larger size
                 $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
-                Log::info('GeminiProductService: Found Amazon media image via ScrapeOps', ['image_url' => $imageUrl]);
+                Log::info('GeminiProductService: Found Amazon og:image via ScrapeOps', ['image_url' => $imageUrl]);
                 return $imageUrl;
             }
 
