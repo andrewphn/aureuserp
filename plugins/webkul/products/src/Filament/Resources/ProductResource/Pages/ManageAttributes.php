@@ -185,18 +185,18 @@ class ManageAttributes extends ManageRelatedRecords
                 TextColumn::make('values.attributeOption.name')
                     ->label(__('products::filament/resources/product/pages/manage-attributes.table.columns.values'))
                     ->badge()
-                    ->visible(fn ($record) => $record->attribute && $record->attribute->requiresOptions()),
+                    ->visible(fn ($record) => $record?->attribute?->requiresOptions() ?? false),
                 TextColumn::make('numeric_value_display')
                     ->label('Value')
                     ->state(function ($record): ?string {
-                        if (! $record->attribute?->isNumeric()) {
+                        if (! $record?->attribute?->isNumeric()) {
                             return null;
                         }
                         // Get the first value's numeric_value
                         $value = $record->values->first();
                         return $value?->getFormattedValue();
                     })
-                    ->visible(fn ($record) => $record->attribute && $record->attribute->isNumeric()),
+                    ->visible(fn ($record) => $record?->attribute?->isNumeric() ?? false),
             ])
             ->headerActions([
                 GenerateVariantsAction::make(),
