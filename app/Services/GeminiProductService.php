@@ -1213,15 +1213,20 @@ PROMPT;
             }
 
             // Try multiple patterns to find the product image
-            // Order matters - more specific patterns first
+            // Order matters - docsPr (product-specific) takes priority over docsGr (group)
             $patterns = [
-                // Product images from static.richelieu.com/documents (most specific for products)
-                '/src=["\']([^"\']*static\.richelieu\.com\/documents\/(?:docsPr|docsGr)[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
-                // Data-src for lazy loaded product images
-                '/data-src=["\']([^"\']*static\.richelieu\.com\/documents\/(?:docsPr|docsGr)[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
-                // Product image with size suffix
+                // PRIORITY 1: Product-specific images with _hd suffix (highest quality)
+                '/src=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+_hd\.(?:jpg|jpeg|png|webp))["\']/',
+                '/data-src=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+_hd\.(?:jpg|jpeg|png|webp))["\']/',
+                // PRIORITY 2: Product-specific images (docsPr) - any size
+                '/src=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
+                '/data-src=["\']([^"\']*static\.richelieu\.com\/documents\/docsPr[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
+                // PRIORITY 3: Group images (docsGr) - fallback only
+                '/src=["\']([^"\']*static\.richelieu\.com\/documents\/docsGr[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
+                '/data-src=["\']([^"\']*static\.richelieu\.com\/documents\/docsGr[^"\']+\.(?:jpg|jpeg|png|webp))["\']/',
+                // PRIORITY 4: Product image with size suffix
                 '/src=["\']([^"\']*static\.richelieu\.com[^"\']*(?:_800|_600|_300|_veryBig)\.(?:jpg|jpeg|png|webp))["\']/',
-                // og:image meta tag (may be logo on search pages, so check after product images)
+                // PRIORITY 5: og:image meta tag (may be logo on search pages)
                 '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']/',
                 '/<meta\s+content=["\']([^"\']*static\.richelieu\.com\/documents[^"\']+)["\']\s+property=["\']og:image["\']/',
             ];
