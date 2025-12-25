@@ -72,8 +72,19 @@ class EditProduct extends BaseEditProduct
                             return;
                         }
 
+                        // Gather all user-entered form data to help Gemini identify the product
+                        $searchContext = [
+                            'source_url' => $currentData['source_url'] ?? null,
+                            'barcode' => $currentData['barcode'] ?? null,
+                            'supplier_sku' => $currentData['supplier_sku'] ?? null,
+                            'reference' => $currentData['reference'] ?? null,
+                        ];
+                        // Get user-entered source URL for image extraction
+                        $userSourceUrl = $currentData['source_url'] ?? null;
+
                         $service = new GeminiProductService();
-                        $data = $service->generateProductDetails($productName, $existingDescription);
+                        // Pass all form context to Gemini for better product identification
+                        $data = $service->generateProductDetails($productName, $existingDescription, $searchContext);
 
                         if (isset($data['error'])) {
                             Notification::make()
@@ -164,13 +175,16 @@ class EditProduct extends BaseEditProduct
                             $updates['reference_type_code_id'] = $data['reference_type_code_id'];
                         }
 
-                        // Download product image - prioritize Richelieu extraction for better quality
+                        // Download product image - prioritize user's source_url over AI's
                         $imageDownloaded = false;
 
+                        // Use user-entered source_url first, then AI's source_url as fallback
+                        $sourceUrlForImage = $userSourceUrl ?: ($data['source_url'] ?? null);
+
                         // PRIORITY 1: If source_url is Richelieu, extract image directly (highest quality)
-                        if (!empty($data['source_url']) && str_contains($data['source_url'], 'richelieu.com')) {
-                            Log::info('AI Populate - Extracting image from Richelieu source', ['source_url' => $data['source_url']]);
-                            $richelieuImageUrl = GeminiProductService::extractRichelieuImageUrl($data['source_url']);
+                        if (!empty($sourceUrlForImage) && str_contains($sourceUrlForImage, 'richelieu.com')) {
+                            Log::info('AI Populate - Extracting image from Richelieu source', ['source_url' => $sourceUrlForImage]);
+                            $richelieuImageUrl = GeminiProductService::extractRichelieuImageUrl($sourceUrlForImage);
                             if ($richelieuImageUrl) {
                                 $downloadedImage = GeminiProductService::downloadProductImage(
                                     $richelieuImageUrl,

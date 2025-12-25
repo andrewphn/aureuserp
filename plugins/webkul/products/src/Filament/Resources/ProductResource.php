@@ -238,6 +238,12 @@ class ProductResource extends Resource
                                 TextInput::make('barcode')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.barcode'))
                                     ->maxLength(255),
+                                TextInput::make('source_url')
+                                    ->label('Source URL')
+                                    ->placeholder('https://www.richelieu.com/us/en/...')
+                                    ->helperText('Vendor product page URL (for AI image extraction)')
+                                    ->url()
+                                    ->maxLength(500),
                                 Select::make('company_id')
                                     ->label(__('products::filament/resources/product.form.sections.settings.fields.company'))
                                     ->relationship(

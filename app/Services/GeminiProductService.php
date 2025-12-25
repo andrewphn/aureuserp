@@ -195,6 +195,19 @@ class GeminiProductService
             $contextSection .= "\nExisting Description: {$existingDescription}\n";
         }
 
+        // If source_url is provided, fetch the page content and include it
+        $sourcePageContent = '';
+        $sourceUrlSection = '';
+        if (!empty($searchContext['source_url'])) {
+            $sourceUrlSection = "\n\n⚠️ CRITICAL: User provided a direct product page URL. USE THIS AS YOUR PRIMARY SOURCE:\n{$searchContext['source_url']}\n";
+
+            // Fetch the page content to give Gemini the actual data
+            $pageContent = $this->fetchPageContent($searchContext['source_url']);
+            if ($pageContent) {
+                $sourcePageContent = "\n\n### PRODUCT PAGE CONTENT (extracted from source URL):\n" . $pageContent . "\n";
+            }
+        }
+
         // Build search context section for multi-field lookup
         $searchFields = [];
         $hasRichelieuCode = false;
@@ -252,9 +265,12 @@ RICHELIEU;
 
         return <<<PROMPT
 You are a product data specialist for TCS Woodwork, a professional cabinet and furniture shop.
-Search the web for accurate, real-world information about the following product.
+{$sourceUrlSection}
+{$sourcePageContent}
+Product Name: {$productName}
+{$searchFieldsText}{$contextSection}
 
-PRIORITY SOURCES - Search these FIRST for pricing and specs:
+PRIORITY SOURCES - If no source URL provided, search these FIRST for pricing and specs:
 1. Richelieu.com (PRIMARY hardware supplier - check here FIRST)
 2. Woodworker's Supply
 3. Rockler.com
@@ -262,8 +278,6 @@ PRIORITY SOURCES - Search these FIRST for pricing and specs:
 5. Manufacturer website (Blum, Titebond, West System, etc.)
 AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
 {$richelieuPriority}
-Product Name: {$productName}
-{$searchFieldsText}{$contextSection}
 
 AVAILABLE CATEGORIES (select ONE by ID):
 {$categoryOptions}
@@ -1396,6 +1410,129 @@ PROMPT;
         } catch (\Exception $e) {
             Log::error('GeminiProductService: Error downloading image', [
                 'url' => $imageUrl,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Fetch and extract relevant content from a product page URL
+     * Used to give Gemini the actual page content when user provides source_url
+     *
+     * @param string $url The product page URL
+     * @return string|null Extracted text content, or null on failure
+     */
+    protected function fetchPageContent(string $url): ?string
+    {
+        try {
+            Log::info('GeminiProductService: Fetching page content', ['url' => $url]);
+
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                ])
+                ->get($url);
+
+            if (!$response->successful()) {
+                Log::warning('GeminiProductService: Failed to fetch page', [
+                    'url' => $url,
+                    'status' => $response->status(),
+                ]);
+                return null;
+            }
+
+            $html = $response->body();
+
+            // Extract key product information from HTML
+
+            // Get page title
+            $title = '';
+            if (preg_match('/<title[^>]*>([^<]+)<\/title>/i', $html, $matches)) {
+                $title = trim(html_entity_decode($matches[1]));
+            }
+
+            // Get meta description
+            $metaDesc = '';
+            if (preg_match('/<meta[^>]*name=["\']description["\'][^>]*content=["\']([^"\']+)["\']/', $html, $matches) ||
+                preg_match('/<meta[^>]*content=["\']([^"\']+)["\'][^>]*name=["\']description["\']/', $html, $matches)) {
+                $metaDesc = trim(html_entity_decode($matches[1]));
+            }
+
+            // Get og:image for reference
+            $ogImage = '';
+            if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/', $html, $matches)) {
+                $ogImage = $matches[1];
+            }
+
+            // Extract price information
+            $prices = [];
+            // Look for common price patterns
+            if (preg_match_all('/\$[\d,]+\.?\d{0,2}/', $html, $priceMatches)) {
+                $prices = array_unique($priceMatches[0]);
+            }
+
+            // For Richelieu, look for specific price elements
+            if (str_contains($url, 'richelieu.com')) {
+                if (preg_match('/data-price=["\']([^"\']+)["\']/i', $html, $matches)) {
+                    $prices[] = '$' . $matches[1];
+                }
+                if (preg_match('/class=["\'][^"\']*price[^"\']*["\'][^>]*>([^<]*\$[\d,.]+[^<]*)</i', $html, $matches)) {
+                    $prices[] = trim(strip_tags($matches[1]));
+                }
+            }
+
+            // Extract product specs - look for common patterns
+            $specs = [];
+            // Look for definition lists or spec tables
+            if (preg_match_all('/<dt[^>]*>([^<]+)<\/dt>\s*<dd[^>]*>([^<]+)<\/dd>/i', $html, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    $specs[] = trim($match[1]) . ': ' . trim($match[2]);
+                }
+            }
+            // Look for table rows with specs
+            if (preg_match_all('/<tr[^>]*>\s*<t[dh][^>]*>([^<]+)<\/t[dh]>\s*<t[dh][^>]*>([^<]+)<\/t[dh]>/i', $html, $matches, PREG_SET_ORDER)) {
+                foreach ($matches as $match) {
+                    $label = trim(strip_tags($match[1]));
+                    $value = trim(strip_tags($match[2]));
+                    if (strlen($label) > 2 && strlen($label) < 50 && strlen($value) > 0 && strlen($value) < 200) {
+                        $specs[] = $label . ': ' . $value;
+                    }
+                }
+            }
+
+            // Build structured content
+            $content = "Page Title: {$title}\n";
+            if ($metaDesc) {
+                $content .= "Description: {$metaDesc}\n";
+            }
+            if ($ogImage) {
+                $content .= "Product Image URL: {$ogImage}\n";
+            }
+            if (!empty($prices)) {
+                $content .= "Prices found: " . implode(', ', array_slice($prices, 0, 5)) . "\n";
+            }
+            if (!empty($specs)) {
+                $content .= "Specifications:\n" . implode("\n", array_slice($specs, 0, 20)) . "\n";
+            }
+
+            // Limit content length for prompt
+            if (strlen($content) > 4000) {
+                $content = substr($content, 0, 4000) . '... [truncated]';
+            }
+
+            Log::info('GeminiProductService: Extracted page content', [
+                'url' => $url,
+                'content_length' => strlen($content),
+            ]);
+
+            return $content;
+
+        } catch (\Exception $e) {
+            Log::error('GeminiProductService: Error fetching page content', [
+                'url' => $url,
                 'error' => $e->getMessage(),
             ]);
             return null;
