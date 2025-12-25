@@ -824,19 +824,32 @@ PROMPT;
 
     /**
      * Get relevant product attributes for AI to suggest
-     * Only returns attributes commonly used for consumable/hardware products
+     * Returns attributes commonly used for consumable/hardware products
+     * Includes both select-type and numeric/dimension-type attributes
      */
     protected function getRelevantAttributes(): array
     {
         return Cache::remember('ai_product_attributes', 3600, function () {
-            // Only get attributes that make sense for consumables/hardware
+            // Get all attributes - both select-type and numeric/dimension types
+            // Select types for general product attributes
             $relevantNames = ['Size', 'Brand', 'Color', 'Finish', 'Length', 'Width', 'Pack Size', 'Grit', 'Type'];
 
-            $attributes = DB::table('products_attributes')
+            // Get select-type attributes by name
+            $selectAttributes = DB::table('products_attributes')
                 ->whereIn('name', $relevantNames)
                 ->whereNull('deleted_at')
-                ->select('id', 'name', 'type')
+                ->select('id', 'name', 'type', 'unit_symbol', 'unit_label', 'min_value', 'max_value')
                 ->get();
+
+            // Also get all numeric/dimension type attributes (for hardware specs like Slide Length)
+            $numericAttributes = DB::table('products_attributes')
+                ->whereIn('type', ['number', 'dimension'])
+                ->whereNull('deleted_at')
+                ->select('id', 'name', 'type', 'unit_symbol', 'unit_label', 'min_value', 'max_value')
+                ->get();
+
+            // Merge and deduplicate
+            $attributes = $selectAttributes->merge($numericAttributes)->unique('id');
 
             $result = [];
             foreach ($attributes as $attr) {
@@ -856,6 +869,10 @@ PROMPT;
                     'id' => $attr->id,
                     'name' => $attr->name,
                     'type' => $attr->type,
+                    'unit_symbol' => $attr->unit_symbol,
+                    'unit_label' => $attr->unit_label,
+                    'min_value' => $attr->min_value,
+                    'max_value' => $attr->max_value,
                     'options' => $options,
                 ];
             }
@@ -865,6 +882,7 @@ PROMPT;
 
     /**
      * Build attribute options string for AI prompt
+     * Formats both select-type and numeric/dimension-type attributes
      */
     protected function buildAttributeOptions(): string
     {
@@ -875,9 +893,33 @@ PROMPT;
 
         $lines = [];
         foreach ($attributes as $attr) {
-            $optionNames = array_map(fn($o) => $o['name'], $attr['options']);
-            $optionsStr = empty($optionNames) ? '(no predefined options)' : implode(', ', array_slice($optionNames, 0, 10));
-            $lines[] = "- {$attr['name']} (id={$attr['id']}): {$optionsStr}";
+            $type = $attr['type'] ?? 'select';
+            $isNumeric = in_array($type, ['number', 'dimension']);
+
+            if ($isNumeric) {
+                // For numeric/dimension types, show unit and range
+                $unit = $attr['unit_symbol'] ?? '';
+                $unitLabel = $attr['unit_label'] ?? '';
+                $min = $attr['min_value'] ?? null;
+                $max = $attr['max_value'] ?? null;
+
+                $rangeStr = '';
+                if ($min !== null && $max !== null) {
+                    $rangeStr = "Range: {$min}-{$max} {$unit}";
+                } elseif ($min !== null) {
+                    $rangeStr = "Min: {$min} {$unit}";
+                } elseif ($max !== null) {
+                    $rangeStr = "Max: {$max} {$unit}";
+                }
+
+                $unitStr = $unit ? " ({$unit})" : '';
+                $lines[] = "- {$attr['name']}{$unitStr} (id={$attr['id']}, type={$type}): NUMERIC VALUE - enter the measurement. {$rangeStr}";
+            } else {
+                // For select-type, show options
+                $optionNames = array_map(fn($o) => $o['name'], $attr['options']);
+                $optionsStr = empty($optionNames) ? '(no predefined options)' : implode(', ', array_slice($optionNames, 0, 10));
+                $lines[] = "- {$attr['name']} (id={$attr['id']}, type={$type}): {$optionsStr}";
+            }
         }
         return implode("\n", $lines);
     }
