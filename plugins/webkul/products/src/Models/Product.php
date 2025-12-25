@@ -91,6 +91,7 @@ class Product extends Model implements Sortable, HasMedia
         'type_code',
         'reference_type_code_id',
         'barcode',
+        'source_url',
         'price',
         'cost',
         'box_cost',
