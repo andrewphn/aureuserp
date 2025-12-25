@@ -276,7 +276,10 @@ PRIORITY SOURCES - If no source URL provided, search these FIRST for pricing and
 3. Rockler.com
 4. Woodcraft.com
 5. Manufacturer website (Blum, Titebond, West System, etc.)
-AVOID Amazon/Home Depot pricing - we need TRADE/WHOLESALE prices, not retail.
+6. Amazon.com (LAST RESORT - use for product details, specs, and images)
+
+PRICING: Use prices from whatever source you find - user will adjust later.
+IMAGE: If source_url is provided, extract image from that source (Richelieu or Amazon).
 {$richelieuPriority}
 
 AVAILABLE CATEGORIES (select ONE by ID):
@@ -1322,6 +1325,79 @@ PROMPT;
 
         } catch (\Exception $e) {
             Log::error('GeminiProductService: Error extracting Richelieu image', [
+                'url' => $pageUrl,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Extract high-quality product image URL from an Amazon product page
+     *
+     * @param string $pageUrl The Amazon product page URL
+     * @return string|null The extracted image URL, or null if not found
+     */
+    public static function extractAmazonImageUrl(string $pageUrl): ?string
+    {
+        if (empty($pageUrl) || !str_contains($pageUrl, 'amazon.com')) {
+            return null;
+        }
+
+        try {
+            Log::info('GeminiProductService: Extracting image from Amazon page', ['url' => $pageUrl]);
+
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                    'Accept-Language' => 'en-US,en;q=0.5',
+                ])
+                ->get($pageUrl);
+
+            if (!$response->successful()) {
+                Log::warning('GeminiProductService: Failed to fetch Amazon page', [
+                    'url' => $pageUrl,
+                    'status' => $response->status(),
+                ]);
+                return null;
+            }
+
+            $html = $response->body();
+
+            // Priority 1: og:image meta tag (usually high quality)
+            if (preg_match('/<meta[^>]*property=["\']og:image["\'][^>]*content=["\']([^"\']+)["\']/', $html, $matches)) {
+                $imageUrl = $matches[1];
+                // Upgrade to larger size if possible (replace size suffix)
+                $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
+                Log::info('GeminiProductService: Found Amazon og:image', ['image_url' => $imageUrl]);
+                return $imageUrl;
+            }
+
+            // Priority 2: Main product image (landingImage or imgTagWrapperId)
+            if (preg_match('/id=["\']landingImage["\'][^>]*src=["\']([^"\']+)["\']/', $html, $matches) ||
+                preg_match('/id=["\']imgBlkFront["\'][^>]*src=["\']([^"\']+)["\']/', $html, $matches)) {
+                $imageUrl = $matches[1];
+                // Upgrade to larger size
+                $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
+                Log::info('GeminiProductService: Found Amazon landing image', ['image_url' => $imageUrl]);
+                return $imageUrl;
+            }
+
+            // Priority 3: Any m.media-amazon.com image with product pattern
+            if (preg_match('/src=["\']([^"\']*m\.media-amazon\.com\/images\/I\/[^"\']+\.jpg)["\']/', $html, $matches)) {
+                $imageUrl = $matches[1];
+                // Upgrade to larger size
+                $imageUrl = preg_replace('/\._[A-Z]{2}_[A-Z0-9_]+_\./', '._AC_SL1500_.', $imageUrl);
+                Log::info('GeminiProductService: Found Amazon media image', ['image_url' => $imageUrl]);
+                return $imageUrl;
+            }
+
+            Log::warning('GeminiProductService: No product image found on Amazon page', ['url' => $pageUrl]);
+            return null;
+
+        } catch (\Exception $e) {
+            Log::error('GeminiProductService: Error extracting Amazon image', [
                 'url' => $pageUrl,
                 'error' => $e->getMessage(),
             ]);
