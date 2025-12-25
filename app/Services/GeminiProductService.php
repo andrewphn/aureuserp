@@ -308,13 +308,23 @@ AVAILABLE CATEGORIES (select ONE by ID):
 AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
 {$referenceCodeOptions}
 
-AVAILABLE PRODUCT ATTRIBUTES (suggest values from the specifications above):
+AVAILABLE PRODUCT ATTRIBUTES (ONLY use values you find in the scraped content above):
 {$attributeOptions}
 
-⚠️ IMPORTANT: Extract attribute values from the product specifications (scraped from the source URL above).
-For drawer slides: Look for "Slide Length" in mm or inches
-For hinges: Look for arm length, cup size, opening angle
-For hardware: Look for dimensions, weight capacity, material
+🚨 CRITICAL - ATTRIBUTE RULES (DO NOT VIOLATE):
+1. ONLY suggest attributes if you find the EXACT value in the scraped content/technical documents above
+2. DO NOT GUESS, ESTIMATE, OR MAKE UP attribute values
+3. If you cannot find a specific measurement in the content, DO NOT include that attribute
+4. The suggested_attributes array should be EMPTY [] if no specs are found in the scraped content
+5. For numeric values (Slide Length, etc.) - only include if you see the exact number in the source
+
+WHAT TO LOOK FOR (only if present in scraped content):
+- For drawer slides: "Slide Length", "Extension Length" (in mm or inches)
+- For hinges: arm length, cup diameter, opening angle
+- For hardware: dimensions, weight capacity, side clearance
+
+Example: If scraped content says "21 inch slide length" → include it
+Example: If content has no length mentioned → DO NOT add Slide Length attribute
 
 Generate product details that a PROFESSIONAL WOODWORKER would actually need to know.
 NOT marketing fluff - practical shop floor information.
@@ -749,14 +759,22 @@ AVAILABLE CATEGORIES (select ONE by ID):
 AVAILABLE REFERENCE TYPE CODES (select ONE by ID - must match category):
 {$referenceCodeOptions}
 
-AVAILABLE PRODUCT ATTRIBUTES (suggest only relevant ones):
+AVAILABLE PRODUCT ATTRIBUTES (ONLY use values you can VERIFY):
 {$attributeOptions}
 
-Only suggest attributes that are DIRECTLY RELEVANT to this product type.
-For hinges: Size is relevant (52mm, 578mm, etc.)
-For sandpaper: Grit is relevant (80, 120, 220, etc.)
-For glue: Pack Size is relevant (oz, gallon)
-Do NOT suggest Brand as an attribute (it goes in the brand field instead)
+🚨 CRITICAL - ATTRIBUTE RULES (DO NOT VIOLATE):
+1. ONLY suggest attributes if you can SEE the value in the image OR find it in verified product documentation
+2. DO NOT GUESS, ESTIMATE, OR MAKE UP attribute values
+3. If you cannot verify a specific measurement, DO NOT include that attribute
+4. The suggested_attributes array should be EMPTY [] if no specs can be verified
+5. For numeric values (Slide Length, etc.) - only include if you can verify the exact number
+
+WHAT YOU CAN USE:
+- Values VISIBLE in the image (text on packaging, labels, product markings)
+- Values from verified manufacturer documentation when you search
+- DO NOT estimate dimensions from the image appearance
+
+Do NOT suggest Brand as an attribute (it goes in the brand field instead).
 If an existing option matches, use its ID. If not, suggest a NEW option name.
 
 DESCRIPTION MUST BE SHORT - MAX 5 BULLET POINTS:
