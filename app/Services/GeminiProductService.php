@@ -1148,14 +1148,26 @@ PROMPT;
             // We must fetch the product page to find the actual image URL
             // The image URL pattern is: static.richelieu.com/documents/docsGr/{groupId}/.../{imageId}_700.jpg
 
-            // FALLBACK: Try to fetch the page and scrape the image
-            $response = Http::timeout(30)
-                ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                    'Accept-Language' => 'en-US,en;q=0.5',
-                ])
-                ->get($pageUrl);
+            // Use ScrapeOps for reliable fetching
+            $apiKey = config('services.scrapeops.api_key');
+            if (!empty($apiKey)) {
+                Log::info('GeminiProductService: Using ScrapeOps for Richelieu page', ['url' => $pageUrl]);
+                $response = Http::timeout(60)
+                    ->get('https://proxy.scrapeops.io/v1/', [
+                        'api_key' => $apiKey,
+                        'url' => $pageUrl,
+                        'render_js' => 'false',
+                    ]);
+            } else {
+                // Fallback to direct fetch if no API key
+                $response = Http::timeout(30)
+                    ->withHeaders([
+                        'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                        'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                        'Accept-Language' => 'en-US,en;q=0.5',
+                    ])
+                    ->get($pageUrl);
+            }
 
             if (!$response->successful()) {
                 Log::warning('GeminiProductService: Failed to fetch Richelieu page', [
@@ -1540,23 +1552,24 @@ PROMPT;
         try {
             Log::info('GeminiProductService: Fetching page content', ['url' => $url]);
 
-            // Use ScrapeOps for Amazon URLs
-            if (str_contains($url, 'amazon.com')) {
-                $apiKey = config('services.scrapeops.api_key');
-                if (!empty($apiKey)) {
-                    Log::info('GeminiProductService: Using ScrapeOps for Amazon page', ['url' => $url]);
-                    $response = Http::timeout(60)
-                        ->get('https://proxy.scrapeops.io/v1/', [
-                            'api_key' => $apiKey,
-                            'url' => $url,
-                            'render_js' => 'false',
-                        ]);
-                } else {
-                    Log::warning('GeminiProductService: ScrapeOps API key not configured, skipping Amazon');
-                    return null;
-                }
+            // Use ScrapeOps for Amazon and Richelieu URLs
+            $apiKey = config('services.scrapeops.api_key');
+            $useScrapeOps = !empty($apiKey) && (str_contains($url, 'amazon.com') || str_contains($url, 'richelieu.com'));
+
+            if ($useScrapeOps) {
+                $source = str_contains($url, 'amazon.com') ? 'Amazon' : 'Richelieu';
+                Log::info("GeminiProductService: Using ScrapeOps for {$source} page", ['url' => $url]);
+                $response = Http::timeout(60)
+                    ->get('https://proxy.scrapeops.io/v1/', [
+                        'api_key' => $apiKey,
+                        'url' => $url,
+                        'render_js' => 'false',
+                    ]);
+            } elseif (str_contains($url, 'amazon.com') && empty($apiKey)) {
+                Log::warning('GeminiProductService: ScrapeOps API key not configured, skipping Amazon');
+                return null;
             } else {
-                // Direct fetch for non-Amazon URLs
+                // Direct fetch for other URLs
                 $response = Http::timeout(30)
                     ->withHeaders([
                         'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
