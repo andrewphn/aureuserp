@@ -405,4 +405,17 @@ class Product extends Model implements Sortable, HasMedia
 
         return $specs->get($attributeName)['value'] ?? null;
     }
+
+    /**
+     * Get the class name for polymorphic relations.
+     *
+     * This ensures Spatie Media Library uses 'product' as the morph type
+     * consistently across all Product model subclasses.
+     *
+     * @return string
+     */
+    public function getMorphClass(): string
+    {
+        return 'product';
+    }
 }

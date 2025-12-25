@@ -177,4 +177,17 @@ class Product extends BaseProduct
             })
             ->sum('quantity');
     }
+
+    /**
+     * Get the class name for polymorphic relations.
+     *
+     * This ensures Spatie Media Library uses 'product' as the morph type
+     * instead of the full class name, matching the base Product model.
+     *
+     * @return string
+     */
+    public function getMorphClass(): string
+    {
+        return 'product';
+    }
 }
