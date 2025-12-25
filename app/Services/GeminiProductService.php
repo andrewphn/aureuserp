@@ -1099,10 +1099,11 @@ PROMPT;
             Log::info('GeminiProductService: Extracting image from Richelieu page', ['url' => $pageUrl]);
 
             // Extract SKU from URL first - we'll need it for direct image URL construction
+            // Check patterns in order of specificity (sku= or sku- first, then term=, then generic)
             $sku = null;
-            if (preg_match('/term=([A-Z0-9]{6,12})/i', $pageUrl, $skuMatch) ||
-                preg_match('/\/([A-Z0-9]{6,12})(?:$|[\/\?])/', $pageUrl, $skuMatch) ||
-                preg_match('/sku[=-]([A-Z0-9]{6,12})/i', $pageUrl, $skuMatch)) {
+            if (preg_match('/sku[=-]([A-Z0-9]{6,15})/i', $pageUrl, $skuMatch) ||
+                preg_match('/term=([A-Z0-9]{6,15})/i', $pageUrl, $skuMatch) ||
+                preg_match('/\/([A-Z][A-Z0-9]{5,14})(?:$|[\/\?])/', $pageUrl, $skuMatch)) {
                 $sku = strtoupper($skuMatch[1]);
                 Log::info('GeminiProductService: Extracted SKU from URL', ['sku' => $sku]);
             }
