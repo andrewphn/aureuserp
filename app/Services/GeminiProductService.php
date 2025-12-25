@@ -1132,7 +1132,18 @@ PROMPT;
 
             // If we have a SKU, try to find an image URL that contains it
             if ($sku) {
-                // Look for image URLs containing our SKU
+                // PRIORITY: Check og:image meta tag first - contains best quality product image
+                $ogImagePattern = '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com[^"\']*' . preg_quote($sku, '/') . '[^"\']*\.(?:jpg|jpeg|png|webp))["\']/' ;
+                if (preg_match($ogImagePattern, $html, $matches)) {
+                    $imageUrl = $matches[1];
+                    Log::info('GeminiProductService: Found Richelieu og:image matching SKU', [
+                        'sku' => $sku,
+                        'image_url' => $imageUrl,
+                    ]);
+                    return $imageUrl;
+                }
+
+                // Look for image URLs containing our SKU in src attributes
                 $skuPattern = '/src=["\']([^"\']*static\.richelieu\.com[^"\']*' . preg_quote($sku, '/') . '[^"\']*\.(?:jpg|jpeg|png|webp))["\']/' ;
                 if (preg_match($skuPattern, $html, $matches)) {
                     $imageUrl = $matches[1];
