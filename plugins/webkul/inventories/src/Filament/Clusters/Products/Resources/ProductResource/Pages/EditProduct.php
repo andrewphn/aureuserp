@@ -18,7 +18,7 @@ use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
 use Webkul\Inventory\Models\Location;
-use Webkul\Inventory\Models\Product;
+use Webkul\Inventory\Models\Product as InventoryProduct;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Inventory\Settings\OperationSettings;
@@ -47,7 +47,7 @@ class EditProduct extends BaseEditProduct
                 ->modalDescription('AI will search the web and generate product details based on the product name. This may take up to 30 seconds. You can review and edit before saving.')
                 ->modalSubmitActionLabel('Generate')
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
-                ->action(function (Product $record) {
+                ->action(function (InventoryProduct $record) {
                     try {
                         // Get current form data WITHOUT triggering validation
                         $currentData = $this->form->getRawState();
@@ -261,7 +261,7 @@ class EditProduct extends BaseEditProduct
                 ->modalDescription('Upload a photo and enter quantity. AI will identify the product and populate all details.')
                 ->modalSubmitActionLabel('Identify & Populate')
                 ->visible(fn () => (new GeminiProductService())->isConfigured())
-                ->action(function (array $data, Product $record) {
+                ->action(function (array $data, InventoryProduct $record) {
                     try {
                         // Get the uploaded file path
                         $imagePath = $data['product_image'] ?? null;
@@ -520,7 +520,7 @@ class EditProduct extends BaseEditProduct
             Action::make('updateQuantity')
                 ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.label'))
                 ->modalHeading(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.modal-heading'))
-                ->schema(fn (Product $record): array => [
+                ->schema(fn (InventoryProduct $record): array => [
                     Select::make('product_id')
                         ->label(__('inventories::filament/clusters/products/resources/product/pages/edit-product.header-actions.update-quantity.form.fields.product'))
                         ->required()
@@ -528,7 +528,7 @@ class EditProduct extends BaseEditProduct
                         ->searchable()
                         ->live()
                         ->afterStateUpdated(function (Get $get, Set $set) {
-                            $product = Product::find($get('product_id'));
+                            $product = InventoryProduct::find($get('product_id'));
 
                             $set('quantity', $product?->on_hand_quantity ?? 0);
                         })
@@ -547,7 +547,7 @@ class EditProduct extends BaseEditProduct
                     OperationSettings $operationSettings,
                     TraceabilitySettings $traceabilitySettings,
                     WarehouseSettings $warehouseSettings,
-                    Product $record
+                    InventoryProduct $record
                 ) {
                     if (
                         $operationSettings->enable_packages
@@ -560,9 +560,9 @@ class EditProduct extends BaseEditProduct
                         return redirect()->to(ProductResource::getUrl('quantities', ['record' => $record]));
                     }
                 })
-                ->action(function (Product $record, array $data): void {
+                ->action(function (InventoryProduct $record, array $data): void {
                     if (isset($data['product_id'])) {
-                        $record = Product::find($data['product_id']);
+                        $record = InventoryProduct::find($data['product_id']);
                     }
 
                     $previousQuantity = $record->on_hand_quantity;
