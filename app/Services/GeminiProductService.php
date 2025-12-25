@@ -1137,6 +1137,14 @@ PROMPT;
                 $ogImagePattern = '/<meta\s+property=["\']og:image["\']\s+content=["\']([^"\']*static\.richelieu\.com[^"\']*' . preg_quote($sku, '/') . '[^"\']*\.(?:jpg|jpeg|png|webp))["\']/' ;
                 if (preg_match($ogImagePattern, $html, $matches)) {
                     $imageUrl = $matches[1];
+                    // Try to get _hd version (highest quality)
+                    if (str_contains($imageUrl, '_700.') || str_contains($imageUrl, '_300.')) {
+                        $hdUrl = preg_replace('/_(700|300)\./', '_hd.', $imageUrl);
+                        $checkResponse = Http::timeout(5)->head($hdUrl);
+                        if ($checkResponse->successful()) {
+                            $imageUrl = $hdUrl;
+                        }
+                    }
                     Log::info('GeminiProductService: Found Richelieu og:image matching SKU', [
                         'sku' => $sku,
                         'image_url' => $imageUrl,
@@ -1268,13 +1276,21 @@ PROMPT;
                         continue;
                     }
 
-                    // Prefer larger image sizes - try to get _800 or _veryBig version
-                    if (str_contains($imageUrl, '_300.')) {
-                        $largerUrl = str_replace('_300.', '_800.', $imageUrl);
-                        // Verify the larger image exists
-                        $checkResponse = Http::timeout(5)->head($largerUrl);
+                    // Prefer larger image sizes - try to get _hd or _800 version
+                    // Order of preference: _hd > _800 > _700 > _300
+                    if (str_contains($imageUrl, '_700.') || str_contains($imageUrl, '_300.')) {
+                        // Try _hd first (highest quality)
+                        $hdUrl = preg_replace('/_(700|300)\./', '_hd.', $imageUrl);
+                        $checkResponse = Http::timeout(5)->head($hdUrl);
                         if ($checkResponse->successful()) {
-                            $imageUrl = $largerUrl;
+                            $imageUrl = $hdUrl;
+                        } elseif (str_contains($imageUrl, '_300.')) {
+                            // Fallback to _800 for _300 images
+                            $largerUrl = str_replace('_300.', '_800.', $imageUrl);
+                            $checkResponse = Http::timeout(5)->head($largerUrl);
+                            if ($checkResponse->successful()) {
+                                $imageUrl = $largerUrl;
+                            }
                         }
                     }
 
