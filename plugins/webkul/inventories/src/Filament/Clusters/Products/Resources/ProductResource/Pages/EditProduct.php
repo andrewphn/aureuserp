@@ -212,9 +212,11 @@ class EditProduct extends BaseEditProduct
                             }
                         }
 
-                        // PRIORITY 2: Fallback to AI-provided image_url if Richelieu extraction failed
-                        if (!$imageDownloaded && !empty($data['image_url'])) {
-                            Log::info('AI Populate - Using AI-provided image URL', ['image_url' => $data['image_url']]);
+                        // PRIORITY 2: Only use AI image if source is NOT Richelieu
+                        // If source is Richelieu but extraction failed, don't fallback to AI's random image
+                        $isRichelieuSource = !empty($sourceUrlForImage) && str_contains($sourceUrlForImage, 'richelieu.com');
+                        if (!$imageDownloaded && !empty($data['image_url']) && !$isRichelieuSource) {
+                            Log::info('AI Populate - Using AI-provided image URL (non-Richelieu source)', ['image_url' => $data['image_url']]);
                             $downloadedImage = GeminiProductService::downloadProductImage(
                                 $data['image_url'],
                                 $data['identified_product_name'] ?? $productName
@@ -238,6 +240,10 @@ class EditProduct extends BaseEditProduct
                                     }
                                 }
                             }
+                        } elseif (!$imageDownloaded && $isRichelieuSource) {
+                            Log::info('AI Populate - Skipping AI image (Richelieu source but extraction failed)', [
+                                'source_url' => $sourceUrlForImage,
+                            ]);
                         }
 
                         if (!empty($updates)) {
