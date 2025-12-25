@@ -199,10 +199,29 @@ class GeminiProductService
         $sourcePageContent = '';
         $sourceUrlSection = '';
         if (!empty($searchContext['source_url'])) {
-            $sourceUrlSection = "\n\n⚠️ CRITICAL: User provided a direct product page URL. USE THIS AS YOUR PRIMARY SOURCE:\n{$searchContext['source_url']}\n";
+            $sourceUrl = $searchContext['source_url'];
+
+            // Different handling based on source
+            if (str_contains($sourceUrl, 'amazon.com')) {
+                // Amazon URL - use it to IDENTIFY product, but search Richelieu first
+                $sourceUrlSection = "\n\n⚠️ AMAZON URL PROVIDED - USE TO IDENTIFY PRODUCT ONLY:\n{$sourceUrl}\n";
+                $sourceUrlSection .= "\n🔍 IMPORTANT WORKFLOW:\n";
+                $sourceUrlSection .= "1. Extract product name, brand, model, specs from the Amazon page below\n";
+                $sourceUrlSection .= "2. FIRST search Richelieu.com for this SAME product (by name/model/brand)\n";
+                $sourceUrlSection .= "3. If Richelieu has it → use Richelieu price, URL, and image\n";
+                $sourceUrlSection .= "4. ONLY if Richelieu doesn't have it → use Amazon data as fallback\n";
+                $sourceUrlSection .= "5. For image: prefer Richelieu image, Amazon image as fallback\n";
+            } elseif (str_contains($sourceUrl, 'richelieu.com')) {
+                // Richelieu URL - use directly as primary source
+                $sourceUrlSection = "\n\n⚠️ RICHELIEU URL PROVIDED - USE THIS AS PRIMARY SOURCE:\n{$sourceUrl}\n";
+            } else {
+                // Other URL - use as reference but still check Richelieu
+                $sourceUrlSection = "\n\n⚠️ SOURCE URL PROVIDED:\n{$sourceUrl}\n";
+                $sourceUrlSection .= "Use this to identify the product, but ALSO check Richelieu.com for better pricing.\n";
+            }
 
             // Fetch the page content to give Gemini the actual data
-            $pageContent = $this->fetchPageContent($searchContext['source_url']);
+            $pageContent = $this->fetchPageContent($sourceUrl);
             if ($pageContent) {
                 $sourcePageContent = "\n\n### PRODUCT PAGE CONTENT (extracted from source URL):\n" . $pageContent . "\n";
             }
