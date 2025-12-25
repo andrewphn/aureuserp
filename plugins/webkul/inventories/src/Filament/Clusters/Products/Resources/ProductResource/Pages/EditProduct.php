@@ -14,6 +14,10 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Webkul\Product\Models\Tag;
+use Webkul\Product\Models\Attribute;
+use Webkul\Product\Models\AttributeOption;
+use Webkul\Product\Models\ProductAttribute;
+use Webkul\Product\Models\ProductAttributeValue;
 use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Enums\ProductTracking;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
@@ -280,13 +284,147 @@ class EditProduct extends BaseEditProduct
                             ]);
                         }
 
-                        if (!empty($updates)) {
+                        // Process suggested attributes from AI
+                        $attributesCreated = 0;
+                        if (!empty($data['suggested_attributes']) && is_array($data['suggested_attributes'])) {
+                            Log::info('AI Populate - Processing suggested attributes', [
+                                'product_id' => $record->id,
+                                'attributes' => $data['suggested_attributes'],
+                            ]);
+
+                            foreach ($data['suggested_attributes'] as $suggestedAttr) {
+                                try {
+                                    // Find the attribute by ID or name
+                                    $attribute = null;
+                                    if (!empty($suggestedAttr['attribute_id'])) {
+                                        $attribute = Attribute::find($suggestedAttr['attribute_id']);
+                                    }
+                                    if (!$attribute && !empty($suggestedAttr['attribute_name'])) {
+                                        $attribute = Attribute::where('name', $suggestedAttr['attribute_name'])->first();
+                                    }
+
+                                    if (!$attribute) {
+                                        Log::warning('AI Populate - Attribute not found', [
+                                            'suggested' => $suggestedAttr,
+                                        ]);
+                                        continue;
+                                    }
+
+                                    // Check if product already has this attribute
+                                    $existingProductAttr = ProductAttribute::where('product_id', $record->id)
+                                        ->where('attribute_id', $attribute->id)
+                                        ->first();
+
+                                    if ($existingProductAttr) {
+                                        Log::info('AI Populate - Product already has this attribute', [
+                                            'product_id' => $record->id,
+                                            'attribute_id' => $attribute->id,
+                                            'attribute_name' => $attribute->name,
+                                        ]);
+                                        continue;
+                                    }
+
+                                    // Create ProductAttribute record
+                                    $productAttribute = ProductAttribute::create([
+                                        'product_id' => $record->id,
+                                        'attribute_id' => $attribute->id,
+                                        'creator_id' => Auth::id(),
+                                    ]);
+
+                                    // Create ProductAttributeValue based on attribute type
+                                    if ($attribute->isNumeric()) {
+                                        // For NUMBER/DIMENSION types, parse the numeric value
+                                        $numericValue = null;
+                                        $valueString = $suggestedAttr['value'] ?? $suggestedAttr['option_name'] ?? null;
+                                        if ($valueString !== null) {
+                                            // Extract numeric value from string like "21 inch" or "533mm"
+                                            if (preg_match('/[\d.]+/', (string) $valueString, $matches)) {
+                                                $numericValue = (float) $matches[0];
+                                            }
+                                        }
+
+                                        if ($numericValue !== null) {
+                                            ProductAttributeValue::create([
+                                                'product_id' => $record->id,
+                                                'attribute_id' => $attribute->id,
+                                                'product_attribute_id' => $productAttribute->id,
+                                                'numeric_value' => $numericValue,
+                                                'extra_price' => 0,
+                                            ]);
+                                            $attributesCreated++;
+                                            Log::info('AI Populate - Created numeric attribute value', [
+                                                'product_id' => $record->id,
+                                                'attribute_name' => $attribute->name,
+                                                'numeric_value' => $numericValue,
+                                            ]);
+                                        }
+                                    } else {
+                                        // For SELECT/RADIO/COLOR types, find or create the option
+                                        $optionName = $suggestedAttr['option_name'] ?? $suggestedAttr['value'] ?? null;
+                                        if (!empty($optionName)) {
+                                            $option = AttributeOption::where('attribute_id', $attribute->id)
+                                                ->where('name', $optionName)
+                                                ->first();
+
+                                            if (!$option) {
+                                                // Create new option
+                                                $option = AttributeOption::create([
+                                                    'attribute_id' => $attribute->id,
+                                                    'name' => $optionName,
+                                                    'extra_price' => 0,
+                                                ]);
+                                                Log::info('AI Populate - Created new attribute option', [
+                                                    'attribute_id' => $attribute->id,
+                                                    'option_name' => $optionName,
+                                                ]);
+                                            }
+
+                                            ProductAttributeValue::create([
+                                                'product_id' => $record->id,
+                                                'attribute_id' => $attribute->id,
+                                                'product_attribute_id' => $productAttribute->id,
+                                                'attribute_option_id' => $option->id,
+                                                'extra_price' => $option->extra_price ?? 0,
+                                            ]);
+                                            $attributesCreated++;
+                                            Log::info('AI Populate - Created option attribute value', [
+                                                'product_id' => $record->id,
+                                                'attribute_name' => $attribute->name,
+                                                'option_name' => $optionName,
+                                            ]);
+                                        }
+                                    }
+                                } catch (\Exception $attrException) {
+                                    Log::error('AI Populate - Error creating attribute', [
+                                        'product_id' => $record->id,
+                                        'suggested' => $suggestedAttr,
+                                        'error' => $attrException->getMessage(),
+                                    ]);
+                                }
+                            }
+
+                            if ($attributesCreated > 0) {
+                                Log::info('AI Populate - Successfully created attributes', [
+                                    'product_id' => $record->id,
+                                    'count' => $attributesCreated,
+                                ]);
+                            }
+                        }
+
+                        if (!empty($updates) || $attributesCreated > 0) {
                             // Update form state without saving to database
-                            $this->form->fill(array_merge($currentData, $updates));
+                            if (!empty($updates)) {
+                                $this->form->fill(array_merge($currentData, $updates));
+                            }
+
+                            $successBody = 'Review the changes below and click Save when ready.';
+                            if ($attributesCreated > 0) {
+                                $successBody .= " {$attributesCreated} product attribute(s) added.";
+                            }
 
                             Notification::make()
                                 ->title('Product details generated')
-                                ->body('Review the changes below and click Save when ready.')
+                                ->body($successBody)
                                 ->success()
                                 ->persistent()
                                 ->send();
@@ -563,18 +701,117 @@ class EditProduct extends BaseEditProduct
                             }
                         }
 
+                        // Process suggested attributes from AI (same logic as aiPopulate)
+                        $attributesCreated = 0;
+                        if (!empty($aiData['suggested_attributes']) && is_array($aiData['suggested_attributes'])) {
+                            Log::info('AI Photo - Processing suggested attributes', [
+                                'product_id' => $record->id,
+                                'attributes' => $aiData['suggested_attributes'],
+                            ]);
+
+                            foreach ($aiData['suggested_attributes'] as $suggestedAttr) {
+                                try {
+                                    // Find the attribute by ID or name
+                                    $attribute = null;
+                                    if (!empty($suggestedAttr['attribute_id'])) {
+                                        $attribute = Attribute::find($suggestedAttr['attribute_id']);
+                                    }
+                                    if (!$attribute && !empty($suggestedAttr['attribute_name'])) {
+                                        $attribute = Attribute::where('name', $suggestedAttr['attribute_name'])->first();
+                                    }
+
+                                    if (!$attribute) {
+                                        continue;
+                                    }
+
+                                    // Check if product already has this attribute
+                                    $existingProductAttr = ProductAttribute::where('product_id', $record->id)
+                                        ->where('attribute_id', $attribute->id)
+                                        ->first();
+
+                                    if ($existingProductAttr) {
+                                        continue;
+                                    }
+
+                                    // Create ProductAttribute record
+                                    $productAttribute = ProductAttribute::create([
+                                        'product_id' => $record->id,
+                                        'attribute_id' => $attribute->id,
+                                        'creator_id' => Auth::id(),
+                                    ]);
+
+                                    // Create ProductAttributeValue based on attribute type
+                                    if ($attribute->isNumeric()) {
+                                        $numericValue = null;
+                                        $valueString = $suggestedAttr['value'] ?? $suggestedAttr['option_name'] ?? null;
+                                        if ($valueString !== null) {
+                                            if (preg_match('/[\d.]+/', (string) $valueString, $matches)) {
+                                                $numericValue = (float) $matches[0];
+                                            }
+                                        }
+
+                                        if ($numericValue !== null) {
+                                            ProductAttributeValue::create([
+                                                'product_id' => $record->id,
+                                                'attribute_id' => $attribute->id,
+                                                'product_attribute_id' => $productAttribute->id,
+                                                'numeric_value' => $numericValue,
+                                                'extra_price' => 0,
+                                            ]);
+                                            $attributesCreated++;
+                                        }
+                                    } else {
+                                        $optionName = $suggestedAttr['option_name'] ?? $suggestedAttr['value'] ?? null;
+                                        if (!empty($optionName)) {
+                                            $option = AttributeOption::where('attribute_id', $attribute->id)
+                                                ->where('name', $optionName)
+                                                ->first();
+
+                                            if (!$option) {
+                                                $option = AttributeOption::create([
+                                                    'attribute_id' => $attribute->id,
+                                                    'name' => $optionName,
+                                                    'extra_price' => 0,
+                                                ]);
+                                            }
+
+                                            ProductAttributeValue::create([
+                                                'product_id' => $record->id,
+                                                'attribute_id' => $attribute->id,
+                                                'product_attribute_id' => $productAttribute->id,
+                                                'attribute_option_id' => $option->id,
+                                                'extra_price' => $option->extra_price ?? 0,
+                                            ]);
+                                            $attributesCreated++;
+                                        }
+                                    }
+                                } catch (\Exception $attrException) {
+                                    Log::error('AI Photo - Error creating attribute', [
+                                        'product_id' => $record->id,
+                                        'error' => $attrException->getMessage(),
+                                    ]);
+                                }
+                            }
+                        }
+
                         // Quantity from user input
                         if (!empty($data['quantity']) && $data['quantity'] > 0) {
                             $updates['qty_available'] = $data['quantity'];
                         }
 
-                        if (!empty($updates)) {
-                            $this->form->fill(array_merge($currentData, $updates));
+                        if (!empty($updates) || $attributesCreated > 0) {
+                            if (!empty($updates)) {
+                                $this->form->fill(array_merge($currentData, $updates));
+                            }
 
                             $identifiedName = $aiData['identified_product_name'] ?? 'Unknown product';
+                            $successBody = "Identified as: {$identifiedName}. Review the details and click Save when ready.";
+                            if ($attributesCreated > 0) {
+                                $successBody .= " {$attributesCreated} attribute(s) added.";
+                            }
                             Notification::make()
                                 ->title('Product Identified!')
-                                ->body("Identified as: {$identifiedName}. Review the details and click Save when ready.")
+                                ->body($successBody)
                                 ->success()
                                 ->persistent()
                                 ->send();
