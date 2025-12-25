@@ -132,28 +132,10 @@ class CreateProduct extends BaseCreateProduct
         // Add any AI-collected images to Spatie media library
         $aiImages = $this->getAiImagesToAdd();
 
-        Log::info('handleRecordCreation: Checking AI images', [
-            'product_id' => $record->id,
-            'product_exists' => $record->exists,
-            'ai_images_count' => count($aiImages),
-            'ai_images' => $aiImages,
-        ]);
-
         if (!empty($aiImages)) {
             foreach ($aiImages as $imagePath) {
                 $fullPath = storage_path('app/public/' . $imagePath);
-                $fileExists = file_exists($fullPath);
-                $fileSize = $fileExists ? filesize($fullPath) : 0;
-
-                Log::info('handleRecordCreation: Processing image', [
-                    'product_id' => $record->id,
-                    'image_path' => $imagePath,
-                    'full_path' => $fullPath,
-                    'file_exists' => $fileExists,
-                    'file_size' => $fileSize,
-                ]);
-
-                if ($fileExists) {
+                if (file_exists($fullPath)) {
                     try {
                         $media = $record->addMedia($fullPath)
                             ->toMediaCollection('product-images');
@@ -161,32 +143,19 @@ class CreateProduct extends BaseCreateProduct
                         Log::info('Added AI image to Spatie media', [
                             'product_id' => $record->id,
                             'image_path' => $imagePath,
-                            'media_id' => $media ? $media->id : 'null',
-                            'media_file' => $media ? $media->file_name : 'null',
-                        ]);
-
-                        // Verify the media was actually saved to database
-                        $mediaCount = $record->getMedia('product-images')->count();
-                        Log::info('handleRecordCreation: Media verification', [
-                            'product_id' => $record->id,
-                            'media_count_after_add' => $mediaCount,
-                            'media_in_db' => \Spatie\MediaLibrary\MediaCollections\Models\Media::where('model_id', $record->id)
-                                ->where('model_type', get_class($record))
-                                ->count(),
+                            'media_id' => $media?->id,
                         ]);
                     } catch (\Exception $e) {
                         Log::error('Failed to add AI image to Spatie', [
                             'product_id' => $record->id,
                             'image_path' => $imagePath,
                             'error' => $e->getMessage(),
-                            'trace' => $e->getTraceAsString(),
                         ]);
                     }
                 } else {
-                    Log::warning('handleRecordCreation: Image file not found', [
+                    Log::warning('AI image file not found', [
                         'product_id' => $record->id,
                         'image_path' => $imagePath,
-                        'full_path' => $fullPath,
                     ]);
                 }
             }
