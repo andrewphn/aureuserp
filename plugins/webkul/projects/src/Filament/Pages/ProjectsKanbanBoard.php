@@ -23,6 +23,7 @@ use Webkul\Lead\Models\Lead;
 use Webkul\Lead\Services\LeadConversionService;
 use Webkul\Partner\Models\Partner;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Models\Milestone;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Models\Task;
@@ -80,6 +81,9 @@ class ProjectsKanbanBoard extends KanbanBoard
     // Chatter modal
     public ?int $chatterRecordId = null;
 
+    // Quick Actions / Project Details modal
+    public ?int $quickActionsRecordId = null;
+
     // Leads inbox
     public bool $leadsInboxOpen = true;
 
@@ -93,6 +97,13 @@ class ProjectsKanbanBoard extends KanbanBoard
 
     // Project filter for tasks view
     public ?int $projectFilter = null;
+
+    // Quick Actions inline form inputs
+    public string $quickTaskTitle = '';
+
+    public string $quickMilestoneTitle = '';
+
+    public string $quickComment = '';
 
     public static function getNavigationGroup(): string
     {
@@ -541,6 +552,28 @@ class ProjectsKanbanBoard extends KanbanBoard
     }
 
     /**
+     * Open Quick Actions / Project Details slide-over
+     */
+    public function openQuickActions(int|string $recordId): void
+    {
+        $this->quickActionsRecordId = (int) $recordId;
+        $this->dispatch('open-modal', id: 'kanban--quick-actions-modal');
+    }
+
+    /**
+     * Get quick actions record
+     */
+    public function getQuickActionsRecord(): ?Project
+    {
+        if (!$this->quickActionsRecordId) {
+            return null;
+        }
+
+        return Project::with(['partner', 'stage', 'milestones', 'tasks', 'orders', 'user', 'designer', 'purchasingManager'])
+            ->find($this->quickActionsRecordId);
+    }
+
+    /**
      * Open create modal for a specific stage
      */
     public function openCreateModal(int|string $stageId): void
@@ -581,6 +614,7 @@ class ProjectsKanbanBoard extends KanbanBoard
     {
         $data = parent::getViewData();
         $data['chatterRecord'] = $this->getChatterRecord();
+        $data['quickActionsRecord'] = $this->getQuickActionsRecord();
         $data['cardSettings'] = $this->cardSettings;
 
         // Add view mode
@@ -763,5 +797,305 @@ class ProjectsKanbanBoard extends KanbanBoard
     public function toggleLeadsInbox(): void
     {
         $this->leadsInboxOpen = ! $this->leadsInboxOpen;
+    }
+
+    // =========================================
+    // QUICK ACTIONS - INLINE CRUD METHODS
+    // =========================================
+
+    /**
+     * Toggle milestone completion status
+     */
+    public function toggleMilestoneStatus(int $milestoneId): void
+    {
+        $milestone = Milestone::find($milestoneId);
+
+        if (!$milestone) {
+            return;
+        }
+
+        $milestone->update([
+            'is_completed' => !$milestone->is_completed,
+            'completed_at' => !$milestone->is_completed ? now() : null,
+        ]);
+
+        Notification::make()
+            ->title($milestone->is_completed ? 'Milestone completed' : 'Milestone reopened')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Add a quick milestone to the project
+     */
+    public function addQuickMilestone(): void
+    {
+        if (empty(trim($this->quickMilestoneTitle))) {
+            return;
+        }
+
+        $project = $this->getQuickActionsRecord();
+
+        if (!$project) {
+            return;
+        }
+
+        // Get the next sort order
+        $maxSort = $project->milestones()->max('sort') ?? 0;
+
+        Milestone::create([
+            'project_id' => $project->id,
+            'name' => trim($this->quickMilestoneTitle),
+            'sort' => $maxSort + 1,
+            'is_completed' => false,
+        ]);
+
+        $this->quickMilestoneTitle = '';
+
+        Notification::make()
+            ->title('Milestone added')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Update task status inline
+     */
+    public function updateTaskStatus(int $taskId, string $state): void
+    {
+        $task = Task::find($taskId);
+
+        if (!$task) {
+            return;
+        }
+
+        $task->update([
+            'state' => $state,
+            'completed_at' => $state === 'done' ? now() : null,
+        ]);
+
+        Notification::make()
+            ->title('Task status updated')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Add a quick task to the project
+     */
+    public function addQuickTask(): void
+    {
+        if (empty(trim($this->quickTaskTitle))) {
+            return;
+        }
+
+        $project = $this->getQuickActionsRecord();
+
+        if (!$project) {
+            return;
+        }
+
+        // Get the first task stage for this project or default
+        $stage = TaskStage::query()
+            ->where(function ($q) use ($project) {
+                $q->where('project_id', $project->id)
+                    ->orWhereNull('project_id');
+            })
+            ->orderBy('sort')
+            ->first();
+
+        Task::create([
+            'project_id' => $project->id,
+            'title' => trim($this->quickTaskTitle),
+            'state' => 'pending',
+            'stage_id' => $stage?->id,
+            'creator_id' => auth()->id(),
+        ]);
+
+        $this->quickTaskTitle = '';
+
+        Notification::make()
+            ->title('Task added')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Assign team member to project
+     */
+    public function assignTeamMember(string $role, ?int $userId): void
+    {
+        $project = $this->getQuickActionsRecord();
+
+        if (!$project) {
+            return;
+        }
+
+        $fieldMap = [
+            'pm' => 'user_id',
+            'designer' => 'designer_id',
+            'purchasing' => 'purchasing_manager_id',
+        ];
+
+        $field = $fieldMap[$role] ?? null;
+
+        if (!$field) {
+            return;
+        }
+
+        $project->update([$field => $userId]);
+
+        $roleName = match ($role) {
+            'pm' => 'Project Manager',
+            'designer' => 'Designer',
+            'purchasing' => 'Purchasing Manager',
+            default => 'Team member',
+        };
+
+        Notification::make()
+            ->title($userId ? "{$roleName} assigned" : "{$roleName} unassigned")
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Toggle project blocked status
+     * If blocked, clears the block. If not blocked, creates a blocker.
+     */
+    public function toggleProjectBlocked(): void
+    {
+        $project = $this->getQuickActionsRecord();
+
+        if (!$project) {
+            return;
+        }
+
+        // Check if any task is blocked
+        $blockedTask = $project->tasks()->where('state', 'blocked')->first();
+
+        if ($blockedTask) {
+            // Unblock all blocked tasks
+            $project->tasks()->where('state', 'blocked')->update(['state' => 'pending']);
+
+            Notification::make()
+                ->title('Project unblocked')
+                ->body('All blocked tasks have been set to open.')
+                ->success()
+                ->send();
+        } else {
+            // Create a blocker task or mark first pending task as blocked
+            $pendingTask = $project->tasks()->whereIn('state', ['open', 'in_progress'])->first();
+
+            if ($pendingTask) {
+                $pendingTask->update(['state' => 'blocked']);
+
+                Notification::make()
+                    ->title('Project marked as blocked')
+                    ->body("Task '{$pendingTask->title}' marked as blocked.")
+                    ->warning()
+                    ->send();
+            } else {
+                // Create a new blocked task
+                Task::create([
+                    'project_id' => $project->id,
+                    'title' => 'Blocker - Needs attention',
+                    'state' => 'blocked',
+                    'creator_id' => auth()->id(),
+                ]);
+
+                Notification::make()
+                    ->title('Project marked as blocked')
+                    ->body('Created a blocker task.')
+                    ->warning()
+                    ->send();
+            }
+        }
+    }
+
+    /**
+     * Post a quick comment to the project via Chatter
+     */
+    public function postQuickComment(): void
+    {
+        if (empty(trim($this->quickComment))) {
+            return;
+        }
+
+        $project = $this->getQuickActionsRecord();
+
+        if (!$project) {
+            return;
+        }
+
+        // Use the Chatter trait to add a message
+        if (method_exists($project, 'addMessage')) {
+            $project->addMessage([
+                'body' => trim($this->quickComment),
+                'type' => 'comment',
+            ]);
+        } else {
+            // Fallback: Create activity directly
+            $project->activities()->create([
+                'type' => 'comment',
+                'body' => trim($this->quickComment),
+                'causer_type' => \Webkul\Security\Models\User::class,
+                'causer_id' => auth()->id(),
+            ]);
+        }
+
+        $this->quickComment = '';
+
+        Notification::make()
+            ->title('Comment added')
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Change project stage inline
+     */
+    public function changeProjectStage(int $stageId): void
+    {
+        $project = $this->getQuickActionsRecord();
+
+        if (!$project) {
+            return;
+        }
+
+        $stage = ProjectStage::find($stageId);
+
+        if (!$stage) {
+            return;
+        }
+
+        $project->update(['stage_id' => $stageId]);
+
+        Notification::make()
+            ->title('Stage updated')
+            ->body("Moved to {$stage->name}")
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Get available users for team assignment
+     */
+    public function getAvailableUsers(): Collection
+    {
+        return User::query()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
+    }
+
+    /**
+     * Get available project stages
+     */
+    public function getAvailableStages(): Collection
+    {
+        return ProjectStage::query()
+            ->where('is_active', true)
+            ->orderBy('sort')
+            ->get(['id', 'name', 'color']);
     }
 }
