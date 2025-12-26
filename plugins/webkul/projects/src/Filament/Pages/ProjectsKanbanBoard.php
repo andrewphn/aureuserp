@@ -961,9 +961,16 @@ class ProjectsKanbanBoard extends KanbanBoard
     /**
      * Toggle project blocked status
      * If blocked, clears the block. If not blocked, creates a blocker.
+     *
+     * @param int|string|null $projectId Optional project ID (for context menu usage)
      */
-    public function toggleProjectBlocked(): void
+    public function toggleProjectBlocked(int|string|null $projectId = null): void
     {
+        // If projectId is provided (from context menu), set it
+        if ($projectId !== null) {
+            $this->quickActionsRecordId = (int) $projectId;
+        }
+
         $project = $this->getQuickActionsRecord();
 
         if (!$project) {
@@ -979,12 +986,12 @@ class ProjectsKanbanBoard extends KanbanBoard
 
             Notification::make()
                 ->title('Project unblocked')
-                ->body('All blocked tasks have been set to open.')
+                ->body('All blocked tasks have been set to pending.')
                 ->success()
                 ->send();
         } else {
             // Create a blocker task or mark first pending task as blocked
-            $pendingTask = $project->tasks()->whereIn('state', ['open', 'in_progress'])->first();
+            $pendingTask = $project->tasks()->whereIn('state', ['pending', 'in_progress'])->first();
 
             if ($pendingTask) {
                 $pendingTask->update(['state' => 'blocked']);
