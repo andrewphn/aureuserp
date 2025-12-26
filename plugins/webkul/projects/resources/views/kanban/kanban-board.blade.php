@@ -203,33 +203,47 @@
                     {{-- Lead Cards - Black outlined container --}}
                     <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 border-2 border-t-0 border-gray-900 dark:border-gray-700">
                         @forelse($leads ?? [] as $lead)
-                            <div
-                                wire:click="openLeadDetails({{ $lead->id }})"
-                                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 cursor-pointer hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all"
+                            <x-filament::section
+                                compact
+                                class="cursor-pointer hover:ring-2 hover:ring-primary-500 transition-all"
+                                x-data
+                                x-on:click="$wire.openLeadDetails({{ $lead->id }})"
                             >
                                 {{-- Lead Header --}}
                                 <div class="flex items-start justify-between mb-1">
-                                    <h4 class="font-medium text-gray-900 dark:text-white text-sm truncate flex-1">
+                                    <span class="font-medium text-gray-900 dark:text-white text-sm truncate flex-1">
                                         {{ $lead->full_name }}
-                                    </h4>
+                                    </span>
+                                    @if($lead->is_new)
+                                        <x-filament::badge color="success" size="sm">
+                                            New
+                                        </x-filament::badge>
+                                    @endif
                                 </div>
+
                                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate mb-2">
                                     {{ $lead->email }}
                                 </p>
 
                                 {{-- Lead Info --}}
                                 @if($lead->project_type || $lead->budget_range)
-                                    <div class="space-y-1 text-xs text-gray-600 dark:text-gray-300 mb-2">
+                                    <div class="space-y-1.5 text-xs mb-2">
                                         @if($lead->project_type)
-                                            <div class="flex items-center gap-1">
-                                                <x-heroicon-m-briefcase class="w-3 h-3 text-gray-400" />
+                                            <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                                                <x-filament::icon
+                                                    icon="heroicon-m-briefcase"
+                                                    class="h-3.5 w-3.5 text-gray-400"
+                                                />
                                                 <span class="truncate">{{ is_array($lead->project_type) ? implode(', ', $lead->project_type) : $lead->project_type }}</span>
                                             </div>
                                         @endif
                                         @if($lead->budget_range)
-                                            <div class="flex items-center gap-1">
-                                                <x-heroicon-m-currency-dollar class="w-3 h-3 text-gray-400" />
-                                                <span>
+                                            <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-300">
+                                                <x-filament::icon
+                                                    icon="heroicon-m-currency-dollar"
+                                                    class="h-3.5 w-3.5 text-gray-400"
+                                                />
+                                                <span class="font-medium text-success-600 dark:text-success-400">
                                                     @switch($lead->budget_range)
                                                         @case('under_10k') < $10K @break
                                                         @case('10k_25k') $10K-$25K @break
@@ -245,23 +259,28 @@
                                 @endif
 
                                 {{-- Footer with source and time --}}
-                                <div class="flex items-center justify-between text-[10px]">
+                                <div class="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
                                     @if($lead->source)
-                                        <span class="inline-flex items-center px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                        <x-filament::badge color="gray" size="sm">
                                             {{ $lead->source->getLabel() }}
-                                        </span>
+                                        </x-filament::badge>
                                     @else
                                         <span></span>
                                     @endif
-                                    <span class="text-gray-400">{{ $lead->created_at->diffForHumans(null, true) }}</span>
+                                    <span class="text-[10px] text-gray-400">{{ $lead->created_at->diffForHumans(null, true) }}</span>
                                 </div>
-                            </div>
+                            </x-filament::section>
                         @empty
-                            {{-- Empty State - Matching other columns --}}
-                            <div class="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-8">
-                                <x-heroicon-o-inbox class="w-8 h-8 mb-2 opacity-40" />
-                                <p class="text-xs">No leads</p>
-                            </div>
+                            {{-- Empty State --}}
+                            <x-filament::section class="flex-1">
+                                <div class="flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-8">
+                                    <x-filament::icon
+                                        icon="heroicon-o-inbox"
+                                        class="h-8 w-8 mb-2 opacity-40"
+                                    />
+                                    <p class="text-xs">No leads</p>
+                                </div>
+                            </x-filament::section>
                         @endforelse
                     </div>
                 </div>
