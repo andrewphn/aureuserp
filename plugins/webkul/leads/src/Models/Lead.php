@@ -134,6 +134,51 @@ class Lead extends Model implements HasMedia
         // Tracking
         'creator_id',
         'company_id',
+
+        // UTM Attribution Parameters
+        'utm_source',
+        'utm_medium',
+        'utm_campaign',
+        'utm_content',
+        'utm_term',
+
+        // Click IDs for ad platform attribution
+        'gclid',
+        'fbclid',
+        'msclkid',
+
+        // Traffic/Session Data
+        'ip_address',
+        'user_agent',
+        'referrer_url',
+        'landing_page',
+        'entry_page',
+
+        // Device Information
+        'device_type',
+        'browser',
+        'operating_system',
+
+        // Geo Data (from IP lookup)
+        'geo_country',
+        'geo_region',
+        'geo_city',
+        'geo_timezone',
+
+        // Session/Attribution Data
+        'session_id',
+        'visit_count',
+        'pages_viewed',
+        'time_on_site_seconds',
+        'first_visit_at',
+
+        // First/Last Touch Attribution
+        'first_touch_source',
+        'first_touch_medium',
+        'first_touch_campaign',
+        'last_touch_source',
+        'last_touch_medium',
+        'last_touch_campaign',
     ];
 
     /**
@@ -154,6 +199,10 @@ class Lead extends Model implements HasMedia
         'converted_at' => 'datetime',
         'processing_consent' => 'boolean',
         'communication_consent' => 'boolean',
+        'visit_count' => 'integer',
+        'pages_viewed' => 'integer',
+        'time_on_site_seconds' => 'integer',
+        'first_visit_at' => 'datetime',
     ];
 
     /**
@@ -322,6 +371,51 @@ class Lead extends Model implements HasMedia
 
             // Store complete form data
             'form_data' => $data,
+
+            // UTM Attribution Parameters
+            'utm_source' => $data['utm_source'] ?? null,
+            'utm_medium' => $data['utm_medium'] ?? null,
+            'utm_campaign' => $data['utm_campaign'] ?? null,
+            'utm_content' => $data['utm_content'] ?? null,
+            'utm_term' => $data['utm_term'] ?? null,
+
+            // Click IDs for ad platform attribution
+            'gclid' => $data['gclid'] ?? null,
+            'fbclid' => $data['fbclid'] ?? null,
+            'msclkid' => $data['msclkid'] ?? null,
+
+            // Traffic/Session Data
+            'ip_address' => $data['ip_address'] ?? null,
+            'user_agent' => $data['user_agent'] ?? null,
+            'referrer_url' => $data['referrer_url'] ?? null,
+            'landing_page' => $data['landing_page'] ?? null,
+            'entry_page' => $data['entry_page'] ?? null,
+
+            // Device Information
+            'device_type' => $data['device_type'] ?? null,
+            'browser' => $data['browser'] ?? null,
+            'operating_system' => $data['operating_system'] ?? null,
+
+            // Geo Data (from IP lookup)
+            'geo_country' => $data['geo_country'] ?? null,
+            'geo_region' => $data['geo_region'] ?? null,
+            'geo_city' => $data['geo_city'] ?? null,
+            'geo_timezone' => $data['geo_timezone'] ?? null,
+
+            // Session/Attribution Data
+            'session_id' => $data['session_id'] ?? null,
+            'visit_count' => $data['visit_count'] ?? null,
+            'pages_viewed' => $data['pages_viewed'] ?? null,
+            'time_on_site_seconds' => $data['time_on_site_seconds'] ?? null,
+            'first_visit_at' => $data['first_visit_at'] ?? null,
+
+            // First/Last Touch Attribution
+            'first_touch_source' => $data['first_touch_source'] ?? null,
+            'first_touch_medium' => $data['first_touch_medium'] ?? null,
+            'first_touch_campaign' => $data['first_touch_campaign'] ?? null,
+            'last_touch_source' => $data['last_touch_source'] ?? null,
+            'last_touch_medium' => $data['last_touch_medium'] ?? null,
+            'last_touch_campaign' => $data['last_touch_campaign'] ?? null,
         ]);
 
         $lead->save();
