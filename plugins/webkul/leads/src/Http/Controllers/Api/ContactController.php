@@ -205,6 +205,51 @@ class ContactController extends Controller
             'previous_woodworking_experience' => 'nullable|string|max:100',
             'communication_consent' => 'nullable|boolean',
             'is_returning_customer' => 'nullable|boolean',
+
+            // UTM Attribution Parameters
+            'utm_source' => 'nullable|string|max:255',
+            'utm_medium' => 'nullable|string|max:255',
+            'utm_campaign' => 'nullable|string|max:255',
+            'utm_content' => 'nullable|string|max:255',
+            'utm_term' => 'nullable|string|max:255',
+
+            // Click IDs for ad platform attribution
+            'gclid' => 'nullable|string|max:255',
+            'fbclid' => 'nullable|string|max:255',
+            'msclkid' => 'nullable|string|max:255',
+
+            // Traffic/Session Data
+            'ip_address' => 'nullable|string|max:45',
+            'user_agent' => 'nullable|string|max:1000',
+            'referrer_url' => 'nullable|string|max:2000',
+            'landing_page' => 'nullable|string|max:500',
+            'entry_page' => 'nullable|string|max:500',
+
+            // Device Information
+            'device_type' => 'nullable|string|max:50',
+            'browser' => 'nullable|string|max:100',
+            'operating_system' => 'nullable|string|max:100',
+
+            // Geo Data (from IP lookup)
+            'geo_country' => 'nullable|string|max:100',
+            'geo_region' => 'nullable|string|max:100',
+            'geo_city' => 'nullable|string|max:100',
+            'geo_timezone' => 'nullable|string|max:100',
+
+            // Session/Attribution Data
+            'session_id' => 'nullable|string|max:100',
+            'visit_count' => 'nullable|integer|min:0',
+            'pages_viewed' => 'nullable|integer|min:0',
+            'time_on_site_seconds' => 'nullable|integer|min:0',
+            'first_visit_at' => 'nullable|string|max:50',
+
+            // First/Last Touch Attribution
+            'first_touch_source' => 'nullable|string|max:255',
+            'first_touch_medium' => 'nullable|string|max:255',
+            'first_touch_campaign' => 'nullable|string|max:255',
+            'last_touch_source' => 'nullable|string|max:255',
+            'last_touch_medium' => 'nullable|string|max:255',
+            'last_touch_campaign' => 'nullable|string|max:255',
         ];
     }
 }
