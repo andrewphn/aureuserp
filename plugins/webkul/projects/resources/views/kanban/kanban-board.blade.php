@@ -38,7 +38,7 @@
         @if($currentViewMode === 'tasks')
             {{-- Project Filter for Tasks --}}
             <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500">Filter by Project:</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400">Filter by Project:</span>
                 <select
                     wire:model.live="projectFilter"
                     class="text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -226,11 +226,11 @@
                 <div
                     x-show="!inboxOpen"
                     @click="toggleInbox()"
-                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 bg-white border-2 border-gray-900 hover:bg-gray-50"
+                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 bg-white dark:bg-gray-800 border-2 border-gray-900 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
                     title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
                     <span
-                        class="text-xs font-medium text-gray-900 whitespace-nowrap"
+                        class="text-xs font-medium text-gray-900 dark:text-white whitespace-nowrap"
                         style="writing-mode: vertical-rl; text-orientation: mixed;"
                     >
                         Inbox ({{ $inboxCount }})
@@ -247,17 +247,17 @@
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
                     {{-- Header - Black outlined, no fill --}}
-                    <div class="flex items-center justify-between px-4 py-2 transition-all duration-150 bg-white border-2 border-gray-900 border-b-0">
-                        <h3 class="font-medium text-gray-900 text-sm flex items-center gap-1.5">
+                    <div class="flex items-center justify-between px-4 py-2 transition-all duration-150 bg-white dark:bg-gray-800 border-2 border-gray-900 dark:border-gray-600 border-b-0">
+                        <h3 class="font-medium text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
                             <span>Inbox</span>
-                            <span class="text-gray-400">/</span>
-                            <span class="text-gray-700">{{ $inboxCount }}</span>
+                            <span class="text-gray-400 dark:text-gray-500">/</span>
+                            <span class="text-gray-700 dark:text-gray-300">{{ $inboxCount }}</span>
                         </h3>
                         <div class="flex items-center gap-1">
                             {{-- Add Lead Button --}}
                             <a
                                 href="{{ route('filament.admin.resources.leads.create') }}"
-                                class="text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded p-1 transition-all duration-100"
+                                class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded p-1 transition-all duration-100"
                                 title="Add new lead"
                             >
                                 <x-heroicon-m-plus class="w-4 h-4" />
@@ -265,7 +265,7 @@
                             {{-- Collapse Button --}}
                             <button
                                 @click="toggleInbox()"
-                                class="text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded p-1 transition-all duration-100"
+                                class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded p-1 transition-all duration-100"
                                 title="Collapse inbox"
                             >
                                 <x-heroicon-m-chevron-double-left class="w-4 h-4" />
@@ -274,7 +274,7 @@
                     </div>
 
                     {{-- Lead Cards - Black outlined container --}}
-                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 border-2 border-t-0 border-gray-900 dark:border-gray-700">
+                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 border-2 border-t-0 border-gray-900 dark:border-gray-600">
                         @forelse($leads ?? [] as $lead)
                             <x-filament::section
                                 compact
