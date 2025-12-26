@@ -25,6 +25,8 @@ use Webkul\Partner\Models\Partner;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
+use Webkul\Project\Models\Task;
+use Webkul\Project\Models\TaskStage;
 use Webkul\Security\Models\User;
 
 class ProjectsKanbanBoard extends KanbanBoard
@@ -86,6 +88,12 @@ class ProjectsKanbanBoard extends KanbanBoard
     // Widget filter
     public ?string $widgetFilter = 'all';
 
+    // View mode: 'projects' or 'tasks'
+    public string $viewMode = 'projects';
+
+    // Project filter for tasks view
+    public ?int $projectFilter = null;
+
     public static function getNavigationGroup(): string
     {
         return __('webkul-project::filament/resources/project.navigation.group');
@@ -112,13 +120,53 @@ class ProjectsKanbanBoard extends KanbanBoard
 
         // Load card settings from session
         $this->cardSettings = session('kanban_card_settings', $this->cardSettings);
+
+        // Load view mode from session
+        $this->viewMode = session('kanban_view_mode', 'projects');
     }
 
     /**
-     * Get statuses from database stages
+     * Toggle between projects and tasks view
+     */
+    public function toggleViewMode(): void
+    {
+        $this->viewMode = $this->viewMode === 'projects' ? 'tasks' : 'projects';
+        session()->put('kanban_view_mode', $this->viewMode);
+
+        // Reset widget filter when switching modes
+        $this->widgetFilter = 'all';
+    }
+
+    /**
+     * Set view mode directly
+     */
+    public function setViewMode(string $mode): void
+    {
+        $this->viewMode = $mode;
+        session()->put('kanban_view_mode', $this->viewMode);
+        $this->widgetFilter = 'all';
+    }
+
+    /**
+     * Get statuses from database stages (projects or tasks based on view mode)
      */
     protected function statuses(): Collection
     {
+        if ($this->viewMode === 'tasks') {
+            return TaskStage::query()
+                ->where('is_active', true)
+                ->when($this->projectFilter, fn($q) => $q->where('project_id', $this->projectFilter))
+                ->orderBy('sort')
+                ->get()
+                ->map(fn(TaskStage $stage) => [
+                    'id' => $stage->id,
+                    'title' => $stage->name,
+                    'color' => '#6b7280', // TaskStage doesn't have color field
+                    'wip_limit' => null,
+                    'is_collapsed' => $stage->is_collapsed ?? false,
+                ]);
+        }
+
         return ProjectStage::query()
             ->where('is_active', true)
             ->orderBy('sort')
@@ -146,9 +194,21 @@ class ProjectsKanbanBoard extends KanbanBoard
     }
 
     /**
-     * Get eloquent query with eager loading
+     * Get eloquent query with eager loading (projects or tasks based on view mode)
      */
     protected function getEloquentQuery(): Builder
+    {
+        if ($this->viewMode === 'tasks') {
+            return $this->getTasksQuery();
+        }
+
+        return $this->getProjectsQuery();
+    }
+
+    /**
+     * Get projects query
+     */
+    protected function getProjectsQuery(): Builder
     {
         return Project::query()
             ->with(['partner', 'stage', 'milestones', 'orders', 'tasks', 'user'])
@@ -182,6 +242,26 @@ class ProjectsKanbanBoard extends KanbanBoard
                 });
             })
             ->when($this->sortBy, fn($q) => $q->orderBy($this->sortBy, $this->sortDirection ?? 'asc'));
+    }
+
+    /**
+     * Get tasks query
+     */
+    protected function getTasksQuery(): Builder
+    {
+        return Task::query()
+            ->with(['project', 'stage', 'users', 'subTasks', 'creator'])
+            ->when($this->projectFilter, fn($q) => $q->where('project_id', $this->projectFilter))
+            ->when($this->personFilter, fn($q) => $q->whereHas('users', fn($u) => $u->where('users.id', $this->personFilter)))
+            // Widget filters for tasks
+            ->when($this->widgetFilter === 'blocked', fn($q) => $q->where('state', 'blocked'))
+            ->when($this->widgetFilter === 'overdue', fn($q) => $q->where('deadline', '<', now()))
+            ->when($this->widgetFilter === 'due_soon', fn($q) => $q->whereBetween('deadline', [now(), now()->addDays(7)]))
+            ->when($this->widgetFilter === 'in_progress', fn($q) => $q->where('state', 'in_progress'))
+            ->when($this->sortBy === 'desired_completion_date', fn($q) => $q->orderBy('deadline', $this->sortDirection ?? 'asc'))
+            ->when($this->sortBy === 'name', fn($q) => $q->orderBy('title', $this->sortDirection ?? 'asc'))
+            ->when($this->sortBy === 'created_at', fn($q) => $q->orderBy('created_at', $this->sortDirection ?? 'asc'))
+            ->when(!in_array($this->sortBy, ['desired_completion_date', 'name', 'created_at']), fn($q) => $q->orderBy('sort'));
     }
 
     /**
@@ -503,6 +583,13 @@ class ProjectsKanbanBoard extends KanbanBoard
         $data['chatterRecord'] = $this->getChatterRecord();
         $data['cardSettings'] = $this->cardSettings;
 
+        // Add view mode
+        $data['viewMode'] = $this->viewMode;
+
+        // Add projects list for task filter
+        $data['projects'] = Project::query()->orderBy('name')->pluck('name', 'id');
+        $data['projectFilter'] = $this->projectFilter;
+
         // Add leads data
         $data['leads'] = $this->getInboxLeads();
         $data['leadsCount'] = $this->getInboxLeadsCount();
@@ -510,6 +597,61 @@ class ProjectsKanbanBoard extends KanbanBoard
         $data['selectedLead'] = $this->selectedLeadId ? Lead::find($this->selectedLeadId) : null;
 
         return $data;
+    }
+
+    /**
+     * Get task progress info for task cards
+     */
+    public function getTaskProgress(Task $task): array
+    {
+        // Calculate progress based on subtasks or hours
+        $totalSubtasks = $task->subTasks->count();
+        $completedSubtasks = $task->subTasks->where('state', 'done')->count();
+
+        if ($totalSubtasks > 0) {
+            $progressPercent = round(($completedSubtasks / $totalSubtasks) * 100);
+            $progressLabel = "$completedSubtasks/$totalSubtasks subtasks";
+        } elseif ($task->allocated_hours > 0) {
+            $progressPercent = min(100, round(($task->effective_hours / $task->allocated_hours) * 100));
+            $progressLabel = number_format($task->effective_hours, 1) . '/' . number_format($task->allocated_hours, 1) . ' hrs';
+        } else {
+            $progressPercent = $task->progress ?? 0;
+            $progressLabel = $progressPercent . '%';
+        }
+
+        return [
+            'percent' => $progressPercent,
+            'label' => $progressLabel,
+        ];
+    }
+
+    /**
+     * Check if task is overdue
+     */
+    public function isTaskOverdue(Task $task): bool
+    {
+        return $task->deadline && $task->deadline < now() && $task->state !== 'done';
+    }
+
+    /**
+     * Check if task is due soon (within 7 days)
+     */
+    public function isTaskDueSoon(Task $task): bool
+    {
+        if (!$task->deadline || $task->state === 'done') {
+            return false;
+        }
+
+        $daysLeft = now()->diffInDays($task->deadline, false);
+        return $daysLeft >= 0 && $daysLeft <= 7;
+    }
+
+    /**
+     * Set project filter for tasks
+     */
+    public function setProjectFilter(?int $projectId): void
+    {
+        $this->projectFilter = $projectId;
     }
 
     /**
