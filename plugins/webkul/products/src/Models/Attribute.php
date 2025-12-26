@@ -52,6 +52,7 @@ class Attribute extends Model implements Sortable
     protected $fillable = [
         'name',
         'type',
+        'category',
         'sort',
         'creator_id',
         'unit_symbol',
@@ -59,6 +60,8 @@ class Attribute extends Model implements Sortable
         'min_value',
         'max_value',
         'decimal_places',
+        'is_constant',
+        'default_value',
     ];
 
     /**
@@ -71,6 +74,8 @@ class Attribute extends Model implements Sortable
         'min_value'      => 'decimal:4',
         'max_value'      => 'decimal:4',
         'decimal_places' => 'integer',
+        'is_constant'    => 'boolean',
+        'default_value'  => 'decimal:4',
     ];
 
     public $sortable = [
