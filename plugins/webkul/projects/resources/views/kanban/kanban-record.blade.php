@@ -32,29 +32,53 @@
     $isUrgent = $isOverdue || ($daysLeft !== null && $daysLeft <= 7 && $daysLeft >= 0) || $priority === 'high';
 
     $borderColor = '#e5e7eb'; // Normal = light gray
+    $statusBadgeColor = 'gray';
     if ($hasBlockers) {
         $borderColor = '#7c3aed'; // purple - Blocked
+        $statusBadgeColor = 'danger';
     } elseif ($isUrgent) {
         $borderColor = '#ea580c'; // orange - Urgent
+        $statusBadgeColor = 'warning';
     }
 @endphp
 
 <div
     id="{{ $record->getKey() }}"
     wire:click="recordClicked('{{ $record->getKey() }}', { id: {{ $record->id }} })"
-    class="group bg-white dark:bg-gray-800 rounded-lg cursor-pointer
-           hover:shadow-md transition-shadow duration-150"
-    style="border-left: 4px solid {{ $borderColor }}; border-top: 1px solid #e5e7eb; border-right: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;"
+    class="group cursor-pointer"
 >
-    <div class="px-3.5 py-3">
-        {{-- Row 1: Title --}}
-        <h4 class="font-semibold text-gray-900 dark:text-white text-sm leading-snug line-clamp-2">
-            {{ $record->name }}
-        </h4>
+    <x-filament::section
+        compact
+        class="hover:ring-2 hover:ring-primary-500/50 transition-all"
+        :attributes="new \Illuminate\View\ComponentAttributeBag(['style' => 'border-left: 4px solid ' . $borderColor . ';'])"
+    >
+        {{-- Row 1: Title with optional blocker badge --}}
+        <div class="flex items-start justify-between gap-2">
+            <h4 class="font-semibold text-gray-900 dark:text-white text-sm leading-snug line-clamp-2 flex-1">
+                {{ $record->name }}
+            </h4>
+            @if($hasBlockers)
+                <x-filament::badge color="danger" size="sm">
+                    Blocked
+                </x-filament::badge>
+            @elseif($isOverdue)
+                <x-filament::badge color="danger" size="sm">
+                    Overdue
+                </x-filament::badge>
+            @elseif($daysLeft !== null && $daysLeft <= 7)
+                <x-filament::badge color="warning" size="sm">
+                    Due Soon
+                </x-filament::badge>
+            @endif
+        </div>
 
         {{-- Row 2: Customer (if exists) --}}
         @if($record->partner)
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-1.5">
+            <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-1.5 flex items-center gap-1">
+                <x-filament::icon
+                    icon="heroicon-m-user"
+                    class="h-3 w-3 text-gray-400"
+                />
                 {{ $record->partner->name }}
             </p>
         @endif
@@ -62,60 +86,75 @@
         {{-- Row 3: Metadata line --}}
         <div class="flex items-center justify-between mt-3 text-xs">
             {{-- Left: Due date --}}
-            <div class="text-gray-500 font-medium">
+            <div class="flex items-center gap-1 text-gray-500">
                 @if($record->desired_completion_date)
-                    {{ $record->desired_completion_date->format('M j') }}
+                    <x-filament::icon
+                        icon="heroicon-m-calendar"
+                        class="h-3.5 w-3.5 text-gray-400"
+                    />
+                    <span class="font-medium">{{ $record->desired_completion_date->format('M j') }}</span>
                 @endif
             </div>
 
             {{-- Right: Key metrics --}}
-            <div class="flex items-center gap-2.5 text-gray-500">
+            <div class="flex items-center gap-2 text-gray-500">
                 {{-- Linear Feet --}}
                 @if($linearFeet)
-                    <span class="font-medium">{{ number_format($linearFeet, 0) }} LF</span>
+                    <x-filament::badge color="gray" size="sm">
+                        {{ number_format($linearFeet, 0) }} LF
+                    </x-filament::badge>
                 @endif
 
                 {{-- Days indicator --}}
                 @if($daysLeft !== null)
                     @if($isOverdue)
-                        <span class="font-bold" style="color: #dc2626;">{{ abs($daysLeft) }}d late</span>
+                        <x-filament::badge color="danger" size="sm">
+                            {{ abs($daysLeft) }}d late
+                        </x-filament::badge>
                     @elseif($daysLeft <= 7)
-                        <span class="font-bold" style="color: #ea580c;">{{ $daysLeft }}d</span>
+                        <x-filament::badge color="warning" size="sm">
+                            {{ $daysLeft }}d
+                        </x-filament::badge>
                     @else
-                        <span class="font-medium">{{ $daysLeft }}d</span>
+                        <span class="font-medium text-gray-500">{{ $daysLeft }}d</span>
                     @endif
                 @endif
 
                 {{-- Progress fraction --}}
                 @if($totalMilestones > 0)
-                    <span style="color: {{ $stageColor }};" class="font-bold">{{ $completedMilestones }}/{{ $totalMilestones }}</span>
+                    <x-filament::badge color="info" size="sm">
+                        {{ $completedMilestones }}/{{ $totalMilestones }}
+                    </x-filament::badge>
                 @endif
             </div>
         </div>
 
         {{-- Hover actions bar --}}
-        <div class="flex items-center justify-end gap-1.5 mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700
-                    opacity-0 group-hover:opacity-100 transition-opacity -mb-0.5">
-            <button
+        <div class="flex items-center justify-end gap-1 mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700
+                    opacity-0 group-hover:opacity-100 transition-opacity">
+            <x-filament::icon-button
                 wire:click.stop="openChatter('{{ $record->getKey() }}')"
-                class="relative p-1 text-gray-400 hover:text-primary-500 rounded"
-                title="Chatter"
+                icon="heroicon-m-chat-bubble-left-right"
+                color="gray"
+                size="sm"
+                label="Open Chatter"
             >
-                <x-heroicon-m-chat-bubble-left-right class="w-4 h-4" />
                 @if($unreadCount > 0)
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                    <x-slot name="badge">
                         {{ $unreadCount > 9 ? '9+' : $unreadCount }}
-                    </span>
+                    </x-slot>
                 @endif
-            </button>
-            <a
+            </x-filament::icon-button>
+
+            <x-filament::icon-button
+                tag="a"
                 href="{{ route('filament.admin.resources.project.projects.view', $record) }}"
                 wire:click.stop
-                class="p-1 text-gray-400 hover:text-primary-500 rounded"
-                title="View Details"
-            >
-                <x-heroicon-m-arrow-top-right-on-square class="w-4 h-4" />
-            </a>
+                icon="heroicon-m-arrow-top-right-on-square"
+                color="gray"
+                size="sm"
+                label="View Details"
+            />
         </div>
-    </div>
+    </x-filament::section>
 </div>
