@@ -4,6 +4,7 @@
     $color = $status['color'] ?? '#6b7280';
     $hasProjects = count($status['records'] ?? []) > 0;
     $isCollapsed = $status['is_collapsed'] ?? false;
+    $currentViewMode = $viewMode ?? 'projects';
 @endphp
 
 <div
@@ -24,12 +25,16 @@
         class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-gray-100/70 dark:bg-gray-800/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700"
     >
         @forelse($status['records'] as $record)
-            @include(static::$recordView)
+            @if($currentViewMode === 'tasks')
+                @include('webkul-project::kanban.kanban-task-record')
+            @else
+                @include(static::$recordView)
+            @endif
         @empty
             {{-- Empty State - Minimal --}}
             <div class="flex-1 flex flex-col items-center justify-center text-gray-400 dark:text-gray-500 py-8">
                 <x-heroicon-o-inbox class="w-8 h-8 mb-2 opacity-40" />
-                <p class="text-xs">No projects</p>
+                <p class="text-xs">No {{ $currentViewMode === 'tasks' ? 'tasks' : 'projects' }}</p>
             </div>
         @endforelse
     </div>

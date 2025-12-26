@@ -1,41 +1,96 @@
 @php
-    // Exclude "To Do" from workflow stages - leads are the inbox now
-    $boardStatuses = $statuses->reject(fn($s) => $s['title'] === 'To Do');
+    // View mode from controller
+    $currentViewMode = $viewMode ?? 'projects';
 
-    // Leads are now the inbox
+    // Exclude "To Do" from workflow stages - leads are the inbox now (only for projects)
+    $boardStatuses = $currentViewMode === 'projects'
+        ? $statuses->reject(fn($s) => $s['title'] === 'To Do')
+        : $statuses;
+
+    // Leads are now the inbox (only shown in projects mode)
     $inboxOpen = $this->leadsInboxOpen ?? true;
     $inboxCount = $leadsCount ?? 0;
     $newInboxCount = $newLeadsCount ?? 0;
 @endphp
 
 <x-filament-panels::page class="!p-0">
+    {{-- View Mode Toggle --}}
+    <div class="px-3 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <x-filament::button
+                wire:click="setViewMode('projects')"
+                :color="$currentViewMode === 'projects' ? 'primary' : 'gray'"
+                size="sm"
+                icon="heroicon-m-folder"
+            >
+                Projects
+            </x-filament::button>
+            <x-filament::button
+                wire:click="setViewMode('tasks')"
+                :color="$currentViewMode === 'tasks' ? 'primary' : 'gray'"
+                size="sm"
+                icon="heroicon-m-clipboard-document-check"
+            >
+                Tasks
+            </x-filament::button>
+        </div>
+
+        @if($currentViewMode === 'tasks')
+            {{-- Project Filter for Tasks --}}
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500">Filter by Project:</span>
+                <select
+                    wire:model.live="projectFilter"
+                    class="text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                    <option value="">All Projects</option>
+                    @foreach($projects ?? [] as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+    </div>
+
     {{-- Filter Widgets - Clickable to toggle filters --}}
     @php
-        $totalProjects = \Webkul\Project\Models\Project::count();
+        if ($currentViewMode === 'projects') {
+            $totalProjects = \Webkul\Project\Models\Project::count();
 
-        // Blocked = has blocked tasks OR no orders OR no customer (using OR, no double-count)
-        $blockedCount = \Webkul\Project\Models\Project::where(function($q) {
-            $q->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
-              ->orWhereDoesntHave('orders')
-              ->orWhereNull('partner_id');
-        })->count();
+            // Blocked = has blocked tasks OR no orders OR no customer (using OR, no double-count)
+            $blockedCount = \Webkul\Project\Models\Project::where(function($q) {
+                $q->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
+                  ->orWhereDoesntHave('orders')
+                  ->orWhereNull('partner_id');
+            })->count();
 
-        $overdueCount = \Webkul\Project\Models\Project::where('desired_completion_date', '<', now())->count();
-        $dueSoonCount = \Webkul\Project\Models\Project::whereBetween('desired_completion_date', [now(), now()->addDays(7)])->count();
+            $overdueCount = \Webkul\Project\Models\Project::where('desired_completion_date', '<', now())->count();
+            $dueSoonCount = \Webkul\Project\Models\Project::whereBetween('desired_completion_date', [now(), now()->addDays(7)])->count();
 
-        // On Track = not overdue AND not blocked (must satisfy both conditions)
-        $onTrackCount = \Webkul\Project\Models\Project::where(function($q) {
-            $q->whereNull('desired_completion_date')
-              ->orWhere('desired_completion_date', '>=', now());
-        })
-        ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
-        ->whereHas('orders')
-        ->whereNotNull('partner_id')
-        ->count();
+            // On Track = not overdue AND not blocked (must satisfy both conditions)
+            $onTrackCount = \Webkul\Project\Models\Project::where(function($q) {
+                $q->whereNull('desired_completion_date')
+                  ->orWhere('desired_completion_date', '>=', now());
+            })
+            ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
+            ->whereHas('orders')
+            ->whereNotNull('partner_id')
+            ->count();
+        } else {
+            // Task mode stats
+            $taskQuery = \Webkul\Project\Models\Task::query()
+                ->when($projectFilter ?? null, fn($q) => $q->where('project_id', $projectFilter));
+
+            $totalProjects = (clone $taskQuery)->count();
+            $blockedCount = (clone $taskQuery)->where('state', 'blocked')->count();
+            $overdueCount = (clone $taskQuery)->where('deadline', '<', now())->where('state', '!=', 'done')->count();
+            $dueSoonCount = (clone $taskQuery)->whereBetween('deadline', [now(), now()->addDays(7)])->where('state', '!=', 'done')->count();
+            $inProgressCount = (clone $taskQuery)->where('state', 'in_progress')->count();
+        }
     @endphp
     <div class="px-3 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-3">
-            {{-- All Projects Widget --}}
+            {{-- All Items Widget --}}
             <button
                 wire:click="toggleWidgetFilter('all')"
                 @class([
@@ -46,7 +101,7 @@
             >
                 <div class="text-left">
                     <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalProjects }}</div>
-                    <div class="text-xs text-gray-500">All Projects</div>
+                    <div class="text-xs text-gray-500">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
                 </div>
             </button>
 
@@ -98,21 +153,38 @@
                 </div>
             </button>
 
-            {{-- On Track Widget --}}
-            <button
-                wire:click="toggleWidgetFilter('on_track')"
-                @class([
-                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                    'border-green-500 bg-green-50 dark:bg-green-900/20' => ($this->widgetFilter ?? null) === 'on_track',
-                    'border-gray-200 dark:border-gray-700 hover:border-green-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'on_track',
-                ])
-            >
-                <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
-                <div class="text-left">
-                    <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
-                    <div class="text-xs text-gray-500">On Track</div>
-                </div>
-            </button>
+            {{-- On Track / In Progress Widget --}}
+            @if($currentViewMode === 'projects')
+                <button
+                    wire:click="toggleWidgetFilter('on_track')"
+                    @class([
+                        'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                        'border-green-500 bg-green-50 dark:bg-green-900/20' => ($this->widgetFilter ?? null) === 'on_track',
+                        'border-gray-200 dark:border-gray-700 hover:border-green-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'on_track',
+                    ])
+                >
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
+                    <div class="text-left">
+                        <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
+                        <div class="text-xs text-gray-500">On Track</div>
+                    </div>
+                </button>
+            @else
+                <button
+                    wire:click="toggleWidgetFilter('in_progress')"
+                    @class([
+                        'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
+                        'border-blue-500 bg-blue-50 dark:bg-blue-900/20' => ($this->widgetFilter ?? null) === 'in_progress',
+                        'border-gray-200 dark:border-gray-700 hover:border-blue-300 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'in_progress',
+                    ])
+                >
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #2563eb;"></div>
+                    <div class="text-left">
+                        <div class="text-2xl font-bold" style="color: #2563eb;">{{ $inProgressCount ?? 0 }}</div>
+                        <div class="text-xs text-gray-500">In Progress</div>
+                    </div>
+                </button>
+            @endif
 
             {{-- Active Filter Indicator --}}
             @if(($this->widgetFilter ?? 'all') !== 'all')
@@ -147,7 +219,8 @@
             class="flex gap-3 h-full overflow-x-auto overflow-y-hidden px-3 py-2"
             style="scrollbar-width: thin;"
         >
-            {{-- INBOX COLUMN (Leads / New Inquiries) --}}
+            {{-- INBOX COLUMN (Leads / New Inquiries) - Only show in projects mode --}}
+            @if($currentViewMode === 'projects')
             <div class="flex-shrink-0 h-full">
                 {{-- Collapsed State --}}
                 <div
@@ -285,6 +358,7 @@
                     </div>
                 </div>
             </div>
+            @endif
 
             {{-- Workflow Stage Columns --}}
             @foreach($boardStatuses as $status)
