@@ -1,20 +1,23 @@
-{{-- Stacked Accordion Tree Navigation --}}
+{{-- Stacked Accordion Tree Navigation with Context Menu --}}
 <div class="space-y-1.5">
     {{-- Loop through rooms --}}
     <template x-for="(room, roomIdx) in specData" :key="room.id || roomIdx">
-        <div class="border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+        <div class="border rounded-lg overflow-hidden shadow-sm border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             {{-- Room Header --}}
             <div
                 @click="selectRoom(roomIdx)"
+                @contextmenu.prevent="openContextMenu($event, 'room', roomIdx, null, null)"
                 :class="[
-                    selectedRoomIndex === roomIdx ? 'bg-blue-50 dark:bg-blue-900/30 border-l-3 border-l-blue-500' : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
+                    selectedRoomIndex === roomIdx
+                        ? 'bg-blue-50 dark:bg-blue-900/30 border-l-3 border-l-blue-500'
+                        : 'hover:bg-gray-50 dark:hover:bg-gray-700/50',
                 ]"
                 class="flex items-center gap-2 px-3 py-2.5 cursor-pointer transition-colors"
             >
                 {{-- Expand/Collapse Toggle --}}
                 <button
                     @click.stop="toggleAccordion(room.id)"
-                    class="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 transition-colors"
+                    class="p-0.5 rounded text-gray-400 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
                 >
                     <x-heroicon-m-chevron-down
                         x-show="isExpanded(room.id)"
@@ -33,10 +36,10 @@
 
                 {{-- Room Name & Info --}}
                 <div class="flex-1 min-w-0">
-                    <div class="font-medium text-gray-900 dark:text-white truncate text-sm" x-text="room.name || 'Untitled Room'"></div>
-                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div class="font-medium truncate text-sm text-gray-900 dark:text-gray-100" x-text="room.name || 'Untitled Room'"></div>
+                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300">
                         <span class="capitalize" x-text="room.room_type || 'other'"></span>
-                        <span x-show="(room.linear_feet || 0) > 0" class="text-blue-600 dark:text-blue-400 font-medium" x-text="(room.linear_feet || 0).toFixed(1) + ' LF'"></span>
+                        <span x-show="(room.linear_feet || 0) > 0" class="font-medium text-blue-600 dark:text-blue-400" x-text="(room.linear_feet || 0).toFixed(1) + ' LF'"></span>
                     </div>
                 </div>
 
@@ -56,6 +59,7 @@
                             {{-- Location Header --}}
                             <div
                                 @click.stop="selectLocation(roomIdx, locIdx)"
+                                @contextmenu.prevent="openContextMenu($event, 'location', roomIdx, locIdx, null)"
                                 :class="[
                                     selectedRoomIndex === roomIdx && selectedLocationIndex === locIdx
                                         ? 'bg-green-50 dark:bg-green-900/30 border-l-2 border-l-green-500 -ml-0.5'
@@ -66,7 +70,7 @@
                                 {{-- Expand/Collapse Toggle --}}
                                 <button
                                     @click.stop="toggleAccordion(location.id)"
-                                    class="p-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-400 transition-colors"
+                                    class="p-0.5 rounded text-gray-400 transition-colors hover:bg-gray-200 dark:hover:bg-gray-600"
                                     x-show="(location.children || []).length > 0"
                                 >
                                     <x-heroicon-m-chevron-down
@@ -87,8 +91,8 @@
 
                                 {{-- Location Name & Info --}}
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-medium text-gray-800 dark:text-gray-200 truncate text-sm" x-text="location.name || 'Untitled'"></div>
-                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <div class="font-medium truncate text-sm text-gray-800 dark:text-gray-200" x-text="location.name || 'Untitled'"></div>
+                                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300">
                                         <span>L<span x-text="location.cabinet_level || '2'"></span></span>
                                         <span x-show="(location.linear_feet || 0) > 0" class="text-blue-600 dark:text-blue-400" x-text="(location.linear_feet || 0).toFixed(1) + ' LF'"></span>
                                     </div>
@@ -107,6 +111,7 @@
                                 <template x-for="(run, runIdx) in (location.children || [])" :key="run.id || runIdx">
                                     <div
                                         @click.stop="selectRun(roomIdx, locIdx, runIdx)"
+                                        @contextmenu.prevent="openContextMenu($event, 'run', roomIdx, locIdx, runIdx)"
                                         :class="[
                                             selectedRoomIndex === roomIdx && selectedLocationIndex === locIdx && selectedRunIndex === runIdx
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-l-2 border-l-purple-500'
@@ -121,7 +126,7 @@
 
                                         {{-- Run Name & Info --}}
                                         <div class="flex-1 min-w-0">
-                                            <div class="text-gray-700 dark:text-gray-300 truncate text-sm" x-text="run.name || 'Untitled'"></div>
+                                            <div class="truncate text-sm text-gray-700 dark:text-gray-300" x-text="run.name || 'Untitled'"></div>
                                         </div>
 
                                         {{-- Stats --}}
@@ -135,10 +140,10 @@
                                     </div>
                                 </template>
 
-                                {{-- Add Run Button --}}
+                                {{-- Add Run Button (Filament Action) --}}
                                 <button
-                                    @click.stop="$wire.openCreate('cabinet_run', roomIdx + '.children.' + locIdx)"
-                                    class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
+                                    @click.stop="$wire.mountAction('createRun', { locationPath: roomIdx + '.children.' + locIdx })"
+                                    class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
                                 >
                                     <x-heroicon-m-plus class="w-3.5 h-3.5" />
                                     Add Run
@@ -147,10 +152,10 @@
                         </div>
                     </template>
 
-                    {{-- Add Location Button --}}
+                    {{-- Add Location Button (Filament Action) --}}
                     <button
-                        @click.stop="$wire.openCreate('room_location', roomIdx.toString())"
-                        class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors ml-1"
+                        @click.stop="$wire.mountAction('createLocation', { roomPath: roomIdx.toString() })"
+                        class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors ml-1 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
                     >
                         <x-heroicon-m-plus class="w-3.5 h-3.5" />
                         Add Location
@@ -160,11 +165,11 @@
         </div>
     </template>
 
-    {{-- Add Room Button --}}
+    {{-- Add Room Button (Filament Action) --}}
     <button
-        wire:click="openCreate('room', null)"
+        @click="$wire.mountAction('createRoom')"
         type="button"
-        class="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 border border-dashed border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+        class="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-medium border border-dashed rounded-lg transition-colors text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
     >
         <x-heroicon-m-plus class="w-4 h-4" />
         Add Room

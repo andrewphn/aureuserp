@@ -1,12 +1,18 @@
 <div class="cabinet-spec-builder"
      wire:key="cabinet-spec-builder"
-     x-data="specAccordionBuilder(@entangle('specData'), @entangle('expanded'))"
+     x-data="specAccordionBuilder(
+         @entangle('specData'),
+         @entangle('expanded'),
+         @js($pricingTiers),
+         @js($materialOptions),
+         @js($finishOptions)
+     )"
      x-init="init()">
 
     {{-- Header with Totals --}}
-    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 p-4 rounded-xl border bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="flex items-center gap-2.5">
-            <div class="p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+            <div class="p-2 rounded-lg shadow-sm bg-white dark:bg-gray-700">
                 <x-heroicon-o-squares-2x2 class="w-5 h-5 text-gray-500 dark:text-gray-400" />
             </div>
             <div>
@@ -20,12 +26,12 @@
             @if($totalLinearFeet > 0)
                 <div class="flex items-center gap-4 text-sm">
                     <div class="flex items-center gap-1.5">
-                        <span class="text-gray-500 dark:text-gray-400">Total:</span>
-                        <strong class="text-blue-600 dark:text-blue-400 tabular-nums">{{ number_format($totalLinearFeet, 1) }} LF</strong>
+                        <span class="text-gray-500 dark:text-gray-300">Total:</span>
+                        <strong class="tabular-nums text-blue-600 dark:text-blue-400">{{ number_format($totalLinearFeet, 1) }} LF</strong>
                     </div>
                     <div class="flex items-center gap-1.5">
-                        <span class="text-gray-500 dark:text-gray-400">Est:</span>
-                        <strong class="text-green-600 dark:text-green-400 tabular-nums">${{ number_format($totalPrice, 0) }}</strong>
+                        <span class="text-gray-500 dark:text-gray-300">Est:</span>
+                        <strong class="tabular-nums text-green-600 dark:text-green-400">${{ number_format($totalPrice, 0) }}</strong>
                     </div>
                 </div>
             @endif
@@ -37,38 +43,32 @@
 
     {{-- Empty State --}}
     @if(empty($specData))
-        <div class="text-center py-16 px-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl bg-gray-50/50 dark:bg-gray-800/50">
-            <div class="w-16 h-16 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+        <div class="text-center py-16 px-6 border-2 border-dashed rounded-xl border-gray-300 dark:border-gray-600 bg-gray-50/50 dark:bg-gray-800/50">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
                 <x-heroicon-o-home class="w-8 h-8 text-gray-400" />
             </div>
-            <h3 class="text-base font-medium text-gray-900 dark:text-white mb-1">No rooms added yet</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-sm mx-auto">
+            <h3 class="text-base font-medium mb-1 text-gray-900 dark:text-white">No rooms added yet</h3>
+            <p class="text-sm mb-5 max-w-sm mx-auto text-gray-500 dark:text-gray-400">
                 Start building your cabinet specification by adding your first room
             </p>
-            <button
-                wire:click="openCreate('room', null)"
-                type="button"
-                class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-primary-600 hover:text-primary-700 border border-primary-300 hover:border-primary-400 bg-white dark:bg-gray-800 rounded-lg transition-colors shadow-sm"
-            >
-                <x-heroicon-m-plus class="w-4 h-4" />
-                Add First Room
-            </button>
+            {{-- Using Filament Action for Add Room --}}
+            {{ $this->createRoomAction }}
         </div>
     @else
-        {{-- Main Layout: Sidebar + Inspector --}}
-        <div class="flex min-h-[550px] border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 overflow-hidden">
+        {{-- Main Layout: Sidebar (40%) + Inspector (60%) --}}
+        <div class="flex min-h-[550px] border rounded-xl overflow-hidden border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
 
-            {{-- Collapsible Sidebar --}}
+            {{-- Navigation Sidebar - 40% when expanded --}}
             <div
-                :class="sidebarCollapsed ? 'w-14' : 'w-80'"
-                class="flex-shrink-0 border-r border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 transition-all duration-200 flex flex-col"
+                :style="sidebarCollapsed ? 'width: 56px; flex: 0 0 56px;' : 'flex: 0 0 40%;'"
+                class="border-r transition-all duration-200 flex flex-col overflow-hidden border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
             >
                 {{-- Sidebar Header with Collapse Toggle --}}
                 <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-gray-700">
-                    <span x-show="!sidebarCollapsed" class="text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">Rooms</span>
+                    <span x-show="!sidebarCollapsed" class="text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-gray-300">Rooms</span>
                     <button
                         @click="sidebarCollapsed = !sidebarCollapsed"
-                        class="p-1.5 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-500 transition-colors"
+                        class="p-1.5 rounded-lg text-gray-500 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
                         :title="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
                     >
                         <x-heroicon-o-chevron-left x-show="!sidebarCollapsed" class="w-4 h-4" />
@@ -86,16 +86,19 @@
                     <template x-for="(room, roomIdx) in specData" :key="room.id || roomIdx">
                         <button
                             @click="selectRoom(roomIdx); sidebarCollapsed = false"
-                            :class="selectedRoomIndex === roomIdx ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500' : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'"
+                            :class="selectedRoomIndex === roomIdx
+                                ? 'bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
+                                : 'bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600'"
                             class="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold shadow-sm transition-colors"
                             :title="room.name"
                         >
                             <span x-text="(room.name || 'R').charAt(0).toUpperCase()"></span>
                         </button>
                     </template>
+                    {{-- Filament Action: Add Room --}}
                     <button
-                        wire:click="openCreate('room', null)"
-                        class="w-10 h-10 rounded-lg flex items-center justify-center bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                        wire:click="mountAction('createRoom')"
+                        class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors bg-gray-200 dark:bg-gray-600 text-gray-500 dark:text-gray-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400"
                         title="Add Room"
                     >
                         <x-heroicon-m-plus class="w-5 h-5" />
@@ -103,8 +106,11 @@
                 </div>
             </div>
 
-            {{-- Inspector Panel --}}
-            <div class="flex-1 flex flex-col overflow-hidden">
+            {{-- Inspector Panel - 60% when sidebar expanded --}}
+            <div
+                :style="sidebarCollapsed ? 'flex: 1 1 auto;' : 'flex: 0 0 60%;'"
+                class="flex flex-col overflow-hidden"
+            >
                 {{-- Inspector Content --}}
                 <div class="flex-1 overflow-y-auto p-4">
                     @include('webkul-project::livewire.partials.spec-inspector')
@@ -114,18 +120,18 @@
 
         {{-- Summary Footer --}}
         @if($totalLinearFeet > 0)
-            <div class="mt-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-900/20 dark:to-green-900/20 rounded-xl border border-blue-200/50 dark:border-blue-800/50 shadow-sm">
+            <div class="mt-4 p-4 bg-gradient-to-r rounded-xl border shadow-sm from-blue-50 dark:from-blue-900/20 to-green-50 dark:to-green-900/20 border-blue-200/50 dark:border-blue-800/50">
                 <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                     <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Project Summary</span>
                     <div class="flex items-center gap-6">
                         <div class="text-right">
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Total Linear Feet</div>
-                            <div class="text-xl font-bold text-blue-600 dark:text-blue-400 tabular-nums">{{ number_format($totalLinearFeet, 1) }} LF</div>
+                            <div class="text-[10px] uppercase tracking-wider font-medium text-gray-500 dark:text-gray-300">Total Linear Feet</div>
+                            <div class="text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">{{ number_format($totalLinearFeet, 1) }} LF</div>
                         </div>
-                        <div class="w-px h-10 bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
+                        <div class="w-px h-10 hidden sm:block bg-gray-200 dark:bg-gray-700"></div>
                         <div class="text-right">
-                            <div class="text-[10px] text-gray-500 dark:text-gray-400 uppercase tracking-wider font-medium">Estimated Price</div>
-                            <div class="text-xl font-bold text-green-600 dark:text-green-400 tabular-nums">${{ number_format($totalPrice, 0) }}</div>
+                            <div class="text-[10px] uppercase tracking-wider font-medium text-gray-500 dark:text-gray-300">Estimated Price</div>
+                            <div class="text-xl font-bold tabular-nums text-green-600 dark:text-green-400">${{ number_format($totalPrice, 0) }}</div>
                         </div>
                     </div>
                 </div>
@@ -133,17 +139,93 @@
         @endif
     @endif
 
-    {{-- Modal --}}
-    @if($showModal)
-        @include('webkul-project::livewire.partials.spec-modal')
-    @endif
+    {{-- Context Menu --}}
+    <div
+        x-show="contextMenu.show"
+        x-cloak
+        :style="`left: ${contextMenu.x}px; top: ${contextMenu.y}px;`"
+        class="fixed z-50 min-w-[180px] py-1 rounded-lg shadow-lg border bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        @click.away="closeContextMenu()"
+    >
+        {{-- Edit --}}
+        <button
+            @click="contextMenuAction('edit')"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+            <x-heroicon-m-pencil-square class="w-4 h-4 text-blue-500" />
+            Edit
+        </button>
+
+        {{-- Duplicate --}}
+        <button
+            @click="contextMenuAction('duplicate')"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+            <x-heroicon-m-document-duplicate class="w-4 h-4 text-purple-500" />
+            Duplicate
+        </button>
+
+        <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+
+        {{-- Move Up --}}
+        <button
+            @click="contextMenuAction('moveUp')"
+            :disabled="contextMenu.isFirst"
+            :class="contextMenu.isFirst ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors text-gray-700 dark:text-gray-200"
+        >
+            <x-heroicon-m-arrow-up class="w-4 h-4 text-gray-500" />
+            Move Up
+        </button>
+
+        {{-- Move Down --}}
+        <button
+            @click="contextMenuAction('moveDown')"
+            :disabled="contextMenu.isLast"
+            :class="contextMenu.isLast ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors text-gray-700 dark:text-gray-200"
+        >
+            <x-heroicon-m-arrow-down class="w-4 h-4 text-gray-500" />
+            Move Down
+        </button>
+
+        <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+
+        {{-- Add Child --}}
+        <button
+            @click="contextMenuAction('addChild')"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+        >
+            <x-heroicon-m-plus class="w-4 h-4 text-green-500" />
+            <span>Add <span x-text="contextMenu.childType"></span></span>
+        </button>
+
+        <div class="my-1 border-t border-gray-200 dark:border-gray-700"></div>
+
+        {{-- Delete --}}
+        <button
+            @click="contextMenuAction('delete')"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+            <x-heroicon-m-trash class="w-4 h-4" />
+            Delete
+        </button>
+    </div>
+
+    {{-- Filament Action Modals --}}
+    <x-filament-actions::modals />
 </div>
 
 @script
 <script>
-Alpine.data('specAccordionBuilder', (specData, expanded) => ({
+Alpine.data('specAccordionBuilder', (specData, expanded, pricingTiers, materialOptions, finishOptions) => ({
     specData: specData,
     expanded: expanded,
+
+    // Pricing data from TcsPricingService
+    pricingTiers: pricingTiers || {},
+    materialOptions: materialOptions || {},
+    finishOptions: finishOptions || {},
 
     // UI state
     sidebarCollapsed: false,
@@ -155,6 +237,7 @@ Alpine.data('specAccordionBuilder', (specData, expanded) => ({
     selectedLocation: null,
     selectedRunIndex: null,
     selectedRun: null,
+    selectedCabinetIndex: null,
 
     // Inline editing state
     editingRow: null,
@@ -242,6 +325,7 @@ Alpine.data('specAccordionBuilder', (specData, expanded) => ({
 
         this.selectedRunIndex = runIndex;
         this.selectedRun = run;
+        this.selectedCabinetIndex = null; // Clear cabinet selection when changing runs
     },
 
     // Toggle accordion expansion
@@ -275,15 +359,84 @@ Alpine.data('specAccordionBuilder', (specData, expanded) => ({
     // PRICING HELPERS
     // =========================================================================
 
-    getPricePerLF(tier) {
-        const prices = {
-            '1': 225,
-            '2': 298,
-            '3': 348,
-            '4': 425,
-            '5': 550
-        };
-        return prices[tier] || 298;
+    /**
+     * Calculate price per linear foot from level, material, and finish
+     * Prices are extracted from the option labels which contain the price info
+     */
+    getPricePerLF(level = '3', material = 'stain_grade', finish = 'unfinished') {
+        // Extract base price from level label (e.g., "Level 3 - Enhanced ($192/LF)" -> 192)
+        let basePrice = 192; // Default Level 3
+        const levelLabel = this.pricingTiers[level] || '';
+        const levelMatch = levelLabel.match(/\$(\d+(?:\.\d+)?)/);
+        if (levelMatch) {
+            basePrice = parseFloat(levelMatch[1]);
+        } else {
+            // Fallback prices if label doesn't contain price
+            const fallbackPrices = {'1': 138, '2': 168, '3': 192, '4': 242, '5': 345};
+            basePrice = fallbackPrices[level] || 192;
+        }
+
+        // Extract material price from label (e.g., "Stain Grade +$156/LF" -> 156)
+        let materialPrice = 0;
+        const materialLabel = this.materialOptions[material] || '';
+        const materialMatch = materialLabel.match(/\+\$(\d+(?:\.\d+)?)/);
+        if (materialMatch) {
+            materialPrice = parseFloat(materialMatch[1]);
+        } else if (material === 'stain_grade') {
+            materialPrice = 156; // Default for stain grade
+        }
+
+        // Extract finish price from label (e.g., "Stain + Clear +$85/LF" -> 85)
+        let finishPrice = 0;
+        const finishLabel = this.finishOptions[finish] || '';
+        const finishMatch = finishLabel.match(/\+\$(\d+(?:\.\d+)?)/);
+        if (finishMatch) {
+            finishPrice = parseFloat(finishMatch[1]);
+        }
+
+        return basePrice + materialPrice + finishPrice;
+    },
+
+    /**
+     * Update location pricing field and sync to Livewire
+     */
+    updateLocationPricing(field, value) {
+        if (this.selectedLocationIndex === null) return;
+
+        // Update local state
+        this.selectedLocation[field] = value || null; // null for "inherit"
+
+        // Build path and update via Livewire
+        const path = `${this.selectedRoomIndex}.children.${this.selectedLocationIndex}`;
+        this.$wire.updateNodeField(path, { [field]: value || null });
+    },
+
+    /**
+     * Update room pricing field and sync to Livewire
+     */
+    updateRoomPricing(field, value) {
+        if (this.selectedRoomIndex === null) return;
+
+        // Update local state
+        this.selectedRoom[field] = value;
+
+        // Update via Livewire
+        const path = `${this.selectedRoomIndex}`;
+        this.$wire.updateNodeField(path, { [field]: value });
+    },
+
+    /**
+     * Update run pricing field and sync to Livewire
+     */
+    updateRunPricing(field, value) {
+        if (this.selectedRunIndex === null) return;
+
+        // Update local state
+        this.selectedRun[field] = value || null;
+
+        // Build path and update via Livewire
+        const path = `${this.selectedRoomIndex}.children.${this.selectedLocationIndex}.children.${this.selectedRunIndex}`;
+        this.$wire.updateNodeField(path, { [field]: value || null });
     },
 
     // =========================================================================
@@ -435,6 +588,104 @@ Alpine.data('specAccordionBuilder', (specData, expanded) => ({
 
         const cabinetPath = `${this.selectedRoomIndex}.children.${this.selectedLocationIndex}.children.${this.selectedRunIndex}.children.${cabIndex}`;
         this.$wire.deleteCabinetByPath(cabinetPath);
+    },
+
+    // =========================================================================
+    // CONTEXT MENU
+    // =========================================================================
+
+    contextMenu: {
+        show: false,
+        x: 0,
+        y: 0,
+        type: null, // 'room', 'location', 'run'
+        roomIdx: null,
+        locIdx: null,
+        runIdx: null
+    },
+
+    openContextMenu(event, type, roomIdx, locIdx, runIdx) {
+        // Get the node and siblings to determine position
+        let node, siblings, currentIdx;
+
+        if (type === 'room') {
+            node = this.specData[roomIdx];
+            siblings = this.specData;
+            currentIdx = roomIdx;
+        } else if (type === 'location') {
+            node = this.specData[roomIdx]?.children?.[locIdx];
+            siblings = this.specData[roomIdx]?.children || [];
+            currentIdx = locIdx;
+        } else if (type === 'run') {
+            node = this.specData[roomIdx]?.children?.[locIdx]?.children?.[runIdx];
+            siblings = this.specData[roomIdx]?.children?.[locIdx]?.children || [];
+            currentIdx = runIdx;
+        }
+
+        this.contextMenu = {
+            show: true,
+            x: event.clientX,
+            y: event.clientY,
+            type: type,
+            roomIdx: roomIdx,
+            locIdx: locIdx,
+            runIdx: runIdx,
+            nodeName: node?.name || 'Item',
+            isFirst: currentIdx === 0,
+            isLast: currentIdx === siblings.length - 1,
+            childType: type === 'room' ? 'Location' : (type === 'location' ? 'Run' : 'Cabinet')
+        };
+
+        // Close on click outside
+        setTimeout(() => {
+            document.addEventListener('click', this.closeContextMenu.bind(this), { once: true });
+        }, 0);
+    },
+
+    closeContextMenu() {
+        this.contextMenu.show = false;
+    },
+
+    contextMenuAction(action) {
+        const { type, roomIdx, locIdx, runIdx } = this.contextMenu;
+        let path;
+
+        if (type === 'room') {
+            path = roomIdx.toString();
+        } else if (type === 'location') {
+            path = `${roomIdx}.children.${locIdx}`;
+        } else if (type === 'run') {
+            path = `${roomIdx}.children.${locIdx}.children.${runIdx}`;
+        }
+
+        switch (action) {
+            case 'edit':
+                this.$wire.mountAction('editNode', { nodePath: path });
+                break;
+            case 'duplicate':
+                this.$wire.mountAction('duplicateNode', { nodePath: path, nodeType: type === 'location' ? 'room_location' : (type === 'run' ? 'cabinet_run' : type) });
+                break;
+            case 'moveUp':
+                this.$wire.moveNode(path, 'up');
+                break;
+            case 'moveDown':
+                this.$wire.moveNode(path, 'down');
+                break;
+            case 'addChild':
+                if (type === 'room') {
+                    this.$wire.mountAction('createLocation', { roomPath: path });
+                } else if (type === 'location') {
+                    this.$wire.mountAction('createRun', { locationPath: path });
+                } else if (type === 'run') {
+                    this.$wire.mountAction('createCabinet', { runPath: path });
+                }
+                break;
+            case 'delete':
+                this.$wire.mountAction('deleteNode', { nodePath: path, nodeType: type === 'location' ? 'room_location' : (type === 'run' ? 'cabinet_run' : type) });
+                break;
+        }
+
+        this.closeContextMenu();
     }
 }));
 </script>

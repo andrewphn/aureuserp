@@ -1737,16 +1737,23 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             ->form([
                 Section::make('Room Details')
                     ->schema([
-                        TextInput::make('name')
-                            ->label('Room Name')
-                            ->required()
-                            ->placeholder('e.g., Kitchen, Master Bath')
-                            ->autofocus(),
                         Select::make('room_type')
                             ->label('Room Type')
                             ->options($this->roomTypes)
                             ->required()
-                            ->default('kitchen'),
+                            ->default('kitchen')
+                            ->live()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Auto-generate name based on type
+                                $autoName = $this->generateAutoRoomName($state);
+                                $set('name', $autoName);
+                            }),
+                        TextInput::make('name')
+                            ->label('Room Name')
+                            ->required()
+                            ->default(fn () => $this->generateAutoRoomName('kitchen'))
+                            ->helperText('Auto-generated from type. Edit if needed.')
+                            ->autofocus(),
                         TextInput::make('floor_number')
                             ->label('Floor Number')
                             ->numeric()
@@ -1827,39 +1834,52 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             ->color('primary')
             ->modalWidth('sm')  // Small modal - only 2 required fields
             ->closeModalByClickingAway()
-            ->form([
-                Section::make('Location Details')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Location Name')
-                            ->required()
-                            ->placeholder('e.g., North Wall, Island')
-                            ->autofocus(),
-                        Select::make('location_type')
-                            ->label('Location Type')
-                            ->options($this->locationTypes)
-                            ->required()
-                            ->default('wall'),
-                    ]),
-                Section::make('Pricing Override')
-                    ->description('Leave blank to inherit from room defaults.')
-                    ->schema([
-                        Select::make('cabinet_level')
-                            ->label('Cabinet Level')
-                            ->options($this->pricingTiers)
-                            ->placeholder('Inherit from room'),
-                        Select::make('material_category')
-                            ->label('Material Category')
-                            ->options($this->materialOptions)
-                            ->placeholder('Inherit from room'),
-                        Select::make('finish_option')
-                            ->label('Finish Option')
-                            ->options($this->finishOptions)
-                            ->placeholder('Inherit from room'),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
-            ])
+            ->form(function (array $arguments): array {
+                $roomPath = $arguments['roomPath'] ?? '0';
+                $roomIndex = (int) $roomPath;
+                $room = $this->specData[$roomIndex] ?? [];
+
+                return [
+                    Section::make('Location Details')
+                        ->schema([
+                            Select::make('location_type')
+                                ->label('Location Type')
+                                ->options($this->locationTypes)
+                                ->required()
+                                ->default('wall')
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) use ($room) {
+                                    // Auto-generate name based on type
+                                    $autoName = $this->generateAutoLocationName($state, $room);
+                                    $set('name', $autoName);
+                                }),
+                            TextInput::make('name')
+                                ->label('Location Name')
+                                ->required()
+                                ->default(fn () => $this->generateAutoLocationName('wall', $room))
+                                ->helperText('Auto-generated. Edit if needed.')
+                                ->autofocus(),
+                        ]),
+                    Section::make('Pricing Override')
+                        ->description('Leave blank to inherit from room defaults.')
+                        ->schema([
+                            Select::make('cabinet_level')
+                                ->label('Cabinet Level')
+                                ->options($this->pricingTiers)
+                                ->placeholder('Inherit from room'),
+                            Select::make('material_category')
+                                ->label('Material Category')
+                                ->options($this->materialOptions)
+                                ->placeholder('Inherit from room'),
+                            Select::make('finish_option')
+                                ->label('Finish Option')
+                                ->options($this->finishOptions)
+                                ->placeholder('Inherit from room'),
+                        ])
+                        ->collapsible()
+                        ->collapsed(),
+                ];
+            })
             ->action(function (array $data, array $arguments): void {
                 $roomPath = $arguments['roomPath'] ?? null;
                 if ($roomPath !== null) {
@@ -1914,39 +1934,51 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             ->color('primary')
             ->modalWidth('sm')  // Small modal - only 2 required fields
             ->closeModalByClickingAway()
-            ->form([
-                Section::make('Run Details')
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Run Name')
-                            ->required()
-                            ->placeholder('e.g., Base Run, Upper Run')
-                            ->autofocus(),
-                        Select::make('run_type')
-                            ->label('Run Type')
-                            ->options($this->runTypes)
-                            ->required()
-                            ->default('base'),
-                    ]),
-                Section::make('Pricing Override')
-                    ->description('Leave blank to inherit from location/room defaults.')
-                    ->schema([
-                        Select::make('cabinet_level')
-                            ->label('Cabinet Level')
-                            ->options($this->pricingTiers)
-                            ->placeholder('Inherit from parent'),
-                        Select::make('material_category')
-                            ->label('Material Category')
-                            ->options($this->materialOptions)
-                            ->placeholder('Inherit from parent'),
-                        Select::make('finish_option')
-                            ->label('Finish Option')
-                            ->options($this->finishOptions)
-                            ->placeholder('Inherit from parent'),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
-            ])
+            ->form(function (array $arguments): array {
+                $locationPath = $arguments['locationPath'] ?? '0.children.0';
+                $location = $this->getNodeByPath($locationPath) ?? [];
+
+                return [
+                    Section::make('Run Details')
+                        ->schema([
+                            Select::make('run_type')
+                                ->label('Run Type')
+                                ->options($this->runTypes)
+                                ->required()
+                                ->default('base')
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) use ($location) {
+                                    // Auto-generate name based on type
+                                    $autoName = $this->generateAutoRunName($state, $location);
+                                    $set('name', $autoName);
+                                }),
+                            TextInput::make('name')
+                                ->label('Run Name')
+                                ->required()
+                                ->default(fn () => $this->generateAutoRunName('base', $location))
+                                ->helperText('Auto-generated. Edit if needed.')
+                                ->autofocus(),
+                        ]),
+                    Section::make('Pricing Override')
+                        ->description('Leave blank to inherit from location/room defaults.')
+                        ->schema([
+                            Select::make('cabinet_level')
+                                ->label('Cabinet Level')
+                                ->options($this->pricingTiers)
+                                ->placeholder('Inherit from parent'),
+                            Select::make('material_category')
+                                ->label('Material Category')
+                                ->options($this->materialOptions)
+                                ->placeholder('Inherit from parent'),
+                            Select::make('finish_option')
+                                ->label('Finish Option')
+                                ->options($this->finishOptions)
+                                ->placeholder('Inherit from parent'),
+                        ])
+                        ->collapsible()
+                        ->collapsed(),
+                ];
+            })
             ->action(function (array $data, array $arguments): void {
                 $locationPath = $arguments['locationPath'] ?? null;
                 if ($locationPath !== null) {
@@ -2518,6 +2550,170 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             $count += $this->countAllDescendants($child);
         }
         return $count;
+    }
+
+    // =========================================================================
+    // REORDERING METHODS (Context Menu Move Up/Down)
+    // =========================================================================
+
+    /**
+     * Move a node up or down within its parent's children array
+     */
+    public function moveNode(string $path, string $direction): void
+    {
+        Log::info('CabinetSpecBuilder: Moving node', ['path' => $path, 'direction' => $direction]);
+
+        $pathParts = explode('.', $path);
+
+        // Handle top-level rooms (path is just an index like "0", "1", etc.)
+        if (count($pathParts) === 1) {
+            $index = (int) $pathParts[0];
+            $this->swapInArray($this->specData, $index, $direction);
+            $this->dispatchSpecDataUpdate();
+
+            Notification::make()
+                ->success()
+                ->title('Room Moved')
+                ->duration(1500)
+                ->send();
+            return;
+        }
+
+        // Handle nested nodes (locations, runs, cabinets)
+        // Path format: "0.children.1.children.2"
+        // We need to find the parent array and swap within it
+
+        // Get the index to move (last part of path)
+        $indexToMove = (int) array_pop($pathParts);
+
+        // Remove 'children' from the end to get parent path
+        if (end($pathParts) === 'children') {
+            array_pop($pathParts);
+        }
+
+        // Navigate to parent node
+        $parent = &$this->specData;
+        foreach ($pathParts as $part) {
+            if ($part === 'children') {
+                $parent = &$parent['children'];
+            } else {
+                $parent = &$parent[(int) $part];
+            }
+        }
+
+        // Now $parent points to the parent node, swap in its children
+        if (isset($parent['children'])) {
+            $this->swapInArray($parent['children'], $indexToMove, $direction);
+        }
+
+        $this->dispatchSpecDataUpdate();
+
+        Notification::make()
+            ->success()
+            ->title('Item Moved')
+            ->duration(1500)
+            ->send();
+    }
+
+    /**
+     * Swap an element with its neighbor in an array
+     */
+    protected function swapInArray(array &$array, int $index, string $direction): bool
+    {
+        $targetIndex = $direction === 'up' ? $index - 1 : $index + 1;
+
+        // Bounds check
+        if ($targetIndex < 0 || $targetIndex >= count($array)) {
+            return false;
+        }
+
+        // Swap elements
+        $temp = $array[$index];
+        $array[$index] = $array[$targetIndex];
+        $array[$targetIndex] = $temp;
+
+        // Re-index array to ensure sequential keys
+        $array = array_values($array);
+
+        return true;
+    }
+
+    // =========================================================================
+    // AUTO-NAMING METHODS
+    // =========================================================================
+
+    /**
+     * Generate auto-name for a new room
+     */
+    protected function generateAutoRoomName(string $roomType): string
+    {
+        $typeLabel = $this->roomTypes[$roomType] ?? 'Room';
+
+        // Count existing rooms of this type
+        $count = 0;
+        foreach ($this->specData as $room) {
+            if (($room['room_type'] ?? '') === $roomType) {
+                $count++;
+            }
+        }
+
+        // If this is the first room of this type, just use the type name
+        // Otherwise, add a number
+        if ($count === 0) {
+            return $typeLabel;
+        }
+
+        return $typeLabel . ' ' . ($count + 1);
+    }
+
+    /**
+     * Generate auto-name for a new location within a room
+     */
+    protected function generateAutoLocationName(string $locationType, array $room): string
+    {
+        $typeLabel = $this->locationTypes[$locationType] ?? 'Location';
+        $existingLocations = $room['children'] ?? [];
+
+        // Count existing locations of this type
+        $count = 0;
+        foreach ($existingLocations as $loc) {
+            if (($loc['location_type'] ?? '') === $locationType) {
+                $count++;
+            }
+        }
+
+        // Use letters for wall positions (Wall A, Wall B, Wall C)
+        // Or numbers for other types (Island 1, Island 2)
+        if ($locationType === 'wall') {
+            $letter = chr(65 + $count); // A, B, C, D...
+            return $typeLabel . ' ' . $letter;
+        }
+
+        if ($count === 0) {
+            return $typeLabel;
+        }
+
+        return $typeLabel . ' ' . ($count + 1);
+    }
+
+    /**
+     * Generate auto-name for a new cabinet run within a location
+     */
+    protected function generateAutoRunName(string $runType, array $location): string
+    {
+        $typeLabel = $this->runTypes[$runType] ?? 'Cabinet Run';
+        $existingRuns = $location['children'] ?? [];
+
+        // Count existing runs of this type
+        $count = 0;
+        foreach ($existingRuns as $run) {
+            if (($run['run_type'] ?? '') === $runType) {
+                $count++;
+            }
+        }
+
+        // Always include number for clarity: "Base Cabinets 1", "Wall Cabinets 1"
+        return $typeLabel . ' ' . ($count + 1);
     }
 
     public function render()

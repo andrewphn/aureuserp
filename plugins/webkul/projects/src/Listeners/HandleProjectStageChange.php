@@ -44,6 +44,9 @@ class HandleProjectStageChange
         $newStageName = strtolower($event->newStage?->name ?? '');
         $previousStageName = strtolower($event->previousStage?->name ?? '');
 
+        // Track when project entered this stage (for expiry warnings)
+        $project->update(['stage_entered_at' => now()]);
+
         Log::info('Project stage changed', [
             'project_id' => $project->id,
             'project_number' => $project->project_number,

@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Storage;
 use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\ProjectResource;
 use Webkul\Project\Filament\Resources\ProjectResource\Actions\CloneProjectAction;
+use Webkul\Project\Filament\Resources\ProjectResource\Actions\QuickActionsAction;
 use Webkul\Project\Models\Milestone;
 use Webkul\Project\Models\MilestoneTemplate;
 use Webkul\Support\Models\ActivityPlan;
@@ -279,6 +280,7 @@ class EditProject extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            QuickActionsAction::make(),
             ChatterAction::make()
                 ->setResource(static::$resource)
                 ->setActivityPlans($this->getActivityPlans()),

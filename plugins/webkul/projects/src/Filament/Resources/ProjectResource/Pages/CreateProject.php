@@ -3430,10 +3430,14 @@ class CreateProject extends Page implements HasForms
 
                                     // Calculate drawer box dimensions based on slide specs
                                     // Blum LEGRABOX formula: width = opening - total clearance (35mm ≈ 1.378")
-                                    $totalClearance = $specs->get('Total Width Clearance')['value'] ?? null;
-                                    if ($totalClearance !== null) {
-                                        // Convert mm to inches if clearance is in mm
-                                        $clearanceInches = $totalClearance > 10 ? $totalClearance / 25.4 : $totalClearance;
+                                    $clearanceSpec = $specs->get('Total Width Clearance');
+                                    $totalClearance = $clearanceSpec['value'] ?? null;
+                                    if ($totalClearance !== null && $openingWidth > 0) {
+                                        // Use unit from spec to determine conversion
+                                        $clearanceUnit = $clearanceSpec['unit'] ?? 'mm';
+                                        $clearanceInches = ($clearanceUnit === 'mm')
+                                            ? $totalClearance / 25.4
+                                            : $totalClearance;
                                         $drawerWidth = $openingWidth - $clearanceInches;
                                         if ($drawerWidth > 0) {
                                             $set('../../width_inches', round($drawerWidth, 4));
@@ -3441,13 +3445,25 @@ class CreateProject extends Page implements HasForms
                                     }
 
                                     // Drawer depth = slide length - depth offset
-                                    $slideLength = $specs->get('Slide Length')['value'] ?? null;
-                                    $depthOffset = $specs->get('Depth Offset')['value'] ?? null;
+                                    $slideLengthSpec = $specs->get('Slide Length');
+                                    $slideLength = $slideLengthSpec['value'] ?? null;
+                                    $depthOffsetSpec = $specs->get('Depth Offset');
+                                    $depthOffset = $depthOffsetSpec['value'] ?? null;
+
                                     if ($slideLength !== null) {
+                                        // Slide length is typically in inches
+                                        $slideLengthUnit = $slideLengthSpec['unit'] ?? 'in';
+                                        $slideLengthInches = ($slideLengthUnit === 'mm')
+                                            ? $slideLength / 25.4
+                                            : $slideLength;
+
+                                        // Depth offset - use unit from spec
+                                        $depthOffsetUnit = $depthOffsetSpec['unit'] ?? 'mm';
                                         $depthOffsetInches = $depthOffset !== null
-                                            ? ($depthOffset > 10 ? $depthOffset / 25.4 : $depthOffset)
+                                            ? (($depthOffsetUnit === 'mm') ? $depthOffset / 25.4 : $depthOffset)
                                             : 0.394; // Default 10mm offset
-                                        $drawerDepth = $slideLength - $depthOffsetInches;
+
+                                        $drawerDepth = $slideLengthInches - $depthOffsetInches;
                                         if ($drawerDepth > 0) {
                                             $set('../../depth_inches', round($drawerDepth, 4));
                                         }

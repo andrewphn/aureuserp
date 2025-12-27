@@ -188,6 +188,12 @@ class ProjectsKanbanBoard extends KanbanBoard
                 'color' => $stage->color ?? '#6b7280',
                 'wip_limit' => $stage->wip_limit,
                 'is_collapsed' => $stage->is_collapsed ?? false,
+                // Stage expiry settings
+                'max_days_in_stage' => $stage->max_days_in_stage,
+                'expiry_warning_days' => $stage->expiry_warning_days ?? 3,
+                // Stage notice settings
+                'notice_message' => $stage->notice_message,
+                'notice_severity' => $stage->notice_severity ?? 'info',
             ]);
     }
 

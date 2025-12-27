@@ -12,7 +12,11 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -72,16 +76,62 @@ class ProjectStageResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label(__('webkul-project::filament/clusters/configurations/resources/project-stage.form.name'))
-                    ->required()
-                    ->maxLength(255)
-                    ->unique(ignoreRecord: true),
+                Section::make('Basic Information')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label(__('webkul-project::filament/clusters/configurations/resources/project-stage.form.name'))
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true),
 
-                ColorPicker::make('color')
-                    ->label('Stage Color')
-                    ->helperText('Color coding for quick visual reference on project pages')
-                    ->default('#3B82F6'),
+                        ColorPicker::make('color')
+                            ->label('Stage Color')
+                            ->helperText('Color coding for quick visual reference on project pages')
+                            ->default('#3B82F6'),
+                    ]),
+
+                Section::make('Stage Expiry Settings')
+                    ->description('Configure how long projects can stay in this stage before triggering a warning')
+                    ->schema([
+                        TextInput::make('max_days_in_stage')
+                            ->label('Maximum Days in Stage')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(365)
+                            ->placeholder('Leave empty for unlimited')
+                            ->helperText('Projects exceeding this will show a warning on the Kanban board'),
+
+                        TextInput::make('expiry_warning_days')
+                            ->label('Warning Days Before Expiry')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(30)
+                            ->default(3)
+                            ->helperText('Show warning this many days before the limit is reached'),
+                    ])
+                    ->columns(2)
+                    ->collapsible(),
+
+                Section::make('Stage Notice')
+                    ->description('Display a custom notice in the Kanban column header for this stage')
+                    ->schema([
+                        Textarea::make('notice_message')
+                            ->label('Notice Message')
+                            ->rows(2)
+                            ->placeholder('e.g., "Requires manager approval before moving to next stage"')
+                            ->helperText('This message will appear in the Kanban column header'),
+
+                        Select::make('notice_severity')
+                            ->label('Notice Severity')
+                            ->options([
+                                'info' => 'Info (Blue)',
+                                'warning' => 'Warning (Orange)',
+                                'danger' => 'Danger (Red)',
+                            ])
+                            ->default('info')
+                            ->helperText('Controls the visual urgency of the notice'),
+                    ])
+                    ->collapsible(),
             ])
             ->columns(1);
     }
