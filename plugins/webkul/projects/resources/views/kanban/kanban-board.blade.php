@@ -303,8 +303,10 @@
 
         {{-- Chart Container (Collapsible - uses showChart from layout settings) --}}
         @if($currentViewMode === 'projects' && ($this->layoutSettings['show_chart'] ?? false))
-            <div class="border-t border-gray-200 dark:border-gray-700">
-                @livewire(\Webkul\Project\Filament\Widgets\ProjectYearlyStatsChart::class, ['year' => $chartYear ?? now()->year], key('yearly-chart-' . ($chartYear ?? now()->year)))
+            <div class="border-t border-gray-200 dark:border-gray-700 px-4 py-2">
+                <div class="max-w-xs">
+                    @livewire(\Webkul\Project\Filament\Widgets\ProjectYearlyStatsChart::class, ['year' => $chartYear ?? now()->year], key('yearly-chart-' . ($chartYear ?? now()->year)))
+                </div>
             </div>
         @endif
 
