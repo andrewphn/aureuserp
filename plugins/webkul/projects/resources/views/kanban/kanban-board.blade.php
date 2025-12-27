@@ -70,8 +70,11 @@
             $totalLF = $blockedLF = $overdueLF = $dueSoonLF = $onTrackLF = 0;
         }
     @endphp
-    {{-- Condensed Filter Bar using Native Filament Components --}}
-    <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+
+    {{-- Single Root Wrapper for Livewire --}}
+    <div class="kanban-wrapper">
+        {{-- Condensed Filter Bar using Native Filament Components --}}
+        <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
         <div class="flex items-center gap-4">
             {{-- View Mode Toggle --}}
             <x-filament::tabs>
@@ -403,7 +406,6 @@
                 </div>
             </div>
         @endif
-    </div>
 
     {{-- Main Kanban Board - Full Height --}}
     <div
@@ -1507,4 +1509,5 @@
             </div>
         @endif
     </x-filament::modal>
+    </div>{{-- Close kanban-wrapper --}}
 </x-filament-panels::page>
