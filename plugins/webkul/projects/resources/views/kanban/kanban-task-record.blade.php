@@ -130,7 +130,7 @@
                     @if($daysLeft !== null && !$statusLabel)
                         <span class="font-medium">{{ $daysLeft }}d</span>
                     @elseif($isOverdue)
-                        <span class="font-bold text-danger-600">{{ abs($daysLeft) }}d late</span>
+                        <span class="font-bold" style="color: #dc2626;">{{ abs($daysLeft) }}d late</span>
                     @endif
 
                     {{-- State icon --}}
