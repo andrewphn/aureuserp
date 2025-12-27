@@ -6,6 +6,18 @@
 
     // Calculate total linear feet for all projects in this column
     $totalLinearFeet = collect($status['records'] ?? [])->sum('estimated_linear_feet');
+
+    // Stage notice settings
+    $noticeMessage = $status['notice_message'] ?? null;
+    $noticeSeverity = $status['notice_severity'] ?? 'info';
+
+    // Notice styling based on severity
+    $noticeStyles = [
+        'info' => ['bg' => '#eff6ff', 'border' => '#3b82f6', 'text' => '#1d4ed8', 'icon' => 'heroicon-m-information-circle'],
+        'warning' => ['bg' => '#fff7ed', 'border' => '#f97316', 'text' => '#c2410c', 'icon' => 'heroicon-m-exclamation-triangle'],
+        'danger' => ['bg' => '#fef2f2', 'border' => '#ef4444', 'text' => '#dc2626', 'icon' => 'heroicon-m-exclamation-circle'],
+    ];
+    $noticeStyle = $noticeStyles[$noticeSeverity] ?? $noticeStyles['info'];
 @endphp
 
 {{-- Monday.com Style Header Bar --}}
@@ -28,9 +40,11 @@
                 <span class="text-white/50 text-xs">(max {{ $wipLimit }})</span>
             @endif
         </h3>
-        <span class="text-white/70 text-xs">
+        <span class="text-xs">
             @if($totalLinearFeet > 0)
-                {{ number_format($totalLinearFeet, 1) }} LF
+                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-white/20 text-white">
+                    {{ number_format($totalLinearFeet, 1) }} LF
+                </span>
             @else
                 &nbsp;
             @endif
@@ -46,3 +60,17 @@
         <x-heroicon-m-plus class="w-4 h-4" />
     </button>
 </div>
+
+{{-- Stage Notice (if configured) --}}
+@if($noticeMessage)
+    <div
+        class="flex items-start gap-2 px-3 py-2 text-xs border-l-3"
+        style="background-color: {{ $noticeStyle['bg'] }}; border-left: 3px solid {{ $noticeStyle['border'] }}; color: {{ $noticeStyle['text'] }};"
+    >
+        <x-filament::icon
+            :icon="$noticeStyle['icon']"
+            class="w-4 h-4 flex-shrink-0 mt-0.5"
+        />
+        <span class="leading-snug">{{ $noticeMessage }}</span>
+    </div>
+@endif

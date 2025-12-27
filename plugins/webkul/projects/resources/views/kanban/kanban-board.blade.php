@@ -190,7 +190,7 @@
 
             {{-- Active Filter Indicator --}}
             @if(($this->widgetFilter ?? 'all') !== 'all')
-                <div class="ml-auto flex items-center gap-2">
+                <div class="flex items-center gap-2">
                     <span class="text-xs" style="color: #6b7280;">Filtering by:</span>
                     <span
                         class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
@@ -201,6 +201,42 @@
                             <x-heroicon-m-x-mark class="w-3 h-3" />
                         </button>
                     </span>
+                </div>
+            @endif
+
+            {{-- Chart Toggle (Projects mode only) - Right side --}}
+            @if($currentViewMode === 'projects')
+                <div class="ml-auto flex items-center gap-2">
+                    {{-- Year Selector --}}
+                    <div class="flex items-center gap-1">
+                        @foreach($availableYears ?? [] as $year => $label)
+                            <button
+                                wire:click="setChartYear({{ $year }})"
+                                class="px-2 py-0.5 text-xs rounded transition-colors"
+                                :style="isDark
+                                    ? '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #374151; color: #9ca3af;' }}'
+                                    : '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #e5e7eb; color: #6b7280;' }}'"
+                            >
+                                {{ $label }}
+                            </button>
+                        @endforeach
+                    </div>
+
+                    {{-- Chart Toggle Button --}}
+                    <button
+                        wire:click="toggleChartCollapsed"
+                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border"
+                        :style="isDark
+                            ? '{{ !($chartCollapsed ?? false) ? 'background-color: rgba(212, 165, 116, 0.2); border-color: #D4A574; color: #D4A574;' : 'background-color: #1f2937; border-color: #374151; color: #9ca3af;' }}'
+                            : '{{ !($chartCollapsed ?? false) ? 'background-color: rgba(212, 165, 116, 0.1); border-color: #D4A574; color: #92400e;' : 'background-color: #fff; border-color: #e5e7eb; color: #6b7280;' }}'"
+                    >
+                        <x-heroicon-m-chart-bar class="w-4 h-4" />
+                        <span>{{ $chartYear ?? now()->year }}</span>
+                        <span class="text-xs opacity-75">
+                            ({{ ($yearlyStats['totals']['completed'] ?? 0) + ($yearlyStats['totals']['in_progress'] ?? 0) }})
+                        </span>
+                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ !($chartCollapsed ?? false) ? 'rotate-180' : '' }}" />
+                    </button>
                 </div>
             @endif
         </div>
@@ -251,6 +287,100 @@
                     <span class="w-2 h-2 rounded-full" style="background-color: #6b7280;"></span>
                     Cancelled ({{ $cancelledCount ?? 0 }})
                 </button>
+            </div>
+        @endif
+
+        {{-- Chart Container (Collapsible) --}}
+        @if($currentViewMode === 'projects' && !($chartCollapsed ?? false))
+            <div
+                class="mt-3 pt-3 border-t"
+                :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
+            >
+                {{-- Chart Legend Row --}}
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-4 text-xs">
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-sm" style="background-color: #16a34a;"></span>
+                            <span style="color: #6b7280;">Completed ({{ $yearlyStats['totals']['completed'] ?? 0 }})</span>
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-sm" style="background-color: #2563eb;"></span>
+                            <span style="color: #6b7280;">In Progress ({{ $yearlyStats['totals']['in_progress'] ?? 0 }})</span>
+                        </span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="w-3 h-3 rounded-sm" style="background-color: #6b7280;"></span>
+                            <span style="color: #6b7280;">Cancelled ({{ $yearlyStats['totals']['cancelled'] ?? 0 }})</span>
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Chart --}}
+                <div class="h-40">
+                    <canvas
+                        id="yearly-stats-chart"
+                        wire:ignore
+                        x-init="
+                            const ctx = document.getElementById('yearly-stats-chart');
+                            if (ctx) {
+                                const isDark = document.documentElement.classList.contains('dark');
+                                const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+                                const textColor = isDark ? '#9ca3af' : '#6b7280';
+
+                                if (window.yearlyStatsChart) {
+                                    window.yearlyStatsChart.destroy();
+                                }
+
+                                window.yearlyStatsChart = new Chart(ctx.getContext('2d'), {
+                                    type: 'bar',
+                                    data: {
+                                        labels: @js($yearlyStats['labels'] ?? []),
+                                        datasets: @js($yearlyStats['datasets'] ?? [])
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: false,
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                backgroundColor: isDark ? '#374151' : '#ffffff',
+                                                titleColor: isDark ? '#f9fafb' : '#111827',
+                                                bodyColor: isDark ? '#d1d5db' : '#4b5563',
+                                                borderColor: isDark ? '#4b5563' : '#e5e7eb',
+                                                borderWidth: 1
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                stacked: true,
+                                                grid: { display: false },
+                                                ticks: { color: textColor, font: { size: 10 } }
+                                            },
+                                            y: {
+                                                stacked: true,
+                                                beginAtZero: true,
+                                                grid: { color: gridColor },
+                                                ticks: {
+                                                    color: textColor,
+                                                    font: { size: 10 },
+                                                    stepSize: 1,
+                                                    precision: 0
+                                                }
+                                            }
+                                        }
+                                    }
+                                });
+
+                                Livewire.on('chartDataUpdated', (data) => {
+                                    if (window.yearlyStatsChart && data[0]) {
+                                        window.yearlyStatsChart.data.labels = data[0].labels;
+                                        window.yearlyStatsChart.data.datasets = data[0].datasets;
+                                        window.yearlyStatsChart.update();
+                                    }
+                                });
+                            }
+                        "
+                    ></canvas>
+                </div>
             </div>
         @endif
     </div>
@@ -304,18 +434,32 @@
                     class="flex flex-col h-full"
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
-                    {{-- Header - Black outlined, no fill --}}
+                    @php
+                        $inboxLinearFeet = collect($leads ?? [])->sum('estimated_linear_feet');
+                    @endphp
+                    {{-- Header - Black outlined, matches column header height --}}
                     <div
                         x-data="{ isDark: document.documentElement.classList.contains('dark') }"
                         x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
-                        class="flex items-center justify-between px-4 py-2 transition-all duration-150 border-2 border-b-0"
+                        class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150 border-2 border-b-0 min-h-[52px]"
                         :style="isDark ? 'background-color: #1f2937; border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
                     >
-                        <h3 class="font-medium text-sm flex items-center gap-1.5" :style="isDark ? 'color: #fff;' : 'color: #111827;'">
-                            <span>Inbox</span>
-                            <span :style="isDark ? 'color: #6b7280;' : 'color: #9ca3af;'">/</span>
-                            <span :style="isDark ? 'color: #d1d5db;' : 'color: #374151;'">{{ $inboxCount }}</span>
-                        </h3>
+                        <div class="flex flex-col">
+                            <h3 class="font-medium text-sm flex items-center gap-1.5" :style="isDark ? 'color: #fff;' : 'color: #111827;'">
+                                <span>Inbox</span>
+                                <span :style="isDark ? 'color: #6b7280;' : 'color: #9ca3af;'">/</span>
+                                <span :style="isDark ? 'color: #d1d5db;' : 'color: #374151;'">{{ $inboxCount }}</span>
+                            </h3>
+                            <span class="text-xs">
+                                @if($inboxLinearFeet > 0)
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
+                                        {{ number_format($inboxLinearFeet, 1) }} LF
+                                    </span>
+                                @else
+                                    &nbsp;
+                                @endif
+                            </span>
+                        </div>
                         <div class="flex items-center gap-1">
                             {{-- Add Lead Button --}}
                             <a
