@@ -304,6 +304,8 @@ class ProjectsKanbanBoard extends KanbanBoard
             ->when($this->widgetFilter === 'overdue', fn($q) => $q->where('deadline', '<', now()))
             ->when($this->widgetFilter === 'due_soon', fn($q) => $q->whereBetween('deadline', [now(), now()->addDays(7)]))
             ->when($this->widgetFilter === 'in_progress', fn($q) => $q->where('state', 'in_progress'))
+            ->when($this->widgetFilter === 'done', fn($q) => $q->where('state', 'done'))
+            ->when($this->widgetFilter === 'cancelled', fn($q) => $q->where('state', 'cancelled'))
             ->when($this->sortBy === 'desired_completion_date', fn($q) => $q->orderBy('deadline', $this->sortDirection ?? 'asc'))
             ->when($this->sortBy === 'name', fn($q) => $q->orderBy('title', $this->sortDirection ?? 'asc'))
             ->when($this->sortBy === 'created_at', fn($q) => $q->orderBy('created_at', $this->sortDirection ?? 'asc'))
