@@ -160,6 +160,7 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('cabinet-spec-builder', \Webkul\Project\Livewire\CabinetSpecBuilder::class);
         \Livewire\Livewire::component('cabinet-ai-assistant', \Webkul\Project\Livewire\CabinetAiAssistant::class);
         \Livewire\Livewire::component('project-gantt-chart', \Webkul\Project\Livewire\ProjectGanttChart::class);
+        \Livewire\Livewire::component('quick-actions-panel', \Webkul\Project\Livewire\QuickActions\QuickActionsPanel::class);
         // Old Livewire Kanban archived - now using mokhosh/filament-kanban package
         // \Livewire\Livewire::component('project-kanban-board', \Webkul\Project\Livewire\ProjectKanbanBoard::class);
 

@@ -10,6 +10,19 @@
         $isOverdue = $days < 0;
     }
 
+    // Stage expiry calculation
+    $daysInStage = null;
+    $isStageExpiring = false;
+    $stageExpiryDaysLeft = null;
+    $maxDaysInStage = $status['max_days_in_stage'] ?? null;
+    $expiryWarningDays = $status['expiry_warning_days'] ?? 3;
+
+    if ($maxDaysInStage && $record->stage_entered_at) {
+        $daysInStage = (int) now()->diffInDays($record->stage_entered_at);
+        $stageExpiryDaysLeft = $maxDaysInStage - $daysInStage;
+        $isStageExpiring = $daysInStage >= ($maxDaysInStage - $expiryWarningDays);
+    }
+
     // Blockers check
     $blockers = $this->getProjectBlockers($record);
     $hasBlockers = !empty($blockers);
@@ -200,6 +213,19 @@
                     @endif
                 </div>
             </div>
+
+            {{-- Stage Expiry Warning --}}
+            @if($isStageExpiring && $stageExpiryDaysLeft !== null)
+                <div class="flex items-center gap-1.5 mt-2 px-2 py-1 rounded text-xs font-medium"
+                     style="background-color: {{ $stageExpiryDaysLeft <= 0 ? '#fef2f2' : '#fff7ed' }}; color: {{ $stageExpiryDaysLeft <= 0 ? '#dc2626' : '#ea580c' }};">
+                    <x-heroicon-m-clock class="h-3.5 w-3.5" />
+                    @if($stageExpiryDaysLeft <= 0)
+                        {{ abs($stageExpiryDaysLeft) }}d over stage limit
+                    @else
+                        {{ $stageExpiryDaysLeft }}d left in stage
+                    @endif
+                </div>
+            @endif
 
             {{-- Hover actions bar --}}
             <div class="flex items-center justify-end gap-1 mt-3 pt-2.5 border-t border-gray-100 dark:border-gray-700

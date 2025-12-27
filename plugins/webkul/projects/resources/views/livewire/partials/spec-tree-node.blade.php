@@ -64,7 +64,7 @@
         <x-dynamic-component :component="$typeConfig['icon']" class="w-4 h-4 {{ $typeConfig['iconColor'] }} flex-shrink-0" />
 
         {{-- Name --}}
-        <span class="font-medium text-sm text-gray-900 dark:text-white truncate min-w-0 flex-1">
+        <span class="font-medium text-sm text-gray-900 dark:text-gray-100 truncate min-w-0 flex-1">
             {{ $node['name'] ?: '(Unnamed)' }}
         </span>
 

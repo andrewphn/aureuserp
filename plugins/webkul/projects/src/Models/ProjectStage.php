@@ -55,6 +55,10 @@ class ProjectStage extends Model implements Sortable
         'is_active',
         'is_collapsed',
         'wip_limit',
+        'max_days_in_stage',
+        'expiry_warning_days',
+        'notice_message',
+        'notice_severity',
         'sort',
         'company_id',
         'creator_id',
@@ -66,8 +70,10 @@ class ProjectStage extends Model implements Sortable
      * @var string
      */
     protected $casts = [
-        'is_active'    => 'boolean',
-        'is_collapsed' => 'boolean',
+        'is_active'           => 'boolean',
+        'is_collapsed'        => 'boolean',
+        'max_days_in_stage'   => 'integer',
+        'expiry_warning_days' => 'integer',
     ];
 
     public $sortable = [
