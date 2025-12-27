@@ -105,6 +105,14 @@ class ProjectsKanbanBoard extends KanbanBoard
 
     public string $quickComment = '';
 
+    // Yearly Chart Widget
+    public int $chartYear;
+
+    public bool $chartCollapsed = false; // Expanded by default
+
+    // Business Owner KPI Widget
+    public string $kpiTimeRange = 'this_week'; // this_week, this_month, this_quarter, ytd
+
     public static function getNavigationGroup(): string
     {
         return __('webkul-project::filament/resources/project.navigation.group');
@@ -134,6 +142,13 @@ class ProjectsKanbanBoard extends KanbanBoard
 
         // Load view mode from session
         $this->viewMode = session('kanban_view_mode', 'projects');
+
+        // Initialize chart year
+        $this->chartYear = session('kanban_chart_year', now()->year);
+        $this->chartCollapsed = session('kanban_chart_collapsed', false);
+
+        // Load KPI time range from session
+        $this->kpiTimeRange = session('kanban_kpi_time_range', 'this_week');
     }
 
     /**
@@ -613,6 +628,255 @@ class ProjectsKanbanBoard extends KanbanBoard
             ->send();
     }
 
+    // =========================================
+    // YEARLY CHART WIDGET METHODS
+    // =========================================
+
+    /**
+     * Set the chart year
+     */
+    public function setChartYear(int $year): void
+    {
+        $this->chartYear = $year;
+        session()->put('kanban_chart_year', $year);
+
+        // Dispatch event to update the chart with new data
+        $stats = $this->getYearlyStats();
+        $this->dispatch('chartDataUpdated', $stats);
+    }
+
+    /**
+     * Toggle chart visibility
+     */
+    public function toggleChartCollapsed(): void
+    {
+        $this->chartCollapsed = !$this->chartCollapsed;
+        session()->put('kanban_chart_collapsed', $this->chartCollapsed);
+    }
+
+    /**
+     * Get available years for chart dropdown
+     */
+    public function getAvailableYears(): array
+    {
+        $currentYear = now()->year;
+        $years = [];
+
+        // Get earliest project year
+        $earliestProject = Project::query()->orderBy('created_at')->first();
+        $startYear = $earliestProject ? $earliestProject->created_at->year : $currentYear;
+
+        for ($year = $currentYear; $year >= $startYear; $year--) {
+            $years[$year] = (string) $year;
+        }
+
+        return $years;
+    }
+
+    /**
+     * Get yearly statistics for chart
+     */
+    public function getYearlyStats(): array
+    {
+        $year = $this->chartYear;
+
+        // Get stage IDs for "completed" and "cancelled" stages
+        $doneStages = ProjectStage::query()
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['done', 'completed', 'finished'])
+            ->pluck('id')
+            ->toArray();
+
+        $cancelledStages = ProjectStage::query()
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['cancelled', 'canceled'])
+            ->pluck('id')
+            ->toArray();
+
+        // Initialize monthly data
+        $months = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $months[$m] = [
+                'month' => date('M', mktime(0, 0, 0, $m, 1)),
+                'completed' => 0,
+                'in_progress' => 0,
+                'cancelled' => 0,
+            ];
+        }
+
+        // Query completed projects (by updated_at in done stage)
+        $completed = Project::query()
+            ->whereIn('stage_id', $doneStages)
+            ->whereYear('updated_at', $year)
+            ->selectRaw('MONTH(updated_at) as month, COUNT(*) as count')
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        // Query cancelled projects
+        $cancelled = Project::query()
+            ->whereIn('stage_id', $cancelledStages)
+            ->whereYear('updated_at', $year)
+            ->selectRaw('MONTH(updated_at) as month, COUNT(*) as count')
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        // Query in-progress projects (by created_at, not in done/cancelled)
+        $inProgress = Project::query()
+            ->whereNotIn('stage_id', array_merge($doneStages, $cancelledStages))
+            ->whereYear('created_at', $year)
+            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->groupBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        // Merge into monthly data
+        foreach ($months as $m => &$data) {
+            $data['completed'] = $completed[$m] ?? 0;
+            $data['cancelled'] = $cancelled[$m] ?? 0;
+            $data['in_progress'] = $inProgress[$m] ?? 0;
+        }
+
+        return [
+            'labels' => array_column($months, 'month'),
+            'datasets' => [
+                [
+                    'label' => 'Completed',
+                    'data' => array_column($months, 'completed'),
+                    'backgroundColor' => '#16a34a', // Green
+                ],
+                [
+                    'label' => 'In Progress',
+                    'data' => array_column($months, 'in_progress'),
+                    'backgroundColor' => '#2563eb', // Blue
+                ],
+                [
+                    'label' => 'Cancelled',
+                    'data' => array_column($months, 'cancelled'),
+                    'backgroundColor' => '#6b7280', // Gray
+                ],
+            ],
+            'year' => $year,
+            'totals' => [
+                'completed' => array_sum(array_column($months, 'completed')),
+                'in_progress' => array_sum(array_column($months, 'in_progress')),
+                'cancelled' => array_sum(array_column($months, 'cancelled')),
+            ],
+        ];
+    }
+
+    // =========================================
+    // BUSINESS OWNER KPI WIDGET METHODS
+    // =========================================
+
+    /**
+     * Set KPI time range
+     */
+    public function setKpiTimeRange(string $range): void
+    {
+        $this->kpiTimeRange = $range;
+        session()->put('kanban_kpi_time_range', $range);
+    }
+
+    /**
+     * Get date range based on KPI time range setting
+     */
+    protected function getKpiDateRange(): array
+    {
+        return match ($this->kpiTimeRange) {
+            'this_week' => [now()->startOfWeek(), now()->endOfWeek()],
+            'this_month' => [now()->startOfMonth(), now()->endOfMonth()],
+            'this_quarter' => [now()->startOfQuarter(), now()->endOfQuarter()],
+            'ytd' => [now()->startOfYear(), now()],
+            default => [now()->startOfWeek(), now()->endOfWeek()],
+        };
+    }
+
+    /**
+     * Get business owner KPI stats
+     */
+    public function getKpiStats(): array
+    {
+        [$startDate, $endDate] = $this->getKpiDateRange();
+
+        // Get "In Production" stage IDs (manufacturing stages)
+        $productionStages = ProjectStage::query()
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), [
+                'in production', 'production', 'manufacturing', 'fabrication',
+                'assembly', 'finishing', 'install', 'installation'
+            ])
+            ->pluck('id')
+            ->toArray();
+
+        // Get "Done" stage IDs
+        $doneStages = ProjectStage::query()
+            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['done', 'completed', 'finished'])
+            ->pluck('id')
+            ->toArray();
+
+        // Linear feet created this period
+        $lfThisPeriod = Project::query()
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('estimated_linear_feet') ?? 0;
+
+        // Linear feet currently in production
+        $lfInProduction = Project::query()
+            ->whereIn('stage_id', $productionStages)
+            ->sum('estimated_linear_feet') ?? 0;
+
+        // Projects in production count
+        $projectsInProduction = Project::query()
+            ->whereIn('stage_id', $productionStages)
+            ->count();
+
+        // On target: Projects with completion date >= today (not overdue)
+        $onTargetCount = Project::query()
+            ->whereNotIn('stage_id', $doneStages)
+            ->where(function ($q) {
+                $q->whereNull('desired_completion_date')
+                    ->orWhere('desired_completion_date', '>=', now());
+            })
+            ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
+            ->count();
+
+        // Off target: Overdue or blocked
+        $offTargetCount = Project::query()
+            ->whereNotIn('stage_id', $doneStages)
+            ->where(function ($q) {
+                $q->where('desired_completion_date', '<', now())
+                    ->orWhereHas('tasks', fn($t) => $t->where('state', 'blocked'));
+            })
+            ->count();
+
+        // Completed this period
+        $completedThisPeriod = Project::query()
+            ->whereIn('stage_id', $doneStages)
+            ->whereBetween('updated_at', [$startDate, $endDate])
+            ->count();
+
+        // LF completed this period
+        $lfCompletedThisPeriod = Project::query()
+            ->whereIn('stage_id', $doneStages)
+            ->whereBetween('updated_at', [$startDate, $endDate])
+            ->sum('estimated_linear_feet') ?? 0;
+
+        return [
+            'lf_this_period' => round($lfThisPeriod, 1),
+            'lf_in_production' => round($lfInProduction, 1),
+            'projects_in_production' => $projectsInProduction,
+            'on_target' => $onTargetCount,
+            'off_target' => $offTargetCount,
+            'completed_this_period' => $completedThisPeriod,
+            'lf_completed_this_period' => round($lfCompletedThisPeriod, 1),
+            'time_range_label' => match ($this->kpiTimeRange) {
+                'this_week' => 'This Week',
+                'this_month' => 'This Month',
+                'this_quarter' => 'This Quarter',
+                'ytd' => 'Year to Date',
+                default => 'This Week',
+            },
+        ];
+    }
+
     /**
      * Override the view to add Chatter modal
      */
@@ -635,6 +899,16 @@ class ProjectsKanbanBoard extends KanbanBoard
         $data['leadsCount'] = $this->getInboxLeadsCount();
         $data['newLeadsCount'] = $this->getNewLeadsCount();
         $data['selectedLead'] = $this->selectedLeadId ? Lead::find($this->selectedLeadId) : null;
+
+        // Chart data
+        $data['chartYear'] = $this->chartYear;
+        $data['chartCollapsed'] = $this->chartCollapsed;
+        $data['availableYears'] = $this->getAvailableYears();
+        $data['yearlyStats'] = $this->getYearlyStats();
+
+        // KPI data
+        $data['kpiTimeRange'] = $this->kpiTimeRange;
+        $data['kpiStats'] = $this->getKpiStats();
 
         return $data;
     }

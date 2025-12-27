@@ -61,7 +61,7 @@
             <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
                 <button
                     wire:click="setViewMode('projects')"
-                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150"
+                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-150"
                     :style="isDark
                         ? '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
                         : '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
@@ -71,7 +71,7 @@
                 </button>
                 <button
                     wire:click="setViewMode('tasks')"
-                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150"
+                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-150"
                     :style="isDark
                         ? '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
                         : '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
@@ -241,6 +241,99 @@
             @endif
         </div>
 
+        {{-- Business Owner KPI Row (Projects mode only) --}}
+        @if($currentViewMode === 'projects')
+            <div class="flex items-center gap-3 mt-3 pt-3 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
+                {{-- Time Range Selector --}}
+                <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
+                    @foreach(['this_week' => 'Week', 'this_month' => 'Month', 'this_quarter' => 'Quarter', 'ytd' => 'YTD'] as $range => $label)
+                        <button
+                            wire:click="setKpiTimeRange('{{ $range }}')"
+                            class="px-3 py-1.5 text-xs font-medium transition-all duration-150"
+                            :style="isDark
+                                ? '{{ ($kpiTimeRange ?? 'this_week') === $range ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
+                                : '{{ ($kpiTimeRange ?? 'this_week') === $range ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
+                        >
+                            {{ $label }}
+                        </button>
+                    @endforeach
+                </div>
+
+                {{-- Divider --}}
+                <div class="w-px h-8" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
+
+                {{-- LF This Period Widget --}}
+                <div
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
+                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
+                >
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(37, 99, 235, 0.2);">
+                        <x-heroicon-s-queue-list class="w-4 h-4" style="color: #2563eb;" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold" style="color: #2563eb;">{{ number_format($kpiStats['lf_this_period'] ?? 0, 0) }} LF</div>
+                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">New {{ $kpiStats['time_range_label'] ?? 'This Week' }}</div>
+                    </div>
+                </div>
+
+                {{-- In Production Widget --}}
+                <div
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
+                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
+                >
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(234, 88, 12, 0.2);">
+                        <x-heroicon-s-cog-6-tooth class="w-4 h-4" style="color: #ea580c;" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold" style="color: #ea580c;">{{ number_format($kpiStats['lf_in_production'] ?? 0, 0) }} LF</div>
+                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">In Production ({{ $kpiStats['projects_in_production'] ?? 0 }})</div>
+                    </div>
+                </div>
+
+                {{-- On Target Widget --}}
+                <div
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
+                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
+                >
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(22, 163, 74, 0.2);">
+                        <x-heroicon-s-check-circle class="w-4 h-4" style="color: #16a34a;" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold" style="color: #16a34a;">{{ $kpiStats['on_target'] ?? 0 }}</div>
+                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">On Target</div>
+                    </div>
+                </div>
+
+                {{-- Off Target Widget --}}
+                <div
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
+                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
+                >
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(220, 38, 38, 0.2);">
+                        <x-heroicon-s-exclamation-triangle class="w-4 h-4" style="color: #dc2626;" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold" style="color: #dc2626;">{{ $kpiStats['off_target'] ?? 0 }}</div>
+                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">Off Target</div>
+                    </div>
+                </div>
+
+                {{-- Completed This Period Widget --}}
+                <div
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
+                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
+                >
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(124, 58, 237, 0.2);">
+                        <x-heroicon-s-trophy class="w-4 h-4" style="color: #7c3aed;" />
+                    </div>
+                    <div class="text-left">
+                        <div class="text-lg font-bold" style="color: #7c3aed;">{{ $kpiStats['completed_this_period'] ?? 0 }}</div>
+                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">Completed ({{ number_format($kpiStats['lf_completed_this_period'] ?? 0, 0) }} LF)</div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
         {{-- Task Status Filters (Tasks mode only) --}}
         @if($currentViewMode === 'tasks')
             @php
@@ -400,29 +493,33 @@
         {{-- Single Flex Container for ALL columns (Inbox + Workflow Stages) --}}
         <div
             wire:ignore.self
-            class="flex gap-3 h-full overflow-x-auto overflow-y-hidden px-3 py-2"
+            class="flex gap-3 h-full min-h-0 overflow-x-auto overflow-y-hidden px-3 py-2"
             style="scrollbar-width: thin;"
         >
             {{-- INBOX COLUMN (Leads / New Inquiries) - Only show in projects mode --}}
             @if($currentViewMode === 'projects')
-            <div class="flex-shrink-0 h-full">
-                {{-- Collapsed State --}}
+            <div class="flex-shrink-0 h-full min-h-0">
+                {{-- Collapsed State - Icon with count --}}
                 <div
                     x-show="!inboxOpen"
                     @click="toggleInbox()"
                     x-data="{ isDark: document.documentElement.classList.contains('dark') }"
                     x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
-                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 border-2 hover:opacity-80"
+                    class="w-12 h-full cursor-pointer flex flex-col items-center pt-3 gap-1 transition-all duration-150 rounded-lg border-2 hover:opacity-80"
                     :style="isDark ? 'background-color: #1f2937; border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
                     title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
+                    {{-- Count badge at top --}}
                     <span
-                        class="text-xs font-medium whitespace-nowrap"
-                        :style="isDark ? 'color: #fff;' : 'color: #111827;'"
-                        style="writing-mode: vertical-rl; text-orientation: mixed;"
+                        class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-xs font-bold"
+                        style="background-color: {{ $newInboxCount > 0 ? '#ef4444' : '#6b7280' }}; color: #fff;"
                     >
-                        Inbox ({{ $inboxCount }})
+                        {{ $inboxCount }}
                     </span>
+                    {{-- Inbox icon --}}
+                    <div :style="isDark ? 'color: #9ca3af;' : 'color: #6b7280;'">
+                        <x-heroicon-o-inbox class="w-5 h-5" />
+                    </div>
                 </div>
 
                 {{-- Expanded Inbox Panel --}}
@@ -431,7 +528,7 @@
                     x-transition:enter="transition ease-out duration-150"
                     x-transition:enter-start="opacity-0"
                     x-transition:enter-end="opacity-100"
-                    class="flex flex-col h-full"
+                    class="flex flex-col h-full min-h-0"
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
                     @php
@@ -486,8 +583,10 @@
                     <div
                         x-data="{ isDark: document.documentElement.classList.contains('dark') }"
                         x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
-                        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto border-2 border-t-0"
-                        :style="isDark ? 'background-color: rgba(31, 41, 55, 0.5); border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
+                        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto min-h-0 border-2 border-t-0"
+                        :style="isDark ? 'background-color: rgba(31, 41, 55, 0.5); border-color: #4b5563; scrollbar-width: thin; scrollbar-color: transparent transparent;' : 'background-color: #fff; border-color: #111827; scrollbar-width: thin; scrollbar-color: transparent transparent;'"
+                        onmouseenter="this.style.scrollbarColor = 'rgba(156,163,175,0.3) transparent'"
+                        onmouseleave="this.style.scrollbarColor = 'transparent transparent'"
                     >
                         @forelse($leads ?? [] as $lead)
                             <x-filament::section
