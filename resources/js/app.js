@@ -1,5 +1,8 @@
 import './bootstrap';
 
+// Import Chart.js for kanban and dashboard charts
+import './charts.js';
+
 // Import Masonry.js and imagesLoaded for gallery layouts
 import Masonry from 'masonry-layout';
 import imagesLoaded from 'imagesloaded';

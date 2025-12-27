@@ -9,7 +9,7 @@
 
 <div
     x-data="{ collapsed: {{ $isCollapsed ? 'true' : 'false' }} }"
-    class="flex-shrink-0 flex-grow-0 flex flex-col h-full"
+    class="flex-shrink-0 flex-grow-0 flex flex-col h-full min-h-0"
     x-bind:style="collapsed ? 'width: 40px; min-width: 40px; max-width: 40px;' : 'width: 280px; min-width: 280px; max-width: 280px;'"
 >
     {{-- Solid Color Header (Monday.com style) --}}
@@ -22,7 +22,10 @@
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
         data-status-id="{{ $status['id'] }}"
-        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-gray-100/70 dark:bg-gray-800/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700"
+        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto min-h-0 bg-gray-100/70 dark:bg-gray-800/50 rounded-b-lg border border-t-0 border-gray-200 dark:border-gray-700"
+        style="scrollbar-width: thin; scrollbar-color: transparent transparent;"
+        onmouseenter="this.style.scrollbarColor = 'rgba(156,163,175,0.3) transparent'"
+        onmouseleave="this.style.scrollbarColor = 'transparent transparent'"
     >
         @forelse($status['records'] as $record)
             @if($currentViewMode === 'tasks')
