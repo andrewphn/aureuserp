@@ -15,7 +15,12 @@
 
 <x-filament-panels::page class="!p-0">
     {{-- View Mode Toggle --}}
-    <div class="px-3 py-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+    <div
+        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+        class="px-3 py-2 border-b flex items-center justify-between"
+        :style="isDark ? 'background-color: #1f2937; border-color: #374151;' : 'background-color: #fff; border-color: #e5e7eb;'"
+    >
         <div class="flex items-center gap-2">
             <x-filament::button
                 wire:click="setViewMode('projects')"
@@ -38,10 +43,11 @@
         @if($currentViewMode === 'tasks')
             {{-- Project Filter for Tasks --}}
             <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 dark:text-gray-400">Filter by Project:</span>
+                <span class="text-sm" style="color: #6b7280;">Filter by Project:</span>
                 <select
                     wire:model.live="projectFilter"
-                    class="text-sm border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    class="text-sm rounded-lg"
+                    :style="isDark ? 'background-color: #374151; border-color: #4b5563; color: #fff;' : 'background-color: #fff; border-color: #d1d5db; color: #111827;'"
                 >
                     <option value="">All Projects</option>
                     @foreach($projects ?? [] as $id => $name)
