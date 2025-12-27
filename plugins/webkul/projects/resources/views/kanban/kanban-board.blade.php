@@ -17,29 +17,41 @@
     {{-- Combined Filter Bar: View Toggle + Filter Widgets --}}
     @php
         if ($currentViewMode === 'projects') {
+            // Count and LF for All Projects
             $totalProjects = \Webkul\Project\Models\Project::count();
+            $totalLF = \Webkul\Project\Models\Project::sum('estimated_linear_feet') ?? 0;
 
-            // Blocked = has blocked tasks OR no orders OR no customer (using OR, no double-count)
-            $blockedCount = \Webkul\Project\Models\Project::where(function($q) {
+            // Blocked = has blocked tasks OR no orders OR no customer
+            $blockedQuery = \Webkul\Project\Models\Project::where(function($q) {
                 $q->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
                   ->orWhereDoesntHave('orders')
                   ->orWhereNull('partner_id');
-            })->count();
+            });
+            $blockedCount = (clone $blockedQuery)->count();
+            $blockedLF = (clone $blockedQuery)->sum('estimated_linear_feet') ?? 0;
 
-            $overdueCount = \Webkul\Project\Models\Project::where('desired_completion_date', '<', now())->count();
-            $dueSoonCount = \Webkul\Project\Models\Project::whereBetween('desired_completion_date', [now(), now()->addDays(7)])->count();
+            // Overdue
+            $overdueQuery = \Webkul\Project\Models\Project::where('desired_completion_date', '<', now());
+            $overdueCount = (clone $overdueQuery)->count();
+            $overdueLF = (clone $overdueQuery)->sum('estimated_linear_feet') ?? 0;
 
-            // On Track = not overdue AND not blocked (must satisfy both conditions)
-            $onTrackCount = \Webkul\Project\Models\Project::where(function($q) {
+            // Due Soon
+            $dueSoonQuery = \Webkul\Project\Models\Project::whereBetween('desired_completion_date', [now(), now()->addDays(7)]);
+            $dueSoonCount = (clone $dueSoonQuery)->count();
+            $dueSoonLF = (clone $dueSoonQuery)->sum('estimated_linear_feet') ?? 0;
+
+            // On Track = not overdue AND not blocked
+            $onTrackQuery = \Webkul\Project\Models\Project::where(function($q) {
                 $q->whereNull('desired_completion_date')
                   ->orWhere('desired_completion_date', '>=', now());
             })
             ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
             ->whereHas('orders')
-            ->whereNotNull('partner_id')
-            ->count();
+            ->whereNotNull('partner_id');
+            $onTrackCount = (clone $onTrackQuery)->count();
+            $onTrackLF = (clone $onTrackQuery)->sum('estimated_linear_feet') ?? 0;
         } else {
-            // Task mode stats
+            // Task mode stats (no LF for tasks)
             $taskQuery = \Webkul\Project\Models\Task::query()
                 ->when($projectFilter ?? null, fn($q) => $q->where('project_id', $projectFilter));
 
@@ -48,6 +60,9 @@
             $overdueCount = (clone $taskQuery)->where('deadline', '<', now())->where('state', '!=', 'done')->count();
             $dueSoonCount = (clone $taskQuery)->whereBetween('deadline', [now(), now()->addDays(7)])->where('state', '!=', 'done')->count();
             $inProgressCount = (clone $taskQuery)->where('state', 'in_progress')->count();
+
+            // No LF for tasks
+            $totalLF = $blockedLF = $overdueLF = $dueSoonLF = $onTrackLF = 0;
         }
     @endphp
     <div
@@ -109,6 +124,9 @@
                 <div class="text-left">
                     <div class="text-2xl font-bold" :style="isDark ? 'color: #fff;' : 'color: #111827;'">{{ $totalProjects }}</div>
                     <div class="text-xs" style="color: #6b7280;">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
+                    @if($currentViewMode === 'projects' && $totalLF > 0)
+                        <div class="text-[10px] font-medium" style="color: #9ca3af;">{{ number_format($totalLF, 0) }} LF</div>
+                    @endif
                 </div>
             </button>
 
@@ -124,6 +142,9 @@
                 <div class="text-left">
                     <div class="text-2xl font-bold" style="color: #7c3aed;">{{ $blockedCount }}</div>
                     <div class="text-xs" style="color: #6b7280;">Blocked</div>
+                    @if($currentViewMode === 'projects' && $blockedLF > 0)
+                        <div class="text-[10px] font-medium" style="color: #a78bfa;">{{ number_format($blockedLF, 0) }} LF</div>
+                    @endif
                 </div>
             </button>
 
@@ -139,6 +160,9 @@
                 <div class="text-left">
                     <div class="text-2xl font-bold" style="color: #dc2626;">{{ $overdueCount }}</div>
                     <div class="text-xs" style="color: #6b7280;">Overdue</div>
+                    @if($currentViewMode === 'projects' && $overdueLF > 0)
+                        <div class="text-[10px] font-medium" style="color: #f87171;">{{ number_format($overdueLF, 0) }} LF</div>
+                    @endif
                 </div>
             </button>
 
@@ -154,6 +178,9 @@
                 <div class="text-left">
                     <div class="text-2xl font-bold" style="color: #ea580c;">{{ $dueSoonCount }}</div>
                     <div class="text-xs" style="color: #6b7280;">Due Soon</div>
+                    @if($currentViewMode === 'projects' && $dueSoonLF > 0)
+                        <div class="text-[10px] font-medium" style="color: #fb923c;">{{ number_format($dueSoonLF, 0) }} LF</div>
+                    @endif
                 </div>
             </button>
 
@@ -170,6 +197,9 @@
                     <div class="text-left">
                         <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
                         <div class="text-xs" style="color: #6b7280;">On Track</div>
+                        @if($onTrackLF > 0)
+                            <div class="text-[10px] font-medium" style="color: #4ade80;">{{ number_format($onTrackLF, 0) }} LF</div>
+                        @endif
                     </div>
                 </button>
             @else
