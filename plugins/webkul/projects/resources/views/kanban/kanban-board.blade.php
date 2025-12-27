@@ -70,318 +70,150 @@
             $totalLF = $blockedLF = $overdueLF = $dueSoonLF = $onTrackLF = 0;
         }
     @endphp
-    <div
-        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
-        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
-        class="px-3 border-b {{ $compactFilters ? 'py-2' : 'py-3' }}"
-        :style="isDark ? 'background-color: #111827; border-color: #374151;' : 'background-color: #f9fafb; border-color: #e5e7eb;'"
-    >
-        <div class="flex items-center gap-3">
-            {{-- View Mode Toggle (Projects/Tasks) --}}
-            <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
-                <button
+    {{-- Condensed Filter Bar using Native Filament Components --}}
+    <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <div class="flex items-center gap-4">
+            {{-- View Mode Toggle --}}
+            <x-filament::tabs>
+                <x-filament::tabs.item
                     wire:click="setViewMode('projects')"
-                    class="flex items-center gap-1.5 {{ $compactFilters ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm' }} font-medium transition-all duration-150"
-                    :style="isDark
-                        ? '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
-                        : '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
+                    :active="$currentViewMode === 'projects'"
+                    icon="heroicon-m-folder"
                 >
-                    <x-heroicon-m-folder class="{{ $compactFilters ? 'w-3.5 h-3.5' : 'w-4 h-4' }}" />
                     Projects
-                </button>
-                <button
+                </x-filament::tabs.item>
+                <x-filament::tabs.item
                     wire:click="setViewMode('tasks')"
-                    class="flex items-center gap-1.5 {{ $compactFilters ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm' }} font-medium transition-all duration-150"
-                    :style="isDark
-                        ? '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
-                        : '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
+                    :active="$currentViewMode === 'tasks'"
+                    icon="heroicon-m-clipboard-document-check"
                 >
-                    <x-heroicon-m-clipboard-document-check class="{{ $compactFilters ? 'w-3.5 h-3.5' : 'w-4 h-4' }}" />
                     Tasks
-                </button>
-            </div>
+                </x-filament::tabs.item>
+            </x-filament::tabs>
 
             {{-- Project Filter (Tasks mode only) --}}
             @if($currentViewMode === 'tasks')
-                <select
-                    wire:model.live="projectFilter"
-                    class="{{ $compactFilters ? 'text-xs py-1.5' : 'text-sm py-2' }} rounded-lg px-3"
-                    :style="isDark ? 'background-color: #1f2937; border-color: #374151; color: #fff;' : 'background-color: #fff; border-color: #e5e7eb; color: #111827;'"
-                >
-                    <option value="">All Projects</option>
-                    @foreach($projects ?? [] as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
+                <x-filament::input.wrapper>
+                    <x-filament::input.select wire:model.live="projectFilter">
+                        <option value="">All Projects</option>
+                        @foreach($projects ?? [] as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </x-filament::input.select>
+                </x-filament::input.wrapper>
             @endif
 
-            {{-- Divider --}}
-            <div class="w-px {{ $compactFilters ? 'h-6' : 'h-8' }}" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
-
-            @if($compactFilters)
-                {{-- COMPACT FILTER TABS --}}
-                <div class="flex items-center gap-1">
-                    {{-- All --}}
-                    <button
-                        wire:click="toggleWidgetFilter('all')"
-                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                        :style="isDark
-                            ? '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'background-color: rgba(249, 115, 22, 0.3); color: #fb923c;' : 'color: #9ca3af;' }}'
-                            : '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'background-color: #fff7ed; color: #ea580c;' : 'color: #6b7280;' }}'"
-                    >
-                        All ({{ $totalProjects }})
-                    </button>
-
-                    {{-- Blocked --}}
-                    @if($blockedCount > 0)
-                    <button
-                        wire:click="toggleWidgetFilter('blocked')"
-                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                        :style="isDark
-                            ? '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'background-color: rgba(124, 58, 237, 0.3); color: #a78bfa;' : 'color: #a78bfa;' }}'
-                            : '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'background-color: #f5f3ff; color: #7c3aed;' : 'color: #7c3aed;' }}'"
-                    >
-                        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #7c3aed;"></span>
-                        Blocked ({{ $blockedCount }})
-                    </button>
-                    @endif
-
-                    {{-- Overdue --}}
-                    @if($overdueCount > 0)
-                    <button
-                        wire:click="toggleWidgetFilter('overdue')"
-                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                        :style="isDark
-                            ? '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'background-color: rgba(220, 38, 38, 0.3); color: #f87171;' : 'color: #f87171;' }}'
-                            : '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'background-color: #fef2f2; color: #dc2626;' : 'color: #dc2626;' }}'"
-                    >
-                        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #dc2626;"></span>
-                        Overdue ({{ $overdueCount }})
-                    </button>
-                    @endif
-
-                    {{-- Due Soon --}}
-                    @if($dueSoonCount > 0)
-                    <button
-                        wire:click="toggleWidgetFilter('due_soon')"
-                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                        :style="isDark
-                            ? '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'background-color: rgba(234, 88, 12, 0.3); color: #fb923c;' : 'color: #fb923c;' }}'
-                            : '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'background-color: #fff7ed; color: #ea580c;' : 'color: #ea580c;' }}'"
-                    >
-                        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #ea580c;"></span>
-                        Due Soon ({{ $dueSoonCount }})
-                    </button>
-                    @endif
-
-                    {{-- On Track / In Progress --}}
-                    @if($currentViewMode === 'projects')
-                        @if($onTrackCount > 0)
-                        <button
-                            wire:click="toggleWidgetFilter('on_track')"
-                            class="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                            :style="isDark
-                                ? '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'background-color: rgba(22, 163, 74, 0.3); color: #4ade80;' : 'color: #4ade80;' }}'
-                                : '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'background-color: #f0fdf4; color: #16a34a;' : 'color: #16a34a;' }}'"
-                        >
-                            <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #16a34a;"></span>
-                            On Track ({{ $onTrackCount }})
-                        </button>
-                        @endif
-                    @else
-                        @if(($inProgressCount ?? 0) > 0)
-                        <button
-                            wire:click="toggleWidgetFilter('in_progress')"
-                            class="px-2.5 py-1 rounded text-xs font-medium transition-all"
-                            :style="isDark
-                                ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'background-color: rgba(37, 99, 235, 0.3); color: #60a5fa;' : 'color: #60a5fa;' }}'
-                                : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'background-color: #eff6ff; color: #2563eb;' : 'color: #2563eb;' }}'"
-                        >
-                            <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #2563eb;"></span>
-                            In Progress ({{ $inProgressCount ?? 0 }})
-                        </button>
-                        @endif
-                    @endif
-                </div>
-
-                {{-- Compact LF Summary (Projects only) --}}
-                @if($currentViewMode === 'projects' && $totalLF > 0)
-                    <div class="flex items-center gap-1.5 text-[10px]" style="color: #9ca3af;">
-                        <span class="font-semibold">{{ number_format($totalLF, 0) }} LF</span>
-                        @if(($kpiStats['lf_in_production'] ?? 0) > 0)
-                            <span>•</span>
-                            <span style="color: #ea580c;">{{ number_format($kpiStats['lf_in_production'], 0) }} LF in prod</span>
-                        @endif
-                    </div>
-                @endif
-            @else
-                {{-- FULL FILTER WIDGETS --}}
-                {{-- All Items Widget --}}
-                <button
+            {{-- Filter Tabs --}}
+            <x-filament::tabs>
+                <x-filament::tabs.item
                     wire:click="toggleWidgetFilter('all')"
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: rgba(249, 115, 22, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                        : '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                    :active="($this->widgetFilter ?? 'all') === 'all'"
                 >
-                    <div class="text-left">
-                        <div class="text-2xl font-bold" :style="isDark ? 'color: #fff;' : 'color: #111827;'">{{ $totalProjects }}</div>
-                        <div class="text-xs" style="color: #6b7280;">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
-                        @if($currentViewMode === 'projects' && $totalLF > 0)
-                            <div class="text-[10px] font-medium" style="color: #9ca3af;">{{ number_format($totalLF, 0) }} LF</div>
-                        @endif
-                    </div>
-                </button>
+                    All
+                    <x-slot name="badge">{{ $totalProjects }}</x-slot>
+                </x-filament::tabs.item>
 
-                {{-- Blocked Widget --}}
-                <button
-                    wire:click="toggleWidgetFilter('blocked')"
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: rgba(124, 58, 237, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: #f5f3ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-                >
-                    <div class="w-3 h-8 rounded-sm" style="background-color: #7c3aed;"></div>
-                    <div class="text-left">
-                        <div class="text-2xl font-bold" style="color: #7c3aed;">{{ $blockedCount }}</div>
-                        <div class="text-xs" style="color: #6b7280;">Blocked</div>
-                        @if($currentViewMode === 'projects' && $blockedLF > 0)
-                            <div class="text-[10px] font-medium" style="color: #a78bfa;">{{ number_format($blockedLF, 0) }} LF</div>
-                        @endif
-                    </div>
-                </button>
-
-                {{-- Overdue Widget --}}
-                <button
-                    wire:click="toggleWidgetFilter('overdue')"
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: rgba(220, 38, 38, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: #fef2f2;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-                >
-                    <div class="w-3 h-8 rounded-sm" style="background-color: #dc2626;"></div>
-                    <div class="text-left">
-                        <div class="text-2xl font-bold" style="color: #dc2626;">{{ $overdueCount }}</div>
-                        <div class="text-xs" style="color: #6b7280;">Overdue</div>
-                        @if($currentViewMode === 'projects' && $overdueLF > 0)
-                            <div class="text-[10px] font-medium" style="color: #f87171;">{{ number_format($overdueLF, 0) }} LF</div>
-                        @endif
-                    </div>
-                </button>
-
-                {{-- Due Soon Widget --}}
-                <button
-                    wire:click="toggleWidgetFilter('due_soon')"
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: rgba(234, 88, 12, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-                >
-                    <div class="w-3 h-8 rounded-sm" style="background-color: #ea580c;"></div>
-                    <div class="text-left">
-                        <div class="text-2xl font-bold" style="color: #ea580c;">{{ $dueSoonCount }}</div>
-                        <div class="text-xs" style="color: #6b7280;">Due Soon</div>
-                        @if($currentViewMode === 'projects' && $dueSoonLF > 0)
-                            <div class="text-[10px] font-medium" style="color: #fb923c;">{{ number_format($dueSoonLF, 0) }} LF</div>
-                        @endif
-                    </div>
-                </button>
-
-                {{-- On Track / In Progress Widget --}}
-                @if($currentViewMode === 'projects')
-                    <button
-                        wire:click="toggleWidgetFilter('on_track')"
-                        class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                        :style="isDark
-                            ? '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                            : '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: #f0fdf4;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                @if($blockedCount > 0)
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('blocked')"
+                        :active="($this->widgetFilter ?? null) === 'blocked'"
+                        badge-color="gray"
                     >
-                        <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
-                        <div class="text-left">
-                            <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
-                            <div class="text-xs" style="color: #6b7280;">On Track</div>
-                            @if($onTrackLF > 0)
-                                <div class="text-[10px] font-medium" style="color: #4ade80;">{{ number_format($onTrackLF, 0) }} LF</div>
-                            @endif
-                        </div>
-                    </button>
-                @else
-                    <button
-                        wire:click="toggleWidgetFilter('in_progress')"
-                        class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                        :style="isDark
-                            ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                            : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-                    >
-                        <div class="w-3 h-8 rounded-sm" style="background-color: #2563eb;"></div>
-                        <div class="text-left">
-                            <div class="text-2xl font-bold" style="color: #2563eb;">{{ $inProgressCount ?? 0 }}</div>
-                            <div class="text-xs" style="color: #6b7280;">In Progress</div>
-                        </div>
-                    </button>
+                        Blocked
+                        <x-slot name="badge">
+                            <span class="text-purple-600 dark:text-purple-400">{{ $blockedCount }}</span>
+                        </x-slot>
+                    </x-filament::tabs.item>
                 @endif
+
+                @if($overdueCount > 0)
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('overdue')"
+                        :active="($this->widgetFilter ?? null) === 'overdue'"
+                    >
+                        Overdue
+                        <x-slot name="badge">
+                            <span class="text-danger-600 dark:text-danger-400">{{ $overdueCount }}</span>
+                        </x-slot>
+                    </x-filament::tabs.item>
+                @endif
+
+                @if($dueSoonCount > 0)
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('due_soon')"
+                        :active="($this->widgetFilter ?? null) === 'due_soon'"
+                    >
+                        Due Soon
+                        <x-slot name="badge">
+                            <span class="text-warning-600 dark:text-warning-400">{{ $dueSoonCount }}</span>
+                        </x-slot>
+                    </x-filament::tabs.item>
+                @endif
+
+                @if($currentViewMode === 'projects' && $onTrackCount > 0)
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('on_track')"
+                        :active="($this->widgetFilter ?? null) === 'on_track'"
+                    >
+                        On Track
+                        <x-slot name="badge">
+                            <span class="text-success-600 dark:text-success-400">{{ $onTrackCount }}</span>
+                        </x-slot>
+                    </x-filament::tabs.item>
+                @elseif($currentViewMode === 'tasks' && ($inProgressCount ?? 0) > 0)
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('in_progress')"
+                        :active="($this->widgetFilter ?? null) === 'in_progress'"
+                    >
+                        In Progress
+                        <x-slot name="badge">{{ $inProgressCount ?? 0 }}</x-slot>
+                    </x-filament::tabs.item>
+                @endif
+            </x-filament::tabs>
+
+            {{-- LF Summary Badge (Projects only) --}}
+            @if($currentViewMode === 'projects' && $totalLF > 0)
+                <x-filament::badge color="gray" size="sm">
+                    {{ number_format($totalLF, 0) }} LF
+                </x-filament::badge>
             @endif
 
-            {{-- Active Filter Indicator --}}
+            {{-- Active Filter Clear --}}
             @if(($this->widgetFilter ?? 'all') !== 'all')
-                <div class="flex items-center gap-2">
-                    <span
-                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
-                        :style="isDark ? 'background-color: #374151; color: #d1d5db;' : 'background-color: #f3f4f6; color: #374151;'"
-                    >
-                        {{ ucfirst(str_replace('_', ' ', $this->widgetFilter ?? 'all')) }}
-                        <button wire:click="toggleWidgetFilter('all')" class="ml-1 hover:text-red-500">
-                            <x-heroicon-m-x-mark class="w-3 h-3" />
-                        </button>
-                    </span>
-                </div>
+                <x-filament::badge color="primary" class="cursor-pointer" wire:click="toggleWidgetFilter('all')">
+                    {{ ucfirst(str_replace('_', ' ', $this->widgetFilter ?? 'all')) }}
+                    <x-heroicon-m-x-mark class="w-3 h-3 ml-1" />
+                </x-filament::badge>
             @endif
 
             {{-- Right Side Controls --}}
-            <div class="ml-auto flex items-center gap-2">
-                {{-- KPI Row Toggle (Projects mode) --}}
+            <div class="ml-auto flex items-center gap-1">
                 @if($currentViewMode === 'projects')
                     @php $kpiActive = $this->layoutSettings['show_kpi_row'] ?? false; @endphp
-                    <button
+                    <x-filament::icon-button
                         wire:click="toggleKpiRow"
-                        class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
-                        :style="isDark
-                            ? '{{ $kpiActive ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
-                            : '{{ $kpiActive ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
-                        title="Toggle Analytics"
-                    >
-                        <x-heroicon-m-chart-pie class="w-3.5 h-3.5" />
-                        <span class="hidden sm:inline">Analytics</span>
-                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $kpiActive ? 'rotate-180' : '' }}" />
-                    </button>
-                @endif
+                        icon="heroicon-m-chart-pie"
+                        :color="$kpiActive ? 'primary' : 'gray'"
+                        size="sm"
+                        label="Analytics"
+                    />
 
-                {{-- Chart Toggle (Projects mode only) --}}
-                @if($currentViewMode === 'projects')
                     @php $chartActive = $this->layoutSettings['show_chart'] ?? false; @endphp
-                    <button
+                    <x-filament::icon-button
                         wire:click="toggleChartVisibility"
-                        class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
-                        :style="isDark
-                            ? '{{ $chartActive ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
-                            : '{{ $chartActive ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
-                        title="Toggle Chart"
-                    >
-                        <x-heroicon-m-chart-bar class="w-3.5 h-3.5" />
-                        <span class="hidden sm:inline">{{ $chartYear ?? now()->year }}</span>
-                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $chartActive ? 'rotate-180' : '' }}" />
-                    </button>
+                        icon="heroicon-m-chart-bar"
+                        :color="$chartActive ? 'primary' : 'gray'"
+                        size="sm"
+                        label="{{ $chartYear ?? now()->year }} Chart"
+                    />
                 @endif
             </div>
         </div>
+    </div>
 
         {{-- Business Owner KPI Row (Projects mode only, collapsible) --}}
         @if($currentViewMode === 'projects' && ($this->layoutSettings['show_kpi_row'] ?? false))
-            <div class="flex items-center gap-3 mt-3 pt-3 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
-                 x-transition:enter="transition ease-out duration-200"
-                 x-transition:enter-start="opacity-0 -translate-y-2"
-                 x-transition:enter-end="opacity-100 translate-y-0"
-            >
+            <div class="flex items-center gap-3 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                 {{-- Time Range Selector using Filament Tabs --}}
                 <x-filament::tabs>
                     <x-filament::tabs.item
@@ -410,78 +242,26 @@
                     </x-filament::tabs.item>
                 </x-filament::tabs>
 
-                {{-- Divider --}}
-                <div class="w-px h-8" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
+                {{-- KPI Stats as Badges --}}
+                <x-filament::badge color="info" size="lg" icon="heroicon-m-queue-list">
+                    {{ number_format($kpiStats['lf_this_period'] ?? 0, 0) }} LF {{ $kpiStats['time_range_label'] ?? 'This Week' }}
+                </x-filament::badge>
 
-                {{-- LF This Period Widget --}}
-                <div
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
-                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
-                >
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(37, 99, 235, 0.2);">
-                        <x-heroicon-s-queue-list class="w-4 h-4" style="color: #2563eb;" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-lg font-bold" style="color: #2563eb;">{{ number_format($kpiStats['lf_this_period'] ?? 0, 0) }} LF</div>
-                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">New {{ $kpiStats['time_range_label'] ?? 'This Week' }}</div>
-                    </div>
-                </div>
+                <x-filament::badge color="warning" size="lg" icon="heroicon-m-cog-6-tooth">
+                    {{ number_format($kpiStats['lf_in_production'] ?? 0, 0) }} LF Production
+                </x-filament::badge>
 
-                {{-- In Production Widget --}}
-                <div
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
-                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
-                >
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(234, 88, 12, 0.2);">
-                        <x-heroicon-s-cog-6-tooth class="w-4 h-4" style="color: #ea580c;" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-lg font-bold" style="color: #ea580c;">{{ number_format($kpiStats['lf_in_production'] ?? 0, 0) }} LF</div>
-                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">In Production ({{ $kpiStats['projects_in_production'] ?? 0 }})</div>
-                    </div>
-                </div>
+                <x-filament::badge color="success" size="lg" icon="heroicon-m-check-circle">
+                    {{ $kpiStats['on_target'] ?? 0 }} On Target
+                </x-filament::badge>
 
-                {{-- On Target Widget --}}
-                <div
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
-                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
-                >
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(22, 163, 74, 0.2);">
-                        <x-heroicon-s-check-circle class="w-4 h-4" style="color: #16a34a;" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-lg font-bold" style="color: #16a34a;">{{ $kpiStats['on_target'] ?? 0 }}</div>
-                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">On Target</div>
-                    </div>
-                </div>
+                <x-filament::badge color="danger" size="lg" icon="heroicon-m-exclamation-triangle">
+                    {{ $kpiStats['off_target'] ?? 0 }} Off Target
+                </x-filament::badge>
 
-                {{-- Off Target Widget --}}
-                <div
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
-                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
-                >
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(220, 38, 38, 0.2);">
-                        <x-heroicon-s-exclamation-triangle class="w-4 h-4" style="color: #dc2626;" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-lg font-bold" style="color: #dc2626;">{{ $kpiStats['off_target'] ?? 0 }}</div>
-                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">Off Target</div>
-                    </div>
-                </div>
-
-                {{-- Completed This Period Widget --}}
-                <div
-                    class="flex items-center gap-3 px-4 py-2 rounded-lg border transition-all duration-150"
-                    :style="isDark ? 'border-color: #374151; background-color: #1f2937;' : 'border-color: #e5e7eb; background-color: #fff;'"
-                >
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background-color: rgba(124, 58, 237, 0.2);">
-                        <x-heroicon-s-trophy class="w-4 h-4" style="color: #7c3aed;" />
-                    </div>
-                    <div class="text-left">
-                        <div class="text-lg font-bold" style="color: #7c3aed;">{{ $kpiStats['completed_this_period'] ?? 0 }}</div>
-                        <div class="text-[10px] uppercase tracking-wider" style="color: #6b7280;">Completed ({{ number_format($kpiStats['lf_completed_this_period'] ?? 0, 0) }} LF)</div>
-                    </div>
-                </div>
+                <x-filament::badge color="gray" size="lg" icon="heroicon-m-flag">
+                    {{ $kpiStats['completed_this_period'] ?? 0 }} Completed
+                </x-filament::badge>
             </div>
         @endif
 
@@ -493,84 +273,65 @@
                 $doneCount = (clone $taskQuery)->where('state', 'done')->count();
                 $cancelledCount = (clone $taskQuery)->where('state', 'cancelled')->count();
             @endphp
-            <div class="flex items-center gap-2 mt-2 pt-2 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
-                <span class="text-xs font-medium" style="color: #6b7280;">Status:</span>
-
-                {{-- In Progress --}}
-                <button
-                    wire:click="toggleWidgetFilter('in_progress')"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2); color: #60a5fa;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff; color: #2563eb;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
-                >
-                    <span class="w-2 h-2 rounded-full" style="background-color: #2563eb;"></span>
-                    In Progress ({{ $inProgressCount ?? 0 }})
-                </button>
-
-                {{-- Done --}}
-                <button
-                    wire:click="toggleWidgetFilter('done')"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'done' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2); color: #4ade80;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'done' ? 'border-color: #16a34a; background-color: #f0fdf4; color: #16a34a;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
-                >
-                    <span class="w-2 h-2 rounded-full" style="background-color: #16a34a;"></span>
-                    Done ({{ $doneCount ?? 0 }})
-                </button>
-
-                {{-- Cancelled --}}
-                <button
-                    wire:click="toggleWidgetFilter('cancelled')"
-                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
-                    :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'cancelled' ? 'border-color: #6b7280; background-color: rgba(107, 114, 128, 0.2); color: #9ca3af;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'cancelled' ? 'border-color: #6b7280; background-color: #f9fafb; color: #6b7280;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
-                >
-                    <span class="w-2 h-2 rounded-full" style="background-color: #6b7280;"></span>
-                    Cancelled ({{ $cancelledCount ?? 0 }})
-                </button>
+            <div class="flex items-center gap-2 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                <span class="text-xs font-medium text-gray-500">Status:</span>
+                <x-filament::tabs>
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('in_progress')"
+                        :active="($this->widgetFilter ?? null) === 'in_progress'"
+                    >
+                        In Progress
+                        <x-slot name="badge">{{ $inProgressCount ?? 0 }}</x-slot>
+                    </x-filament::tabs.item>
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('done')"
+                        :active="($this->widgetFilter ?? null) === 'done'"
+                    >
+                        Done
+                        <x-slot name="badge">{{ $doneCount ?? 0 }}</x-slot>
+                    </x-filament::tabs.item>
+                    <x-filament::tabs.item
+                        wire:click="toggleWidgetFilter('cancelled')"
+                        :active="($this->widgetFilter ?? null) === 'cancelled'"
+                    >
+                        Cancelled
+                        <x-slot name="badge">{{ $cancelledCount ?? 0 }}</x-slot>
+                    </x-filament::tabs.item>
+                </x-filament::tabs>
             </div>
         @endif
 
         {{-- Chart Container (Collapsible - uses showChart from layout settings) --}}
         @if($currentViewMode === 'projects' && ($this->layoutSettings['show_chart'] ?? false))
-            <div
-                class="mt-3 pt-3 border-t"
-                :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
-            >
+            <div class="px-4 py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
                 {{-- Chart Legend Row with Year Selector --}}
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-4 text-xs">
                         <span class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-sm" style="background-color: #16a34a;"></span>
-                            <span style="color: #6b7280;">Completed ({{ $yearlyStats['totals']['completed'] ?? 0 }})</span>
+                            <span class="w-3 h-3 rounded-sm bg-success-500"></span>
+                            <span class="text-gray-500">Completed ({{ $yearlyStats['totals']['completed'] ?? 0 }})</span>
                         </span>
                         <span class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-sm" style="background-color: #2563eb;"></span>
-                            <span style="color: #6b7280;">In Progress ({{ $yearlyStats['totals']['in_progress'] ?? 0 }})</span>
+                            <span class="w-3 h-3 rounded-sm bg-primary-500"></span>
+                            <span class="text-gray-500">In Progress ({{ $yearlyStats['totals']['in_progress'] ?? 0 }})</span>
                         </span>
                         <span class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-sm" style="background-color: #6b7280;"></span>
-                            <span style="color: #6b7280;">Cancelled ({{ $yearlyStats['totals']['cancelled'] ?? 0 }})</span>
+                            <span class="w-3 h-3 rounded-sm bg-gray-500"></span>
+                            <span class="text-gray-500">Cancelled ({{ $yearlyStats['totals']['cancelled'] ?? 0 }})</span>
                         </span>
                     </div>
 
                     {{-- Year Selector --}}
-                    <div class="flex items-center gap-1">
+                    <x-filament::tabs>
                         @foreach($availableYears ?? [] as $year => $label)
-                            <button
+                            <x-filament::tabs.item
                                 wire:click="setChartYear({{ $year }})"
-                                class="px-2 py-0.5 text-xs rounded transition-colors"
-                                :style="isDark
-                                    ? '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #374151; color: #9ca3af;' }}'
-                                    : '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #e5e7eb; color: #6b7280;' }}'"
+                                :active="($chartYear ?? now()->year) == $year"
                             >
                                 {{ $label }}
-                            </button>
+                            </x-filament::tabs.item>
                         @endforeach
-                    </div>
+                    </x-filament::tabs>
                 </div>
 
                 {{-- Chart --}}
