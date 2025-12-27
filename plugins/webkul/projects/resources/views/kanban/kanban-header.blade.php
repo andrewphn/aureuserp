@@ -10,7 +10,7 @@
 
 {{-- Monday.com Style Header Bar --}}
 <div
-    class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150"
+    class="flex items-center justify-between px-4 py-2 rounded-t-lg transition-all duration-150 min-h-[52px]"
     style="background-color: {{ $color }};"
 >
     {{-- Stage Name / Count / Linear Feet --}}
@@ -28,11 +28,13 @@
                 <span class="text-white/50 text-xs">(max {{ $wipLimit }})</span>
             @endif
         </h3>
-        @if($totalLinearFeet > 0)
-            <span class="text-white/70 text-xs">
+        <span class="text-white/70 text-xs">
+            @if($totalLinearFeet > 0)
                 {{ number_format($totalLinearFeet, 1) }} LF
-            </span>
-        @endif
+            @else
+                &nbsp;
+            @endif
+        </span>
     </div>
 
     {{-- Add button --}}
