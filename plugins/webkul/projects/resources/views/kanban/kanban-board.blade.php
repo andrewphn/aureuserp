@@ -65,6 +65,8 @@
             $overdueCount = (clone $taskQuery)->where('deadline', '<', now())->where('state', '!=', 'done')->count();
             $dueSoonCount = (clone $taskQuery)->whereBetween('deadline', [now(), now()->addDays(7)])->where('state', '!=', 'done')->count();
             $inProgressCount = (clone $taskQuery)->where('state', 'in_progress')->count();
+            $doneCount = (clone $taskQuery)->where('state', 'done')->count();
+            $cancelledCount = (clone $taskQuery)->where('state', 'cancelled')->count();
 
             // No LF for tasks
             $totalLF = $blockedLF = $overdueLF = $dueSoonLF = $onTrackLF = 0;
@@ -163,14 +165,45 @@
                             <span class="text-success-600 dark:text-success-400">{{ $onTrackCount }}</span>
                         </x-slot>
                     </x-filament::tabs.item>
-                @elseif($currentViewMode === 'tasks' && ($inProgressCount ?? 0) > 0)
-                    <x-filament::tabs.item
-                        wire:click="toggleWidgetFilter('in_progress')"
-                        :active="($this->widgetFilter ?? null) === 'in_progress'"
-                    >
-                        In Progress
-                        <x-slot name="badge">{{ $inProgressCount ?? 0 }}</x-slot>
-                    </x-filament::tabs.item>
+                @endif
+
+                {{-- Task-specific filters --}}
+                @if($currentViewMode === 'tasks')
+                    @if(($inProgressCount ?? 0) > 0)
+                        <x-filament::tabs.item
+                            wire:click="toggleWidgetFilter('in_progress')"
+                            :active="($this->widgetFilter ?? null) === 'in_progress'"
+                        >
+                            In Progress
+                            <x-slot name="badge">
+                                <span class="text-primary-600 dark:text-primary-400">{{ $inProgressCount ?? 0 }}</span>
+                            </x-slot>
+                        </x-filament::tabs.item>
+                    @endif
+
+                    @if(($doneCount ?? 0) > 0)
+                        <x-filament::tabs.item
+                            wire:click="toggleWidgetFilter('done')"
+                            :active="($this->widgetFilter ?? null) === 'done'"
+                        >
+                            Done
+                            <x-slot name="badge">
+                                <span class="text-success-600 dark:text-success-400">{{ $doneCount ?? 0 }}</span>
+                            </x-slot>
+                        </x-filament::tabs.item>
+                    @endif
+
+                    @if(($cancelledCount ?? 0) > 0)
+                        <x-filament::tabs.item
+                            wire:click="toggleWidgetFilter('cancelled')"
+                            :active="($this->widgetFilter ?? null) === 'cancelled'"
+                        >
+                            Cancelled
+                            <x-slot name="badge">
+                                <span class="text-gray-500 dark:text-gray-400">{{ $cancelledCount ?? 0 }}</span>
+                            </x-slot>
+                        </x-filament::tabs.item>
+                    @endif
                 @endif
             </x-filament::tabs>
 
@@ -265,42 +298,6 @@
                 <x-filament::badge color="gray" size="lg" icon="heroicon-m-flag">
                     {{ $kpiStats['completed_this_period'] ?? 0 }} Completed
                 </x-filament::badge>
-            </div>
-        @endif
-
-        {{-- Task Status Filters (Tasks mode only) --}}
-        @if($currentViewMode === 'tasks')
-            @php
-                $taskQuery = \Webkul\Project\Models\Task::query()
-                    ->when($projectFilter ?? null, fn($q) => $q->where('project_id', $projectFilter));
-                $doneCount = (clone $taskQuery)->where('state', 'done')->count();
-                $cancelledCount = (clone $taskQuery)->where('state', 'cancelled')->count();
-            @endphp
-            <div class="flex items-center gap-2 px-4 py-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-                <span class="text-xs font-medium text-gray-500">Status:</span>
-                <x-filament::tabs>
-                    <x-filament::tabs.item
-                        wire:click="toggleWidgetFilter('in_progress')"
-                        :active="($this->widgetFilter ?? null) === 'in_progress'"
-                    >
-                        In Progress
-                        <x-slot name="badge">{{ $inProgressCount ?? 0 }}</x-slot>
-                    </x-filament::tabs.item>
-                    <x-filament::tabs.item
-                        wire:click="toggleWidgetFilter('done')"
-                        :active="($this->widgetFilter ?? null) === 'done'"
-                    >
-                        Done
-                        <x-slot name="badge">{{ $doneCount ?? 0 }}</x-slot>
-                    </x-filament::tabs.item>
-                    <x-filament::tabs.item
-                        wire:click="toggleWidgetFilter('cancelled')"
-                        :active="($this->widgetFilter ?? null) === 'cancelled'"
-                    >
-                        Cancelled
-                        <x-slot name="badge">{{ $cancelledCount ?? 0 }}</x-slot>
-                    </x-filament::tabs.item>
-                </x-filament::tabs>
             </div>
         @endif
 
