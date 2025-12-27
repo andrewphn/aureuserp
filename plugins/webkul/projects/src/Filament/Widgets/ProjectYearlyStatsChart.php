@@ -25,16 +25,6 @@ class ProjectYearlyStatsChart extends ApexChartWidget
         return view('filament::components.loading-indicator');
     }
 
-    protected function getFilters(): ?array
-    {
-        return [
-            'this_week' => 'Week',
-            'this_month' => 'Month',
-            'this_quarter' => 'Quarter',
-            'ytd' => 'YTD',
-        ];
-    }
-
     protected function getTimeRangeData(): array
     {
         $timeRange = $this->filter ?? 'this_month';
