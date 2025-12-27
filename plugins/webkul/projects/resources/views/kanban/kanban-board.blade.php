@@ -50,28 +50,31 @@
             $inProgressCount = (clone $taskQuery)->where('state', 'in_progress')->count();
         }
     @endphp
-    <div class="px-3 py-3 border-b bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+    <div
+        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+        class="px-3 py-3 border-b"
+        :style="isDark ? 'background-color: #111827; border-color: #374151;' : 'background-color: #f9fafb; border-color: #e5e7eb;'"
+    >
         <div class="flex items-center gap-3">
             {{-- View Mode Toggle (Projects/Tasks) --}}
-            <div class="flex items-center rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
                 <button
                     wire:click="setViewMode('projects')"
-                    @class([
-                        'flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150',
-                        'bg-[#D4A574] text-gray-900' => $currentViewMode === 'projects',
-                        'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400' => $currentViewMode !== 'projects',
-                    ])
+                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150"
+                    :style="isDark
+                        ? '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
                 >
                     <x-heroicon-m-folder class="w-4 h-4" />
                     Projects
                 </button>
                 <button
                     wire:click="setViewMode('tasks')"
-                    @class([
-                        'flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150',
-                        'bg-[#D4A574] text-gray-900' => $currentViewMode === 'tasks',
-                        'bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400' => $currentViewMode !== 'tasks',
-                    ])
+                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150"
+                    :style="isDark
+                        ? '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
                 >
                     <x-heroicon-m-clipboard-document-check class="w-4 h-4" />
                     Tasks
@@ -82,7 +85,8 @@
             @if($currentViewMode === 'tasks')
                 <select
                     wire:model.live="projectFilter"
-                    class="text-sm rounded-lg px-3 py-2 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                    class="text-sm rounded-lg px-3 py-2"
+                    :style="isDark ? 'background-color: #1f2937; border-color: #374151; color: #fff;' : 'background-color: #fff; border-color: #e5e7eb; color: #111827;'"
                 >
                     <option value="">All Projects</option>
                     @foreach($projects ?? [] as $id => $name)
@@ -92,68 +96,64 @@
             @endif
 
             {{-- Divider --}}
-            <div class="w-px h-8 bg-gray-200 dark:bg-gray-700"></div>
+            <div class="w-px h-8" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
 
             {{-- All Items Widget --}}
             <button
                 wire:click="toggleWidgetFilter('all')"
-                @class([
-                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                    'border-orange-500 bg-orange-50 dark:bg-orange-500/20' => ($this->widgetFilter ?? 'all') === 'all',
-                    'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? 'all') !== 'all',
-                ])
+                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                :style="isDark
+                    ? '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: rgba(249, 115, 22, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                    : '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
             >
                 <div class="text-left">
-                    <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalProjects }}</div>
-                    <div class="text-xs text-gray-500">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
+                    <div class="text-2xl font-bold" :style="isDark ? 'color: #fff;' : 'color: #111827;'">{{ $totalProjects }}</div>
+                    <div class="text-xs" style="color: #6b7280;">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
                 </div>
             </button>
 
             {{-- Blocked Widget --}}
             <button
                 wire:click="toggleWidgetFilter('blocked')"
-                @class([
-                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                    'border-violet-600 bg-violet-50 dark:bg-violet-600/20' => ($this->widgetFilter ?? null) === 'blocked',
-                    'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'blocked',
-                ])
+                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                :style="isDark
+                    ? '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: rgba(124, 58, 237, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                    : '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: #f5f3ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
             >
-                <div class="w-3 h-8 rounded-sm bg-violet-600"></div>
+                <div class="w-3 h-8 rounded-sm" style="background-color: #7c3aed;"></div>
                 <div class="text-left">
-                    <div class="text-2xl font-bold text-violet-600">{{ $blockedCount }}</div>
-                    <div class="text-xs text-gray-500">Blocked</div>
+                    <div class="text-2xl font-bold" style="color: #7c3aed;">{{ $blockedCount }}</div>
+                    <div class="text-xs" style="color: #6b7280;">Blocked</div>
                 </div>
             </button>
 
             {{-- Overdue Widget --}}
             <button
                 wire:click="toggleWidgetFilter('overdue')"
-                @class([
-                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                    'border-red-600 bg-red-50 dark:bg-red-600/20' => ($this->widgetFilter ?? null) === 'overdue',
-                    'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'overdue',
-                ])
+                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                :style="isDark
+                    ? '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: rgba(220, 38, 38, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                    : '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: #fef2f2;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
             >
-                <div class="w-3 h-8 rounded-sm bg-red-600"></div>
+                <div class="w-3 h-8 rounded-sm" style="background-color: #dc2626;"></div>
                 <div class="text-left">
-                    <div class="text-2xl font-bold text-red-600">{{ $overdueCount }}</div>
-                    <div class="text-xs text-gray-500">Overdue</div>
+                    <div class="text-2xl font-bold" style="color: #dc2626;">{{ $overdueCount }}</div>
+                    <div class="text-xs" style="color: #6b7280;">Overdue</div>
                 </div>
             </button>
 
             {{-- Due Soon Widget --}}
             <button
                 wire:click="toggleWidgetFilter('due_soon')"
-                @class([
-                    'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                    'border-orange-600 bg-orange-50 dark:bg-orange-600/20' => ($this->widgetFilter ?? null) === 'due_soon',
-                    'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'due_soon',
-                ])
+                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                :style="isDark
+                    ? '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: rgba(234, 88, 12, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                    : '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
             >
-                <div class="w-3 h-8 rounded-sm bg-orange-600"></div>
+                <div class="w-3 h-8 rounded-sm" style="background-color: #ea580c;"></div>
                 <div class="text-left">
-                    <div class="text-2xl font-bold text-orange-600">{{ $dueSoonCount }}</div>
-                    <div class="text-xs text-gray-500">Due Soon</div>
+                    <div class="text-2xl font-bold" style="color: #ea580c;">{{ $dueSoonCount }}</div>
+                    <div class="text-xs" style="color: #6b7280;">Due Soon</div>
                 </div>
             </button>
 
@@ -161,31 +161,29 @@
             @if($currentViewMode === 'projects')
                 <button
                     wire:click="toggleWidgetFilter('on_track')"
-                    @class([
-                        'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                        'border-green-600 bg-green-50 dark:bg-green-600/20' => ($this->widgetFilter ?? null) === 'on_track',
-                        'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'on_track',
-                    ])
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: #f0fdf4;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
                 >
-                    <div class="w-3 h-8 rounded-sm bg-green-600"></div>
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
                     <div class="text-left">
-                        <div class="text-2xl font-bold text-green-600">{{ $onTrackCount }}</div>
-                        <div class="text-xs text-gray-500">On Track</div>
+                        <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
+                        <div class="text-xs" style="color: #6b7280;">On Track</div>
                     </div>
                 </button>
             @else
                 <button
                     wire:click="toggleWidgetFilter('in_progress')"
-                    @class([
-                        'flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer',
-                        'border-blue-600 bg-blue-50 dark:bg-blue-600/20' => ($this->widgetFilter ?? null) === 'in_progress',
-                        'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800' => ($this->widgetFilter ?? null) !== 'in_progress',
-                    ])
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
                 >
-                    <div class="w-3 h-8 rounded-sm bg-blue-600"></div>
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #2563eb;"></div>
                     <div class="text-left">
-                        <div class="text-2xl font-bold text-blue-600">{{ $inProgressCount ?? 0 }}</div>
-                        <div class="text-xs text-gray-500">In Progress</div>
+                        <div class="text-2xl font-bold" style="color: #2563eb;">{{ $inProgressCount ?? 0 }}</div>
+                        <div class="text-xs" style="color: #6b7280;">In Progress</div>
                     </div>
                 </button>
             @endif
@@ -193,8 +191,11 @@
             {{-- Active Filter Indicator --}}
             @if(($this->widgetFilter ?? 'all') !== 'all')
                 <div class="ml-auto flex items-center gap-2">
-                    <span class="text-xs text-gray-500">Filtering by:</span>
-                    <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+                    <span class="text-xs" style="color: #6b7280;">Filtering by:</span>
+                    <span
+                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                        :style="isDark ? 'background-color: #374151; color: #d1d5db;' : 'background-color: #f3f4f6; color: #374151;'"
+                    >
                         {{ ucfirst(str_replace('_', ' ', $this->widgetFilter ?? 'all')) }}
                         <button wire:click="toggleWidgetFilter('all')" class="ml-1 hover:text-red-500">
                             <x-heroicon-m-x-mark class="w-3 h-3" />
@@ -212,45 +213,42 @@
                 $doneCount = (clone $taskQuery)->where('state', 'done')->count();
                 $cancelledCount = (clone $taskQuery)->where('state', 'cancelled')->count();
             @endphp
-            <div class="flex items-center gap-2 mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
-                <span class="text-xs font-medium text-gray-500">Status:</span>
+            <div class="flex items-center gap-2 mt-2 pt-2 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
+                <span class="text-xs font-medium" style="color: #6b7280;">Status:</span>
 
                 {{-- In Progress --}}
                 <button
                     wire:click="toggleWidgetFilter('in_progress')"
-                    @class([
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border',
-                        'border-blue-600 bg-blue-50 dark:bg-blue-600/20 text-blue-600 dark:text-blue-400' => ($this->widgetFilter ?? null) === 'in_progress',
-                        'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400' => ($this->widgetFilter ?? null) !== 'in_progress',
-                    ])
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2); color: #60a5fa;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff; color: #2563eb;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
                 >
-                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+                    <span class="w-2 h-2 rounded-full" style="background-color: #2563eb;"></span>
                     In Progress ({{ $inProgressCount ?? 0 }})
                 </button>
 
                 {{-- Done --}}
                 <button
                     wire:click="toggleWidgetFilter('done')"
-                    @class([
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border',
-                        'border-green-600 bg-green-50 dark:bg-green-600/20 text-green-600 dark:text-green-400' => ($this->widgetFilter ?? null) === 'done',
-                        'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400' => ($this->widgetFilter ?? null) !== 'done',
-                    ])
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'done' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2); color: #4ade80;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'done' ? 'border-color: #16a34a; background-color: #f0fdf4; color: #16a34a;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
                 >
-                    <span class="w-2 h-2 rounded-full bg-green-600"></span>
+                    <span class="w-2 h-2 rounded-full" style="background-color: #16a34a;"></span>
                     Done ({{ $doneCount ?? 0 }})
                 </button>
 
                 {{-- Cancelled --}}
                 <button
                     wire:click="toggleWidgetFilter('cancelled')"
-                    @class([
-                        'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border',
-                        'border-gray-500 bg-gray-50 dark:bg-gray-500/20 text-gray-500 dark:text-gray-400' => ($this->widgetFilter ?? null) === 'cancelled',
-                        'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400' => ($this->widgetFilter ?? null) !== 'cancelled',
-                    ])
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'cancelled' ? 'border-color: #6b7280; background-color: rgba(107, 114, 128, 0.2); color: #9ca3af;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'cancelled' ? 'border-color: #6b7280; background-color: #f9fafb; color: #6b7280;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
                 >
-                    <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                    <span class="w-2 h-2 rounded-full" style="background-color: #6b7280;"></span>
                     Cancelled ({{ $cancelledCount ?? 0 }})
                 </button>
             </div>
@@ -282,11 +280,15 @@
                 <div
                     x-show="!inboxOpen"
                     @click="toggleInbox()"
-                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 border-2 hover:opacity-80 bg-white dark:bg-gray-800 border-gray-900 dark:border-gray-600"
+                    x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+                    x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 border-2 hover:opacity-80"
+                    :style="isDark ? 'background-color: #1f2937; border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
                     title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
                     <span
-                        class="text-xs font-medium whitespace-nowrap text-gray-900 dark:text-white"
+                        class="text-xs font-medium whitespace-nowrap"
+                        :style="isDark ? 'color: #fff;' : 'color: #111827;'"
                         style="writing-mode: vertical-rl; text-orientation: mixed;"
                     >
                         Inbox ({{ $inboxCount }})
@@ -303,17 +305,23 @@
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
                     {{-- Header - Black outlined, no fill --}}
-                    <div class="flex items-center justify-between px-4 py-2 transition-all duration-150 border-2 border-b-0 bg-white dark:bg-gray-800 border-gray-900 dark:border-gray-600">
-                        <h3 class="font-medium text-sm flex items-center gap-1.5 text-gray-900 dark:text-white">
+                    <div
+                        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+                        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+                        class="flex items-center justify-between px-4 py-2 transition-all duration-150 border-2 border-b-0"
+                        :style="isDark ? 'background-color: #1f2937; border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
+                    >
+                        <h3 class="font-medium text-sm flex items-center gap-1.5" :style="isDark ? 'color: #fff;' : 'color: #111827;'">
                             <span>Inbox</span>
-                            <span class="text-gray-400 dark:text-gray-500">/</span>
-                            <span class="text-gray-700 dark:text-gray-300">{{ $inboxCount }}</span>
+                            <span :style="isDark ? 'color: #6b7280;' : 'color: #9ca3af;'">/</span>
+                            <span :style="isDark ? 'color: #d1d5db;' : 'color: #374151;'">{{ $inboxCount }}</span>
                         </h3>
                         <div class="flex items-center gap-1">
                             {{-- Add Lead Button --}}
                             <a
                                 href="{{ route('filament.admin.resources.leads.create') }}"
-                                class="rounded p-1 transition-all duration-100 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                class="rounded p-1 transition-all duration-100"
+                                :style="isDark ? 'color: #9ca3af;' : 'color: #6b7280;'"
                                 title="Add new lead"
                             >
                                 <x-heroicon-m-plus class="w-4 h-4" />
@@ -321,7 +329,8 @@
                             {{-- Collapse Button --}}
                             <button
                                 @click="toggleInbox()"
-                                class="rounded p-1 transition-all duration-100 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                class="rounded p-1 transition-all duration-100"
+                                :style="isDark ? 'color: #9ca3af;' : 'color: #6b7280;'"
                                 title="Collapse inbox"
                             >
                                 <x-heroicon-m-chevron-double-left class="w-4 h-4" />
@@ -330,7 +339,12 @@
                     </div>
 
                     {{-- Lead Cards - Black outlined container --}}
-                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto border-2 border-t-0 bg-white dark:bg-gray-800/50 border-gray-900 dark:border-gray-600">
+                    <div
+                        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+                        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+                        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto border-2 border-t-0"
+                        :style="isDark ? 'background-color: rgba(31, 41, 55, 0.5); border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
+                    >
                         @forelse($leads ?? [] as $lead)
                             <x-filament::section
                                 compact
