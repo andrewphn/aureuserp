@@ -2,6 +2,11 @@
     // View mode from controller
     $currentViewMode = $viewMode ?? 'projects';
 
+    // Layout settings
+    $compactFilters = $layoutSettings['compact_filters'] ?? true;
+    $showKpiRow = $layoutSettings['show_kpi_row'] ?? false;
+    $showChart = $layoutSettings['show_chart'] ?? false;
+
     // Exclude "To Do" from workflow stages - leads are the inbox now (only for projects)
     $boardStatuses = $currentViewMode === 'projects'
         ? $statuses->reject(fn($s) => $s['title'] === 'To Do')
@@ -68,7 +73,7 @@
     <div
         x-data="{ isDark: document.documentElement.classList.contains('dark') }"
         x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
-        class="px-3 py-3 border-b"
+        class="px-3 border-b {{ $compactFilters ? 'py-2' : 'py-3' }}"
         :style="isDark ? 'background-color: #111827; border-color: #374151;' : 'background-color: #f9fafb; border-color: #e5e7eb;'"
     >
         <div class="flex items-center gap-3">
@@ -76,22 +81,22 @@
             <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
                 <button
                     wire:click="setViewMode('projects')"
-                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-150"
+                    class="flex items-center gap-1.5 {{ $compactFilters ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm' }} font-medium transition-all duration-150"
                     :style="isDark
                         ? '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
                         : '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
                 >
-                    <x-heroicon-m-folder class="w-4 h-4" />
+                    <x-heroicon-m-folder class="{{ $compactFilters ? 'w-3.5 h-3.5' : 'w-4 h-4' }}" />
                     Projects
                 </button>
                 <button
                     wire:click="setViewMode('tasks')"
-                    class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all duration-150"
+                    class="flex items-center gap-1.5 {{ $compactFilters ? 'px-3 py-1.5 text-xs' : 'px-4 py-2.5 text-sm' }} font-medium transition-all duration-150"
                     :style="isDark
                         ? '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
                         : '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
                 >
-                    <x-heroicon-m-clipboard-document-check class="w-4 h-4" />
+                    <x-heroicon-m-clipboard-document-check class="{{ $compactFilters ? 'w-3.5 h-3.5' : 'w-4 h-4' }}" />
                     Tasks
                 </button>
             </div>
@@ -100,7 +105,7 @@
             @if($currentViewMode === 'tasks')
                 <select
                     wire:model.live="projectFilter"
-                    class="text-sm rounded-lg px-3 py-2"
+                    class="{{ $compactFilters ? 'text-xs py-1.5' : 'text-sm py-2' }} rounded-lg px-3"
                     :style="isDark ? 'background-color: #1f2937; border-color: #374151; color: #fff;' : 'background-color: #fff; border-color: #e5e7eb; color: #111827;'"
                 >
                     <option value="">All Projects</option>
@@ -111,119 +116,217 @@
             @endif
 
             {{-- Divider --}}
-            <div class="w-px h-8" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
+            <div class="w-px {{ $compactFilters ? 'h-6' : 'h-8' }}" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
 
-            {{-- All Items Widget --}}
-            <button
-                wire:click="toggleWidgetFilter('all')"
-                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                :style="isDark
-                    ? '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: rgba(249, 115, 22, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                    : '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-            >
-                <div class="text-left">
-                    <div class="text-2xl font-bold" :style="isDark ? 'color: #fff;' : 'color: #111827;'">{{ $totalProjects }}</div>
-                    <div class="text-xs" style="color: #6b7280;">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
-                    @if($currentViewMode === 'projects' && $totalLF > 0)
-                        <div class="text-[10px] font-medium" style="color: #9ca3af;">{{ number_format($totalLF, 0) }} LF</div>
+            @if($compactFilters)
+                {{-- COMPACT FILTER TABS --}}
+                <div class="flex items-center gap-1">
+                    {{-- All --}}
+                    <button
+                        wire:click="toggleWidgetFilter('all')"
+                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                        :style="isDark
+                            ? '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'background-color: rgba(249, 115, 22, 0.3); color: #fb923c;' : 'color: #9ca3af;' }}'
+                            : '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'background-color: #fff7ed; color: #ea580c;' : 'color: #6b7280;' }}'"
+                    >
+                        All ({{ $totalProjects }})
+                    </button>
+
+                    {{-- Blocked --}}
+                    @if($blockedCount > 0)
+                    <button
+                        wire:click="toggleWidgetFilter('blocked')"
+                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                        :style="isDark
+                            ? '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'background-color: rgba(124, 58, 237, 0.3); color: #a78bfa;' : 'color: #a78bfa;' }}'
+                            : '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'background-color: #f5f3ff; color: #7c3aed;' : 'color: #7c3aed;' }}'"
+                    >
+                        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #7c3aed;"></span>
+                        Blocked ({{ $blockedCount }})
+                    </button>
+                    @endif
+
+                    {{-- Overdue --}}
+                    @if($overdueCount > 0)
+                    <button
+                        wire:click="toggleWidgetFilter('overdue')"
+                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                        :style="isDark
+                            ? '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'background-color: rgba(220, 38, 38, 0.3); color: #f87171;' : 'color: #f87171;' }}'
+                            : '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'background-color: #fef2f2; color: #dc2626;' : 'color: #dc2626;' }}'"
+                    >
+                        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #dc2626;"></span>
+                        Overdue ({{ $overdueCount }})
+                    </button>
+                    @endif
+
+                    {{-- Due Soon --}}
+                    @if($dueSoonCount > 0)
+                    <button
+                        wire:click="toggleWidgetFilter('due_soon')"
+                        class="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                        :style="isDark
+                            ? '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'background-color: rgba(234, 88, 12, 0.3); color: #fb923c;' : 'color: #fb923c;' }}'
+                            : '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'background-color: #fff7ed; color: #ea580c;' : 'color: #ea580c;' }}'"
+                    >
+                        <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #ea580c;"></span>
+                        Due Soon ({{ $dueSoonCount }})
+                    </button>
+                    @endif
+
+                    {{-- On Track / In Progress --}}
+                    @if($currentViewMode === 'projects')
+                        @if($onTrackCount > 0)
+                        <button
+                            wire:click="toggleWidgetFilter('on_track')"
+                            class="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                            :style="isDark
+                                ? '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'background-color: rgba(22, 163, 74, 0.3); color: #4ade80;' : 'color: #4ade80;' }}'
+                                : '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'background-color: #f0fdf4; color: #16a34a;' : 'color: #16a34a;' }}'"
+                        >
+                            <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #16a34a;"></span>
+                            On Track ({{ $onTrackCount }})
+                        </button>
+                        @endif
+                    @else
+                        @if(($inProgressCount ?? 0) > 0)
+                        <button
+                            wire:click="toggleWidgetFilter('in_progress')"
+                            class="px-2.5 py-1 rounded text-xs font-medium transition-all"
+                            :style="isDark
+                                ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'background-color: rgba(37, 99, 235, 0.3); color: #60a5fa;' : 'color: #60a5fa;' }}'
+                                : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'background-color: #eff6ff; color: #2563eb;' : 'color: #2563eb;' }}'"
+                        >
+                            <span class="inline-block w-1.5 h-1.5 rounded-full mr-1" style="background-color: #2563eb;"></span>
+                            In Progress ({{ $inProgressCount ?? 0 }})
+                        </button>
+                        @endif
                     @endif
                 </div>
-            </button>
 
-            {{-- Blocked Widget --}}
-            <button
-                wire:click="toggleWidgetFilter('blocked')"
-                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                :style="isDark
-                    ? '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: rgba(124, 58, 237, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                    : '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: #f5f3ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-            >
-                <div class="w-3 h-8 rounded-sm" style="background-color: #7c3aed;"></div>
-                <div class="text-left">
-                    <div class="text-2xl font-bold" style="color: #7c3aed;">{{ $blockedCount }}</div>
-                    <div class="text-xs" style="color: #6b7280;">Blocked</div>
-                    @if($currentViewMode === 'projects' && $blockedLF > 0)
-                        <div class="text-[10px] font-medium" style="color: #a78bfa;">{{ number_format($blockedLF, 0) }} LF</div>
-                    @endif
-                </div>
-            </button>
-
-            {{-- Overdue Widget --}}
-            <button
-                wire:click="toggleWidgetFilter('overdue')"
-                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                :style="isDark
-                    ? '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: rgba(220, 38, 38, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                    : '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: #fef2f2;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-            >
-                <div class="w-3 h-8 rounded-sm" style="background-color: #dc2626;"></div>
-                <div class="text-left">
-                    <div class="text-2xl font-bold" style="color: #dc2626;">{{ $overdueCount }}</div>
-                    <div class="text-xs" style="color: #6b7280;">Overdue</div>
-                    @if($currentViewMode === 'projects' && $overdueLF > 0)
-                        <div class="text-[10px] font-medium" style="color: #f87171;">{{ number_format($overdueLF, 0) }} LF</div>
-                    @endif
-                </div>
-            </button>
-
-            {{-- Due Soon Widget --}}
-            <button
-                wire:click="toggleWidgetFilter('due_soon')"
-                class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
-                :style="isDark
-                    ? '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: rgba(234, 88, 12, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                    : '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
-            >
-                <div class="w-3 h-8 rounded-sm" style="background-color: #ea580c;"></div>
-                <div class="text-left">
-                    <div class="text-2xl font-bold" style="color: #ea580c;">{{ $dueSoonCount }}</div>
-                    <div class="text-xs" style="color: #6b7280;">Due Soon</div>
-                    @if($currentViewMode === 'projects' && $dueSoonLF > 0)
-                        <div class="text-[10px] font-medium" style="color: #fb923c;">{{ number_format($dueSoonLF, 0) }} LF</div>
-                    @endif
-                </div>
-            </button>
-
-            {{-- On Track / In Progress Widget --}}
-            @if($currentViewMode === 'projects')
+                {{-- Compact LF Summary (Projects only) --}}
+                @if($currentViewMode === 'projects' && $totalLF > 0)
+                    <div class="flex items-center gap-1.5 text-[10px]" style="color: #9ca3af;">
+                        <span class="font-semibold">{{ number_format($totalLF, 0) }} LF</span>
+                        @if(($kpiStats['lf_in_production'] ?? 0) > 0)
+                            <span>•</span>
+                            <span style="color: #ea580c;">{{ number_format($kpiStats['lf_in_production'], 0) }} LF in prod</span>
+                        @endif
+                    </div>
+                @endif
+            @else
+                {{-- FULL FILTER WIDGETS --}}
+                {{-- All Items Widget --}}
                 <button
-                    wire:click="toggleWidgetFilter('on_track')"
+                    wire:click="toggleWidgetFilter('all')"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
                     :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: #f0fdf4;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                        ? '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: rgba(249, 115, 22, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                        : '{{ ($this->widgetFilter ?? 'all') === 'all' ? 'border-color: #f97316; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
                 >
-                    <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
                     <div class="text-left">
-                        <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
-                        <div class="text-xs" style="color: #6b7280;">On Track</div>
-                        @if($onTrackLF > 0)
-                            <div class="text-[10px] font-medium" style="color: #4ade80;">{{ number_format($onTrackLF, 0) }} LF</div>
+                        <div class="text-2xl font-bold" :style="isDark ? 'color: #fff;' : 'color: #111827;'">{{ $totalProjects }}</div>
+                        <div class="text-xs" style="color: #6b7280;">All {{ $currentViewMode === 'projects' ? 'Projects' : 'Tasks' }}</div>
+                        @if($currentViewMode === 'projects' && $totalLF > 0)
+                            <div class="text-[10px] font-medium" style="color: #9ca3af;">{{ number_format($totalLF, 0) }} LF</div>
                         @endif
                     </div>
                 </button>
-            @else
+
+                {{-- Blocked Widget --}}
                 <button
-                    wire:click="toggleWidgetFilter('in_progress')"
+                    wire:click="toggleWidgetFilter('blocked')"
                     class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
                     :style="isDark
-                        ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
-                        : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                        ? '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: rgba(124, 58, 237, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'blocked' ? 'border-color: #7c3aed; background-color: #f5f3ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
                 >
-                    <div class="w-3 h-8 rounded-sm" style="background-color: #2563eb;"></div>
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #7c3aed;"></div>
                     <div class="text-left">
-                        <div class="text-2xl font-bold" style="color: #2563eb;">{{ $inProgressCount ?? 0 }}</div>
-                        <div class="text-xs" style="color: #6b7280;">In Progress</div>
+                        <div class="text-2xl font-bold" style="color: #7c3aed;">{{ $blockedCount }}</div>
+                        <div class="text-xs" style="color: #6b7280;">Blocked</div>
+                        @if($currentViewMode === 'projects' && $blockedLF > 0)
+                            <div class="text-[10px] font-medium" style="color: #a78bfa;">{{ number_format($blockedLF, 0) }} LF</div>
+                        @endif
                     </div>
                 </button>
+
+                {{-- Overdue Widget --}}
+                <button
+                    wire:click="toggleWidgetFilter('overdue')"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: rgba(220, 38, 38, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'overdue' ? 'border-color: #dc2626; background-color: #fef2f2;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                >
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #dc2626;"></div>
+                    <div class="text-left">
+                        <div class="text-2xl font-bold" style="color: #dc2626;">{{ $overdueCount }}</div>
+                        <div class="text-xs" style="color: #6b7280;">Overdue</div>
+                        @if($currentViewMode === 'projects' && $overdueLF > 0)
+                            <div class="text-[10px] font-medium" style="color: #f87171;">{{ number_format($overdueLF, 0) }} LF</div>
+                        @endif
+                    </div>
+                </button>
+
+                {{-- Due Soon Widget --}}
+                <button
+                    wire:click="toggleWidgetFilter('due_soon')"
+                    class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: rgba(234, 88, 12, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'due_soon' ? 'border-color: #ea580c; background-color: #fff7ed;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                >
+                    <div class="w-3 h-8 rounded-sm" style="background-color: #ea580c;"></div>
+                    <div class="text-left">
+                        <div class="text-2xl font-bold" style="color: #ea580c;">{{ $dueSoonCount }}</div>
+                        <div class="text-xs" style="color: #6b7280;">Due Soon</div>
+                        @if($currentViewMode === 'projects' && $dueSoonLF > 0)
+                            <div class="text-[10px] font-medium" style="color: #fb923c;">{{ number_format($dueSoonLF, 0) }} LF</div>
+                        @endif
+                    </div>
+                </button>
+
+                {{-- On Track / In Progress Widget --}}
+                @if($currentViewMode === 'projects')
+                    <button
+                        wire:click="toggleWidgetFilter('on_track')"
+                        class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                        :style="isDark
+                            ? '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                            : '{{ ($this->widgetFilter ?? null) === 'on_track' ? 'border-color: #16a34a; background-color: #f0fdf4;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                    >
+                        <div class="w-3 h-8 rounded-sm" style="background-color: #16a34a;"></div>
+                        <div class="text-left">
+                            <div class="text-2xl font-bold" style="color: #16a34a;">{{ $onTrackCount }}</div>
+                            <div class="text-xs" style="color: #6b7280;">On Track</div>
+                            @if($onTrackLF > 0)
+                                <div class="text-[10px] font-medium" style="color: #4ade80;">{{ number_format($onTrackLF, 0) }} LF</div>
+                            @endif
+                        </div>
+                    </button>
+                @else
+                    <button
+                        wire:click="toggleWidgetFilter('in_progress')"
+                        class="flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all duration-150 cursor-pointer"
+                        :style="isDark
+                            ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2);' : 'border-color: #374151; background-color: #1f2937;' }}'
+                            : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff;' : 'border-color: #e5e7eb; background-color: #fff;' }}'"
+                    >
+                        <div class="w-3 h-8 rounded-sm" style="background-color: #2563eb;"></div>
+                        <div class="text-left">
+                            <div class="text-2xl font-bold" style="color: #2563eb;">{{ $inProgressCount ?? 0 }}</div>
+                            <div class="text-xs" style="color: #6b7280;">In Progress</div>
+                        </div>
+                    </button>
+                @endif
             @endif
 
             {{-- Active Filter Indicator --}}
             @if(($this->widgetFilter ?? 'all') !== 'all')
                 <div class="flex items-center gap-2">
-                    <span class="text-xs" style="color: #6b7280;">Filtering by:</span>
                     <span
-                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
                         :style="isDark ? 'background-color: #374151; color: #d1d5db;' : 'background-color: #f3f4f6; color: #374151;'"
                     >
                         {{ ucfirst(str_replace('_', ' ', $this->widgetFilter ?? 'all')) }}
@@ -234,46 +337,49 @@
                 </div>
             @endif
 
-            {{-- Chart Toggle (Projects mode only) - Right side --}}
-            @if($currentViewMode === 'projects')
-                <div class="ml-auto flex items-center gap-2">
-                    {{-- Year Selector --}}
-                    <div class="flex items-center gap-1">
-                        @foreach($availableYears ?? [] as $year => $label)
-                            <button
-                                wire:click="setChartYear({{ $year }})"
-                                class="px-2 py-0.5 text-xs rounded transition-colors"
-                                :style="isDark
-                                    ? '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #374151; color: #9ca3af;' }}'
-                                    : '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #e5e7eb; color: #6b7280;' }}'"
-                            >
-                                {{ $label }}
-                            </button>
-                        @endforeach
-                    </div>
-
-                    {{-- Chart Toggle Button --}}
+            {{-- Right Side Controls --}}
+            <div class="ml-auto flex items-center gap-2">
+                {{-- KPI Row Toggle (Projects mode) --}}
+                @if($currentViewMode === 'projects')
                     <button
-                        wire:click="toggleChartCollapsed"
-                        class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all border"
+                        wire:click="toggleKpiRow"
+                        class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
                         :style="isDark
-                            ? '{{ !($chartCollapsed ?? false) ? 'background-color: rgba(212, 165, 116, 0.2); border-color: #D4A574; color: #D4A574;' : 'background-color: #1f2937; border-color: #374151; color: #9ca3af;' }}'
-                            : '{{ !($chartCollapsed ?? false) ? 'background-color: rgba(212, 165, 116, 0.1); border-color: #D4A574; color: #92400e;' : 'background-color: #fff; border-color: #e5e7eb; color: #6b7280;' }}'"
+                            ? '{{ $showKpiRow ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
+                            : '{{ $showKpiRow ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
+                        title="Toggle Analytics"
                     >
-                        <x-heroicon-m-chart-bar class="w-4 h-4" />
-                        <span>{{ $chartYear ?? now()->year }}</span>
-                        <span class="text-xs opacity-75">
-                            ({{ ($yearlyStats['totals']['completed'] ?? 0) + ($yearlyStats['totals']['in_progress'] ?? 0) }})
-                        </span>
-                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ !($chartCollapsed ?? false) ? 'rotate-180' : '' }}" />
+                        <x-heroicon-m-chart-pie class="w-3.5 h-3.5" />
+                        <span class="hidden sm:inline">Analytics</span>
+                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $showKpiRow ? 'rotate-180' : '' }}" />
                     </button>
-                </div>
-            @endif
+                @endif
+
+                {{-- Chart Toggle (Projects mode only) --}}
+                @if($currentViewMode === 'projects')
+                    <button
+                        wire:click="toggleChartVisibility"
+                        class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
+                        :style="isDark
+                            ? '{{ $showChart ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
+                            : '{{ $showChart ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
+                        title="Toggle Chart"
+                    >
+                        <x-heroicon-m-chart-bar class="w-3.5 h-3.5" />
+                        <span class="hidden sm:inline">{{ $chartYear ?? now()->year }}</span>
+                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $showChart ? 'rotate-180' : '' }}" />
+                    </button>
+                @endif
+            </div>
         </div>
 
-        {{-- Business Owner KPI Row (Projects mode only) --}}
-        @if($currentViewMode === 'projects')
-            <div class="flex items-center gap-3 mt-3 pt-3 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
+        {{-- Business Owner KPI Row (Projects mode only, collapsible) --}}
+        @if($currentViewMode === 'projects' && $showKpiRow)
+            <div class="flex items-center gap-3 mt-3 pt-3 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+            >
                 {{-- Time Range Selector --}}
                 <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
                     @foreach(['this_week' => 'Week', 'this_month' => 'Month', 'this_quarter' => 'Quarter', 'ytd' => 'YTD'] as $range => $label)
@@ -413,13 +519,13 @@
             </div>
         @endif
 
-        {{-- Chart Container (Collapsible) --}}
-        @if($currentViewMode === 'projects' && !($chartCollapsed ?? false))
+        {{-- Chart Container (Collapsible - uses showChart from layout settings) --}}
+        @if($currentViewMode === 'projects' && $showChart)
             <div
                 class="mt-3 pt-3 border-t"
                 :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
             >
-                {{-- Chart Legend Row --}}
+                {{-- Chart Legend Row with Year Selector --}}
                 <div class="flex items-center justify-between mb-2">
                     <div class="flex items-center gap-4 text-xs">
                         <span class="flex items-center gap-1.5">
@@ -434,6 +540,21 @@
                             <span class="w-3 h-3 rounded-sm" style="background-color: #6b7280;"></span>
                             <span style="color: #6b7280;">Cancelled ({{ $yearlyStats['totals']['cancelled'] ?? 0 }})</span>
                         </span>
+                    </div>
+
+                    {{-- Year Selector --}}
+                    <div class="flex items-center gap-1">
+                        @foreach($availableYears ?? [] as $year => $label)
+                            <button
+                                wire:click="setChartYear({{ $year }})"
+                                class="px-2 py-0.5 text-xs rounded transition-colors"
+                                :style="isDark
+                                    ? '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #374151; color: #9ca3af;' }}'
+                                    : '{{ ($chartYear ?? now()->year) == $year ? 'background-color: #D4A574; color: #111827;' : 'background-color: #e5e7eb; color: #6b7280;' }}'"
+                            >
+                                {{ $label }}
+                            </button>
+                        @endforeach
                     </div>
                 </div>
 

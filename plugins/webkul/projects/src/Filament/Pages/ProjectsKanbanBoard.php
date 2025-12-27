@@ -113,6 +113,14 @@ class ProjectsKanbanBoard extends KanbanBoard
     // Business Owner KPI Widget
     public string $kpiTimeRange = 'this_week'; // this_week, this_month, this_quarter, ytd
 
+    // Layout settings (condensed UX - minimal by default)
+    public array $layoutSettings = [
+        'show_kpi_row' => false,      // KPI row hidden by default
+        'show_chart' => false,         // Chart hidden by default
+        'inbox_collapsed' => true,     // Inbox collapsed by default
+        'compact_filters' => true,     // Compact filter tabs instead of large buttons
+    ];
+
     public static function getNavigationGroup(): string
     {
         return __('webkul-project::filament/resources/project.navigation.group');
@@ -140,15 +148,21 @@ class ProjectsKanbanBoard extends KanbanBoard
         // Load card settings from session
         $this->cardSettings = session('kanban_card_settings', $this->cardSettings);
 
+        // Load layout settings from session
+        $this->layoutSettings = session('kanban_layout_settings', $this->layoutSettings);
+
         // Load view mode from session
         $this->viewMode = session('kanban_view_mode', 'projects');
 
         // Initialize chart year
         $this->chartYear = session('kanban_chart_year', now()->year);
-        $this->chartCollapsed = session('kanban_chart_collapsed', false);
+        $this->chartCollapsed = session('kanban_chart_collapsed', $this->layoutSettings['show_chart'] ? false : true);
 
         // Load KPI time range from session
         $this->kpiTimeRange = session('kanban_kpi_time_range', 'this_week');
+
+        // Apply inbox collapsed setting
+        $this->leadsInboxOpen = !($this->layoutSettings['inbox_collapsed'] ?? true);
     }
 
     /**
@@ -324,6 +338,26 @@ class ProjectsKanbanBoard extends KanbanBoard
                 ->slideOver()
                 ->modalWidth(Width::Medium)
                 ->form([
+                    \Filament\Schemas\Components\Section::make('Layout')
+                        ->description('Control board layout and visibility')
+                        ->schema([
+                            Toggle::make('compact_filters')
+                                ->label('Compact Filter Bar')
+                                ->helperText('Use tab-style filters (saves space)')
+                                ->default(fn() => $this->layoutSettings['compact_filters'] ?? true),
+                            Toggle::make('show_kpi_row')
+                                ->label('Show Analytics Row')
+                                ->helperText('Display KPI widgets below filters')
+                                ->default(fn() => $this->layoutSettings['show_kpi_row'] ?? false),
+                            Toggle::make('show_chart')
+                                ->label('Show Yearly Chart')
+                                ->helperText('Display project statistics chart')
+                                ->default(fn() => $this->layoutSettings['show_chart'] ?? false),
+                            Toggle::make('inbox_collapsed')
+                                ->label('Collapse Inbox by Default')
+                                ->helperText('Start with leads inbox collapsed')
+                                ->default(fn() => $this->layoutSettings['inbox_collapsed'] ?? true),
+                        ])->columns(2),
                     \Filament\Schemas\Components\Section::make('Card Fields')
                         ->description('Choose which fields to display on cards')
                         ->schema([
@@ -340,7 +374,7 @@ class ProjectsKanbanBoard extends KanbanBoard
                                 ->label('Progress Bar')
                                 ->default(fn() => $this->cardSettings['show_milestones']),
                         ])->columns(2),
-                    \Filament\Schemas\Components\Section::make('Display Options')
+                    \Filament\Schemas\Components\Section::make('Card Display')
                         ->schema([
                             Toggle::make('compact_mode')
                                 ->label('Compact Cards')
@@ -349,8 +383,29 @@ class ProjectsKanbanBoard extends KanbanBoard
                         ]),
                 ])
                 ->action(function (array $data) {
-                    $this->cardSettings = array_merge($this->cardSettings, $data);
+                    // Extract layout settings
+                    $layoutKeys = ['compact_filters', 'show_kpi_row', 'show_chart', 'inbox_collapsed'];
+                    foreach ($layoutKeys as $key) {
+                        if (isset($data[$key])) {
+                            $this->layoutSettings[$key] = $data[$key];
+                        }
+                    }
+                    session()->put('kanban_layout_settings', $this->layoutSettings);
+
+                    // Extract card settings
+                    $cardKeys = ['show_customer', 'show_days', 'show_linear_feet', 'show_milestones', 'compact_mode'];
+                    foreach ($cardKeys as $key) {
+                        if (isset($data[$key])) {
+                            $this->cardSettings[$key] = $data[$key];
+                        }
+                    }
                     session()->put('kanban_card_settings', $this->cardSettings);
+
+                    // Apply inbox setting immediately
+                    $this->leadsInboxOpen = !($this->layoutSettings['inbox_collapsed'] ?? true);
+
+                    // Apply chart visibility
+                    $this->chartCollapsed = !($this->layoutSettings['show_chart'] ?? false);
 
                     Notification::make()
                         ->title('View settings saved')
@@ -655,6 +710,35 @@ class ProjectsKanbanBoard extends KanbanBoard
     }
 
     /**
+     * Toggle KPI row visibility
+     */
+    public function toggleKpiRow(): void
+    {
+        $this->layoutSettings['show_kpi_row'] = !($this->layoutSettings['show_kpi_row'] ?? false);
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+    }
+
+    /**
+     * Toggle chart visibility (layout setting)
+     */
+    public function toggleChartVisibility(): void
+    {
+        $this->layoutSettings['show_chart'] = !($this->layoutSettings['show_chart'] ?? false);
+        $this->chartCollapsed = !$this->layoutSettings['show_chart'];
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+        session()->put('kanban_chart_collapsed', $this->chartCollapsed);
+    }
+
+    /**
+     * Toggle compact filters mode
+     */
+    public function toggleCompactFilters(): void
+    {
+        $this->layoutSettings['compact_filters'] = !($this->layoutSettings['compact_filters'] ?? true);
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+    }
+
+    /**
      * Get available years for chart dropdown
      */
     public function getAvailableYears(): array
@@ -909,6 +993,9 @@ class ProjectsKanbanBoard extends KanbanBoard
         // KPI data
         $data['kpiTimeRange'] = $this->kpiTimeRange;
         $data['kpiStats'] = $this->getKpiStats();
+
+        // Layout settings
+        $data['layoutSettings'] = $this->layoutSettings;
 
         return $data;
     }
