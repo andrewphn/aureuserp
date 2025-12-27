@@ -10,9 +10,9 @@ class ProjectYearlyStatsChart extends ApexChartWidget
 {
     protected static ?string $chartId = 'projectYearlyStatsChart';
 
-    protected static ?string $heading = 'Projects by Month';
+    protected static ?string $heading = null;
 
-    protected static ?int $contentHeight = 160;
+    protected static ?int $contentHeight = 120;
 
     protected int | string | array $columnSpan = 'full';
 
@@ -70,10 +70,13 @@ class ProjectYearlyStatsChart extends ApexChartWidget
         return [
             'chart' => [
                 'type' => 'bar',
-                'height' => 180,
+                'height' => 100,
                 'stacked' => true,
                 'toolbar' => [
                     'show' => false,
+                ],
+                'sparkline' => [
+                    'enabled' => false,
                 ],
             ],
             'series' => [
@@ -111,10 +114,17 @@ class ProjectYearlyStatsChart extends ApexChartWidget
                 ],
             ],
             'legend' => [
+                'show' => true,
                 'position' => 'top',
-                'horizontalAlign' => 'left',
-                'fontSize' => '12px',
+                'horizontalAlign' => 'right',
+                'fontSize' => '10px',
                 'fontFamily' => 'inherit',
+                'markers' => [
+                    'size' => 8,
+                ],
+                'itemMargin' => [
+                    'horizontal' => 8,
+                ],
             ],
             'plotOptions' => [
                 'bar' => [
