@@ -25,13 +25,9 @@ class ProjectYearlyStatsChart extends ApexChartWidget
         $this->year = $this->year ?? now()->year;
     }
 
-    public function placeholder(): string
+    public function placeholder(): \Illuminate\Contracts\View\View
     {
-        return <<<'HTML'
-        <div class="flex items-center justify-center h-40">
-            <x-filament::loading-indicator class="h-8 w-8" />
-        </div>
-        HTML;
+        return view('filament::components.loading-indicator');
     }
 
     protected function getOptions(): array
