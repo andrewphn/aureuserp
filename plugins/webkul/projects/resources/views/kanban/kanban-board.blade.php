@@ -341,59 +341,74 @@
             <div class="ml-auto flex items-center gap-2">
                 {{-- KPI Row Toggle (Projects mode) --}}
                 @if($currentViewMode === 'projects')
+                    @php $kpiActive = $this->layoutSettings['show_kpi_row'] ?? false; @endphp
                     <button
                         wire:click="toggleKpiRow"
                         class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
                         :style="isDark
-                            ? '{{ $showKpiRow ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
-                            : '{{ $showKpiRow ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
+                            ? '{{ $kpiActive ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
+                            : '{{ $kpiActive ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
                         title="Toggle Analytics"
                     >
                         <x-heroicon-m-chart-pie class="w-3.5 h-3.5" />
                         <span class="hidden sm:inline">Analytics</span>
-                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $showKpiRow ? 'rotate-180' : '' }}" />
+                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $kpiActive ? 'rotate-180' : '' }}" />
                     </button>
                 @endif
 
                 {{-- Chart Toggle (Projects mode only) --}}
                 @if($currentViewMode === 'projects')
+                    @php $chartActive = $this->layoutSettings['show_chart'] ?? false; @endphp
                     <button
                         wire:click="toggleChartVisibility"
                         class="flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-all"
                         :style="isDark
-                            ? '{{ $showChart ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
-                            : '{{ $showChart ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
+                            ? '{{ $chartActive ? 'background-color: rgba(212, 165, 116, 0.2); color: #D4A574;' : 'color: #9ca3af;' }}'
+                            : '{{ $chartActive ? 'background-color: rgba(212, 165, 116, 0.1); color: #92400e;' : 'color: #6b7280;' }}'"
                         title="Toggle Chart"
                     >
                         <x-heroicon-m-chart-bar class="w-3.5 h-3.5" />
                         <span class="hidden sm:inline">{{ $chartYear ?? now()->year }}</span>
-                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $showChart ? 'rotate-180' : '' }}" />
+                        <x-heroicon-m-chevron-down class="w-3 h-3 transition-transform {{ $chartActive ? 'rotate-180' : '' }}" />
                     </button>
                 @endif
             </div>
         </div>
 
         {{-- Business Owner KPI Row (Projects mode only, collapsible) --}}
-        @if($currentViewMode === 'projects' && $showKpiRow)
+        @if($currentViewMode === 'projects' && ($this->layoutSettings['show_kpi_row'] ?? false))
             <div class="flex items-center gap-3 mt-3 pt-3 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 -translate-y-2"
                  x-transition:enter-end="opacity-100 translate-y-0"
             >
-                {{-- Time Range Selector --}}
-                <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
-                    @foreach(['this_week' => 'Week', 'this_month' => 'Month', 'this_quarter' => 'Quarter', 'ytd' => 'YTD'] as $range => $label)
-                        <button
-                            wire:click="setKpiTimeRange('{{ $range }}')"
-                            class="px-3 py-1.5 text-xs font-medium transition-all duration-150"
-                            :style="isDark
-                                ? '{{ ($kpiTimeRange ?? 'this_week') === $range ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
-                                : '{{ ($kpiTimeRange ?? 'this_week') === $range ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
-                        >
-                            {{ $label }}
-                        </button>
-                    @endforeach
-                </div>
+                {{-- Time Range Selector using Filament Tabs --}}
+                <x-filament::tabs>
+                    <x-filament::tabs.item
+                        wire:click="setKpiTimeRange('this_week')"
+                        :active="($kpiTimeRange ?? 'this_week') === 'this_week'"
+                    >
+                        Week
+                    </x-filament::tabs.item>
+                    <x-filament::tabs.item
+                        wire:click="setKpiTimeRange('this_month')"
+                        :active="($kpiTimeRange ?? 'this_week') === 'this_month'"
+                    >
+                        Month
+                    </x-filament::tabs.item>
+                    <x-filament::tabs.item
+                        wire:click="setKpiTimeRange('this_quarter')"
+                        :active="($kpiTimeRange ?? 'this_week') === 'this_quarter'"
+                    >
+                        Quarter
+                    </x-filament::tabs.item>
+                    <x-filament::tabs.item
+                        wire:click="setKpiTimeRange('ytd')"
+                        :active="($kpiTimeRange ?? 'this_week') === 'ytd'"
+                    >
+                        YTD
+                    </x-filament::tabs.item>
+                </x-filament::tabs>
 
                 {{-- Divider --}}
                 <div class="w-px h-8" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
@@ -520,7 +535,7 @@
         @endif
 
         {{-- Chart Container (Collapsible - uses showChart from layout settings) --}}
-        @if($currentViewMode === 'projects' && $showChart)
+        @if($currentViewMode === 'projects' && ($this->layoutSettings['show_chart'] ?? false))
             <div
                 class="mt-3 pt-3 border-t"
                 :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'"
