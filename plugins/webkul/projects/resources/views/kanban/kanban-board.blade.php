@@ -14,51 +14,7 @@
 @endphp
 
 <x-filament-panels::page class="!p-0">
-    {{-- View Mode Toggle --}}
-    <div
-        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
-        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
-        class="px-3 py-2 border-b flex items-center justify-between"
-        :style="isDark ? 'background-color: #1f2937; border-color: #374151;' : 'background-color: #fff; border-color: #e5e7eb;'"
-    >
-        <div class="flex items-center gap-2">
-            <x-filament::button
-                wire:click="setViewMode('projects')"
-                :color="$currentViewMode === 'projects' ? 'primary' : 'gray'"
-                size="sm"
-                icon="heroicon-m-folder"
-            >
-                Projects
-            </x-filament::button>
-            <x-filament::button
-                wire:click="setViewMode('tasks')"
-                :color="$currentViewMode === 'tasks' ? 'primary' : 'gray'"
-                size="sm"
-                icon="heroicon-m-clipboard-document-check"
-            >
-                Tasks
-            </x-filament::button>
-        </div>
-
-        @if($currentViewMode === 'tasks')
-            {{-- Project Filter for Tasks --}}
-            <div class="flex items-center gap-2">
-                <span class="text-sm" style="color: #6b7280;">Filter by Project:</span>
-                <select
-                    wire:model.live="projectFilter"
-                    class="text-sm rounded-lg"
-                    :style="isDark ? 'background-color: #374151; border-color: #4b5563; color: #fff;' : 'background-color: #fff; border-color: #d1d5db; color: #111827;'"
-                >
-                    <option value="">All Projects</option>
-                    @foreach($projects ?? [] as $id => $name)
-                        <option value="{{ $id }}">{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-        @endif
-    </div>
-
-    {{-- Filter Widgets - Clickable to toggle filters --}}
+    {{-- Combined Filter Bar: View Toggle + Filter Widgets --}}
     @php
         if ($currentViewMode === 'projects') {
             $totalProjects = \Webkul\Project\Models\Project::count();
@@ -101,6 +57,47 @@
         :style="isDark ? 'background-color: #111827; border-color: #374151;' : 'background-color: #f9fafb; border-color: #e5e7eb;'"
     >
         <div class="flex items-center gap-3">
+            {{-- View Mode Toggle (Projects/Tasks) --}}
+            <div class="flex items-center rounded-lg overflow-hidden border" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
+                <button
+                    wire:click="setViewMode('projects')"
+                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150"
+                    :style="isDark
+                        ? '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ $currentViewMode === 'projects' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
+                >
+                    <x-heroicon-m-folder class="w-4 h-4" />
+                    Projects
+                </button>
+                <button
+                    wire:click="setViewMode('tasks')"
+                    class="flex items-center gap-1.5 px-3 py-2 text-sm font-medium transition-all duration-150"
+                    :style="isDark
+                        ? '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ $currentViewMode === 'tasks' ? 'background-color: #D4A574; color: #111827;' : 'background-color: #fff; color: #6b7280;' }}'"
+                >
+                    <x-heroicon-m-clipboard-document-check class="w-4 h-4" />
+                    Tasks
+                </button>
+            </div>
+
+            {{-- Project Filter (Tasks mode only) --}}
+            @if($currentViewMode === 'tasks')
+                <select
+                    wire:model.live="projectFilter"
+                    class="text-sm rounded-lg px-3 py-2"
+                    :style="isDark ? 'background-color: #1f2937; border-color: #374151; color: #fff;' : 'background-color: #fff; border-color: #e5e7eb; color: #111827;'"
+                >
+                    <option value="">All Projects</option>
+                    @foreach($projects ?? [] as $id => $name)
+                        <option value="{{ $id }}">{{ $name }}</option>
+                    @endforeach
+                </select>
+            @endif
+
+            {{-- Divider --}}
+            <div class="w-px h-8" :style="isDark ? 'background-color: #374151;' : 'background-color: #e5e7eb;'"></div>
+
             {{-- All Items Widget --}}
             <button
                 wire:click="toggleWidgetFilter('all')"
@@ -207,6 +204,55 @@
                 </div>
             @endif
         </div>
+
+        {{-- Task Status Filters (Tasks mode only) --}}
+        @if($currentViewMode === 'tasks')
+            @php
+                $taskQuery = \Webkul\Project\Models\Task::query()
+                    ->when($projectFilter ?? null, fn($q) => $q->where('project_id', $projectFilter));
+                $doneCount = (clone $taskQuery)->where('state', 'done')->count();
+                $cancelledCount = (clone $taskQuery)->where('state', 'cancelled')->count();
+            @endphp
+            <div class="flex items-center gap-2 mt-2 pt-2 border-t" :style="isDark ? 'border-color: #374151;' : 'border-color: #e5e7eb;'">
+                <span class="text-xs font-medium" style="color: #6b7280;">Status:</span>
+
+                {{-- In Progress --}}
+                <button
+                    wire:click="toggleWidgetFilter('in_progress')"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: rgba(37, 99, 235, 0.2); color: #60a5fa;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'in_progress' ? 'border-color: #2563eb; background-color: #eff6ff; color: #2563eb;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
+                >
+                    <span class="w-2 h-2 rounded-full" style="background-color: #2563eb;"></span>
+                    In Progress ({{ $inProgressCount ?? 0 }})
+                </button>
+
+                {{-- Done --}}
+                <button
+                    wire:click="toggleWidgetFilter('done')"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'done' ? 'border-color: #16a34a; background-color: rgba(22, 163, 74, 0.2); color: #4ade80;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'done' ? 'border-color: #16a34a; background-color: #f0fdf4; color: #16a34a;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
+                >
+                    <span class="w-2 h-2 rounded-full" style="background-color: #16a34a;"></span>
+                    Done ({{ $doneCount ?? 0 }})
+                </button>
+
+                {{-- Cancelled --}}
+                <button
+                    wire:click="toggleWidgetFilter('cancelled')"
+                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-150 border"
+                    :style="isDark
+                        ? '{{ ($this->widgetFilter ?? null) === 'cancelled' ? 'border-color: #6b7280; background-color: rgba(107, 114, 128, 0.2); color: #9ca3af;' : 'border-color: #374151; background-color: #1f2937; color: #9ca3af;' }}'
+                        : '{{ ($this->widgetFilter ?? null) === 'cancelled' ? 'border-color: #6b7280; background-color: #f9fafb; color: #6b7280;' : 'border-color: #e5e7eb; background-color: #fff; color: #6b7280;' }}'"
+                >
+                    <span class="w-2 h-2 rounded-full" style="background-color: #6b7280;"></span>
+                    Cancelled ({{ $cancelledCount ?? 0 }})
+                </button>
+            </div>
+        @endif
     </div>
 
     {{-- Main Kanban Board - Full Height --}}
