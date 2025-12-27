@@ -129,6 +129,7 @@ class AdminPanelProvider extends PanelProvider
                         'sm'      => 2,
                     ]),
                 PluginManager::make(),
+                \Leandrocfe\FilamentApexCharts\FilamentApexChartsPlugin::make(),
             ])
             ->pages([
                 \App\Filament\Pages\ManageFooter::class,
