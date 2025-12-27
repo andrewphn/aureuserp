@@ -226,11 +226,15 @@
                 <div
                     x-show="!inboxOpen"
                     @click="toggleInbox()"
-                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 bg-white dark:bg-gray-800 border-2 border-gray-900 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+                    x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+                    class="w-10 h-full cursor-pointer flex flex-col items-center justify-center transition-all duration-150 border-2 hover:opacity-80"
+                    :style="isDark ? 'background-color: #1f2937; border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
                     title="Open Inbox ({{ $inboxCount }} inquiries)"
                 >
                     <span
-                        class="text-xs font-medium text-gray-900 dark:text-white whitespace-nowrap"
+                        class="text-xs font-medium whitespace-nowrap"
+                        :style="isDark ? 'color: #fff;' : 'color: #111827;'"
                         style="writing-mode: vertical-rl; text-orientation: mixed;"
                     >
                         Inbox ({{ $inboxCount }})
@@ -247,17 +251,23 @@
                     style="width: 280px; min-width: 280px; max-width: 280px;"
                 >
                     {{-- Header - Black outlined, no fill --}}
-                    <div class="flex items-center justify-between px-4 py-2 transition-all duration-150 bg-white dark:bg-gray-800 border-2 border-gray-900 dark:border-gray-600 border-b-0">
-                        <h3 class="font-medium text-gray-900 dark:text-white text-sm flex items-center gap-1.5">
+                    <div
+                        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+                        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+                        class="flex items-center justify-between px-4 py-2 transition-all duration-150 border-2 border-b-0"
+                        :style="isDark ? 'background-color: #1f2937; border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
+                    >
+                        <h3 class="font-medium text-sm flex items-center gap-1.5" :style="isDark ? 'color: #fff;' : 'color: #111827;'">
                             <span>Inbox</span>
-                            <span class="text-gray-400 dark:text-gray-500">/</span>
-                            <span class="text-gray-700 dark:text-gray-300">{{ $inboxCount }}</span>
+                            <span :style="isDark ? 'color: #6b7280;' : 'color: #9ca3af;'">/</span>
+                            <span :style="isDark ? 'color: #d1d5db;' : 'color: #374151;'">{{ $inboxCount }}</span>
                         </h3>
                         <div class="flex items-center gap-1">
                             {{-- Add Lead Button --}}
                             <a
                                 href="{{ route('filament.admin.resources.leads.create') }}"
-                                class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded p-1 transition-all duration-100"
+                                class="rounded p-1 transition-all duration-100"
+                                :style="isDark ? 'color: #9ca3af;' : 'color: #6b7280;'"
                                 title="Add new lead"
                             >
                                 <x-heroicon-m-plus class="w-4 h-4" />
@@ -265,7 +275,8 @@
                             {{-- Collapse Button --}}
                             <button
                                 @click="toggleInbox()"
-                                class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded p-1 transition-all duration-100"
+                                class="rounded p-1 transition-all duration-100"
+                                :style="isDark ? 'color: #9ca3af;' : 'color: #6b7280;'"
                                 title="Collapse inbox"
                             >
                                 <x-heroicon-m-chevron-double-left class="w-4 h-4" />
@@ -274,7 +285,12 @@
                     </div>
 
                     {{-- Lead Cards - Black outlined container --}}
-                    <div class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto bg-white dark:bg-gray-800/50 border-2 border-t-0 border-gray-900 dark:border-gray-600">
+                    <div
+                        x-data="{ isDark: document.documentElement.classList.contains('dark') }"
+                        x-init="new MutationObserver(() => isDark = document.documentElement.classList.contains('dark')).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })"
+                        class="flex-1 flex flex-col gap-2 p-2 overflow-y-auto border-2 border-t-0"
+                        :style="isDark ? 'background-color: rgba(31, 41, 55, 0.5); border-color: #4b5563;' : 'background-color: #fff; border-color: #111827;'"
+                    >
                         @forelse($leads ?? [] as $lead)
                             <x-filament::section
                                 compact

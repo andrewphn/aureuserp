@@ -102,6 +102,15 @@ export default {
         'hover:bg-gray-50',
         'dark:hover:bg-gray-700',
 
+        // Kanban Inbox dark mode classes
+        'dark:bg-gray-800',
+        'dark:border-gray-600',
+        'dark:text-white',
+        'dark:text-gray-300',
+        'dark:text-gray-500',
+        'dark:hover:text-white',
+        'min-h-[52px]',
+
         // V2 Annotation System Badge
         'bg-purple-600',
         'text-xs',
