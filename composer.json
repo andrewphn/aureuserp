@@ -28,6 +28,7 @@
         "joaopaulolndev/filament-pdf-viewer": "^2.0",
         "laravel/framework": "^11.9",
         "laravel/tinker": "^2.9",
+        "leandrocfe/filament-apex-charts": "^4.0",
         "milon/barcode": "^11.0",
         "mokhosh/filament-kanban": "dev-main",
         "njxqlus/filament-lightbox": "^4.0",
