@@ -16,23 +16,28 @@ class ProjectYearlyStatsChart extends ApexChartWidget
 
     protected int | string | array $columnSpan = 1;
 
-    public ?string $timeRange = 'this_month';
+    public ?string $filter = 'this_month';
 
     protected static bool $deferLoading = true;
-
-    public function mount(): void
-    {
-        $this->timeRange = $this->timeRange ?? 'this_month';
-    }
 
     public function placeholder(): \Illuminate\Contracts\View\View
     {
         return view('filament::components.loading-indicator');
     }
 
+    protected function getFilters(): ?array
+    {
+        return [
+            'this_week' => 'Week',
+            'this_month' => 'Month',
+            'this_quarter' => 'Quarter',
+            'ytd' => 'YTD',
+        ];
+    }
+
     protected function getTimeRangeData(): array
     {
-        $timeRange = $this->timeRange ?? 'this_month';
+        $timeRange = $this->filter ?? 'this_month';
 
         return match ($timeRange) {
             'this_week' => [
@@ -177,19 +182,4 @@ class ProjectYearlyStatsChart extends ApexChartWidget
         ];
     }
 
-    protected function getFormSchema(): array
-    {
-        return [
-            \Filament\Forms\Components\Select::make('timeRange')
-                ->options([
-                    'this_week' => 'Week',
-                    'this_month' => 'Month',
-                    'this_quarter' => 'Quarter',
-                    'ytd' => 'YTD',
-                ])
-                ->default('this_month')
-                ->live()
-                ->afterStateUpdated(fn () => $this->updateOptions()),
-        ];
-    }
 }
