@@ -187,32 +187,56 @@
         @if($currentViewMode === 'projects')
             <div class="ml-auto flex items-center gap-2">
                 {{-- Compact Time Range Tabs --}}
-                <x-filament::tabs contained>
-                    <x-filament::tabs.item
+                <div class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1" data-testid="time-range-tabs">
+                    <button
+                        type="button"
                         wire:click="setKpiTimeRange('this_week')"
-                        :active="($kpiTimeRange ?? 'this_week') === 'this_week'"
+                        data-testid="time-range-week"
+                        @class([
+                            'px-2 py-1 text-xs font-medium rounded-md transition-colors',
+                            'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' => ($kpiTimeRange ?? 'this_week') === 'this_week',
+                            'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white' => ($kpiTimeRange ?? 'this_week') !== 'this_week',
+                        ])
                     >
                         Wk
-                    </x-filament::tabs.item>
-                    <x-filament::tabs.item
+                    </button>
+                    <button
+                        type="button"
                         wire:click="setKpiTimeRange('this_month')"
-                        :active="($kpiTimeRange ?? 'this_week') === 'this_month'"
+                        data-testid="time-range-month"
+                        @class([
+                            'px-2 py-1 text-xs font-medium rounded-md transition-colors',
+                            'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' => ($kpiTimeRange ?? 'this_week') === 'this_month',
+                            'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white' => ($kpiTimeRange ?? 'this_week') !== 'this_month',
+                        ])
                     >
                         Mo
-                    </x-filament::tabs.item>
-                    <x-filament::tabs.item
+                    </button>
+                    <button
+                        type="button"
                         wire:click="setKpiTimeRange('this_quarter')"
-                        :active="($kpiTimeRange ?? 'this_week') === 'this_quarter'"
+                        data-testid="time-range-quarter"
+                        @class([
+                            'px-2 py-1 text-xs font-medium rounded-md transition-colors',
+                            'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' => ($kpiTimeRange ?? 'this_week') === 'this_quarter',
+                            'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white' => ($kpiTimeRange ?? 'this_week') !== 'this_quarter',
+                        ])
                     >
                         Qtr
-                    </x-filament::tabs.item>
-                    <x-filament::tabs.item
+                    </button>
+                    <button
+                        type="button"
                         wire:click="setKpiTimeRange('ytd')"
-                        :active="($kpiTimeRange ?? 'this_week') === 'ytd'"
+                        data-testid="time-range-ytd"
+                        @class([
+                            'px-2 py-1 text-xs font-medium rounded-md transition-colors',
+                            'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' => ($kpiTimeRange ?? 'this_week') === 'ytd',
+                            'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white' => ($kpiTimeRange ?? 'this_week') !== 'ytd',
+                        ])
                     >
                         YTD
-                    </x-filament::tabs.item>
-                </x-filament::tabs>
+                    </button>
+                </div>
 
                 {{-- Total LF Badge --}}
                 @if($totalLF > 0)
@@ -223,13 +247,19 @@
 
                 {{-- Analytics Toggle Icon --}}
                 @php $analyticsActive = ($this->layoutSettings['show_kpi_row'] ?? false) || ($this->layoutSettings['show_chart'] ?? false); @endphp
-                <x-filament::icon-button
+                <button
+                    type="button"
                     wire:click="toggleKpiRow"
-                    icon="heroicon-m-chart-bar-square"
-                    :color="$analyticsActive ? 'primary' : 'gray'"
-                    size="sm"
-                    label="Toggle Analytics"
-                />
+                    data-testid="analytics-toggle"
+                    @class([
+                        'p-1.5 rounded-lg transition-colors',
+                        'bg-primary-100 text-primary-600 dark:bg-primary-900 dark:text-primary-400' => $analyticsActive,
+                        'text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800' => !$analyticsActive,
+                    ])
+                    title="Toggle Analytics"
+                >
+                    <x-heroicon-m-chart-bar-square class="w-5 h-5" />
+                </button>
             </div>
         @else
             {{-- Tasks mode: just show active filter clear if needed --}}
