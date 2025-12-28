@@ -13,63 +13,53 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Livewire\Attributes\On;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
-use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Lead\Models\Lead;
 use Webkul\Lead\Services\LeadConversionService;
 use Webkul\Partner\Models\Partner;
 use Webkul\Project\Filament\Resources\ProjectResource;
-use Webkul\Project\Models\Milestone;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Models\Task;
-use Webkul\Project\Models\TaskStage;
+use Webkul\Project\Services\KanbanKpiService;
+use Webkul\Project\Services\KanbanQueryService;
+use Webkul\Project\Services\ProjectBlockerService;
+use Webkul\Project\Services\QuickActionService;
 use Webkul\Security\Models\User;
 
 class ProjectsKanbanBoard extends KanbanBoard
 {
     protected static string $model = Project::class;
-
     protected static string $recordTitleAttribute = 'name';
-
     protected static string $recordStatusAttribute = 'stage_id';
-
     protected static string|null|BackedEnum $navigationIcon = 'heroicon-o-view-columns';
-
     protected static ?string $navigationLabel = 'Kanban Board';
-
     protected static ?string $slug = 'project/kanban';
-
     protected static ?int $navigationSort = 4;
 
-    // Custom main view with Chatter modal
-    protected string $view = 'webkul-project::kanban.kanban-board';
-
     // Custom views
+    protected string $view = 'webkul-project::kanban.kanban-board';
     protected static string $headerView = 'webkul-project::kanban.kanban-header';
-
     protected static string $recordView = 'webkul-project::kanban.kanban-record';
-
     protected static string $statusView = 'webkul-project::kanban.kanban-status';
-
     protected static string $scriptsView = 'webkul-project::kanban.kanban-scripts';
+
+    // Services (lazy loaded)
+    protected ?KanbanQueryService $queryService = null;
+    protected ?KanbanKpiService $kpiService = null;
+    protected ?ProjectBlockerService $blockerService = null;
+    protected ?QuickActionService $actionService = null;
 
     // Filters
     public ?int $customerFilter = null;
-
     public ?int $personFilter = null;
-
     public bool $overdueOnly = false;
-
     public ?string $sortBy = 'desired_completion_date';
-
     public ?string $sortDirection = 'asc';
 
-    // Card settings (simplified based on "Don't Make Me Think" principles)
+    // Card settings
     public array $cardSettings = [
         'show_customer' => true,
         'show_days' => true,
@@ -78,48 +68,65 @@ class ProjectsKanbanBoard extends KanbanBoard
         'compact_mode' => false,
     ];
 
-    // Chatter modal
+    // Modal states
     public ?int $chatterRecordId = null;
-
-    // Quick Actions / Project Details modal
     public ?int $quickActionsRecordId = null;
+    public ?int $selectedLeadId = null;
 
     // Leads inbox
     public bool $leadsInboxOpen = true;
 
-    public ?int $selectedLeadId = null;
-
-    // Widget filter
+    // Filters & view mode
     public ?string $widgetFilter = 'all';
-
-    // View mode: 'projects' or 'tasks'
     public string $viewMode = 'projects';
-
-    // Project filter for tasks view
     public ?int $projectFilter = null;
 
-    // Quick Actions inline form inputs
+    // Quick Actions form inputs
     public string $quickTaskTitle = '';
-
     public string $quickMilestoneTitle = '';
-
     public string $quickComment = '';
 
-    // Yearly Chart Widget
+    // Chart & KPI
     public int $chartYear;
+    public bool $chartCollapsed = false;
+    public string $kpiTimeRange = 'this_week';
 
-    public bool $chartCollapsed = false; // Expanded by default
-
-    // Business Owner KPI Widget
-    public string $kpiTimeRange = 'this_week'; // this_week, this_month, this_quarter, ytd
-
-    // Layout settings (condensed UX - minimal by default)
+    // Layout settings
     public array $layoutSettings = [
-        'show_kpi_row' => false,      // KPI row hidden by default
-        'show_chart' => false,         // Chart hidden by default
-        'inbox_collapsed' => true,     // Inbox collapsed by default
-        'compact_filters' => true,     // Compact filter tabs instead of large buttons
+        'show_kpi_row' => false,
+        'show_chart' => false,
+        'inbox_collapsed' => true,
+        'compact_filters' => true,
     ];
+
+    public function boot(): void
+    {
+        $this->queryService = app(KanbanQueryService::class);
+        $this->kpiService = app(KanbanKpiService::class);
+        $this->blockerService = app(ProjectBlockerService::class);
+        $this->actionService = app(QuickActionService::class);
+    }
+
+    // Lazy service getters (fallback if boot() hasn't run)
+    protected function queryService(): KanbanQueryService
+    {
+        return $this->queryService ??= app(KanbanQueryService::class);
+    }
+
+    protected function kpiService(): KanbanKpiService
+    {
+        return $this->kpiService ??= app(KanbanKpiService::class);
+    }
+
+    protected function blockerService(): ProjectBlockerService
+    {
+        return $this->blockerService ??= app(ProjectBlockerService::class);
+    }
+
+    protected function actionService(): QuickActionService
+    {
+        return $this->actionService ??= app(QuickActionService::class);
+    }
 
     public static function getNavigationGroup(): string
     {
@@ -145,41 +152,26 @@ class ProjectsKanbanBoard extends KanbanBoard
     {
         parent::mount();
 
-        // Load card settings from session
         $this->cardSettings = session('kanban_card_settings', $this->cardSettings);
-
-        // Load layout settings from session
         $this->layoutSettings = session('kanban_layout_settings', $this->layoutSettings);
-
-        // Load view mode from session
         $this->viewMode = session('kanban_view_mode', 'projects');
-
-        // Initialize chart year
         $this->chartYear = session('kanban_chart_year', now()->year);
         $this->chartCollapsed = session('kanban_chart_collapsed', $this->layoutSettings['show_chart'] ? false : true);
-
-        // Load KPI time range from session
         $this->kpiTimeRange = session('kanban_kpi_time_range', 'this_week');
-
-        // Apply inbox collapsed setting
         $this->leadsInboxOpen = !($this->layoutSettings['inbox_collapsed'] ?? true);
     }
 
-    /**
-     * Toggle between projects and tasks view
-     */
+    // =========================================
+    // VIEW MODE & FILTERS
+    // =========================================
+
     public function toggleViewMode(): void
     {
         $this->viewMode = $this->viewMode === 'projects' ? 'tasks' : 'projects';
         session()->put('kanban_view_mode', $this->viewMode);
-
-        // Reset widget filter when switching modes
         $this->widgetFilter = 'all';
     }
 
-    /**
-     * Set view mode directly
-     */
     public function setViewMode(string $mode): void
     {
         $this->viewMode = $mode;
@@ -187,235 +179,393 @@ class ProjectsKanbanBoard extends KanbanBoard
         $this->widgetFilter = 'all';
     }
 
-    /**
-     * Get statuses from database stages (projects or tasks based on view mode)
-     */
-    protected function statuses(): Collection
-    {
-        if ($this->viewMode === 'tasks') {
-            return TaskStage::query()
-                ->where('is_active', true)
-                ->when($this->projectFilter, fn($q) => $q->where('project_id', $this->projectFilter))
-                ->orderBy('sort')
-                ->get()
-                ->map(fn(TaskStage $stage) => [
-                    'id' => $stage->id,
-                    'title' => $stage->name,
-                    'color' => '#6b7280', // TaskStage doesn't have color field
-                    'wip_limit' => null,
-                    'is_collapsed' => $stage->is_collapsed ?? false,
-                ]);
-        }
-
-        return ProjectStage::query()
-            ->where('is_active', true)
-            ->orderBy('sort')
-            ->get()
-            ->map(fn(ProjectStage $stage) => [
-                'id' => $stage->id,
-                'title' => $stage->name,
-                'color' => $stage->color ?? '#6b7280',
-                'wip_limit' => $stage->wip_limit,
-                'is_collapsed' => $stage->is_collapsed ?? false,
-                // Stage expiry settings
-                'max_days_in_stage' => $stage->max_days_in_stage,
-                'expiry_warning_days' => $stage->expiry_warning_days ?? 3,
-                // Stage notice settings
-                'notice_message' => $stage->notice_message,
-                'notice_severity' => $stage->notice_severity ?? 'info',
-            ]);
-    }
-
-    /**
-     * Toggle widget filter
-     */
     public function toggleWidgetFilter(string $filter): void
     {
-        // If clicking the same filter, reset to 'all'
-        if ($this->widgetFilter === $filter && $filter !== 'all') {
-            $this->widgetFilter = 'all';
-        } else {
-            $this->widgetFilter = $filter;
-        }
+        $this->widgetFilter = ($this->widgetFilter === $filter && $filter !== 'all') ? 'all' : $filter;
     }
 
-    /**
-     * Get eloquent query with eager loading (projects or tasks based on view mode)
-     */
-    protected function getEloquentQuery(): Builder
+    public function setProjectFilter(?int $projectId): void
     {
-        if ($this->viewMode === 'tasks') {
-            return $this->getTasksQuery();
-        }
-
-        return $this->getProjectsQuery();
+        $this->projectFilter = $projectId;
     }
 
-    /**
-     * Get projects query
-     */
-    protected function getProjectsQuery(): Builder
-    {
-        return Project::query()
-            ->with(['partner', 'stage', 'milestones', 'orders', 'tasks', 'user'])
-            ->when($this->customerFilter, fn($q) => $q->where('partner_id', $this->customerFilter))
-            ->when($this->personFilter, fn($q) => $q->where('user_id', $this->personFilter))
-            ->when($this->overdueOnly, fn($q) => $q->where('desired_completion_date', '<', now()))
-            // Widget filters
-            ->when($this->widgetFilter === 'blocked', function ($q) {
-                $q->where(function ($query) {
-                    // Projects with blocked tasks
-                    $query->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
-                        // OR projects without sales orders
-                        ->orWhereDoesntHave('orders')
-                        // OR projects without customers
-                        ->orWhereNull('partner_id');
-                });
-            })
-            ->when($this->widgetFilter === 'overdue', fn($q) => $q->where('desired_completion_date', '<', now()))
-            ->when($this->widgetFilter === 'due_soon', fn($q) => $q->whereBetween('desired_completion_date', [now(), now()->addDays(7)]))
-            ->when($this->widgetFilter === 'on_track', function ($q) {
-                $q->where(function ($query) {
-                    // Not overdue
-                    $query->where(function ($q2) {
-                        $q2->whereNull('desired_completion_date')
-                            ->orWhere('desired_completion_date', '>=', now());
-                    })
-                    // Not blocked
-                    ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
-                    ->whereHas('orders')
-                    ->whereNotNull('partner_id');
-                });
-            })
-            ->when($this->sortBy, fn($q) => $q->orderBy($this->sortBy, $this->sortDirection ?? 'asc'));
-    }
-
-    /**
-     * Get tasks query
-     */
-    protected function getTasksQuery(): Builder
-    {
-        return Task::query()
-            ->with(['project', 'stage', 'users', 'subTasks', 'creator'])
-            ->when($this->projectFilter, fn($q) => $q->where('project_id', $this->projectFilter))
-            ->when($this->personFilter, fn($q) => $q->whereHas('users', fn($u) => $u->where('users.id', $this->personFilter)))
-            // Widget filters for tasks
-            ->when($this->widgetFilter === 'blocked', fn($q) => $q->where('state', 'blocked'))
-            ->when($this->widgetFilter === 'overdue', fn($q) => $q->where('deadline', '<', now()))
-            ->when($this->widgetFilter === 'due_soon', fn($q) => $q->whereBetween('deadline', [now(), now()->addDays(7)]))
-            ->when($this->widgetFilter === 'in_progress', fn($q) => $q->where('state', 'in_progress'))
-            ->when($this->widgetFilter === 'done', fn($q) => $q->where('state', 'done'))
-            ->when($this->widgetFilter === 'cancelled', fn($q) => $q->where('state', 'cancelled'))
-            ->when($this->sortBy === 'desired_completion_date', fn($q) => $q->orderBy('deadline', $this->sortDirection ?? 'asc'))
-            ->when($this->sortBy === 'name', fn($q) => $q->orderBy('title', $this->sortDirection ?? 'asc'))
-            ->when($this->sortBy === 'created_at', fn($q) => $q->orderBy('created_at', $this->sortDirection ?? 'asc'))
-            ->when(!in_array($this->sortBy, ['desired_completion_date', 'name', 'created_at']), fn($q) => $q->orderBy('sort'));
-    }
-
-    /**
-     * Check if any filters are active
-     */
     public function hasActiveFilters(): bool
     {
         return $this->customerFilter || $this->personFilter || $this->overdueOnly;
     }
 
-    /**
-     * Get header actions
-     */
+    // =========================================
+    // QUERIES (delegated to service)
+    // =========================================
+
+    protected function statuses(): Collection
+    {
+        return $this->queryService()->getStatuses($this->viewMode, $this->projectFilter);
+    }
+
+    protected function getEloquentQuery(): Builder
+    {
+        $filters = [
+            'customer' => $this->customerFilter,
+            'person' => $this->personFilter,
+            'project' => $this->projectFilter,
+            'overdue_only' => $this->overdueOnly,
+            'widget' => $this->widgetFilter,
+            'sort_by' => $this->sortBy,
+            'sort_direction' => $this->sortDirection,
+        ];
+
+        return $this->viewMode === 'tasks'
+            ? $this->queryService()->getTasksQuery($filters)
+            : $this->queryService()->getProjectsQuery($filters);
+    }
+
+    // =========================================
+    // BLOCKER & PRIORITY (delegated to service)
+    // =========================================
+
+    public function getProjectBlockers(Project $project): array
+    {
+        return $this->blockerService()->getBlockers($project);
+    }
+
+    public function getProjectPriority(Project $project): ?string
+    {
+        return $this->blockerService()->getPriority($project);
+    }
+
+    public function getTaskProgress(Task $task): array
+    {
+        return $this->blockerService()->getTaskProgress($task);
+    }
+
+    public function isTaskOverdue(Task $task): bool
+    {
+        return $this->blockerService()->isTaskOverdue($task);
+    }
+
+    public function isTaskDueSoon(Task $task): bool
+    {
+        return $this->blockerService()->isTaskDueSoon($task);
+    }
+
+    // =========================================
+    // KPI & CHART (delegated to service)
+    // =========================================
+
+    public function setKpiTimeRange(string $range): void
+    {
+        $this->kpiTimeRange = $range;
+        session()->put('kanban_kpi_time_range', $range);
+    }
+
+    public function getKpiStats(): array
+    {
+        return $this->kpiService()->getKpiStats($this->kpiTimeRange);
+    }
+
+    public function getYearlyStats(): array
+    {
+        return $this->kpiService()->getYearlyStats($this->chartYear);
+    }
+
+    public function getAvailableYears(): array
+    {
+        return $this->kpiService()->getAvailableYears();
+    }
+
+    public function setChartYear(int $year): void
+    {
+        $this->chartYear = $year;
+        session()->put('kanban_chart_year', $year);
+        $this->dispatch('chartDataUpdated', $this->getYearlyStats());
+    }
+
+    public function toggleChartCollapsed(): void
+    {
+        $this->chartCollapsed = !$this->chartCollapsed;
+        session()->put('kanban_chart_collapsed', $this->chartCollapsed);
+    }
+
+    public function toggleKpiRow(): void
+    {
+        $this->layoutSettings['show_kpi_row'] = !($this->layoutSettings['show_kpi_row'] ?? false);
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+    }
+
+    public function toggleChartVisibility(): void
+    {
+        $this->layoutSettings['show_chart'] = !($this->layoutSettings['show_chart'] ?? false);
+        $this->chartCollapsed = !$this->layoutSettings['show_chart'];
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+        session()->put('kanban_chart_collapsed', $this->chartCollapsed);
+    }
+
+    public function toggleCompactFilters(): void
+    {
+        $this->layoutSettings['compact_filters'] = !($this->layoutSettings['compact_filters'] ?? true);
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+    }
+
+    // =========================================
+    // MODALS
+    // =========================================
+
+    public function openChatter(int|string $recordId): void
+    {
+        $this->chatterRecordId = (int) $recordId;
+        $this->dispatch('open-modal', id: 'kanban--chatter-modal');
+    }
+
+    public function getChatterRecord(): ?Project
+    {
+        return $this->chatterRecordId ? Project::find($this->chatterRecordId) : null;
+    }
+
+    public function openQuickActions(int|string $recordId): void
+    {
+        $this->quickActionsRecordId = (int) $recordId;
+        $this->dispatch('open-modal', id: 'kanban--quick-actions-modal');
+    }
+
+    public function getQuickActionsRecord(): ?Project
+    {
+        return $this->quickActionsRecordId
+            ? Project::with(['partner', 'stage', 'milestones', 'tasks', 'orders', 'user', 'designer', 'purchasingManager'])
+                ->find($this->quickActionsRecordId)
+            : null;
+    }
+
+    public function openCreateModal(int|string $stageId): void
+    {
+        $this->redirect(ProjectResource::getUrl('create', ['stage_id' => $stageId]));
+    }
+
+    // =========================================
+    // QUICK ACTIONS (delegated to service)
+    // =========================================
+
+    public function toggleMilestoneStatus(int $milestoneId): void
+    {
+        $milestone = $this->actionService()->toggleMilestone($milestoneId);
+
+        if ($milestone) {
+            Notification::make()
+                ->title($milestone->is_completed ? 'Milestone completed' : 'Milestone reopened')
+                ->success()
+                ->send();
+        }
+    }
+
+    public function addQuickMilestone(): void
+    {
+        if (empty(trim($this->quickMilestoneTitle))) return;
+
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $this->actionService()->addMilestone($project, $this->quickMilestoneTitle);
+        $this->quickMilestoneTitle = '';
+
+        Notification::make()->title('Milestone added')->success()->send();
+    }
+
+    public function addQuickTask(): void
+    {
+        if (empty(trim($this->quickTaskTitle))) return;
+
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $this->actionService()->addTask($project, $this->quickTaskTitle);
+        $this->quickTaskTitle = '';
+
+        Notification::make()->title('Task added')->success()->send();
+    }
+
+    public function updateTaskStatus(int $taskId, string $state): void
+    {
+        $this->actionService()->updateTaskStatus($taskId, $state);
+        Notification::make()->title('Task status updated')->success()->send();
+    }
+
+    public function assignTeamMember(string $role, ?int $userId): void
+    {
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $this->actionService()->assignTeamMember($project, $role, $userId);
+        $roleName = $this->actionService()->getRoleName($role);
+
+        Notification::make()
+            ->title($userId ? "{$roleName} assigned" : "{$roleName} unassigned")
+            ->success()
+            ->send();
+    }
+
+    public function changeProjectStage(int $stageId): void
+    {
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $stage = $this->actionService()->changeProjectStage($project, $stageId);
+
+        if ($stage) {
+            Notification::make()
+                ->title('Stage updated')
+                ->body("Moved to {$stage->name}")
+                ->success()
+                ->send();
+        }
+    }
+
+    public function postQuickComment(): void
+    {
+        if (empty(trim($this->quickComment))) return;
+
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $this->actionService()->postComment($project, $this->quickComment);
+        $this->quickComment = '';
+
+        Notification::make()->title('Comment added')->success()->send();
+    }
+
+    public function toggleProjectBlocked(int|string|null $projectId = null): void
+    {
+        if ($projectId !== null) {
+            $this->quickActionsRecordId = (int) $projectId;
+        }
+
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $result = $this->blockerService()->toggleBlocked($project);
+
+        Notification::make()
+            ->title($result['action'] === 'unblocked' ? 'Project unblocked' : 'Project marked as blocked')
+            ->body($result['message'])
+            ->color($result['action'] === 'unblocked' ? 'success' : 'warning')
+            ->send();
+    }
+
+    public function duplicateProject(int|string $recordId): void
+    {
+        $newProject = $this->actionService()->duplicateProject((int) $recordId);
+
+        Notification::make()
+            ->title($newProject ? 'Project duplicated' : 'Project not found')
+            ->color($newProject ? 'success' : 'danger')
+            ->send();
+    }
+
+    public function getAvailableUsers(): Collection
+    {
+        return $this->actionService()->getAvailableUsers();
+    }
+
+    public function getAvailableStages(): Collection
+    {
+        return $this->actionService()->getAvailableStages();
+    }
+
+    // =========================================
+    // LEADS INBOX
+    // =========================================
+
+    public function getInboxLeads(): Collection
+    {
+        return Lead::query()
+            ->inbox()
+            ->with(['assignedUser'])
+            ->orderByDesc('created_at')
+            ->get();
+    }
+
+    public function getInboxLeadsCount(): int
+    {
+        return Lead::inbox()->count();
+    }
+
+    public function getNewLeadsCount(): int
+    {
+        return Lead::inbox()->where('created_at', '>', now()->subDay())->count();
+    }
+
+    public function openLeadDetails(int $leadId): void
+    {
+        $this->selectedLeadId = $leadId;
+        $this->dispatch('open-modal', id: 'kanban--lead-detail-modal');
+    }
+
+    public function closeLeadDetails(): void
+    {
+        $this->selectedLeadId = null;
+    }
+
+    public function convertLeadToProject(int $leadId): void
+    {
+        $lead = Lead::find($leadId);
+
+        if (!$lead) {
+            Notification::make()->title('Lead not found')->danger()->send();
+            return;
+        }
+
+        try {
+            $result = (new LeadConversionService)->convert($lead);
+            $this->selectedLeadId = null;
+
+            Notification::make()
+                ->title('Lead converted successfully')
+                ->body("Created project: {$result['project']->name}")
+                ->success()
+                ->send();
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Conversion failed')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+        }
+    }
+
+    public function updateLeadStatus(int $leadId, string $status): void
+    {
+        $lead = Lead::find($leadId);
+        if (!$lead) return;
+
+        $lead->update(['status' => $status]);
+        Notification::make()->title('Lead status updated')->success()->send();
+    }
+
+    public function toggleLeadsInbox(): void
+    {
+        $this->leadsInboxOpen = !$this->leadsInboxOpen;
+    }
+
+    // =========================================
+    // HEADER ACTIONS
+    // =========================================
+
     protected function getHeaderActions(): array
     {
         return [
-            // Create new project
             Action::make('createProject')
                 ->label('New Project')
                 ->icon('heroicon-m-plus')
                 ->color('primary')
                 ->url(fn() => ProjectResource::getUrl('create')),
 
-            // Customize View slide-over
             Action::make('customizeView')
                 ->label('Customize')
                 ->icon('heroicon-o-adjustments-horizontal')
                 ->slideOver()
                 ->modalWidth(Width::Medium)
-                ->form([
-                    \Filament\Schemas\Components\Section::make('Layout')
-                        ->description('Control board layout and visibility')
-                        ->schema([
-                            Toggle::make('compact_filters')
-                                ->label('Compact Filter Bar')
-                                ->helperText('Use tab-style filters (saves space)')
-                                ->default(fn() => $this->layoutSettings['compact_filters'] ?? true),
-                            Toggle::make('show_kpi_row')
-                                ->label('Show Analytics Row')
-                                ->helperText('Display KPI widgets below filters')
-                                ->default(fn() => $this->layoutSettings['show_kpi_row'] ?? false),
-                            Toggle::make('show_chart')
-                                ->label('Show Yearly Chart')
-                                ->helperText('Display project statistics chart')
-                                ->default(fn() => $this->layoutSettings['show_chart'] ?? false),
-                            Toggle::make('inbox_collapsed')
-                                ->label('Collapse Inbox by Default')
-                                ->helperText('Start with leads inbox collapsed')
-                                ->default(fn() => $this->layoutSettings['inbox_collapsed'] ?? true),
-                        ])->columns(2),
-                    \Filament\Schemas\Components\Section::make('Card Fields')
-                        ->description('Choose which fields to display on cards')
-                        ->schema([
-                            Toggle::make('show_customer')
-                                ->label('Customer Name')
-                                ->default(fn() => $this->cardSettings['show_customer']),
-                            Toggle::make('show_days')
-                                ->label('Days Left/Late')
-                                ->default(fn() => $this->cardSettings['show_days']),
-                            Toggle::make('show_linear_feet')
-                                ->label('Linear Feet')
-                                ->default(fn() => $this->cardSettings['show_linear_feet']),
-                            Toggle::make('show_milestones')
-                                ->label('Progress Bar')
-                                ->default(fn() => $this->cardSettings['show_milestones']),
-                        ])->columns(2),
-                    \Filament\Schemas\Components\Section::make('Card Display')
-                        ->schema([
-                            Toggle::make('compact_mode')
-                                ->label('Compact Cards')
-                                ->helperText('Show smaller cards with less detail')
-                                ->default(fn() => $this->cardSettings['compact_mode']),
-                        ]),
-                ])
-                ->action(function (array $data) {
-                    // Extract layout settings
-                    $layoutKeys = ['compact_filters', 'show_kpi_row', 'show_chart', 'inbox_collapsed'];
-                    foreach ($layoutKeys as $key) {
-                        if (isset($data[$key])) {
-                            $this->layoutSettings[$key] = $data[$key];
-                        }
-                    }
-                    session()->put('kanban_layout_settings', $this->layoutSettings);
+                ->form($this->getCustomizeViewForm())
+                ->action(fn(array $data) => $this->saveCustomizeSettings($data)),
 
-                    // Extract card settings
-                    $cardKeys = ['show_customer', 'show_days', 'show_linear_feet', 'show_milestones', 'compact_mode'];
-                    foreach ($cardKeys as $key) {
-                        if (isset($data[$key])) {
-                            $this->cardSettings[$key] = $data[$key];
-                        }
-                    }
-                    session()->put('kanban_card_settings', $this->cardSettings);
-
-                    // Apply inbox setting immediately
-                    $this->leadsInboxOpen = !($this->layoutSettings['inbox_collapsed'] ?? true);
-
-                    // Apply chart visibility
-                    $this->chartCollapsed = !($this->layoutSettings['show_chart'] ?? false);
-
-                    Notification::make()
-                        ->title('View settings saved')
-                        ->success()
-                        ->send();
-                }),
-
-            // Filter by person
             Action::make('filterPerson')
                 ->label('Person')
                 ->icon('heroicon-o-user')
@@ -428,11 +578,8 @@ class ProjectsKanbanBoard extends KanbanBoard
                         ->searchable()
                         ->default($this->personFilter),
                 ])
-                ->action(function (array $data) {
-                    $this->personFilter = $data['user_id'] ?? null;
-                }),
+                ->action(fn(array $data) => $this->personFilter = $data['user_id'] ?? null),
 
-            // Filter
             Action::make('filter')
                 ->label('Filter')
                 ->icon('heroicon-o-funnel')
@@ -453,7 +600,6 @@ class ProjectsKanbanBoard extends KanbanBoard
                     $this->overdueOnly = $data['overdue_only'] ?? false;
                 }),
 
-            // Sort
             Action::make('sort')
                 ->label('Sort')
                 ->icon('heroicon-o-bars-arrow-down')
@@ -468,10 +614,7 @@ class ProjectsKanbanBoard extends KanbanBoard
                         ->default($this->sortBy),
                     Select::make('sort_direction')
                         ->label('Direction')
-                        ->options([
-                            'asc' => 'Ascending',
-                            'desc' => 'Descending',
-                        ])
+                        ->options(['asc' => 'Ascending', 'desc' => 'Descending'])
                         ->default($this->sortDirection),
                 ])
                 ->action(function (array $data) {
@@ -479,7 +622,6 @@ class ProjectsKanbanBoard extends KanbanBoard
                     $this->sortDirection = $data['sort_direction'];
                 }),
 
-            // Clear filters
             Action::make('clearFilters')
                 ->label('Clear')
                 ->icon('heroicon-o-x-mark')
@@ -489,989 +631,103 @@ class ProjectsKanbanBoard extends KanbanBoard
                     $this->customerFilter = null;
                     $this->personFilter = null;
                     $this->overdueOnly = false;
-
-                    Notification::make()
-                        ->title('Filters cleared')
-                        ->success()
-                        ->send();
+                    Notification::make()->title('Filters cleared')->success()->send();
                 }),
         ];
     }
 
-    /**
-     * Edit modal form schema
-     */
+    protected function getCustomizeViewForm(): array
+    {
+        return [
+            \Filament\Schemas\Components\Section::make('Layout')
+                ->description('Control board layout and visibility')
+                ->schema([
+                    Toggle::make('compact_filters')->label('Compact Filter Bar')->default(fn() => $this->layoutSettings['compact_filters'] ?? true),
+                    Toggle::make('show_kpi_row')->label('Show Analytics Row')->default(fn() => $this->layoutSettings['show_kpi_row'] ?? false),
+                    Toggle::make('show_chart')->label('Show Yearly Chart')->default(fn() => $this->layoutSettings['show_chart'] ?? false),
+                    Toggle::make('inbox_collapsed')->label('Collapse Inbox by Default')->default(fn() => $this->layoutSettings['inbox_collapsed'] ?? true),
+                ])->columns(2),
+            \Filament\Schemas\Components\Section::make('Card Fields')
+                ->description('Choose which fields to display on cards')
+                ->schema([
+                    Toggle::make('show_customer')->label('Customer Name')->default(fn() => $this->cardSettings['show_customer']),
+                    Toggle::make('show_days')->label('Days Left/Late')->default(fn() => $this->cardSettings['show_days']),
+                    Toggle::make('show_linear_feet')->label('Linear Feet')->default(fn() => $this->cardSettings['show_linear_feet']),
+                    Toggle::make('show_milestones')->label('Progress Bar')->default(fn() => $this->cardSettings['show_milestones']),
+                ])->columns(2),
+            \Filament\Schemas\Components\Section::make('Card Display')
+                ->schema([
+                    Toggle::make('compact_mode')->label('Compact Cards')->default(fn() => $this->cardSettings['compact_mode']),
+                ]),
+        ];
+    }
+
+    protected function saveCustomizeSettings(array $data): void
+    {
+        $layoutKeys = ['compact_filters', 'show_kpi_row', 'show_chart', 'inbox_collapsed'];
+        foreach ($layoutKeys as $key) {
+            if (isset($data[$key])) $this->layoutSettings[$key] = $data[$key];
+        }
+        session()->put('kanban_layout_settings', $this->layoutSettings);
+
+        $cardKeys = ['show_customer', 'show_days', 'show_linear_feet', 'show_milestones', 'compact_mode'];
+        foreach ($cardKeys as $key) {
+            if (isset($data[$key])) $this->cardSettings[$key] = $data[$key];
+        }
+        session()->put('kanban_card_settings', $this->cardSettings);
+
+        $this->leadsInboxOpen = !($this->layoutSettings['inbox_collapsed'] ?? true);
+        $this->chartCollapsed = !($this->layoutSettings['show_chart'] ?? false);
+
+        Notification::make()->title('View settings saved')->success()->send();
+    }
+
+    // =========================================
+    // EDIT MODAL
+    // =========================================
+
     protected function getEditModalFormSchema(null|int|string $recordId): array
     {
         return [
-            TextInput::make('name')
-                ->label('Project Name')
-                ->required()
-                ->maxLength(255),
-
-            Select::make('partner_id')
-                ->label('Customer')
-                ->relationship('partner', 'name')
-                ->searchable()
-                ->preload(),
-
-            Select::make('stage_id')
-                ->label('Stage')
-                ->options(ProjectStage::where('is_active', true)->pluck('name', 'id'))
-                ->required(),
-
-            DatePicker::make('desired_completion_date')
-                ->label('Due Date'),
-
-            TextInput::make('estimated_linear_feet')
-                ->label('Estimated Linear Feet')
-                ->numeric()
-                ->step(0.1),
-
-            Textarea::make('description')
-                ->label('Description')
-                ->rows(3),
+            TextInput::make('name')->label('Project Name')->required()->maxLength(255),
+            Select::make('partner_id')->label('Customer')->relationship('partner', 'name')->searchable()->preload(),
+            Select::make('stage_id')->label('Stage')->options(ProjectStage::where('is_active', true)->pluck('name', 'id'))->required(),
+            DatePicker::make('desired_completion_date')->label('Due Date'),
+            TextInput::make('estimated_linear_feet')->label('Estimated Linear Feet')->numeric()->step(0.1),
+            Textarea::make('description')->label('Description')->rows(3),
         ];
     }
 
-    protected function getEditModalTitle(): string
-    {
-        return 'Edit Project';
-    }
-
-    protected function getEditModalSlideOver(): bool
-    {
-        return true;
-    }
-
-    protected function getEditModalWidth(): string
-    {
-        return '2xl';
-    }
-
-    /**
-     * Get project blockers - checks tasks with "blocked" status first,
-     * then other blocking conditions
-     */
-    public function getProjectBlockers(Project $project): array
-    {
-        $blockers = [];
-
-        // PRIMARY: Check for blocked tasks
-        $blockedTasks = $project->tasks()->where('state', 'blocked')->count();
-        if ($blockedTasks > 0) {
-            $blockers[] = $blockedTasks . ' task(s) blocked';
-        }
-
-        // SECONDARY: Check for missing order (only if no blocked tasks)
-        if (empty($blockers) && !$project->orders()->exists()) {
-            $blockers[] = 'No sales order linked';
-        }
-
-        // SECONDARY: Check for missing customer
-        if (empty($blockers) && !$project->partner_id) {
-            $blockers[] = 'No customer assigned';
-        }
-
-        // Check for project dependencies
-        if ($project->dependsOn->where('is_completed', false)->count() > 0) {
-            $blockers[] = 'Waiting on dependencies';
-        }
-
-        return $blockers;
-    }
-
-    /**
-     * Get project priority
-     */
-    public function getProjectPriority(Project $project): ?string
-    {
-        // Check if overdue - high priority
-        if ($project->desired_completion_date && $project->desired_completion_date < now()) {
-            return 'high';
-        }
-
-        // Check complexity score
-        $score = $project->complexity_score ?? 0;
-        if ($score >= 8) {
-            return 'high';
-        }
-        if ($score >= 5) {
-            return 'medium';
-        }
-
-        // Check if due within 7 days
-        if ($project->desired_completion_date && $project->desired_completion_date->diffInDays(now()) < 7) {
-            return 'medium';
-        }
-
-        return null;
-    }
-
-    /**
-     * Open Chatter slide-over
-     */
-    public function openChatter(int|string $recordId): void
-    {
-        $this->chatterRecordId = (int) $recordId;
-        $this->dispatch('open-modal', id: 'kanban--chatter-modal');
-    }
-
-    /**
-     * Get chatter record
-     */
-    public function getChatterRecord(): ?Project
-    {
-        if (!$this->chatterRecordId) {
-            return null;
-        }
-
-        return Project::find($this->chatterRecordId);
-    }
-
-    /**
-     * Open Quick Actions / Project Details slide-over
-     */
-    public function openQuickActions(int|string $recordId): void
-    {
-        $this->quickActionsRecordId = (int) $recordId;
-        $this->dispatch('open-modal', id: 'kanban--quick-actions-modal');
-    }
-
-    /**
-     * Get quick actions record
-     */
-    public function getQuickActionsRecord(): ?Project
-    {
-        if (!$this->quickActionsRecordId) {
-            return null;
-        }
-
-        return Project::with(['partner', 'stage', 'milestones', 'tasks', 'orders', 'user', 'designer', 'purchasingManager'])
-            ->find($this->quickActionsRecordId);
-    }
-
-    /**
-     * Open create modal for a specific stage
-     */
-    public function openCreateModal(int|string $stageId): void
-    {
-        // Redirect to create page with stage pre-selected
-        $this->redirect(ProjectResource::getUrl('create', ['stage_id' => $stageId]));
-    }
-
-    /**
-     * Duplicate a project
-     */
-    public function duplicateProject(int|string $recordId): void
-    {
-        $project = Project::find($recordId);
-
-        if (!$project) {
-            Notification::make()
-                ->title('Project not found')
-                ->danger()
-                ->send();
-            return;
-        }
-
-        $newProject = $project->replicate();
-        $newProject->name = $project->name . ' (Copy)';
-        $newProject->save();
-
-        Notification::make()
-            ->title('Project duplicated')
-            ->success()
-            ->send();
-    }
+    protected function getEditModalTitle(): string { return 'Edit Project'; }
+    protected function getEditModalSlideOver(): bool { return true; }
+    protected function getEditModalWidth(): string { return '2xl'; }
 
     // =========================================
-    // YEARLY CHART WIDGET METHODS
+    // VIEW DATA
     // =========================================
 
-    /**
-     * Set the chart year
-     */
-    public function setChartYear(int $year): void
-    {
-        $this->chartYear = $year;
-        session()->put('kanban_chart_year', $year);
-
-        // Dispatch event to update the chart with new data
-        $stats = $this->getYearlyStats();
-        $this->dispatch('chartDataUpdated', $stats);
-    }
-
-    /**
-     * Toggle chart visibility
-     */
-    public function toggleChartCollapsed(): void
-    {
-        $this->chartCollapsed = !$this->chartCollapsed;
-        session()->put('kanban_chart_collapsed', $this->chartCollapsed);
-    }
-
-    /**
-     * Toggle KPI row visibility
-     */
-    public function toggleKpiRow(): void
-    {
-        $this->layoutSettings['show_kpi_row'] = !($this->layoutSettings['show_kpi_row'] ?? false);
-        session()->put('kanban_layout_settings', $this->layoutSettings);
-    }
-
-    /**
-     * Toggle chart visibility (layout setting)
-     */
-    public function toggleChartVisibility(): void
-    {
-        $this->layoutSettings['show_chart'] = !($this->layoutSettings['show_chart'] ?? false);
-        $this->chartCollapsed = !$this->layoutSettings['show_chart'];
-        session()->put('kanban_layout_settings', $this->layoutSettings);
-        session()->put('kanban_chart_collapsed', $this->chartCollapsed);
-    }
-
-    /**
-     * Toggle compact filters mode
-     */
-    public function toggleCompactFilters(): void
-    {
-        $this->layoutSettings['compact_filters'] = !($this->layoutSettings['compact_filters'] ?? true);
-        session()->put('kanban_layout_settings', $this->layoutSettings);
-    }
-
-    /**
-     * Get available years for chart dropdown
-     */
-    public function getAvailableYears(): array
-    {
-        $currentYear = now()->year;
-        $years = [];
-
-        // Get earliest project year
-        $earliestProject = Project::query()->orderBy('created_at')->first();
-        $startYear = $earliestProject ? $earliestProject->created_at->year : $currentYear;
-
-        for ($year = $currentYear; $year >= $startYear; $year--) {
-            $years[$year] = (string) $year;
-        }
-
-        return $years;
-    }
-
-    /**
-     * Get yearly statistics for chart
-     */
-    public function getYearlyStats(): array
-    {
-        $year = $this->chartYear;
-
-        // Get stage IDs for "completed" and "cancelled" stages
-        $doneStages = ProjectStage::query()
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['done', 'completed', 'finished'])
-            ->pluck('id')
-            ->toArray();
-
-        $cancelledStages = ProjectStage::query()
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['cancelled', 'canceled'])
-            ->pluck('id')
-            ->toArray();
-
-        // Initialize monthly data
-        $months = [];
-        for ($m = 1; $m <= 12; $m++) {
-            $months[$m] = [
-                'month' => date('M', mktime(0, 0, 0, $m, 1)),
-                'completed' => 0,
-                'in_progress' => 0,
-                'cancelled' => 0,
-            ];
-        }
-
-        // Query completed projects (by updated_at in done stage)
-        $completed = Project::query()
-            ->whereIn('stage_id', $doneStages)
-            ->whereYear('updated_at', $year)
-            ->selectRaw('MONTH(updated_at) as month, COUNT(*) as count')
-            ->groupBy('month')
-            ->pluck('count', 'month')
-            ->toArray();
-
-        // Query cancelled projects
-        $cancelled = Project::query()
-            ->whereIn('stage_id', $cancelledStages)
-            ->whereYear('updated_at', $year)
-            ->selectRaw('MONTH(updated_at) as month, COUNT(*) as count')
-            ->groupBy('month')
-            ->pluck('count', 'month')
-            ->toArray();
-
-        // Query in-progress projects (by created_at, not in done/cancelled)
-        $inProgress = Project::query()
-            ->whereNotIn('stage_id', array_merge($doneStages, $cancelledStages))
-            ->whereYear('created_at', $year)
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->groupBy('month')
-            ->pluck('count', 'month')
-            ->toArray();
-
-        // Merge into monthly data
-        foreach ($months as $m => &$data) {
-            $data['completed'] = $completed[$m] ?? 0;
-            $data['cancelled'] = $cancelled[$m] ?? 0;
-            $data['in_progress'] = $inProgress[$m] ?? 0;
-        }
-
-        return [
-            'labels' => array_column($months, 'month'),
-            'datasets' => [
-                [
-                    'label' => 'Completed',
-                    'data' => array_column($months, 'completed'),
-                    'backgroundColor' => '#16a34a', // Green
-                ],
-                [
-                    'label' => 'In Progress',
-                    'data' => array_column($months, 'in_progress'),
-                    'backgroundColor' => '#2563eb', // Blue
-                ],
-                [
-                    'label' => 'Cancelled',
-                    'data' => array_column($months, 'cancelled'),
-                    'backgroundColor' => '#6b7280', // Gray
-                ],
-            ],
-            'year' => $year,
-            'totals' => [
-                'completed' => array_sum(array_column($months, 'completed')),
-                'in_progress' => array_sum(array_column($months, 'in_progress')),
-                'cancelled' => array_sum(array_column($months, 'cancelled')),
-            ],
-        ];
-    }
-
-    // =========================================
-    // BUSINESS OWNER KPI WIDGET METHODS
-    // =========================================
-
-    /**
-     * Set KPI time range
-     */
-    public function setKpiTimeRange(string $range): void
-    {
-        $this->kpiTimeRange = $range;
-        session()->put('kanban_kpi_time_range', $range);
-    }
-
-    /**
-     * Get date range based on KPI time range setting
-     */
-    protected function getKpiDateRange(): array
-    {
-        return match ($this->kpiTimeRange) {
-            'this_week' => [now()->startOfWeek(), now()->endOfWeek()],
-            'this_month' => [now()->startOfMonth(), now()->endOfMonth()],
-            'this_quarter' => [now()->startOfQuarter(), now()->endOfQuarter()],
-            'ytd' => [now()->startOfYear(), now()],
-            default => [now()->startOfWeek(), now()->endOfWeek()],
-        };
-    }
-
-    /**
-     * Get business owner KPI stats
-     */
-    public function getKpiStats(): array
-    {
-        [$startDate, $endDate] = $this->getKpiDateRange();
-
-        // Get "In Production" stage IDs (manufacturing stages)
-        $productionStages = ProjectStage::query()
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), [
-                'in production', 'production', 'manufacturing', 'fabrication',
-                'assembly', 'finishing', 'install', 'installation'
-            ])
-            ->pluck('id')
-            ->toArray();
-
-        // Get "Done" stage IDs
-        $doneStages = ProjectStage::query()
-            ->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['done', 'completed', 'finished'])
-            ->pluck('id')
-            ->toArray();
-
-        // Linear feet created this period
-        $lfThisPeriod = Project::query()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('estimated_linear_feet') ?? 0;
-
-        // Linear feet currently in production
-        $lfInProduction = Project::query()
-            ->whereIn('stage_id', $productionStages)
-            ->sum('estimated_linear_feet') ?? 0;
-
-        // Projects in production count
-        $projectsInProduction = Project::query()
-            ->whereIn('stage_id', $productionStages)
-            ->count();
-
-        // On target: Projects with completion date >= today (not overdue)
-        $onTargetCount = Project::query()
-            ->whereNotIn('stage_id', $doneStages)
-            ->where(function ($q) {
-                $q->whereNull('desired_completion_date')
-                    ->orWhere('desired_completion_date', '>=', now());
-            })
-            ->whereDoesntHave('tasks', fn($t) => $t->where('state', 'blocked'))
-            ->count();
-
-        // Off target: Overdue or blocked
-        $offTargetCount = Project::query()
-            ->whereNotIn('stage_id', $doneStages)
-            ->where(function ($q) {
-                $q->where('desired_completion_date', '<', now())
-                    ->orWhereHas('tasks', fn($t) => $t->where('state', 'blocked'));
-            })
-            ->count();
-
-        // Completed this period
-        $completedThisPeriod = Project::query()
-            ->whereIn('stage_id', $doneStages)
-            ->whereBetween('updated_at', [$startDate, $endDate])
-            ->count();
-
-        // LF completed this period
-        $lfCompletedThisPeriod = Project::query()
-            ->whereIn('stage_id', $doneStages)
-            ->whereBetween('updated_at', [$startDate, $endDate])
-            ->sum('estimated_linear_feet') ?? 0;
-
-        return [
-            'lf_this_period' => round($lfThisPeriod, 1),
-            'lf_in_production' => round($lfInProduction, 1),
-            'projects_in_production' => $projectsInProduction,
-            'on_target' => $onTargetCount,
-            'off_target' => $offTargetCount,
-            'completed_this_period' => $completedThisPeriod,
-            'lf_completed_this_period' => round($lfCompletedThisPeriod, 1),
-            'time_range_label' => match ($this->kpiTimeRange) {
-                'this_week' => 'This Week',
-                'this_month' => 'This Month',
-                'this_quarter' => 'This Quarter',
-                'ytd' => 'Year to Date',
-                default => 'This Week',
-            },
-        ];
-    }
-
-    /**
-     * Override the view to add Chatter modal
-     */
     protected function getViewData(): array
     {
         $data = parent::getViewData();
+
         $data['chatterRecord'] = $this->getChatterRecord();
         $data['quickActionsRecord'] = $this->getQuickActionsRecord();
         $data['cardSettings'] = $this->cardSettings;
-
-        // Add view mode
         $data['viewMode'] = $this->viewMode;
-
-        // Add projects list for task filter
         $data['projects'] = Project::query()->orderBy('name')->pluck('name', 'id');
         $data['projectFilter'] = $this->projectFilter;
-
-        // Add leads data
         $data['leads'] = $this->getInboxLeads();
         $data['leadsCount'] = $this->getInboxLeadsCount();
         $data['newLeadsCount'] = $this->getNewLeadsCount();
         $data['selectedLead'] = $this->selectedLeadId ? Lead::find($this->selectedLeadId) : null;
-
-        // Chart data
         $data['chartYear'] = $this->chartYear;
         $data['chartCollapsed'] = $this->chartCollapsed;
         $data['availableYears'] = $this->getAvailableYears();
         $data['yearlyStats'] = $this->getYearlyStats();
-
-        // KPI data
         $data['kpiTimeRange'] = $this->kpiTimeRange;
         $data['kpiStats'] = $this->getKpiStats();
-
-        // Layout settings
         $data['layoutSettings'] = $this->layoutSettings;
 
         return $data;
-    }
-
-    /**
-     * Get task progress info for task cards
-     */
-    public function getTaskProgress(Task $task): array
-    {
-        // Calculate progress based on subtasks or hours
-        $totalSubtasks = $task->subTasks->count();
-        $completedSubtasks = $task->subTasks->where('state', 'done')->count();
-
-        if ($totalSubtasks > 0) {
-            $progressPercent = round(($completedSubtasks / $totalSubtasks) * 100);
-            $progressLabel = "$completedSubtasks/$totalSubtasks subtasks";
-        } elseif ($task->allocated_hours > 0) {
-            $progressPercent = min(100, round(($task->effective_hours / $task->allocated_hours) * 100));
-            $progressLabel = number_format($task->effective_hours, 1) . '/' . number_format($task->allocated_hours, 1) . ' hrs';
-        } else {
-            $progressPercent = $task->progress ?? 0;
-            $progressLabel = $progressPercent . '%';
-        }
-
-        return [
-            'percent' => $progressPercent,
-            'label' => $progressLabel,
-        ];
-    }
-
-    /**
-     * Check if task is overdue
-     */
-    public function isTaskOverdue(Task $task): bool
-    {
-        return $task->deadline && $task->deadline < now() && $task->state !== 'done';
-    }
-
-    /**
-     * Check if task is due soon (within 7 days)
-     */
-    public function isTaskDueSoon(Task $task): bool
-    {
-        if (!$task->deadline || $task->state === 'done') {
-            return false;
-        }
-
-        $daysLeft = now()->diffInDays($task->deadline, false);
-        return $daysLeft >= 0 && $daysLeft <= 7;
-    }
-
-    /**
-     * Set project filter for tasks
-     */
-    public function setProjectFilter(?int $projectId): void
-    {
-        $this->projectFilter = $projectId;
-    }
-
-    /**
-     * Get leads for inbox
-     */
-    public function getInboxLeads(): Collection
-    {
-        return Lead::query()
-            ->inbox()
-            ->with(['assignedUser'])
-            ->orderByDesc('created_at')
-            ->get();
-    }
-
-    /**
-     * Get count of inbox leads
-     */
-    public function getInboxLeadsCount(): int
-    {
-        return Lead::inbox()->count();
-    }
-
-    /**
-     * Get count of new leads (created in last 24 hours)
-     */
-    public function getNewLeadsCount(): int
-    {
-        return Lead::inbox()
-            ->where('created_at', '>', now()->subDay())
-            ->count();
-    }
-
-    /**
-     * Open lead detail panel
-     */
-    public function openLeadDetails(int $leadId): void
-    {
-        $this->selectedLeadId = $leadId;
-        $this->dispatch('open-modal', id: 'kanban--lead-detail-modal');
-    }
-
-    /**
-     * Close lead detail panel
-     */
-    public function closeLeadDetails(): void
-    {
-        $this->selectedLeadId = null;
-    }
-
-    /**
-     * Convert lead to project
-     */
-    public function convertLeadToProject(int $leadId): void
-    {
-        $lead = Lead::find($leadId);
-
-        if (! $lead) {
-            Notification::make()
-                ->title('Lead not found')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        try {
-            $service = new LeadConversionService;
-            $result = $service->convert($lead);
-
-            $this->selectedLeadId = null;
-
-            Notification::make()
-                ->title('Lead converted successfully')
-                ->body("Created project: {$result['project']->name}")
-                ->success()
-                ->send();
-
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Conversion failed')
-                ->body($e->getMessage())
-                ->danger()
-                ->send();
-        }
-    }
-
-    /**
-     * Update lead status
-     */
-    public function updateLeadStatus(int $leadId, string $status): void
-    {
-        $lead = Lead::find($leadId);
-
-        if (! $lead) {
-            return;
-        }
-
-        $lead->update(['status' => $status]);
-
-        Notification::make()
-            ->title('Lead status updated')
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Toggle leads inbox visibility
-     */
-    public function toggleLeadsInbox(): void
-    {
-        $this->leadsInboxOpen = ! $this->leadsInboxOpen;
-    }
-
-    // =========================================
-    // QUICK ACTIONS - INLINE CRUD METHODS
-    // =========================================
-
-    /**
-     * Toggle milestone completion status
-     */
-    public function toggleMilestoneStatus(int $milestoneId): void
-    {
-        $milestone = Milestone::find($milestoneId);
-
-        if (!$milestone) {
-            return;
-        }
-
-        $milestone->update([
-            'is_completed' => !$milestone->is_completed,
-            'completed_at' => !$milestone->is_completed ? now() : null,
-        ]);
-
-        Notification::make()
-            ->title($milestone->is_completed ? 'Milestone completed' : 'Milestone reopened')
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Add a quick milestone to the project
-     */
-    public function addQuickMilestone(): void
-    {
-        if (empty(trim($this->quickMilestoneTitle))) {
-            return;
-        }
-
-        $project = $this->getQuickActionsRecord();
-
-        if (!$project) {
-            return;
-        }
-
-        // Get the next sort order
-        $maxSort = $project->milestones()->max('sort') ?? 0;
-
-        Milestone::create([
-            'project_id' => $project->id,
-            'name' => trim($this->quickMilestoneTitle),
-            'sort' => $maxSort + 1,
-            'is_completed' => false,
-        ]);
-
-        $this->quickMilestoneTitle = '';
-
-        Notification::make()
-            ->title('Milestone added')
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Update task status inline
-     */
-    public function updateTaskStatus(int $taskId, string $state): void
-    {
-        $task = Task::find($taskId);
-
-        if (!$task) {
-            return;
-        }
-
-        $task->update([
-            'state' => $state,
-            'completed_at' => $state === 'done' ? now() : null,
-        ]);
-
-        Notification::make()
-            ->title('Task status updated')
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Add a quick task to the project
-     */
-    public function addQuickTask(): void
-    {
-        if (empty(trim($this->quickTaskTitle))) {
-            return;
-        }
-
-        $project = $this->getQuickActionsRecord();
-
-        if (!$project) {
-            return;
-        }
-
-        // Get the first task stage for this project or default
-        $stage = TaskStage::query()
-            ->where(function ($q) use ($project) {
-                $q->where('project_id', $project->id)
-                    ->orWhereNull('project_id');
-            })
-            ->orderBy('sort')
-            ->first();
-
-        Task::create([
-            'project_id' => $project->id,
-            'title' => trim($this->quickTaskTitle),
-            'state' => 'pending',
-            'stage_id' => $stage?->id,
-            'creator_id' => auth()->id(),
-        ]);
-
-        $this->quickTaskTitle = '';
-
-        Notification::make()
-            ->title('Task added')
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Assign team member to project
-     */
-    public function assignTeamMember(string $role, ?int $userId): void
-    {
-        $project = $this->getQuickActionsRecord();
-
-        if (!$project) {
-            return;
-        }
-
-        $fieldMap = [
-            'pm' => 'user_id',
-            'designer' => 'designer_id',
-            'purchasing' => 'purchasing_manager_id',
-        ];
-
-        $field = $fieldMap[$role] ?? null;
-
-        if (!$field) {
-            return;
-        }
-
-        $project->update([$field => $userId]);
-
-        $roleName = match ($role) {
-            'pm' => 'Project Manager',
-            'designer' => 'Designer',
-            'purchasing' => 'Purchasing Manager',
-            default => 'Team member',
-        };
-
-        Notification::make()
-            ->title($userId ? "{$roleName} assigned" : "{$roleName} unassigned")
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Toggle project blocked status
-     * If blocked, clears the block. If not blocked, creates a blocker.
-     *
-     * @param int|string|null $projectId Optional project ID (for context menu usage)
-     */
-    public function toggleProjectBlocked(int|string|null $projectId = null): void
-    {
-        // If projectId is provided (from context menu), set it
-        if ($projectId !== null) {
-            $this->quickActionsRecordId = (int) $projectId;
-        }
-
-        $project = $this->getQuickActionsRecord();
-
-        if (!$project) {
-            return;
-        }
-
-        // Check if any task is blocked
-        $blockedTask = $project->tasks()->where('state', 'blocked')->first();
-
-        if ($blockedTask) {
-            // Unblock all blocked tasks
-            $project->tasks()->where('state', 'blocked')->update(['state' => 'pending']);
-
-            Notification::make()
-                ->title('Project unblocked')
-                ->body('All blocked tasks have been set to pending.')
-                ->success()
-                ->send();
-        } else {
-            // Create a blocker task or mark first pending task as blocked
-            $pendingTask = $project->tasks()->whereIn('state', ['pending', 'in_progress'])->first();
-
-            if ($pendingTask) {
-                $pendingTask->update(['state' => 'blocked']);
-
-                Notification::make()
-                    ->title('Project marked as blocked')
-                    ->body("Task '{$pendingTask->title}' marked as blocked.")
-                    ->warning()
-                    ->send();
-            } else {
-                // Create a new blocked task
-                Task::create([
-                    'project_id' => $project->id,
-                    'title' => 'Blocker - Needs attention',
-                    'state' => 'blocked',
-                    'creator_id' => auth()->id(),
-                ]);
-
-                Notification::make()
-                    ->title('Project marked as blocked')
-                    ->body('Created a blocker task.')
-                    ->warning()
-                    ->send();
-            }
-        }
-    }
-
-    /**
-     * Post a quick comment to the project via Chatter
-     */
-    public function postQuickComment(): void
-    {
-        if (empty(trim($this->quickComment))) {
-            return;
-        }
-
-        $project = $this->getQuickActionsRecord();
-
-        if (!$project) {
-            return;
-        }
-
-        // Use the Chatter trait to add a message
-        if (method_exists($project, 'addMessage')) {
-            $project->addMessage([
-                'body' => trim($this->quickComment),
-                'type' => 'comment',
-            ]);
-        } else {
-            // Fallback: Create activity directly
-            $project->activities()->create([
-                'type' => 'comment',
-                'body' => trim($this->quickComment),
-                'causer_type' => \Webkul\Security\Models\User::class,
-                'causer_id' => auth()->id(),
-            ]);
-        }
-
-        $this->quickComment = '';
-
-        Notification::make()
-            ->title('Comment added')
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Change project stage inline
-     */
-    public function changeProjectStage(int $stageId): void
-    {
-        $project = $this->getQuickActionsRecord();
-
-        if (!$project) {
-            return;
-        }
-
-        $stage = ProjectStage::find($stageId);
-
-        if (!$stage) {
-            return;
-        }
-
-        $project->update(['stage_id' => $stageId]);
-
-        Notification::make()
-            ->title('Stage updated')
-            ->body("Moved to {$stage->name}")
-            ->success()
-            ->send();
-    }
-
-    /**
-     * Get available users for team assignment
-     */
-    public function getAvailableUsers(): Collection
-    {
-        return User::query()
-            ->where('is_active', true)
-            ->orderBy('name')
-            ->get(['id', 'name']);
-    }
-
-    /**
-     * Get available project stages
-     */
-    public function getAvailableStages(): Collection
-    {
-        return ProjectStage::query()
-            ->where('is_active', true)
-            ->orderBy('sort')
-            ->get(['id', 'name', 'color']);
     }
 }

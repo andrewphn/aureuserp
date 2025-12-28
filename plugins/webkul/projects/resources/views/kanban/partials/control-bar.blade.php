@@ -1,12 +1,27 @@
 {{-- Control Bar: View Toggle + Filter Widgets + KPI Row --}}
 @php
     if ($currentViewMode === 'projects') {
-        // Count and LF for All Projects
-        $totalProjects = \Webkul\Project\Models\Project::count();
-        $totalLF = \Webkul\Project\Models\Project::sum('estimated_linear_feet') ?? 0;
+        // Get stage IDs excluded from kanban columns:
+        // - Done/Completed/Finished/Cancelled (completed work)
+        // - To Do (shown in Inbox instead)
+        // - Inactive stages
+        $excludedStages = \Webkul\Project\Models\ProjectStage::query()
+            ->where(function($q) {
+                $q->whereIn(\Illuminate\Support\Facades\DB::raw('LOWER(name)'), ['done', 'completed', 'finished', 'cancelled', 'canceled', 'to do'])
+                  ->orWhere('is_active', false);
+            })
+            ->pluck('id')
+            ->toArray();
+
+        // Base query: only projects visible on kanban columns (not in inbox or done)
+        $baseQuery = \Webkul\Project\Models\Project::whereNotIn('stage_id', $excludedStages);
+
+        // Count and LF for visible projects only
+        $totalProjects = (clone $baseQuery)->count();
+        $totalLF = (clone $baseQuery)->sum('estimated_linear_feet') ?? 0;
 
         // Blocked = has blocked tasks OR no orders OR no customer
-        $blockedQuery = \Webkul\Project\Models\Project::where(function($q) {
+        $blockedQuery = (clone $baseQuery)->where(function($q) {
             $q->whereHas('tasks', fn($t) => $t->where('state', 'blocked'))
               ->orWhereDoesntHave('orders')
               ->orWhereNull('partner_id');
@@ -15,17 +30,17 @@
         $blockedLF = (clone $blockedQuery)->sum('estimated_linear_feet') ?? 0;
 
         // Overdue
-        $overdueQuery = \Webkul\Project\Models\Project::where('desired_completion_date', '<', now());
+        $overdueQuery = (clone $baseQuery)->where('desired_completion_date', '<', now());
         $overdueCount = (clone $overdueQuery)->count();
         $overdueLF = (clone $overdueQuery)->sum('estimated_linear_feet') ?? 0;
 
         // Due Soon
-        $dueSoonQuery = \Webkul\Project\Models\Project::whereBetween('desired_completion_date', [now(), now()->addDays(7)]);
+        $dueSoonQuery = (clone $baseQuery)->whereBetween('desired_completion_date', [now(), now()->addDays(7)]);
         $dueSoonCount = (clone $dueSoonQuery)->count();
         $dueSoonLF = (clone $dueSoonQuery)->sum('estimated_linear_feet') ?? 0;
 
         // On Track = not overdue AND not blocked
-        $onTrackQuery = \Webkul\Project\Models\Project::where(function($q) {
+        $onTrackQuery = (clone $baseQuery)->where(function($q) {
             $q->whereNull('desired_completion_date')
               ->orWhere('desired_completion_date', '>=', now());
         })

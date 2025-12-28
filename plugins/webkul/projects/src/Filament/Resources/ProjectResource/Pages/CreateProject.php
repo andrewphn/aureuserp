@@ -48,6 +48,7 @@ use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
 use Webkul\Project\Settings\TimeSettings;
 use Webkul\Support\Models\Company;
+use Webkul\Project\Filament\Traits\HasStep2ScopeBudgetSchema;
 
 /**
  * Create Project Wizard
@@ -62,6 +63,7 @@ use Webkul\Support\Models\Company;
 class CreateProject extends Page implements HasForms
 {
     use InteractsWithForms;
+    use HasStep2ScopeBudgetSchema;
 
     protected static string $resource = ProjectResource::class;
 
@@ -458,6 +460,17 @@ class CreateProject extends Page implements HasForms
      * Step 2: Scope & Budget - Quick estimate, room-by-room, or detailed spec
      */
     protected function getStep2Schema(): array
+    {
+        // Delegated to trait for maintainability
+        // @see HasStep2ScopeBudgetSchema::buildStep2Schema()
+        return $this->buildStep2Schema();
+    }
+
+    /**
+     * Step 2 LEGACY - PRESERVED FOR REMOVAL
+     * TODO: Remove this after confirming trait works
+     */
+    protected function getStep2SchemaLegacy(): array
     {
         $pricingService = app(TcsPricingService::class);
 
@@ -1436,7 +1449,8 @@ class CreateProject extends Page implements HasForms
 
         $sequentialNumber = $startNumber;
         if ($lastProject && $lastProject->project_number) {
-            preg_match('/-(\d+)-/', $lastProject->project_number, $matches);
+            // Match number after first dash: TCS-500 or TCS-500-Street both extract 500
+            preg_match('/-(\d+)/', $lastProject->project_number, $matches);
             if (!empty($matches[1])) {
                 $sequentialNumber = max(intval($matches[1]) + 1, $startNumber);
             }
@@ -1508,7 +1522,8 @@ class CreateProject extends Page implements HasForms
 
         $sequentialNumber = $startNumber;
         if ($lastProject && $lastProject->project_number) {
-            preg_match('/-(\d+)-/', $lastProject->project_number, $matches);
+            // Match number after first dash: TCS-500 or TCS-500-Street both extract 500
+            preg_match('/-(\d+)/', $lastProject->project_number, $matches);
             if (!empty($matches[1])) {
                 $sequentialNumber = max(intval($matches[1]) + 1, $startNumber);
             }

@@ -1,0 +1,480 @@
+{{-- Lead Detail Modal --}}
+<x-filament::modal
+    id="kanban--lead-detail-modal"
+    :close-by-clicking-away="true"
+    :close-button="true"
+    slide-over
+    width="2xl"
+>
+    <x-slot name="heading">
+        <div class="flex items-center gap-2">
+            <x-heroicon-o-user-plus class="w-5 h-5 text-amber-500" />
+            <span>Lead Details</span>
+        </div>
+    </x-slot>
+
+    @if($selectedLead ?? null)
+        <div x-data="{ activeTab: 'contact' }" class="space-y-4">
+            {{-- Filament Native Tabs --}}
+            <x-filament::tabs label="Lead details">
+                <x-filament::tabs.item
+                    alpine-active="activeTab === 'contact'"
+                    x-on:click="activeTab = 'contact'"
+                    icon="heroicon-m-user"
+                >
+                    Contact
+                </x-filament::tabs.item>
+
+                <x-filament::tabs.item
+                    alpine-active="activeTab === 'project'"
+                    x-on:click="activeTab = 'project'"
+                    icon="heroicon-m-briefcase"
+                >
+                    Project
+                </x-filament::tabs.item>
+
+                <x-filament::tabs.item
+                    alpine-active="activeTab === 'location'"
+                    x-on:click="activeTab = 'location'"
+                    icon="heroicon-m-map-pin"
+                >
+                    Location
+                </x-filament::tabs.item>
+
+                <x-filament::tabs.item
+                    alpine-active="activeTab === 'tracking'"
+                    x-on:click="activeTab = 'tracking'"
+                    icon="heroicon-m-chart-bar"
+                >
+                    Tracking
+                </x-filament::tabs.item>
+            </x-filament::tabs>
+
+            {{-- Tab Content --}}
+            <div class="min-h-[300px]">
+                {{-- Contact Tab --}}
+                <div x-show="activeTab === 'contact'" x-cloak class="space-y-4">
+                    <div class="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <x-heroicon-m-user class="w-4 h-4" />
+                            Contact Information
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Name:</span>
+                                <span class="font-medium text-gray-900 dark:text-white ml-1">{{ $selectedLead->full_name }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Email:</span>
+                                <a href="mailto:{{ $selectedLead->email }}" class="text-primary-600 hover:underline ml-1">{{ $selectedLead->email }}</a>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Phone:</span>
+                                <a href="tel:{{ $selectedLead->phone }}" class="text-primary-600 hover:underline ml-1">{{ $selectedLead->phone }}</a>
+                            </div>
+                            @if($selectedLead->company_name)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Company:</span>
+                                    <span class="ml-1">{{ $selectedLead->company_name }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->preferred_contact_method)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Preferred Contact:</span>
+                                    <span class="ml-1 capitalize">{{ $selectedLead->preferred_contact_method }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->source)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Lead Source:</span>
+                                    <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
+                                        {{ $selectedLead->source->getLabel() }}
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Metadata --}}
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <x-heroicon-m-clock class="w-4 h-4" />
+                            Submission Info
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Submitted:</span>
+                                <span class="ml-1">{{ $selectedLead->created_at->format('M d, Y g:i A') }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Days Ago:</span>
+                                <span class="ml-1">{{ $selectedLead->days_since_submission }} days</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500 dark:text-gray-400">Status:</span>
+                                <span class="ml-1 capitalize">{{ $selectedLead->status->value ?? 'New' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Project Tab --}}
+                <div x-show="activeTab === 'project'" x-cloak class="space-y-4">
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <x-heroicon-m-briefcase class="w-4 h-4" />
+                            Project Details
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            @if($selectedLead->project_type)
+                                <div class="col-span-2">
+                                    <span class="text-gray-500 dark:text-gray-400">Project Type:</span>
+                                    <span class="ml-1 font-medium">{{ is_array($selectedLead->project_type) ? implode(', ', $selectedLead->project_type) : $selectedLead->project_type }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->project_phase)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Project Phase:</span>
+                                    <span class="ml-1 capitalize">{{ str_replace('_', ' ', $selectedLead->project_phase) }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->budget_range)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Budget Range:</span>
+                                    <span class="ml-1 font-medium text-green-600">
+                                        @switch($selectedLead->budget_range)
+                                            @case('under_10k') Under $10,000 @break
+                                            @case('10k_25k') $10,000 - $25,000 @break
+                                            @case('25k_50k') $25,000 - $50,000 @break
+                                            @case('50k_100k') $50,000 - $100,000 @break
+                                            @case('over_100k') Over $100,000 @break
+                                            @default {{ $selectedLead->budget_range }}
+                                        @endswitch
+                                    </span>
+                                </div>
+                            @endif
+                            @if($selectedLead->timeline_start_date)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Start Date:</span>
+                                    <span class="ml-1">{{ $selectedLead->timeline_start_date?->format('M d, Y') }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->timeline_completion_date)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Completion:</span>
+                                    <span class="ml-1">{{ $selectedLead->timeline_completion_date?->format('M d, Y') }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    @if($selectedLead->design_style || $selectedLead->wood_species || $selectedLead->finish_choices)
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-paint-brush class="w-4 h-4" />
+                                Design Preferences
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                @if($selectedLead->design_style)
+                                    <div class="col-span-2">
+                                        <span class="text-gray-500 dark:text-gray-400">Design Style:</span>
+                                        <span class="ml-1">{{ is_array($selectedLead->design_style) ? implode(', ', $selectedLead->design_style) : $selectedLead->design_style }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->wood_species)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Wood Species:</span>
+                                        <span class="ml-1">{{ ucfirst(str_replace('_', ' ', $selectedLead->wood_species)) }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->finish_choices)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Finish:</span>
+                                        <span class="ml-1">{{ is_array($selectedLead->finish_choices) ? implode(', ', $selectedLead->finish_choices) : $selectedLead->finish_choices }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($selectedLead->message || $selectedLead->project_description || $selectedLead->additional_information)
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-chat-bubble-left-ellipsis class="w-4 h-4" />
+                                Message / Notes
+                            </h3>
+                            @if($selectedLead->message || $selectedLead->project_description)
+                                <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap mb-3">{{ $selectedLead->message ?? $selectedLead->project_description }}</p>
+                            @endif
+                            @if($selectedLead->additional_information)
+                                <div class="border-t border-gray-200 dark:border-gray-600 pt-3 mt-3">
+                                    <span class="text-xs text-gray-500 font-medium">Additional Info:</span>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $selectedLead->additional_information }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Location Tab --}}
+                <div x-show="activeTab === 'location'" x-cloak class="space-y-4">
+                    @if($selectedLead->city || $selectedLead->street1)
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-map-pin class="w-4 h-4" />
+                                Project Location
+                            </h3>
+                            <div class="text-sm text-gray-700 dark:text-gray-300">
+                                @if($selectedLead->street1)<p>{{ $selectedLead->street1 }}</p>@endif
+                                @if($selectedLead->street2)<p>{{ $selectedLead->street2 }}</p>@endif
+                                <p>
+                                    {{ $selectedLead->city }}@if($selectedLead->state), {{ $selectedLead->state }}@endif
+                                    @if($selectedLead->zip) {{ $selectedLead->zip }}@endif
+                                </p>
+                                @if($selectedLead->country && $selectedLead->country !== 'United States')
+                                    <p>{{ $selectedLead->country }}</p>
+                                @endif
+                            </div>
+                            @if($selectedLead->project_address_notes)
+                                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                                    <span class="text-xs text-gray-500 font-medium">Location Notes:</span>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">{{ $selectedLead->project_address_notes }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 text-center">
+                            <x-heroicon-o-map-pin class="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                            <p class="text-gray-500">No location information provided</p>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Tracking Tab --}}
+                <div x-show="activeTab === 'tracking'" x-cloak class="space-y-4">
+                    {{-- UTM Attribution --}}
+                    @if($selectedLead->utm_source || $selectedLead->utm_medium || $selectedLead->utm_campaign)
+                        <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-megaphone class="w-4 h-4 text-blue-600" />
+                                Marketing Attribution
+                            </h3>
+                            <div class="grid grid-cols-2 gap-3 text-sm">
+                                @if($selectedLead->utm_source)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Source:</span>
+                                        <span class="ml-1 font-medium">{{ $selectedLead->utm_source }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->utm_medium)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Medium:</span>
+                                        <span class="ml-1">{{ $selectedLead->utm_medium }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->utm_campaign)
+                                    <div class="col-span-2">
+                                        <span class="text-gray-500 dark:text-gray-400">Campaign:</span>
+                                        <span class="ml-1">{{ $selectedLead->utm_campaign }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->utm_content)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Content:</span>
+                                        <span class="ml-1">{{ $selectedLead->utm_content }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->utm_term)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400">Term:</span>
+                                        <span class="ml-1">{{ $selectedLead->utm_term }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Click IDs --}}
+                    @if($selectedLead->gclid || $selectedLead->fbclid || $selectedLead->msclkid)
+                        <div class="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-cursor-arrow-rays class="w-4 h-4 text-purple-600" />
+                                Ad Platform Click IDs
+                            </h3>
+                            <div class="space-y-2 text-sm">
+                                @if($selectedLead->gclid)
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">Google</span>
+                                        <span class="text-gray-600 truncate text-xs">{{ Str::limit($selectedLead->gclid, 30) }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->fbclid)
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-600 text-white">Facebook</span>
+                                        <span class="text-gray-600 truncate text-xs">{{ Str::limit($selectedLead->fbclid, 30) }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->msclkid)
+                                    <div class="flex items-center gap-2">
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-cyan-100 text-cyan-800">Microsoft</span>
+                                        <span class="text-gray-600 truncate text-xs">{{ Str::limit($selectedLead->msclkid, 30) }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Device & Session Info --}}
+                    <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                        <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                            <x-heroicon-m-device-phone-mobile class="w-4 h-4" />
+                            Device & Session
+                        </h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            @if($selectedLead->device_type)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Device:</span>
+                                    <span class="ml-1 capitalize">{{ $selectedLead->device_type }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->browser)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Browser:</span>
+                                    <span class="ml-1">{{ $selectedLead->browser }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->operating_system)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">OS:</span>
+                                    <span class="ml-1">{{ $selectedLead->operating_system }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->visit_count)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Visits:</span>
+                                    <span class="ml-1">{{ $selectedLead->visit_count }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->pages_viewed)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Pages Viewed:</span>
+                                    <span class="ml-1">{{ $selectedLead->pages_viewed }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->time_on_site_seconds)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">Time on Site:</span>
+                                    <span class="ml-1">{{ gmdate('i:s', $selectedLead->time_on_site_seconds) }}</span>
+                                </div>
+                            @endif
+                            @if($selectedLead->ip_address)
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400">IP:</span>
+                                    <span class="ml-1 text-xs">{{ $selectedLead->ip_address }}</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- First/Last Touch Attribution --}}
+                    @if($selectedLead->first_touch_source || $selectedLead->last_touch_source)
+                        <div class="bg-green-50 dark:bg-green-900/20 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-arrow-path class="w-4 h-4 text-green-600" />
+                                Attribution Journey
+                            </h3>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                @if($selectedLead->first_touch_source)
+                                    <div class="space-y-1">
+                                        <span class="text-xs font-medium text-gray-500 uppercase">First Touch</span>
+                                        <div class="text-gray-900 dark:text-white">{{ $selectedLead->first_touch_source }}</div>
+                                        @if($selectedLead->first_touch_medium)
+                                            <div class="text-xs text-gray-500">{{ $selectedLead->first_touch_medium }}</div>
+                                        @endif
+                                    </div>
+                                @endif
+                                @if($selectedLead->last_touch_source)
+                                    <div class="space-y-1">
+                                        <span class="text-xs font-medium text-gray-500 uppercase">Last Touch</span>
+                                        <div class="text-gray-900 dark:text-white">{{ $selectedLead->last_touch_source }}</div>
+                                        @if($selectedLead->last_touch_medium)
+                                            <div class="text-xs text-gray-500">{{ $selectedLead->last_touch_medium }}</div>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    {{-- Landing/Referrer --}}
+                    @if($selectedLead->landing_page || $selectedLead->referrer_url)
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4">
+                            <h3 class="font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                                <x-heroicon-m-globe-alt class="w-4 h-4" />
+                                Page Info
+                            </h3>
+                            <div class="space-y-2 text-sm">
+                                @if($selectedLead->landing_page)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400 block text-xs">Landing Page:</span>
+                                        <span class="text-xs text-gray-600 break-all">{{ $selectedLead->landing_page }}</span>
+                                    </div>
+                                @endif
+                                @if($selectedLead->referrer_url)
+                                    <div>
+                                        <span class="text-gray-500 dark:text-gray-400 block text-xs">Referrer:</span>
+                                        <span class="text-xs text-gray-600 break-all">{{ $selectedLead->referrer_url }}</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(!$selectedLead->utm_source && !$selectedLead->device_type && !$selectedLead->first_touch_source)
+                        <div class="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-8 text-center">
+                            <x-heroicon-o-chart-bar class="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                            <p class="text-gray-500">No tracking data available</p>
+                            <p class="text-xs text-gray-400 mt-1">This lead was submitted before tracking was enabled</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Actions (always visible) --}}
+            <div class="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <x-filament::button
+                    wire:click="convertLeadToProject({{ $selectedLead->id }})"
+                    color="success"
+                    icon="heroicon-m-arrow-right-circle"
+                    class="flex-1"
+                >
+                    Convert to Project
+                </x-filament::button>
+
+                <x-filament::button
+                    tag="a"
+                    href="{{ route('filament.admin.resources.leads.edit', $selectedLead->id) }}"
+                    color="gray"
+                    icon="heroicon-m-pencil"
+                >
+                    Edit
+                </x-filament::button>
+
+                <x-filament::button
+                    wire:click="updateLeadStatus({{ $selectedLead->id }}, 'disqualified')"
+                    x-on:click="$dispatch('close-modal', { id: 'kanban--lead-detail-modal' })"
+                    color="danger"
+                    icon="heroicon-m-x-circle"
+                    outlined
+                >
+                    Disqualify
+                </x-filament::button>
+            </div>
+        </div>
+    @else
+        <div class="text-center py-8 text-gray-500">
+            <x-heroicon-o-user-plus class="w-12 h-12 mx-auto mb-2 opacity-50" />
+            <p>Select a lead to view details</p>
+        </div>
+    @endif
+</x-filament::modal>
