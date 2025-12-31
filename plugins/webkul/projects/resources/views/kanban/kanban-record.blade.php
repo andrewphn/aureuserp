@@ -70,12 +70,18 @@
 
 <div
     id="{{ $record->getKey() }}"
+    data-card-id="{{ $record->getKey() }}"
+    data-due-date="{{ $record->desired_completion_date?->format('Y-m-d') ?? '' }}"
+    data-linear-feet="{{ $record->estimated_linear_feet ?? 0 }}"
+    data-days-left="{{ $daysLeft ?? 9999 }}"
+    data-sort-order="{{ $loop->index ?? 0 }}"
     x-data="{ showMenu: false, menuX: 0, menuY: 0 }"
     @contextmenu.prevent.stop="showMenu = true; menuX = $event.clientX; menuY = $event.clientY"
     @click.away="showMenu = false"
     @keydown.escape.window="showMenu = false"
-    wire:click="openQuickActions('{{ $record->getKey() }}')"
-    class="group cursor-pointer relative"
+    @click="if (handleCardClick('{{ $record->getKey() }}', $event)) { $wire.openQuickActions('{{ $record->getKey() }}') }"
+    :style="isSelected('{{ $record->getKey() }}') ? 'outline: 4px solid #3b82f6; outline-offset: 2px; box-shadow: 0 0 0 8px rgba(59, 130, 246, 0.2);' : ''"
+    class="group cursor-pointer relative rounded-lg transition-all"
 >
     {{-- Right-Click Context Menu (Component) --}}
     @include('webkul-project::kanban.components.context-menu', [

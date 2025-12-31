@@ -32,8 +32,101 @@
             toggleInbox() {
                 this.inboxOpen = !this.inboxOpen;
                 $wire.leadsInboxOpen = this.inboxOpen;
+            },
+
+            // Multi-select state
+            selectedCards: [],
+            lastSelectedId: null,
+
+            // Check if card is selected
+            isSelected(id) {
+                return this.selectedCards.includes(id);
+            },
+
+            // Handle card click with modifier keys
+            handleCardClick(id, event) {
+                const isCtrlOrCmd = event.ctrlKey || event.metaKey;
+                const isShift = event.shiftKey;
+
+                if (isCtrlOrCmd) {
+                    // Ctrl/Cmd+Click: Toggle individual selection
+                    if (this.isSelected(id)) {
+                        this.selectedCards = this.selectedCards.filter(i => i !== id);
+                    } else {
+                        this.selectedCards.push(id);
+                    }
+                    this.lastSelectedId = id;
+                } else if (isShift && this.lastSelectedId) {
+                    // Shift+Click: Range select
+                    const allCards = Array.from(document.querySelectorAll('[data-card-id]')).map(el => el.dataset.cardId);
+                    const startIdx = allCards.indexOf(this.lastSelectedId.toString());
+                    const endIdx = allCards.indexOf(id.toString());
+
+                    if (startIdx !== -1 && endIdx !== -1) {
+                        const start = Math.min(startIdx, endIdx);
+                        const end = Math.max(startIdx, endIdx);
+                        const rangeIds = allCards.slice(start, end + 1);
+
+                        // Add range to selection (union)
+                        rangeIds.forEach(rangeId => {
+                            if (!this.selectedCards.includes(rangeId)) {
+                                this.selectedCards.push(rangeId);
+                            }
+                        });
+                    }
+                } else {
+                    // Normal click: Clear selection, open quick actions
+                    this.selectedCards = [];
+                    this.lastSelectedId = id;
+                    return true; // Allow default action (open quick actions)
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                return false; // Prevent default action
+            },
+
+            // Clear all selections
+            clearSelection() {
+                this.selectedCards = [];
+                this.lastSelectedId = null;
+            },
+
+            // Select all visible cards
+            selectAll() {
+                this.selectedCards = Array.from(document.querySelectorAll('[data-card-id]')).map(el => el.dataset.cardId);
+            },
+
+            // Get selected count
+            get selectedCount() {
+                return this.selectedCards.length;
+            },
+
+            // Bulk actions
+            bulkChangeStage(stageId) {
+                if (this.selectedCards.length > 0) {
+                    $wire.bulkChangeStage(this.selectedCards, stageId);
+                    this.clearSelection();
+                }
+            },
+
+            bulkMarkBlocked() {
+                if (this.selectedCards.length > 0) {
+                    $wire.bulkMarkBlocked(this.selectedCards);
+                    this.clearSelection();
+                }
+            },
+
+            bulkUnblock() {
+                if (this.selectedCards.length > 0) {
+                    $wire.bulkUnblock(this.selectedCards);
+                    this.clearSelection();
+                }
             }
         }"
+        @keydown.escape.window="clearSelection()"
+        @keydown.a.window.prevent="if ($event.ctrlKey || $event.metaKey) selectAll()"
+        @click.self="clearSelection()"
         class="h-[calc(100vh-180px)]"
     >
         {{-- Single Flex Container for ALL columns (Inbox + Workflow Stages) --}}
@@ -54,6 +147,9 @@
                 @include(static::$scriptsView)
             </div>
         </div>
+
+        {{-- Bulk Actions Floating Bar (Multi-Select) --}}
+        @include('webkul-project::kanban.components.bulk-actions-bar')
     </div>
 
     {{-- Edit Record Modal (from package) --}}

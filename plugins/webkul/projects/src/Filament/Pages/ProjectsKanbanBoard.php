@@ -15,6 +15,7 @@ use Filament\Support\Enums\Width;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\On;
 use Mokhosh\FilamentKanban\Pages\KanbanBoard;
 use Webkul\Lead\Models\Lead;
 use Webkul\Lead\Services\LeadConversionService;
@@ -543,6 +544,123 @@ class ProjectsKanbanBoard extends KanbanBoard
     public function toggleLeadsInbox(): void
     {
         $this->leadsInboxOpen = !$this->leadsInboxOpen;
+    }
+
+    // =========================================
+    // BULK ACTIONS (Multi-Select)
+    // =========================================
+
+    public function bulkChangeStage(array $projectIds, int $stageId): void
+    {
+        if (empty($projectIds)) return;
+
+        $stage = ProjectStage::find($stageId);
+        if (!$stage) {
+            Notification::make()->title('Stage not found')->danger()->send();
+            return;
+        }
+
+        $count = Project::whereIn('id', $projectIds)->update([
+            'stage_id' => $stageId,
+            'stage_entered_at' => now(),
+        ]);
+
+        Notification::make()
+            ->title("{$count} projects moved")
+            ->body("Moved to {$stage->name}")
+            ->success()
+            ->send();
+    }
+
+    public function bulkMarkBlocked(array $projectIds): void
+    {
+        if (empty($projectIds)) return;
+
+        $count = 0;
+        foreach ($projectIds as $projectId) {
+            $project = Project::with('tasks')->find($projectId);
+            if (!$project) continue;
+
+            // Only block if not already blocked
+            if (!$this->blockerService()->isBlocked($project)) {
+                // Create a blocker task
+                Task::create([
+                    'project_id' => $project->id,
+                    'title' => 'Blocker - Needs attention',
+                    'state' => 'blocked',
+                    'creator_id' => auth()->id(),
+                ]);
+                $count++;
+            }
+        }
+
+        Notification::make()
+            ->title("{$count} projects marked as blocked")
+            ->warning()
+            ->send();
+    }
+
+    public function bulkUnblock(array $projectIds): void
+    {
+        if (empty($projectIds)) return;
+
+        $count = 0;
+        foreach ($projectIds as $projectId) {
+            $project = Project::with('tasks')->find($projectId);
+            if (!$project) continue;
+
+            // Unblock all blocked tasks for this project
+            $unblocked = $project->tasks()->where('state', 'blocked')->update(['state' => 'pending']);
+            if ($unblocked > 0) {
+                $count++;
+            }
+        }
+
+        Notification::make()
+            ->title("{$count} projects unblocked")
+            ->success()
+            ->send();
+    }
+
+    public function bulkDuplicate(array $projectIds): void
+    {
+        if (empty($projectIds)) return;
+
+        $count = 0;
+        foreach ($projectIds as $projectId) {
+            if ($this->actionService()->duplicateProject((int) $projectId)) {
+                $count++;
+            }
+        }
+
+        Notification::make()
+            ->title("{$count} projects duplicated")
+            ->success()
+            ->send();
+    }
+
+    #[On('bulk-status-changed')]
+    public function bulkStatusChanged(array $recordIds, int $status, array $fromOrderedIds, array $toOrderedIds): void
+    {
+        if (empty($recordIds)) return;
+
+        $stage = ProjectStage::find($status);
+        if (!$stage) {
+            Notification::make()->title('Stage not found')->danger()->send();
+            return;
+        }
+
+        // Update all projects to new stage
+        $count = Project::whereIn('id', $recordIds)->update([
+            'stage_id' => $status,
+            'stage_entered_at' => now(),
+        ]);
+
+        Notification::make()
+            ->title("{$count} projects moved")
+            ->body("Moved to {$stage->name}")
+            ->success()
+            ->send();
     }
 
     // =========================================
