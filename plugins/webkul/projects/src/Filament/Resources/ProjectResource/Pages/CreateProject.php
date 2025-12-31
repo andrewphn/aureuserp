@@ -1426,7 +1426,7 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Generate project number
+     * Generate project number (ensures uniqueness)
      */
     protected function generateProjectNumber(array $data): string
     {
@@ -1462,12 +1462,35 @@ class CreateProject extends Page implements HasForms
             $streetAbbr = $street;
         }
 
-        return sprintf(
+        // Generate base project number
+        $projectNumber = sprintf(
             '%s-%03d%s',
             $companyAcronym,
             $sequentialNumber,
             $streetAbbr ? "-{$streetAbbr}" : ''
         );
+
+        // Ensure uniqueness - if this number exists, increment until we find a unique one
+        $originalNumber = $projectNumber;
+        $attempt = 0;
+        while (Project::where('project_number', $projectNumber)->exists()) {
+            $attempt++;
+            $sequentialNumber++;
+            $projectNumber = sprintf(
+                '%s-%03d%s',
+                $companyAcronym,
+                $sequentialNumber,
+                $streetAbbr ? "-{$streetAbbr}" : ''
+            );
+            // Safety limit to prevent infinite loop
+            if ($attempt > 100) {
+                // Fallback: append timestamp
+                $projectNumber = $originalNumber . '-' . time();
+                break;
+            }
+        }
+
+        return $projectNumber;
     }
 
     /**
