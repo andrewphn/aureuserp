@@ -4,6 +4,7 @@ namespace Webkul\Project\Filament\Forms\Schemas\Components;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
+use Webkul\Support\Filament\Forms\Components\MeasurementInput;
 use Webkul\Support\Services\MeasurementFormatter;
 
 /**
@@ -54,8 +55,7 @@ class CabinetDimensionsFields
 
     /**
      * Get dimension input field with fractional support
-     * Allows entering "41 5/16", "41-5/16", "41.3125", etc. and converts to decimal
-     * Displays the original fraction in brackets after conversion
+     * Uses the MeasurementInput component which handles fractional input and display
      * 
      * @param string $name Field name
      * @param string $label Field label
@@ -63,7 +63,7 @@ class CabinetDimensionsFields
      * @param bool $required Whether field is required
      * @param float|null $minValue Minimum value
      * @param float|null $maxValue Maximum value
-     * @return TextInput
+     * @return MeasurementInput
      */
     public static function getDimensionInput(
         string $name,
@@ -72,22 +72,9 @@ class CabinetDimensionsFields
         bool $required = false,
         ?float $minValue = null,
         ?float $maxValue = null
-    ): TextInput {
-        $originalFieldName = $name . '_original_fraction';
-        
-        $field = TextInput::make($name)
-            ->label($label)
-            ->placeholder('e.g. 41 5/16 or 41-5/16')
-            ->helperText(function (callable $get) use ($name, $originalFieldName) {
-                $original = $get($originalFieldName);
-                if ($original) {
-                    // Show the fractional representation
-                    return $original;
-                }
-                // Default helper text
-                return 'Enter as decimal (41.3125) or fraction (41 5/16)';
-            })
-            ->live(debounce: 500);
+    ): MeasurementInput {
+        $field = MeasurementInput::make($name)
+            ->label($label);
 
         if ($default !== null) {
             $field->default($default);
@@ -97,38 +84,13 @@ class CabinetDimensionsFields
             $field->required();
         }
 
-        // Parse fractional input and convert to decimal
-        $field->afterStateUpdated(function ($state, callable $set, callable $get) use ($name, $originalFieldName) {
-            if ($state !== null && $state !== '') {
-                // Check if input looks like a fraction (contains / or space/dash before /)
-                $isFractionInput = preg_match('/[\d\s\-]+\/\d+/', (string) $state) || 
-                                   preg_match('/\d+\s+\d+\/\d+/', (string) $state) ||
-                                   preg_match('/\d+-\d+\/\d+/', (string) $state);
-                
-                $decimal = MeasurementFormatter::parse($state);
-                if ($decimal !== null) {
-                    // Round to 4 decimal places for precision
-                    $rounded = round($decimal, 4);
-                    
-                    // If input was a fraction, store the original fraction
-                    if ($isFractionInput && abs($rounded - (float) $state) > 0.0001) {
-                        $set($originalFieldName, $state);
-                        // Store the decimal value (this is what gets saved)
-                        $set($name, $rounded);
-                    } else {
-                        // User entered decimal directly - clear original fraction
-                        $set($originalFieldName, null);
-                        // Store the decimal value
-                        if (abs($rounded - (float) $state) > 0.0001) {
-                            $set($name, $rounded);
-                        }
-                    }
-                }
-            } else {
-                // Clear original when field is cleared
-                $set($originalFieldName, null);
-            }
-        });
+        if ($minValue !== null) {
+            $field->minValue($minValue);
+        }
+
+        if ($maxValue !== null) {
+            $field->maxValue($maxValue);
+        }
 
         return $field;
     }
