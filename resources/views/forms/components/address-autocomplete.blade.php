@@ -54,30 +54,20 @@
                 x-ref="hiddenInput"
                 {{ $applyStateBindingModifiers('wire:model') }}="{{ $getStatePath() }}"
             />
-            {{-- Address input with Google Places Autocomplete --}}
-            <input
-                x-ref="addressInput"
-                type="text"
-                x-model="displayValue"
+            {{-- Google Places Autocomplete Element (new web component API) --}}
+            <gmp-place-autocomplete
+                x-ref="placeAutocompleteElement"
+                api-key="{{ $apiKey }}"
                 @if($isDisabled()) disabled @endif
-                {!! $isRequired() ? 'required' : '' !!}
                 {!! $getPlaceholder() ? 'placeholder="' . e($getPlaceholder()) . '"' : 'placeholder="Start typing an address..."' !!}
                 {!! $getMaxLength() ? 'maxlength="' . $getMaxLength() . '"' : '' !!}
                 id="{{ $getId() }}"
-                @class([
-                    'fi-input block w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75',
-                    'placeholder:text-gray-400 focus:ring-0',
-                    'disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)]',
-                    'disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)]',
-                    'sm:text-sm sm:leading-6',
-                    'dark:text-white dark:placeholder:text-gray-500',
-                    'dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)]',
-                    'dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)]',
-                ])
-                autocomplete="off"
+                class="fi-input block w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6 dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)]"
+                x-model="displayValue"
+                @gmp-placeselect="onPlaceSelect($event)"
                 @input.debounce.300ms="onManualInput($event)"
                 @blur="onBlur()"
-            />
+            ></gmp-place-autocomplete>
         </div>
     </x-filament::input.wrapper>
 </x-dynamic-component>
@@ -155,7 +145,7 @@ document.addEventListener('alpine:init', () => {
         displayValue: config.initialValue || '',
 
         async init() {
-            const input = this.$refs.addressInput;
+            const element = this.$refs.placeAutocompleteElement;
 
             // Check if API key is missing
             if (!this.apiKey) {
@@ -164,8 +154,8 @@ document.addEventListener('alpine:init', () => {
             }
 
             // If currently disabled, set up observer to init when enabled
-            if (input && input.disabled) {
-                console.log('[AddressAutocomplete] Input is disabled, watching for enable...');
+            if (element && element.disabled) {
+                console.log('[AddressAutocomplete] Element is disabled, watching for enable...');
                 this.watchForEnable();
                 return;
             }
@@ -184,14 +174,14 @@ document.addEventListener('alpine:init', () => {
                 clearInterval(this.enableCheckInterval);
                 this.enableCheckInterval = null;
             }
-            // Unbind autocomplete (legacy API doesn't need DOM cleanup)
+            // Clean up web component
             this.placeAutocomplete = null;
             this.initialized = false;
         },
 
         watchForEnable() {
-            const input = this.$refs.addressInput;
-            if (!input) return;
+            const element = this.$refs.placeAutocompleteElement;
+            if (!element) return;
 
             // Clean up existing observer if any
             if (this.observer) {
@@ -203,22 +193,22 @@ document.addEventListener('alpine:init', () => {
             this.observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'attributes' && mutation.attributeName === 'disabled') {
-                        if (!input.disabled && !this.initialized) {
-                            console.log('[AddressAutocomplete] Input became enabled, initializing...');
+                        if (!element.disabled && !this.initialized) {
+                            console.log('[AddressAutocomplete] Element became enabled, initializing...');
                             this.doInit();
                         }
                     }
                 });
             });
 
-            this.observer.observe(input, { attributes: true });
+            this.observer.observe(element, { attributes: true });
 
             // Also check periodically in case mutation observer misses changes
             // (can happen with Livewire morphing)
             this.enableCheckInterval = setInterval(() => {
-                const currentInput = this.$refs.addressInput;
-                if (currentInput && !currentInput.disabled && !this.initialized) {
-                    console.log('[AddressAutocomplete] Enable check: input is now enabled, initializing...');
+                const currentElement = this.$refs.placeAutocompleteElement;
+                if (currentElement && !currentElement.disabled && !this.initialized) {
+                    console.log('[AddressAutocomplete] Enable check: element is now enabled, initializing...');
                     clearInterval(this.enableCheckInterval);
                     this.doInit();
                 }
@@ -236,8 +226,8 @@ document.addEventListener('alpine:init', () => {
             if (this.initialized) return;
 
             // Double-check not disabled
-            const input = this.$refs.addressInput;
-            if (input && input.disabled) {
+            const element = this.$refs.placeAutocompleteElement;
+            if (element && element.disabled) {
                 return;
             }
 
@@ -259,8 +249,8 @@ document.addEventListener('alpine:init', () => {
         },
 
         async loadGooglePlacesApi() {
-            // Check if Places library is already loaded
-            if (window.google?.maps?.places?.Autocomplete) {
+            // Check if Places library is already loaded (check for new API)
+            if (window.google?.maps?.places?.PlaceAutocompleteElement) {
                 console.log('[AddressAutocomplete] Google Places API already loaded');
                 return;
             }
@@ -312,59 +302,48 @@ document.addEventListener('alpine:init', () => {
         },
 
         async initializeAutocomplete() {
-            const input = this.$refs.addressInput;
-            if (!input) {
-                console.warn('[AddressAutocomplete] Input ref not found');
+            const element = this.$refs.placeAutocompleteElement;
+            if (!element) {
+                console.warn('[AddressAutocomplete] PlaceAutocompleteElement ref not found');
                 return;
             }
 
-            // Use the legacy Autocomplete API which attaches to existing input
-            console.log('[AddressAutocomplete] Using legacy Autocomplete API');
-            await this.initLegacyAutocomplete(input);
+            // Use the new PlaceAutocompleteElement web component API
+            console.log('[AddressAutocomplete] Using PlaceAutocompleteElement API');
+            await this.initPlaceAutocompleteElement(element);
         },
 
-        async initLegacyAutocomplete(input) {
-            // Build options for legacy Autocomplete
+        async initPlaceAutocompleteElement(element) {
+            // Wait for the custom element to be defined
+            await customElements.whenDefined('gmp-place-autocomplete');
+
+            // Configure the PlaceAutocompleteElement
             // Use 'street_address' instead of 'address' to limit results to actual street addresses
-            // This prevents showing cities, states, and other place types when typing
-            const options = {
+            const requestOptions = {
                 types: ['street_address'],
-                fields: ['address_components', 'formatted_address', 'geometry']
+                fields: ['addressComponents', 'formattedAddress', 'geometry']
             };
 
             // Add country restrictions if specified
             if (this.countries && this.countries.length > 0) {
-                options.componentRestrictions = { country: this.countries };
+                requestOptions.componentRestrictions = { country: this.countries };
             }
 
-            // Create the legacy Autocomplete attached to the input
-            this.placeAutocomplete = new google.maps.places.Autocomplete(input, options);
-
-            // Listen for place selection
-            this.placeAutocomplete.addListener('place_changed', () => {
-                const place = this.placeAutocomplete.getPlace();
-
-                if (!place.address_components) {
-                    console.warn('[AddressAutocomplete] No address components in place');
-                    return;
-                }
-
-                console.log('[AddressAutocomplete] Place selected:', place.formatted_address);
-                this.populateAddressFieldsLegacy(place);
-            });
-
-            // Prevent form submission on Enter key
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                }
-            });
-
-            console.log('[AddressAutocomplete] Legacy Autocomplete initialized');
+            // Set the request options
+            element.requestOptions = requestOptions;
+            
+            console.log('[AddressAutocomplete] PlaceAutocompleteElement initialized');
         },
 
-        async populateAddressFieldsLegacy(place) {
-            const components = this.extractAddressComponentsLegacy(place);
+        async onPlaceSelect(event) {
+            const place = event.detail.place;
+            
+            if (!place) {
+                console.warn('[AddressAutocomplete] No place in event detail');
+                return;
+            }
+
+            const components = this.extractAddressComponents(place);
             console.log('[AddressAutocomplete] Extracted components:', components);
 
             // Build the street address
@@ -437,7 +416,7 @@ document.addEventListener('alpine:init', () => {
             this.$wire.set(fullPath, value);
         },
 
-        extractAddressComponentsLegacy(place) {
+        extractAddressComponents(place) {
             const components = {
                 streetNumber: '',
                 route: '',
@@ -449,13 +428,13 @@ document.addEventListener('alpine:init', () => {
                 countryName: ''
             };
 
-            // Legacy API uses address_components with long_name/short_name
-            const addressComponents = place.address_components || [];
+            // New API uses addressComponents (same structure as legacy)
+            const addressComponents = place.addressComponents || place.address_components || [];
 
             addressComponents.forEach(component => {
                 const types = component.types || [];
-                const longName = component.long_name || '';
-                const shortName = component.short_name || '';
+                const longName = component.longText || component.long_name || '';
+                const shortName = component.shortText || component.short_name || '';
 
                 if (types.includes('street_number')) {
                     components.streetNumber = shortName;
