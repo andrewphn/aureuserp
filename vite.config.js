@@ -7,7 +7,6 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/js/login-debug.js', // Login debugging console logger
                 'resources/js/pdf-viewer.js',
                 'resources/js/pdf-thumbnail.js',
                 'resources/js/pdf-document-manager.js',

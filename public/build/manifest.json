@@ -52,12 +52,6 @@
       "_pdf-BnRl7pXp.js"
     ]
   },
-  "resources/js/login-debug.js": {
-    "file": "assets/login-debug-bJe4Sscl.js",
-    "name": "login-debug",
-    "src": "resources/js/login-debug.js",
-    "isEntry": true
-  },
   "resources/js/pdf-document-manager.js": {
     "file": "assets/pdf-document-manager-BLVVX3om.js",
     "name": "pdf-document-manager",
