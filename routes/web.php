@@ -3,10 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PdfPreviewController;
 
-if (! request()->getRequestUri() == '/login') {
-    Route::redirect('/login', '/admin/login')
-        ->name('login');
-}
+// Redirect /login to /admin/login (only register once, not conditionally)
+Route::redirect('/login', '/admin/login')
+    ->name('login');
 
 // PDF Preview Routes (server-side rendering via Nutrient Cloud API)
 Route::get('/api/pdf/{pdfId}/page/{pageNumber}/render', [PdfPreviewController::class, 'renderPage'])
