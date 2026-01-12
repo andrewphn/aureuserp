@@ -1,24 +1,12 @@
 @php
     $showUnitSelector = $getShowUnitSelector();
     $unitSelectorField = $getUnitSelectorField();
-    
-    // Convert state path to Alpine-compatible bracket notation for numeric indices
-    // e.g., "mountedActions.0.data.runs..." -> "mountedActions[0].data.runs..."
     $statePath = $getStatePath();
-    $alpineStatePath = preg_replace_callback(
-        '/\.(\d+)(?=\.|$)/',
-        fn($matches) => '[' . $matches[1] . ']',
-        $statePath
-    );
     
-    // Build unit selector field path (same as state path but with _unit suffix)
-    // For nested repeaters, we need the full path
-    $unitSelectorPath = $statePath . '_unit';
-    $alpineUnitSelectorPath = preg_replace_callback(
-        '/\.(\d+)(?=\.|$)/',
-        fn($matches) => '[' . $matches[1] . ']',
-        $unitSelectorPath
-    );
+    // Use $wire.$entangle for proper Livewire two-way binding
+    // This handles nested paths correctly, including mountedActions
+    $alpineStatePath = "\$wire.\$entangle('{$statePath}')";
+    $alpineUnitSelectorPath = "\$wire.\$entangle('{$statePath}_unit')";
 @endphp
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
