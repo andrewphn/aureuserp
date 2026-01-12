@@ -5,7 +5,8 @@
          @entangle('expanded'),
          @js($pricingTiers),
          @js($materialOptions),
-         @js($finishOptions)
+         @js($finishOptions),
+         @js(measurement_settings())
      )"
      x-init="init()">
 
@@ -216,11 +217,4 @@
     <x-filament-actions::modals />
 </div>
 
-@script
-<script>
-// Initialize MeasurementFormatter with settings from PHP
-if (window.MeasurementFormatter) {
-    window.MeasurementFormatter.init(@js(measurement_settings()));
-}
-</script>
-@endscript
+{{-- MeasurementFormatter is now initialized in the Alpine component's init() method --}}

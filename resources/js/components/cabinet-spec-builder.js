@@ -9,7 +9,7 @@
  */
 
 // Define the Alpine component factory function
-function createSpecAccordionBuilder(specData, expanded, pricingTiers, materialOptions, finishOptions) {
+function createSpecAccordionBuilder(specData, expanded, pricingTiers, materialOptions, finishOptions, measurementSettings) {
     return {
         specData: specData,
         expanded: expanded,
@@ -39,6 +39,11 @@ function createSpecAccordionBuilder(specData, expanded, pricingTiers, materialOp
         fieldOrder: ['name', 'length_inches', 'height_inches', 'depth_inches', 'quantity'],
 
         init() {
+            // Initialize MeasurementFormatter with settings from PHP
+            if (window.MeasurementFormatter && measurementSettings) {
+                window.MeasurementFormatter.init(measurementSettings);
+            }
+
             // Watch for specData changes from Livewire
             this.$watch('specData', (value) => {
                 // Re-select if current selections still valid
