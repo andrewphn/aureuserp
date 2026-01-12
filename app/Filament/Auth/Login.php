@@ -69,10 +69,15 @@ class Login extends BaseLogin
         
         Log::info('[LOGIN DEBUG] Authenticate called', [
             'email' => $data['email'] ?? null,
+            'has_password' => !empty($data['password'] ?? null),
+            'password_length' => isset($data['password']) ? strlen($data['password']) : 0,
             'remember' => $data['remember'] ?? false,
+            'form_data_keys' => array_keys($data),
             'session_id_before' => $sessionIdBefore,
             'url' => request()->url(),
             'ip' => request()->ip(),
+            'request_method' => request()->method(),
+            'all_request_data' => request()->all(),
         ]);
 
         try {
@@ -86,7 +91,16 @@ class Login extends BaseLogin
         }
 
         // Call parent authenticate but log the result
-        $result = parent::authenticate();
+        try {
+            $result = parent::authenticate();
+        } catch (\Exception $e) {
+            Log::error('[LOGIN DEBUG] Exception during authentication', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
+        }
         
         $sessionIdAfter = session()->getId();
         $user = Filament::auth()->user();
@@ -101,12 +115,19 @@ class Login extends BaseLogin
             'is_filament_user' => $user instanceof FilamentUser,
             'panel_id' => $panel->getId(),
             'can_access' => $user instanceof FilamentUser ? $user->canAccessPanel($panel) : false,
+            'redirect_url' => $result ? 'will redirect' : 'no redirect',
         ]);
 
         if ($result === null && $user) {
             Log::warning('[LOGIN DEBUG] Authenticate returned null but user exists', [
                 'user_id' => $user->id,
                 'user_email' => $user->email,
+            ]);
+        }
+
+        if ($result === null && !$user) {
+            Log::warning('[LOGIN DEBUG] Authenticate returned null and no user', [
+                'likely_reason' => 'authentication_failed_or_validation_error',
             ]);
         }
 
