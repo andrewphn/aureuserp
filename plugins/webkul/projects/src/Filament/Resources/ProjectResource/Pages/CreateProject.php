@@ -616,17 +616,31 @@ class CreateProject extends Page implements HasForms
                             ->dehydrated(),
                         Select::make('project_address.state_id')
                             ->label('State')
-                            ->options(function (callable $get) {
+                            ->searchable()
+                            ->getSearchResultsUsing(function (string $search, callable $get) {
                                 $countryId = $get('project_address.country_id');
                                 if (!$countryId) {
                                     // Default to US states if no country selected
                                     $usCountryId = \Webkul\Support\Models\Country::where('code', 'US')->first()?->id;
-                                    return \Webkul\Support\Models\State::where('country_id', $usCountryId)->pluck('name', 'id');
+                                    $query = \Webkul\Support\Models\State::where('country_id', $usCountryId);
+                                } else {
+                                    $query = \Webkul\Support\Models\State::where('country_id', $countryId);
                                 }
-                                return \Webkul\Support\Models\State::where('country_id', $countryId)->pluck('name', 'id');
+                                
+                                // Filter by search term and limit results to reduce clutter
+                                if ($search) {
+                                    $query->where('name', 'like', "%{$search}%");
+                                }
+                                
+                                return $query
+                                    ->orderBy('name')
+                                    ->limit(20) // Limit to 20 results max
+                                    ->pluck('name', 'id')
+                                    ->toArray();
                             })
-                            ->searchable()
-                            ->preload()
+                            ->getOptionLabelUsing(function ($value) {
+                                return \Webkul\Support\Models\State::find($value)?->name;
+                            })
                             ->disabled(fn (callable $get) => $get('use_customer_address'))
                             ->dehydrated(),
                         TextInput::make('project_address.zip')
@@ -2217,11 +2231,26 @@ class CreateProject extends Page implements HasForms
                     Grid::make(2)->schema([
                         Select::make('state_id')
                             ->label('State')
-                            ->options(fn () => \Webkul\Support\Models\State::where('country_id', 233)
-                                ->orderBy('name')
-                                ->pluck('name', 'id'))
                             ->searchable()
-                            ->preload(),
+                            ->getSearchResultsUsing(function (string $search, callable $get) {
+                                $countryId = $get('country_id') ?? 233; // Default to US (233)
+                                
+                                $query = \Webkul\Support\Models\State::where('country_id', $countryId);
+                                
+                                // Filter by search term and limit results to reduce clutter
+                                if ($search) {
+                                    $query->where('name', 'like', "%{$search}%");
+                                }
+                                
+                                return $query
+                                    ->orderBy('name')
+                                    ->limit(20) // Limit to 20 results max
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(function ($value) {
+                                return \Webkul\Support\Models\State::find($value)?->name;
+                            }),
 
                         Select::make('country_id')
                             ->label('Country')

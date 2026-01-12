@@ -22,17 +22,31 @@ class StateSeeder extends Seeder
         if (File::exists($path)) {
             $states = json_decode(File::get($path), true);
 
-            $formattedStates = collect($states)->map(function ($state) {
-                return [
-                    'country_id' => (int) $state['country_id'] ?? null,
-                    'name'       => (string) $state['name'] ?? null,
-                    'code'       => (string) $state['code'] ?? null,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ];
-            })->toArray();
+            foreach ($states as $state) {
+                $countryId = (int) ($state['country_id'] ?? null);
+                $name = (string) ($state['name'] ?? null);
+                $code = (string) ($state['code'] ?? null);
 
-            DB::table('states')->insert($formattedStates);
+                // Check if state already exists (by name + country_id or code + country_id)
+                $exists = DB::table('states')
+                    ->where('country_id', $countryId)
+                    ->where(function ($query) use ($name, $code) {
+                        $query->where('name', $name)
+                              ->orWhere('code', $code);
+                    })
+                    ->exists();
+
+                // Only insert if it doesn't exist
+                if (!$exists) {
+                    DB::table('states')->insert([
+                        'country_id' => $countryId,
+                        'name'       => $name,
+                        'code'       => $code,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
         }
     }
 }

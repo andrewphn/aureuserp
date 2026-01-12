@@ -325,8 +325,10 @@ document.addEventListener('alpine:init', () => {
 
         async initLegacyAutocomplete(input) {
             // Build options for legacy Autocomplete
+            // Use 'street_address' instead of 'address' to limit results to actual street addresses
+            // This prevents showing cities, states, and other place types when typing
             const options = {
-                types: ['address'],
+                types: ['street_address'],
                 fields: ['address_components', 'formatted_address', 'geometry']
             };
 

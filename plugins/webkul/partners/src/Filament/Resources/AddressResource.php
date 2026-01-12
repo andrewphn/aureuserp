@@ -125,6 +125,19 @@ class AddressResource extends Resource
                                 }),
                         ]);
                 })
+                ->createOptionUsing(function (array $data): int {
+                    // Check if state already exists with same name + country_id
+                    $existing = \Webkul\Support\Models\State::where('name', $data['name'])
+                        ->where('country_id', $data['country_id'])
+                        ->first();
+                    
+                    if ($existing) {
+                        return $existing->id;
+                    }
+                    
+                    // Create new state if it doesn't exist
+                    return \Webkul\Support\Models\State::create($data)->id;
+                })
                 ->searchable()
                 ->preload(),
         ])
