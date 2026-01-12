@@ -128,22 +128,29 @@ class RunFormSchema
         return Repeater::make('cabinets')
             ->label('Cabinets')
             ->schema([
-                Grid::make(5)->schema([
-                    CabinetCodeInput::getCabinetCodeInput(function (array $parsed, callable $set) {
-                        if ($parsed['type']) {
-                            $defaults = static::$typeDefaults[$parsed['type']] ?? [];
-                            $set('depth_inches', $defaults['depth_inches'] ?? 24);
-                            $set('height_inches', $defaults['height_inches'] ?? 34.5);
-                        }
-                    }),
+                // Stack fields vertically for better slideover layout
+                CabinetCodeInput::getCabinetCodeInput(function (array $parsed, callable $set) {
+                    if ($parsed['type']) {
+                        $defaults = static::$typeDefaults[$parsed['type']] ?? [];
+                        $set('depth_inches', $defaults['depth_inches'] ?? 24);
+                        $set('height_inches', $defaults['height_inches'] ?? 34.5);
+                    }
+                }),
+                
+                // Cabinet Type and Quantity on same row
+                Grid::make(2)->schema([
                     CabinetTypeSelect::getCabinetTypeSelect(),
-                    CabinetDimensionsFields::getDimensionInput('length_inches', 'Width', 24, true),
-                    CabinetDimensionsFields::getDimensionInput('height_inches', 'Height', 34.5, true),
                     TextInput::make('quantity')
                         ->label('Qty')
                         ->numeric()
                         ->default(1)
                         ->minValue(1),
+                ]),
+                
+                // Dimensions stacked vertically for better readability
+                Grid::make(2)->schema([
+                    CabinetDimensionsFields::getDimensionInput('length_inches', 'Width', 24, true),
+                    CabinetDimensionsFields::getDimensionInput('height_inches', 'Height', 34.5, true),
                 ]),
             ])
             ->defaultItems(1)
