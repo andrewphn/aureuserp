@@ -15,8 +15,16 @@ window.MeasurementFormatter = {
         inputStep: 0.125,
     },
 
-    // Conversion constant
+    // Conversion constants
     INCHES_TO_MM: 25.4,
+    INCHES_TO_CM: 2.54,
+    INCHES_TO_M: 0.0254,
+    INCHES_TO_FEET: 1 / 12,
+    FEET_TO_INCHES: 12,
+    SQ_INCHES_TO_SQ_FEET: 1 / 144,
+    SQ_FEET_TO_SQ_INCHES: 144,
+    CUBIC_INCHES_TO_CUBIC_FEET: 1 / 1728,
+    CUBIC_FEET_TO_CUBIC_INCHES: 1728,
 
     /**
      * Initialize with settings from PHP.
@@ -141,6 +149,113 @@ window.MeasurementFormatter = {
      */
     mmToInches(mm) {
         return mm / this.INCHES_TO_MM;
+    },
+
+    /**
+     * Convert inches to feet
+     */
+    inchesToFeet(inches) {
+        return inches * this.INCHES_TO_FEET;
+    },
+
+    /**
+     * Convert feet to inches
+     */
+    feetToInches(feet) {
+        return feet * this.FEET_TO_INCHES;
+    },
+
+    /**
+     * Convert inches to centimeters
+     */
+    inchesToCm(inches) {
+        return inches * this.INCHES_TO_CM;
+    },
+
+    /**
+     * Convert centimeters to inches
+     */
+    cmToInches(cm) {
+        return cm / this.INCHES_TO_CM;
+    },
+
+    /**
+     * Convert inches to meters
+     */
+    inchesToMeters(inches) {
+        return inches * this.INCHES_TO_M;
+    },
+
+    /**
+     * Convert meters to inches
+     */
+    metersToInches(meters) {
+        return meters / this.INCHES_TO_M;
+    },
+
+    /**
+     * Convert square inches to square feet
+     */
+    sqInchesToSqFeet(sqInches) {
+        return sqInches * this.SQ_INCHES_TO_SQ_FEET;
+    },
+
+    /**
+     * Convert square feet to square inches
+     */
+    sqFeetToSqInches(sqFeet) {
+        return sqFeet * this.SQ_FEET_TO_SQ_INCHES;
+    },
+
+    /**
+     * Calculate square feet from width and height (in inches)
+     */
+    calculateSquareFeet(widthInches, heightInches) {
+        const sqInches = widthInches * heightInches;
+        return this.sqInchesToSqFeet(sqInches);
+    },
+
+    /**
+     * Convert cubic inches to cubic feet
+     */
+    cubicInchesToCubicFeet(cubicInches) {
+        return cubicInches * this.CUBIC_INCHES_TO_CUBIC_FEET;
+    },
+
+    /**
+     * Convert cubic feet to cubic inches
+     */
+    cubicFeetToCubicInches(cubicFeet) {
+        return cubicFeet * this.CUBIC_FEET_TO_CUBIC_INCHES;
+    },
+
+    /**
+     * Calculate cubic feet from width, height, and depth (in inches)
+     */
+    calculateCubicFeet(widthInches, heightInches, depthInches) {
+        const cubicInches = widthInches * heightInches * depthInches;
+        return this.cubicInchesToCubicFeet(cubicInches);
+    },
+
+    /**
+     * Calculate linear feet from inches
+     */
+    calculateLinearFeet(inches) {
+        return this.inchesToFeet(inches);
+    },
+
+    /**
+     * Format square feet value
+     */
+    formatSquareFeet(sqFeet, precision = 2) {
+        return sqFeet.toFixed(precision) + ' sq ft';
+    },
+
+    /**
+     * Format cubic feet value
+     */
+    formatCubicFeet(cubicFeet, precision = 2) {
+        return cubicFeet.toFixed(precision) + ' cu ft';
     },
 
     /**

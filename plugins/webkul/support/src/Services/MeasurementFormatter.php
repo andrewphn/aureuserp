@@ -14,8 +14,16 @@ class MeasurementFormatter
 {
     protected ?MeasurementSettings $settings = null;
 
-    /** Conversion factor: 1 inch = 25.4 mm */
-    public const INCHES_TO_MM = 25.4;
+    /** Conversion factors */
+    public const INCHES_TO_MM = 25.4;        // 1 inch = 25.4 mm
+    public const INCHES_TO_CM = 2.54;        // 1 inch = 2.54 cm
+    public const INCHES_TO_M = 0.0254;       // 1 inch = 0.0254 m
+    public const INCHES_TO_FEET = 1 / 12;    // 1 inch = 1/12 feet
+    public const FEET_TO_INCHES = 12;        // 1 foot = 12 inches
+    public const SQ_INCHES_TO_SQ_FEET = 1 / 144; // 1 sq inch = 1/144 sq feet
+    public const SQ_FEET_TO_SQ_INCHES = 144;     // 1 sq foot = 144 sq inches
+    public const CUBIC_INCHES_TO_CUBIC_FEET = 1 / 1728; // 1 cu inch = 1/1728 cu feet
+    public const CUBIC_FEET_TO_CUBIC_INCHES = 1728;     // 1 cu foot = 1728 cu inches
 
     /**
      * Default settings if MeasurementSettings not yet configured.
@@ -192,6 +200,128 @@ class MeasurementFormatter
     public function mmToInches(float $mm): float
     {
         return $mm / self::INCHES_TO_MM;
+    }
+
+    /**
+     * Convert inches to feet
+     */
+    public function inchesToFeet(float $inches): float
+    {
+        return $inches * self::INCHES_TO_FEET;
+    }
+
+    /**
+     * Convert feet to inches
+     */
+    public function feetToInches(float $feet): float
+    {
+        return $feet * self::FEET_TO_INCHES;
+    }
+
+    /**
+     * Convert inches to centimeters
+     */
+    public function inchesToCm(float $inches): float
+    {
+        return $inches * self::INCHES_TO_CM;
+    }
+
+    /**
+     * Convert centimeters to inches
+     */
+    public function cmToInches(float $cm): float
+    {
+        return $cm / self::INCHES_TO_CM;
+    }
+
+    /**
+     * Convert inches to meters
+     */
+    public function inchesToMeters(float $inches): float
+    {
+        return $inches * self::INCHES_TO_M;
+    }
+
+    /**
+     * Convert meters to inches
+     */
+    public function metersToInches(float $meters): float
+    {
+        return $meters / self::INCHES_TO_M;
+    }
+
+    /**
+     * Convert square inches to square feet
+     */
+    public function sqInchesToSqFeet(float $sqInches): float
+    {
+        return $sqInches * self::SQ_INCHES_TO_SQ_FEET;
+    }
+
+    /**
+     * Convert square feet to square inches
+     */
+    public function sqFeetToSqInches(float $sqFeet): float
+    {
+        return $sqFeet * self::SQ_FEET_TO_SQ_INCHES;
+    }
+
+    /**
+     * Calculate square feet from width and height (in inches)
+     */
+    public function calculateSquareFeet(float $widthInches, float $heightInches): float
+    {
+        $sqInches = $widthInches * $heightInches;
+        return $this->sqInchesToSqFeet($sqInches);
+    }
+
+    /**
+     * Convert cubic inches to cubic feet
+     */
+    public function cubicInchesToCubicFeet(float $cubicInches): float
+    {
+        return $cubicInches * self::CUBIC_INCHES_TO_CUBIC_FEET;
+    }
+
+    /**
+     * Convert cubic feet to cubic inches
+     */
+    public function cubicFeetToCubicInches(float $cubicFeet): float
+    {
+        return $cubicFeet * self::CUBIC_FEET_TO_CUBIC_INCHES;
+    }
+
+    /**
+     * Calculate cubic feet from width, height, and depth (in inches)
+     */
+    public function calculateCubicFeet(float $widthInches, float $heightInches, float $depthInches): float
+    {
+        $cubicInches = $widthInches * $heightInches * $depthInches;
+        return $this->cubicInchesToCubicFeet($cubicInches);
+    }
+
+    /**
+     * Calculate linear feet from inches
+     */
+    public function calculateLinearFeet(float $inches): float
+    {
+        return $this->inchesToFeet($inches);
+    }
+
+    /**
+     * Format square feet value
+     */
+    public function formatSquareFeet(float $sqFeet, int $precision = 2): string
+    {
+        return number_format($sqFeet, $precision) . ' sq ft';
+    }
+
+    /**
+     * Format cubic feet value
+     */
+    public function formatCubicFeet(float $cubicFeet, int $precision = 2): string
+    {
+        return number_format($cubicFeet, $precision) . ' cu ft';
     }
 
     /**
