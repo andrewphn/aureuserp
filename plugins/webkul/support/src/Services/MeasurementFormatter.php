@@ -270,4 +270,108 @@ class MeasurementFormatter
     {
         return $b === 0 ? $a : $this->gcd($b, $a % $b);
     }
+
+    /**
+     * Parse fractional measurement input and convert to decimal inches
+     * 
+     * Supports woodworker-friendly formats:
+     * - "12.5" -> 12.5 (decimal)
+     * - "12 1/2" -> 12.5 (whole + fraction with space)
+     * - "12-1/2" -> 12.5 (whole + fraction with dash)
+     * - "41 5/16" -> 41.3125 (whole + fraction)
+     * - "41-5/16" -> 41.3125 (whole + fraction with dash)
+     * - "3/4" -> 0.75 (fraction only)
+     * - "1/2" -> 0.5
+     * - "2'" -> 24 (feet to inches)
+     * - "2' 6" -> 30 (feet and inches)
+     * - "2' 6 1/2" -> 30.5 (feet, inches, and fraction)
+     * 
+     * @param string|float|null $input The input measurement
+     * @return float|null The decimal value or null if invalid
+     */
+    public function parseFractionalMeasurement($input): ?float
+    {
+        if ($input === null || $input === '') {
+            return null;
+        }
+
+        // If already a number, return it
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        // Convert to string for parsing
+        $input = trim((string) $input);
+
+        // Handle feet notation first (e.g., "2'" or "2' 6" or "2' 6 1/2")
+        if (preg_match("/^(\d+)'(?:\s*(\d+(?:\s+\d+\/\d+|\-\d+\/\d+|\/\d+)?)?)?$/", $input, $feetMatches)) {
+            $feet = (int) $feetMatches[1];
+            $inches = 0.0;
+
+            if (!empty($feetMatches[2])) {
+                // Parse the inches part (which may include fractions)
+                $inches = $this->parseFractionalMeasurement($feetMatches[2]) ?? 0;
+            }
+
+            return ($feet * 12) + $inches;
+        }
+
+        // Pattern: Match "12 1/2" or "41 5/16" (whole number space fraction)
+        if (preg_match('/^(\d+)\s+(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $whole + ($numerator / $denominator);
+        }
+
+        // Format: "12-1/2" or "41-5/16" (whole number dash fraction)
+        if (preg_match('/^(\d+)-(\d+)\/(\d+)$/', $input, $matches)) {
+            $whole = (int) $matches[1];
+            $numerator = (int) $matches[2];
+            $denominator = (int) $matches[3];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $whole + ($numerator / $denominator);
+        }
+
+        // Format: "3/4" (just fraction)
+        if (preg_match('/^(\d+)\/(\d+)$/', $input, $matches)) {
+            $numerator = (int) $matches[1];
+            $denominator = (int) $matches[2];
+
+            if ($denominator == 0) {
+                return null;
+            }
+
+            return $numerator / $denominator;
+        }
+
+        // Try to parse as decimal
+        if (is_numeric($input)) {
+            return (float) $input;
+        }
+
+        return null;
+    }
+
+    /**
+     * Static helper for parsing fractional measurements
+     * Convenience method that creates a new instance and calls parseFractionalMeasurement
+     * 
+     * @param string|float|null $input The input measurement
+     * @return float|null The decimal value or null if invalid
+     */
+    public static function parse($input): ?float
+    {
+        $formatter = new self();
+        return $formatter->parseFractionalMeasurement($input);
+    }
 }

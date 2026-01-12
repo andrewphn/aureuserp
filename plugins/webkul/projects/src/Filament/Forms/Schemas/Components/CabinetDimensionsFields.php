@@ -4,7 +4,7 @@ namespace Webkul\Project\Filament\Forms\Schemas\Components;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Grid;
-use Webkul\Project\Services\CabinetParsingService;
+use Webkul\Support\Services\MeasurementFormatter;
 
 /**
  * Cabinet Dimensions Fields Molecule Component
@@ -90,7 +90,7 @@ class CabinetDimensionsFields
         // Parse fractional input and convert to decimal
         $field->afterStateUpdated(function ($state, callable $set) use ($name) {
             if ($state !== null && $state !== '') {
-                $decimal = CabinetParsingService::parseFractionalMeasurement($state);
+                $decimal = MeasurementFormatter::parse($state);
                 if ($decimal !== null) {
                     // Round to 4 decimal places for precision
                     $rounded = round($decimal, 4);
