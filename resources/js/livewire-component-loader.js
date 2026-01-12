@@ -6,29 +6,44 @@
 // Component registry for re-registration after Livewire updates
 window.componentRegistry = window.componentRegistry || {};
 
+// Track if we've already logged initial registration (reduce console noise)
+let hasLoggedInitialRegistration = false;
+
 // Register a component in the global registry
 function registerComponent(name, factory) {
     window.componentRegistry[name] = factory;
     window[name] = factory;
-    console.log(`[ComponentLoader] Registered component: ${name}`);
+    // Only log in development or on first registration
+    if (!hasLoggedInitialRegistration && (import.meta.env?.DEV || window.location.hostname.includes('localhost'))) {
+        console.log(`[ComponentLoader] Registered component: ${name}`);
+    }
 }
 
 // Re-register all components (called after Livewire updates)
+// Only re-registers window globals, not Alpine.data() components (those are handled separately)
 function reregisterComponents() {
     Object.keys(window.componentRegistry).forEach(name => {
         window[name] = window.componentRegistry[name];
     });
-    console.log('[ComponentLoader] Re-registered all components after Livewire update');
+    // Suppress repeated logs - only log once on initial load
+    if (!hasLoggedInitialRegistration) {
+        hasLoggedInitialRegistration = true;
+        if (import.meta.env?.DEV || window.location.hostname.includes('localhost')) {
+            console.log('[ComponentLoader] Components registered and ready');
+        }
+    }
 }
 
-// Listen for Livewire navigations and updates
+// Listen for Livewire navigations (page changes)
 document.addEventListener('livewire:navigated', reregisterComponents);
-document.addEventListener('livewire:load', reregisterComponents);
 
-// Also listen for Alpine re-initialization
-document.addEventListener('alpine:init', () => {
-    console.log('[ComponentLoader] Alpine re-initialized, ensuring components are available');
-    reregisterComponents();
+// Listen for Livewire initial load (only once)
+let livewireLoaded = false;
+document.addEventListener('livewire:load', () => {
+    if (!livewireLoaded) {
+        livewireLoaded = true;
+        reregisterComponents();
+    }
 });
 
 // Immediate registration for initial load
@@ -37,12 +52,6 @@ if (document.readyState === 'loading') {
 } else {
     reregisterComponents();
 }
-
-// Also ensure components are available during Alpine initialization
-document.addEventListener('alpine:before-init', () => {
-    console.log('[ComponentLoader] Alpine about to initialize, ensuring components are available');
-    reregisterComponents();
-});
 
 // Export for module usage
 export { registerComponent, reregisterComponents };

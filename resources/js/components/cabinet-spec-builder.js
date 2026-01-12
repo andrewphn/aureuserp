@@ -488,15 +488,27 @@ function createSpecAccordionBuilder(specData, expanded, pricingTiers, materialOp
 }
 
 // Register Alpine component when Alpine is available
-if (typeof Alpine !== 'undefined') {
-    Alpine.data('specAccordionBuilder', createSpecAccordionBuilder);
-    console.log('✅ Cabinet Spec Builder Alpine component registered');
-} else {
-    // Wait for Alpine to be ready
-    document.addEventListener('alpine:init', () => {
+// Prevent duplicate registrations by checking if already registered
+let specAccordionBuilderRegistered = false;
+
+function registerSpecAccordionBuilder() {
+    if (specAccordionBuilderRegistered) return;
+    
+    if (typeof Alpine !== 'undefined' && !Alpine.data('specAccordionBuilder')) {
         Alpine.data('specAccordionBuilder', createSpecAccordionBuilder);
-        console.log('✅ Cabinet Spec Builder Alpine component registered');
-    });
+        specAccordionBuilderRegistered = true;
+        // Only log in development
+        if (import.meta.env?.DEV || window.location.hostname.includes('localhost')) {
+            console.log('✅ Cabinet Spec Builder Alpine component registered');
+        }
+    }
+}
+
+if (typeof Alpine !== 'undefined') {
+    registerSpecAccordionBuilder();
+} else {
+    // Wait for Alpine to be ready (only register once)
+    document.addEventListener('alpine:init', registerSpecAccordionBuilder, { once: true });
 }
 
 // Export for ES module imports

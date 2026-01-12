@@ -40,4 +40,7 @@ reregisterComponents();
 
 // Standard Laravel + FilamentPHP app.js entry point
 // Components are now registered via FilamentPHP's AlpineComponent system and Livewire-aware loader
-console.log('[App.js] TCS Woodwork ERP - Alpine.js initialization complete with Livewire support');
+// Only log in development to reduce console noise
+if (import.meta.env?.DEV || window.location.hostname.includes('localhost')) {
+    console.log('[App.js] TCS Woodwork ERP - Alpine.js initialization complete with Livewire support');
+}

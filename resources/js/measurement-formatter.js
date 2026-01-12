@@ -311,8 +311,12 @@ window.MeasurementFormatter = {
     },
 };
 
-// Register Alpine.js magic helpers when Alpine initializes
+// Register Alpine.js magic helpers when Alpine initializes (only once)
+let measurementFormatterMagicRegistered = false;
 document.addEventListener('alpine:init', () => {
+    if (measurementFormatterMagicRegistered) return;
+    measurementFormatterMagicRegistered = true;
+    
     // Magic property: $dimension(inches) - format a single dimension
     Alpine.magic('dimension', () => {
         return (inches, showSymbol = null) => MeasurementFormatter.format(inches, showSymbol);
@@ -330,7 +334,7 @@ document.addEventListener('alpine:init', () => {
 
     // Magic property: $measurementSettings - get current settings
     Alpine.magic('measurementSettings', () => MeasurementFormatter.settings);
-});
+}, { once: true });
 
 // Global helper functions for non-Alpine contexts
 window.formatDimension = (inches, showSymbol = null) => MeasurementFormatter.format(inches, showSymbol);
