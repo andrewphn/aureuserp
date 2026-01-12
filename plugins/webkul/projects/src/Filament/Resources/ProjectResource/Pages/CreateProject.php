@@ -117,17 +117,26 @@ class CreateProject extends Page implements HasForms
 
     /**
      * Mount the wizard
-     * Accepts optional record parameter for edit mode
+     * Accepts optional record parameter for edit mode (can be int ID or Project model)
      */
-    public function mount(?int $record = null): void
+    public function mount(int|Project|null $record = null): void
     {
-        // If a record ID is provided, load the project for editing
+        // If a record is provided, load/use it for editing
         if ($record) {
-            $this->record = Project::with([
-                'rooms.locations.cabinetRuns.cabinets',
-                'addresses',
-                'tags',
-            ])->findOrFail($record);
+            // If it's already a Project model, use it; otherwise load by ID
+            if ($record instanceof Project) {
+                $this->record = $record->load([
+                    'rooms.locations.cabinetRuns.cabinets',
+                    'addresses',
+                    'tags',
+                ]);
+            } else {
+                $this->record = Project::with([
+                    'rooms.locations.cabinetRuns.cabinets',
+                    'addresses',
+                    'tags',
+                ])->findOrFail($record);
+            }
             $this->isEditMode = true;
 
             // Load project data into form
