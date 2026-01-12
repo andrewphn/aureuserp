@@ -45,7 +45,7 @@ class MeasurementInput extends TextInput
         }
 
         // Set default placeholder
-        $this->placeholder('e.g. 41 5/16 or 41-5/16');
+        $this->placeholder('e.g. 41 5/16, 41 yd, 41 mm, or 41"');
 
         // Set helper text to show formatted measurement
         $this->helperText(function (callable $get) {
@@ -53,21 +53,21 @@ class MeasurementInput extends TextInput
             $unit = $this->showUnitSelector ? ($get($this->unitSelectorField) ?? 'inches') : 'inches';
             
             if ($value === null || $value === '') {
-                return 'Enter as decimal (41.3125) or fraction (41 5/16). Defaults to inches.';
+                return 'Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm, 41 cm, 41 m). Defaults to inches.';
             }
 
             // Parse the input value (handles fractions, decimals, etc.)
             $parsed = MeasurementFormatter::parse($value);
             
             if ($parsed === null) {
-                return 'Enter as decimal (41.3125) or fraction (41 5/16).';
+                return 'Invalid format. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
             }
 
             // Convert input value to inches for formatting
             $inches = $this->convertToInches($parsed, $unit);
             
             if ($inches === null) {
-                return 'Enter as decimal (41.3125) or fraction (41 5/16).';
+                return 'Error converting unit. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
             }
 
             // Format the measurement in all formats for display
@@ -185,8 +185,11 @@ class MeasurementInput extends TextInput
     {
         return match ($unit) {
             'inches' => $value,
-            'feet' => $value * 12, // 1 foot = 12 inches
+            'feet' => $value * MeasurementFormatter::FEET_TO_INCHES, // 1 foot = 12 inches
+            'yards' => $value * MeasurementFormatter::YARDS_TO_INCHES, // 1 yard = 36 inches
             'millimeters' => $value / MeasurementFormatter::INCHES_TO_MM, // Convert mm to inches
+            'centimeters' => $value / MeasurementFormatter::INCHES_TO_CM, // Convert cm to inches
+            'meters' => $value / MeasurementFormatter::INCHES_TO_M, // Convert m to inches
             default => $value, // Default to inches
         };
     }

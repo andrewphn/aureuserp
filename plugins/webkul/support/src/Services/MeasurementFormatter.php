@@ -17,9 +17,11 @@ class MeasurementFormatter
     /** Conversion factors */
     public const INCHES_TO_MM = 25.4;        // 1 inch = 25.4 mm
     public const INCHES_TO_CM = 2.54;        // 1 inch = 2.54 cm
-    public const INCHES_TO_M = 0.0254;       // 1 inch = 0.0254 m
+    public const INCHES_TO_M = 0.0254;        // 1 inch = 0.0254 m
     public const INCHES_TO_FEET = 1 / 12;    // 1 inch = 1/12 feet
     public const FEET_TO_INCHES = 12;        // 1 foot = 12 inches
+    public const INCHES_TO_YARDS = 1 / 36;   // 1 inch = 1/36 yards
+    public const YARDS_TO_INCHES = 36;       // 1 yard = 36 inches
     public const SQ_INCHES_TO_SQ_FEET = 1 / 144; // 1 sq inch = 1/144 sq feet
     public const SQ_FEET_TO_SQ_INCHES = 144;     // 1 sq foot = 144 sq inches
     public const CUBIC_INCHES_TO_CUBIC_FEET = 1 / 1728; // 1 cu inch = 1/1728 cu feet
@@ -251,6 +253,22 @@ class MeasurementFormatter
     }
 
     /**
+     * Convert inches to yards
+     */
+    public function inchesToYards(float $inches): float
+    {
+        return $inches * self::INCHES_TO_YARDS;
+    }
+
+    /**
+     * Convert yards to inches
+     */
+    public function yardsToInches(float $yards): float
+    {
+        return $yards * self::YARDS_TO_INCHES;
+    }
+
+    /**
      * Convert square inches to square feet
      */
     public function sqInchesToSqFeet(float $sqInches): float
@@ -402,22 +420,28 @@ class MeasurementFormatter
     }
 
     /**
-     * Parse fractional measurement input and convert to decimal inches
+     * Parse measurement input with automatic unit detection and convert to decimal inches
      * 
-     * Supports woodworker-friendly formats:
-     * - "12.5" -> 12.5 (decimal)
-     * - "12 1/2" -> 12.5 (whole + fraction with space)
-     * - "12-1/2" -> 12.5 (whole + fraction with dash)
-     * - "41 5/16" -> 41.3125 (whole + fraction)
-     * - "41-5/16" -> 41.3125 (whole + fraction with dash)
-     * - "3/4" -> 0.75 (fraction only)
-     * - "1/2" -> 0.5
+     * Supports woodworker-friendly formats with automatic unit detection:
+     * - "12.5" -> 12.5 (decimal inches)
+     * - "12.5 in" or "12.5\"" -> 12.5 (inches)
+     * - "12.5 ft" or "12.5'" -> 150 (feet to inches)
+     * - "12.5 yd" -> 450 (yards to inches)
+     * - "12.5 mm" -> 0.492 (millimeters to inches)
+     * - "12.5 cm" -> 4.921 (centimeters to inches)
+     * - "12.5 m" -> 492.125 (meters to inches)
+     * - "12 1/2" -> 12.5 (whole + fraction with space, inches)
+     * - "12-1/2" -> 12.5 (whole + fraction with dash, inches)
+     * - "41 5/16" -> 41.3125 (whole + fraction, inches)
+     * - "41-5/16" -> 41.3125 (whole + fraction with dash, inches)
+     * - "3/4" -> 0.75 (fraction only, inches)
+     * - "1/2" -> 0.5 (fraction only, inches)
      * - "2'" -> 24 (feet to inches)
      * - "2' 6" -> 30 (feet and inches)
      * - "2' 6 1/2" -> 30.5 (feet, inches, and fraction)
      * 
      * @param string|float|null $input The input measurement
-     * @return float|null The decimal value or null if invalid
+     * @return float|null The decimal value in inches, or null if invalid
      */
     public function parseFractionalMeasurement($input): ?float
     {
@@ -433,8 +457,28 @@ class MeasurementFormatter
         // Convert to string for parsing
         $input = trim((string) $input);
 
-        // Handle feet notation first (e.g., "2'" or "2' 6" or "2' 6 1/2")
-        if (preg_match("/^(\d+)'(?:\s*(\d+(?:\s+\d+\/\d+|\-\d+\/\d+|\/\d+)?)?)?$/", $input, $feetMatches)) {
+        // Detect and extract unit suffix (yd, ft, in, ", mm, cm, m)
+        $unit = null;
+        $unitPattern = '/\s*(yd|yard|yards|ft|feet|foot|\'|in|inch|inches|"|mm|millimeter|millimeters|cm|centimeter|centimeters|m|meter|meters)\s*$/i';
+        if (preg_match($unitPattern, $input, $unitMatches)) {
+            $unitStr = strtolower(trim($unitMatches[1]));
+            $input = preg_replace($unitPattern, '', $input);
+            
+            // Normalize unit strings
+            $unit = match($unitStr) {
+                'yd', 'yard', 'yards' => 'yards',
+                'ft', 'feet', 'foot', "'" => 'feet',
+                'in', 'inch', 'inches', '"' => 'inches',
+                'mm', 'millimeter', 'millimeters' => 'millimeters',
+                'cm', 'centimeter', 'centimeters' => 'centimeters',
+                'm', 'meter', 'meters' => 'meters',
+                default => 'inches',
+            };
+        }
+
+        // Handle feet notation (e.g., "2'" or "2' 6" or "2' 6 1/2")
+        // This takes precedence if unit wasn't detected from suffix
+        if ($unit === null && preg_match("/^(\d+)'(?:\s*(\d+(?:\s+\d+\/\d+|\-\d+\/\d+|\/\d+)?)?)?$/", $input, $feetMatches)) {
             $feet = (int) $feetMatches[1];
             $inches = 0.0;
 
@@ -456,7 +500,21 @@ class MeasurementFormatter
                 return null;
             }
 
-            return $whole + ($numerator / $denominator);
+            $decimal = $whole + ($numerator / $denominator);
+            
+            // Convert to inches based on detected unit
+            if ($unit !== null && $unit !== 'inches') {
+                return match($unit) {
+                    'feet' => $this->feetToInches($decimal),
+                    'yards' => $this->yardsToInches($decimal),
+                    'millimeters' => $this->mmToInches($decimal),
+                    'centimeters' => $this->cmToInches($decimal),
+                    'meters' => $this->metersToInches($decimal),
+                    default => $decimal,
+                };
+            }
+            
+            return $decimal;
         }
 
         // Format: "12-1/2" or "41-5/16" (whole number dash fraction)
@@ -469,7 +527,21 @@ class MeasurementFormatter
                 return null;
             }
 
-            return $whole + ($numerator / $denominator);
+            $decimal = $whole + ($numerator / $denominator);
+            
+            // Convert to inches based on detected unit
+            if ($unit !== null && $unit !== 'inches') {
+                return match($unit) {
+                    'feet' => $this->feetToInches($decimal),
+                    'yards' => $this->yardsToInches($decimal),
+                    'millimeters' => $this->mmToInches($decimal),
+                    'centimeters' => $this->cmToInches($decimal),
+                    'meters' => $this->metersToInches($decimal),
+                    default => $decimal,
+                };
+            }
+            
+            return $decimal;
         }
 
         // Format: "3/4" (just fraction)
@@ -481,12 +553,40 @@ class MeasurementFormatter
                 return null;
             }
 
-            return $numerator / $denominator;
+            $decimal = $numerator / $denominator;
+            
+            // Convert to inches based on detected unit
+            if ($unit !== null && $unit !== 'inches') {
+                return match($unit) {
+                    'feet' => $this->feetToInches($decimal),
+                    'yards' => $this->yardsToInches($decimal),
+                    'millimeters' => $this->mmToInches($decimal),
+                    'centimeters' => $this->cmToInches($decimal),
+                    'meters' => $this->metersToInches($decimal),
+                    default => $decimal,
+                };
+            }
+            
+            return $decimal;
         }
 
         // Try to parse as decimal
         if (is_numeric($input)) {
-            return (float) $input;
+            $decimal = (float) $input;
+            
+            // Convert to inches based on detected unit
+            if ($unit !== null && $unit !== 'inches') {
+                return match($unit) {
+                    'feet' => $this->feetToInches($decimal),
+                    'yards' => $this->yardsToInches($decimal),
+                    'millimeters' => $this->mmToInches($decimal),
+                    'centimeters' => $this->cmToInches($decimal),
+                    'meters' => $this->metersToInches($decimal),
+                    default => $decimal,
+                };
+            }
+            
+            return $decimal;
         }
 
         return null;

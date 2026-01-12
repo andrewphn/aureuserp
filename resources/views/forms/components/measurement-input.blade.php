@@ -40,7 +40,10 @@
                     >
                         <option value="inches">in</option>
                         <option value="feet">ft</option>
+                        <option value="yards">yd</option>
                         <option value="millimeters">mm</option>
+                        <option value="centimeters">cm</option>
+                        <option value="meters">m</option>
                     </select>
                 </x-filament::input.wrapper>
             </div>

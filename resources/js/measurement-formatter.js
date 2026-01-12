@@ -21,6 +21,8 @@ window.MeasurementFormatter = {
     INCHES_TO_M: 0.0254,
     INCHES_TO_FEET: 1 / 12,
     FEET_TO_INCHES: 12,
+    INCHES_TO_YARDS: 1 / 36,
+    YARDS_TO_INCHES: 36,
     SQ_INCHES_TO_SQ_FEET: 1 / 144,
     SQ_FEET_TO_SQ_INCHES: 144,
     CUBIC_INCHES_TO_CUBIC_FEET: 1 / 1728,
@@ -191,6 +193,20 @@ window.MeasurementFormatter = {
      */
     metersToInches(meters) {
         return meters / this.INCHES_TO_M;
+    },
+
+    /**
+     * Convert inches to yards
+     */
+    inchesToYards(inches) {
+        return inches * this.INCHES_TO_YARDS;
+    },
+
+    /**
+     * Convert yards to inches
+     */
+    yardsToInches(yards) {
+        return yards * this.YARDS_TO_INCHES;
     },
 
     /**
