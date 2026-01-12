@@ -107,8 +107,9 @@ class MeasurementInput extends TextInput
             return implode(' | ', $parts);
         });
 
-        // Enable live updates with debounce
-        $this->live(debounce: 500);
+        // Enable live updates on blur/tab (not while typing)
+        // This allows user to type freely, then normalizes on blur
+        $this->live(onBlur: true);
 
         // Format state for display - use settings to determine display format (default: fractional)
         $this->formatStateUsing(function ($state, callable $get) {
@@ -167,39 +168,62 @@ class MeasurementInput extends TextInput
             return $inches !== null ? round($inches, 4) : null;
         });
 
-        // After state updated - normalize the display value according to settings
+        // After state updated (on blur/tab) - normalize the display value according to settings
         // This ensures the field shows the correct format (fraction/decimal/metric) while storing as decimal
+        // Normalizes fractional input (e.g., "41-5/16" → "41 5/16")
         $this->afterStateUpdated(function ($state, callable $set, callable $get) {
-            if ($state !== null && $state !== '') {
-                // Check if input looks like a fraction
-                $isFractionInput = is_string($state) && (
-                    str_contains($state, '/') || 
-                    preg_match('/\d+\s+\d+\/\d+/', $state) ||
-                    preg_match('/\d+-\d+\/\d+/', $state)
-                );
+            if ($state === null || $state === '') {
+                return;
+            }
 
-                if ($isFractionInput) {
-                    // User typed a fraction - keep it as-is in the field for display/editing
-                    // The dehydrateStateUsing will convert it to decimal for storage
-                    return; // Don't change the state, let it remain as the fraction string
-                } else {
-                    // User typed a decimal or other format - format according to settings
-                    if (is_numeric($state)) {
-                        $formatter = new MeasurementFormatter();
-                        $settings = $formatter->getSettings();
-                        
-                        // Use settings to determine display format (default to imperial_fraction)
-                        $displayFormat = $settings->display_unit ?? 'imperial_fraction';
-                        
-                        $formatted = match($displayFormat) {
-                            'imperial_fraction' => $formatter->formatFraction((float) $state, false),
-                            'imperial_decimal' => $formatter->formatDecimal((float) $state, false),
-                            'metric' => $formatter->formatMetric((float) $state, false),
-                            default => $formatter->formatFraction((float) $state, false), // Default to fraction
-                        };
-                        
-                        $set($this->getName(), $formatted);
-                    }
+            // Check if input looks like a fraction (with dash or space)
+            $isFractionInput = is_string($state) && (
+                str_contains($state, '/') || 
+                preg_match('/\d+\s+\d+\/\d+/', $state) ||
+                preg_match('/\d+-\d+\/\d+/', $state)
+            );
+
+            if ($isFractionInput) {
+                // User typed a fraction - normalize it by parsing to decimal then formatting back
+                // This converts "41-5/16" → 41.3125 → "41 5/16" (proper format with space)
+                $formatter = new MeasurementFormatter();
+                
+                // Parse the fraction to decimal
+                $decimal = MeasurementFormatter::parse($state);
+                
+                if ($decimal !== null) {
+                    // Get settings to determine display format (default to imperial_fraction)
+                    $settings = $formatter->getSettings();
+                    $displayFormat = $settings->display_unit ?? 'imperial_fraction';
+                    
+                    // Format back according to settings (this normalizes dash to space for fractions)
+                    $formatted = match($displayFormat) {
+                        'imperial_fraction' => $formatter->formatFraction($decimal, false), // false = no symbol
+                        'imperial_decimal' => $formatter->formatDecimal($decimal, false),
+                        'metric' => $formatter->formatMetric($decimal, false),
+                        default => $formatter->formatFraction($decimal, false), // Default to fraction
+                    };
+                    
+                    // Update the field with normalized format
+                    $set($this->getName(), $formatted);
+                }
+            } else {
+                // User typed a decimal or other format - format according to settings
+                if (is_numeric($state)) {
+                    $formatter = new MeasurementFormatter();
+                    $settings = $formatter->getSettings();
+                    
+                    // Use settings to determine display format (default to imperial_fraction)
+                    $displayFormat = $settings->display_unit ?? 'imperial_fraction';
+                    
+                    $formatted = match($displayFormat) {
+                        'imperial_fraction' => $formatter->formatFraction((float) $state, false),
+                        'imperial_decimal' => $formatter->formatDecimal((float) $state, false),
+                        'metric' => $formatter->formatMetric((float) $state, false),
+                        default => $formatter->formatFraction((float) $state, false), // Default to fraction
+                    };
+                    
+                    $set($this->getName(), $formatted);
                 }
             }
         });
