@@ -54,6 +54,7 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public $pdfDocument;
 
+    #[Url]
     public $currentPage = 1;
 
     protected $pdfPageIdCache = [];
