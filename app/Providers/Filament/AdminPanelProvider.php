@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->darkMode()
-            ->login()
+            ->login(\App\Filament\Auth\Login::class)
             ->favicon(asset('images/favicon.ico'))
             ->brandLogo(asset('images/logo-light.svg'))
             ->darkModeBrandLogo(asset('images/logo-dark.svg'))
