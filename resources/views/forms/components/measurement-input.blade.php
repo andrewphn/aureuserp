@@ -5,8 +5,8 @@
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
     @if($showUnitSelector)
-        <div class="flex gap-2 items-end">
-            <div class="flex-1">
+        <div class="flex gap-2 items-stretch">
+            <div class="flex-1 min-w-0">
                 <x-filament::input.wrapper
                     :disabled="$isDisabled()"
                     :prefix="$getPrefixLabel()"
@@ -29,14 +29,17 @@
                 </x-filament::input.wrapper>
             </div>
             
-            <div class="w-24">
+            <div class="flex-shrink-0 w-20">
                 <x-filament::input.wrapper
-                    :valid="true"
+                    :disabled="$isDisabled()"
+                    :valid="! $errors->has($unitSelectorField)"
                     class="fi-fo-select"
                 >
                     <select
-                        {{ $applyStateBindingModifiers('wire:model.live') }}="{{ $unitSelectorField }}"
-                        class="fi-input block w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6 dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)]"
+                        wire:model.live="{{ $unitSelectorField }}"
+                        @if($isDisabled()) disabled @endif
+                        class="fi-input block w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6 dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)] appearance-none bg-no-repeat bg-right pr-8 cursor-pointer"
+                        style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1em 1em;"
                     >
                         <option value="inches">in</option>
                         <option value="feet">ft</option>
