@@ -1,6 +1,15 @@
 @php
     $showUnitSelector = $getShowUnitSelector();
     $unitSelectorField = $getUnitSelectorField();
+    
+    // Convert state path to Alpine-compatible bracket notation for numeric indices
+    // e.g., "mountedActions.0.data.runs..." -> "mountedActions[0].data.runs..."
+    $statePath = $getStatePath();
+    $alpineStatePath = preg_replace_callback(
+        '/\.(\d+)(?=\.|$)/',
+        fn($matches) => '[' . $matches[1] . ']',
+        $statePath
+    );
 @endphp
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
@@ -22,7 +31,7 @@
                         :attributes="
                             \Filament\Support\prepare_inherited_attributes($attributes)
                                 ->merge([
-                                    'x-model' => $getStatePath(),
+                                    'x-model' => $alpineStatePath,
                                 ], escape: false)
                         "
                     />
@@ -72,7 +81,7 @@
                 :attributes="
                     \Filament\Support\prepare_inherited_attributes($attributes)
                         ->merge([
-                            'x-model' => $getStatePath(),
+                            'x-model' => $alpineStatePath,
                         ], escape: false)
                 "
             />
