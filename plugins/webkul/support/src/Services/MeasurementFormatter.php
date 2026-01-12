@@ -29,9 +29,10 @@ class MeasurementFormatter
 
     /**
      * Default settings if MeasurementSettings not yet configured.
+     * Default display_unit is 'imperial_fraction' to show fractional inches by default.
      */
     protected array $defaults = [
-        'display_unit' => 'imperial_decimal',
+        'display_unit' => 'imperial_fraction',
         'fraction_precision' => 8,
         'show_unit_symbol' => true,
         'metric_precision' => 0,
@@ -46,8 +47,9 @@ class MeasurementFormatter
 
     /**
      * Get settings instance with fallback to defaults.
+     * Public method to allow access from other classes.
      */
-    protected function getSettings(): MeasurementSettings
+    public function getSettings(): MeasurementSettings
     {
         if ($this->settings === null) {
             try {

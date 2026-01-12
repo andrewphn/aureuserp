@@ -48,6 +48,7 @@ class MeasurementInput extends TextInput
         $this->placeholder('e.g. 41 5/16, 41 yd, 41 mm, or 41"');
 
         // Set helper text to show formatted measurement and conversion
+        // Helper text always shows decimal form for clarity
         $this->helperText(function (callable $get) {
             $value = $get($this->getName());
             $unit = $this->showUnitSelector ? ($get($this->unitSelectorField) ?? 'inches') : 'inches';
@@ -74,40 +75,42 @@ class MeasurementInput extends TextInput
                 return 'Invalid format. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
             }
 
-            // Format the measurement in all formats for display
+            // Format the measurement for helper text - always show decimal prominently
             $formatter = new MeasurementFormatter();
-            $formatted = [];
+            $decimal = $formatter->formatDecimal($inches, true);
             
             // Show the conversion that took place if unit was detected or different from inches
+            $conversionText = '';
             if ($detectedUnit && $detectedUnit !== 'inches') {
                 $unitSymbol = $this->getUnitSymbol($detectedUnit);
-                $formatted[] = "{$numericValue} {$unitSymbol} → " . $formatter->formatDecimal($inches, true);
+                $conversionText = "{$numericValue} {$unitSymbol} → ";
             } elseif ($inputUnit !== 'inches' && $this->showUnitSelector) {
                 $unitSymbol = $this->getUnitSymbol($inputUnit);
-                $formatted[] = "{$numericValue} {$unitSymbol} → " . $formatter->formatDecimal($inches, true);
+                $conversionText = "{$numericValue} {$unitSymbol} → ";
             }
             
-            // Show fraction format
+            // Build helper text: show conversion (if any), then decimal, then other formats
+            $parts = [];
+            if ($conversionText) {
+                $parts[] = $conversionText . $decimal;
+            }
+            $parts[] = 'Stored as: ' . $decimal;
+            
+            // Show other formats for reference
             $fraction = $formatter->formatFraction($inches, true);
-            $formatted[] = $fraction;
-            
-            // Show decimal format (only if different from fraction)
-            $decimal = $formatter->formatDecimal($inches, true);
-            if ($decimal !== $fraction) {
-                $formatted[] = $decimal;
-            }
-            
-            // Show metric format
             $metric = $formatter->formatMetric($inches, true);
-            $formatted[] = $metric;
+            if ($decimal !== $fraction) {
+                $parts[] = $fraction;
+            }
+            $parts[] = $metric;
             
-            return 'Conversion: ' . implode(' = ', $formatted);
+            return implode(' | ', $parts);
         });
 
         // Enable live updates with debounce
         $this->live(debounce: 500);
 
-        // Format state for display - convert decimal to fraction when loading existing data
+        // Format state for display - use settings to determine display format (default: fractional)
         $this->formatStateUsing(function ($state, callable $get) {
             if ($state === null || $state === '') {
                 return null;
@@ -122,11 +125,20 @@ class MeasurementInput extends TextInput
                 return $state;
             }
 
-            // If it's a decimal number, convert to fraction for display
+            // If it's a decimal number, format according to settings (default: fractional)
             if (is_numeric($state)) {
                 $formatter = new MeasurementFormatter();
-                $fraction = $formatter->formatFraction((float) $state, false); // false = no symbol
-                return $fraction;
+                $settings = $formatter->getSettings();
+                
+                // Use settings to determine display format (default to imperial_fraction)
+                $displayFormat = $settings->display_unit ?? 'imperial_fraction';
+                
+                return match($displayFormat) {
+                    'imperial_fraction' => $formatter->formatFraction((float) $state, false), // false = no symbol
+                    'imperial_decimal' => $formatter->formatDecimal((float) $state, false),
+                    'metric' => $formatter->formatMetric((float) $state, false),
+                    default => $formatter->formatFraction((float) $state, false), // Default to fraction
+                };
             }
 
             return $state;
@@ -155,8 +167,8 @@ class MeasurementInput extends TextInput
             return $inches !== null ? round($inches, 4) : null;
         });
 
-        // After state updated - normalize the display value
-        // This ensures the field shows the fraction while storing the decimal
+        // After state updated - normalize the display value according to settings
+        // This ensures the field shows the correct format (fraction/decimal/metric) while storing as decimal
         $this->afterStateUpdated(function ($state, callable $set, callable $get) {
             if ($state !== null && $state !== '') {
                 // Check if input looks like a fraction
@@ -171,11 +183,22 @@ class MeasurementInput extends TextInput
                     // The dehydrateStateUsing will convert it to decimal for storage
                     return; // Don't change the state, let it remain as the fraction string
                 } else {
-                    // User typed a decimal - convert to fraction for display
+                    // User typed a decimal or other format - format according to settings
                     if (is_numeric($state)) {
                         $formatter = new MeasurementFormatter();
-                        $fraction = $formatter->formatFraction((float) $state, false);
-                        $set($this->getName(), $fraction);
+                        $settings = $formatter->getSettings();
+                        
+                        // Use settings to determine display format (default to imperial_fraction)
+                        $displayFormat = $settings->display_unit ?? 'imperial_fraction';
+                        
+                        $formatted = match($displayFormat) {
+                            'imperial_fraction' => $formatter->formatFraction((float) $state, false),
+                            'imperial_decimal' => $formatter->formatDecimal((float) $state, false),
+                            'metric' => $formatter->formatMetric((float) $state, false),
+                            default => $formatter->formatFraction((float) $state, false), // Default to fraction
+                        };
+                        
+                        $set($this->getName(), $formatted);
                     }
                 }
             }

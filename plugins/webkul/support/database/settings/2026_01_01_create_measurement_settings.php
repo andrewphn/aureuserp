@@ -10,7 +10,8 @@ return new class extends SettingsMigration
     public function up(): void
     {
         // Display unit: imperial_decimal, imperial_fraction, or metric
-        $this->migrator->add('measurement.display_unit', 'imperial_decimal');
+        // Default to imperial_fraction to show fractional inches by default
+        $this->migrator->add('measurement.display_unit', 'imperial_fraction');
 
         // Fraction precision: 2 (1/2), 4 (1/4), 8 (1/8), 16 (1/16)
         $this->migrator->add('measurement.fraction_precision', 8);
