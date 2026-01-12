@@ -106,14 +106,13 @@ class LocationFormSchema
 
         return Section::make('Location Details')
             ->schema([
-                Grid::make(2)->schema([
-                    $locationTypeSelect,
-                    TextInput::make('name')
-                        ->label('Location Name')
-                        ->required()
-                        ->default('Wall')
-                        ->helperText('Auto-generated. Edit if needed.'),
-                ]),
+                // Stack fields vertically for better slideover layout
+                $locationTypeSelect,
+                TextInput::make('name')
+                    ->label('Location Name')
+                    ->required()
+                    ->default('Wall')
+                    ->helperText('Auto-generated. Edit if needed.'),
             ]);
     }
 
