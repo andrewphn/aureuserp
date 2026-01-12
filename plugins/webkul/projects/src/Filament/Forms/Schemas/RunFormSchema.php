@@ -107,14 +107,13 @@ class RunFormSchema
 
         return Section::make('Run Details')
             ->schema([
-                Grid::make(2)->schema([
-                    $runTypeSelect,
-                    TextInput::make('name')
-                        ->label('Run Name')
-                        ->required()
-                        ->default('Base Run')
-                        ->helperText('Auto-generated. Edit if needed.'),
-                ]),
+                // Stack fields vertically for better slideover layout
+                $runTypeSelect,
+                TextInput::make('name')
+                    ->label('Run Name')
+                    ->required()
+                    ->default('Base Run')
+                    ->helperText('Auto-generated. Edit if needed.'),
             ]);
     }
 
