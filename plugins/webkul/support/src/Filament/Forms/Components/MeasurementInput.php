@@ -47,7 +47,7 @@ class MeasurementInput extends TextInput
         // Set default placeholder
         $this->placeholder('e.g. 41 5/16, 41 yd, 41 mm, or 41"');
 
-        // Set helper text to show formatted measurement
+        // Set helper text to show formatted measurement and conversion
         $this->helperText(function (callable $get) {
             $value = $get($this->getName());
             $unit = $this->showUnitSelector ? ($get($this->unitSelectorField) ?? 'inches') : 'inches';
@@ -56,29 +56,42 @@ class MeasurementInput extends TextInput
                 return 'Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm, 41 cm, 41 m). Defaults to inches.';
             }
 
-            // Parse the input value (handles fractions, decimals, etc.)
-            $parsed = MeasurementFormatter::parse($value);
+            // Detect unit from input string (before parsing)
+            $detectedUnit = $this->detectUnitFromInput($value);
+            $inputUnit = $detectedUnit ?? $unit;
             
-            if ($parsed === null) {
-                return 'Invalid format. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
+            // Extract numeric value from input (remove unit suffix for display)
+            $numericValue = $value;
+            if ($detectedUnit) {
+                $unitPattern = '/\s*(yd|yard|yards|ft|feet|foot|\'|in|inch|inches|"|mm|millimeter|millimeters|cm|centimeter|centimeters|m|meter|meters)\s*$/i';
+                $numericValue = preg_replace($unitPattern, '', $value);
             }
-
-            // Convert input value to inches for formatting
-            $inches = $this->convertToInches($parsed, $unit);
+            
+            // Parse the input value (handles fractions, decimals, etc.) - this converts to inches
+            $inches = MeasurementFormatter::parse($value);
             
             if ($inches === null) {
-                return 'Error converting unit. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
+                return 'Invalid format. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
             }
 
             // Format the measurement in all formats for display
             $formatter = new MeasurementFormatter();
             $formatted = [];
             
+            // Show the conversion that took place if unit was detected or different from inches
+            if ($detectedUnit && $detectedUnit !== 'inches') {
+                $unitSymbol = $this->getUnitSymbol($detectedUnit);
+                $formatted[] = "{$numericValue} {$unitSymbol} → " . $formatter->formatDecimal($inches, true);
+            } elseif ($inputUnit !== 'inches' && $this->showUnitSelector) {
+                $unitSymbol = $this->getUnitSymbol($inputUnit);
+                $formatted[] = "{$numericValue} {$unitSymbol} → " . $formatter->formatDecimal($inches, true);
+            }
+            
             // Show fraction format
             $fraction = $formatter->formatFraction($inches, true);
             $formatted[] = $fraction;
             
-            // Show decimal format
+            // Show decimal format (only if different from fraction)
             $decimal = $formatter->formatDecimal($inches, true);
             if ($decimal !== $fraction) {
                 $formatted[] = $decimal;
@@ -88,7 +101,7 @@ class MeasurementInput extends TextInput
             $metric = $formatter->formatMetric($inches, true);
             $formatted[] = $metric;
             
-            return 'Measurement: ' . implode(' = ', $formatted);
+            return 'Conversion: ' . implode(' = ', $formatted);
         });
 
         // Enable live updates with debounce
@@ -191,6 +204,55 @@ class MeasurementInput extends TextInput
             'centimeters' => $value / MeasurementFormatter::INCHES_TO_CM, // Convert cm to inches
             'meters' => $value / MeasurementFormatter::INCHES_TO_M, // Convert m to inches
             default => $value, // Default to inches
+        };
+    }
+
+    /**
+     * Detect unit from input string
+     *
+     * @param string $input The input string
+     * @return string|null The detected unit or null if not detected
+     */
+    protected function detectUnitFromInput(string $input): ?string
+    {
+        $input = trim($input);
+        
+        // Pattern to match unit suffixes
+        $unitPattern = '/\s*(yd|yard|yards|ft|feet|foot|\'|in|inch|inches|"|mm|millimeter|millimeters|cm|centimeter|centimeters|m|meter|meters)\s*$/i';
+        
+        if (preg_match($unitPattern, $input, $matches)) {
+            $unitStr = strtolower(trim($matches[1]));
+            
+            return match($unitStr) {
+                'yd', 'yard', 'yards' => 'yards',
+                'ft', 'feet', 'foot', "'" => 'feet',
+                'in', 'inch', 'inches', '"' => 'inches',
+                'mm', 'millimeter', 'millimeters' => 'millimeters',
+                'cm', 'centimeter', 'centimeters' => 'centimeters',
+                'm', 'meter', 'meters' => 'meters',
+                default => null,
+            };
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get unit symbol for display
+     *
+     * @param string $unit The unit name
+     * @return string The unit symbol
+     */
+    protected function getUnitSymbol(string $unit): string
+    {
+        return match($unit) {
+            'inches' => 'in',
+            'feet' => 'ft',
+            'yards' => 'yd',
+            'millimeters' => 'mm',
+            'centimeters' => 'cm',
+            'meters' => 'm',
+            default => 'in',
         };
     }
 
