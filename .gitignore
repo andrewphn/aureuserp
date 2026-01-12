@@ -46,6 +46,17 @@ node_modules/
 # OS specific
 .DS_Store
 
+# Video and audio files
+*.mov
+*.mp4
+*.mp3
+*.avi
+*.mkv
+*.webm
+public/images/*.mov
+public/images/*.mp4
+public/images/*.mp3
+
 # Task files
 # tasks.json
 # tasks/ 
