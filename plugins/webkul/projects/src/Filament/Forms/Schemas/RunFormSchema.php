@@ -137,18 +137,8 @@ class RunFormSchema
                         }
                     }),
                     CabinetTypeSelect::getCabinetTypeSelect(),
-                    TextInput::make('length_inches')
-                        ->label('Width')
-                        ->numeric()
-                        ->required()
-                        ->default(24)
-                        ->suffix('in'),
-                    TextInput::make('height_inches')
-                        ->label('Height')
-                        ->numeric()
-                        ->required()
-                        ->default(34.5)
-                        ->suffix('in'),
+                    CabinetDimensionsFields::getDimensionInput('length_inches', 'Width', 24, true),
+                    CabinetDimensionsFields::getDimensionInput('height_inches', 'Height', 34.5, true),
                     TextInput::make('quantity')
                         ->label('Qty')
                         ->numeric()

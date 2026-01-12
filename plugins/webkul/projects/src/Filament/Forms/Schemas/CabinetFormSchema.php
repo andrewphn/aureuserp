@@ -61,13 +61,7 @@ class CabinetFormSchema
                     CabinetTypeSelect::getCabinetTypeSelect(),
                 ]),
                 CabinetDimensionsFields::getSimplifiedDimensionsGrid(),
-                TextInput::make('depth_inches')
-                    ->label('Depth (in)')
-                    ->numeric()
-                    ->required()
-                    ->default(24)
-                    ->minValue(6)
-                    ->maxValue(36),
+                CabinetDimensionsFields::getDimensionInput('depth_inches', 'Depth (in)', 24, true, 6, 36),
             ]);
     }
 
