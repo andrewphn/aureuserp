@@ -1495,20 +1495,19 @@ class CreateProject extends Page implements HasForms
 
         $currentStep = $step ?? $this->draft?->current_step ?? 1;
 
-        if (!$this->draft) {
-            $this->draft = ProjectDraft::create([
+        // Use updateOrCreate to handle race conditions and Livewire re-hydration
+        // This prevents duplicate key errors when the draft property is null but a draft exists
+        $this->draft = ProjectDraft::updateOrCreate(
+            [
                 'user_id' => Auth::id(),
                 'session_id' => session()->getId(),
+            ],
+            [
                 'current_step' => $currentStep,
                 'form_data' => $data,
                 'expires_at' => now()->addDays(7),
-            ]);
-        } else {
-            $this->draft->update([
-                'current_step' => $currentStep,
-                'form_data' => $data,
-            ]);
-        }
+            ]
+        );
 
         // Update the last saved indicator
         $this->lastSavedAt = 'just now';
@@ -1521,19 +1520,18 @@ class CreateProject extends Page implements HasForms
     {
         $data = $this->form->getState();
 
-        if (!$this->draft) {
-            $this->draft = ProjectDraft::create([
+        // Use updateOrCreate to handle race conditions and Livewire re-hydration
+        $this->draft = ProjectDraft::updateOrCreate(
+            [
                 'user_id' => Auth::id(),
                 'session_id' => session()->getId(),
+            ],
+            [
                 'current_step' => 1,
                 'form_data' => $data,
                 'expires_at' => now()->addDays(7),
-            ]);
-        } else {
-            $this->draft->update([
-                'form_data' => $data,
-            ]);
-        }
+            ]
+        );
 
         Notification::make()
             ->success()
