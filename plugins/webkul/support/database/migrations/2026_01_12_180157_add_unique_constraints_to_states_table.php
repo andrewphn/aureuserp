@@ -31,7 +31,14 @@ return new class extends Migration
             $deleteIds = array_map('intval', array_slice($ids, 1)); // Delete the rest
             
             // Update foreign key references to point to the kept record
-            $tablesWithStateId = ['companies', 'partners', 'addresses', 'banks'];
+            // Include all tables that have state_id foreign keys
+            $tablesWithStateId = [
+                'companies',
+                'partners_partners',
+                'banks',
+                'employees_employees',
+                'projects_project_addresses',
+            ];
             
             foreach ($tablesWithStateId as $table) {
                 if (Schema::hasTable($table) && Schema::hasColumn($table, 'state_id')) {
@@ -39,6 +46,13 @@ return new class extends Migration
                         ->whereIn('state_id', $deleteIds)
                         ->update(['state_id' => $keepId]);
                 }
+            }
+            
+            // Also check for private_state_id in employees_employees
+            if (Schema::hasTable('employees_employees') && Schema::hasColumn('employees_employees', 'private_state_id')) {
+                DB::table('employees_employees')
+                    ->whereIn('private_state_id', $deleteIds)
+                    ->update(['private_state_id' => $keepId]);
             }
             
             // Delete duplicate states
