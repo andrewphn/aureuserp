@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Webkul\Product\Models\Product;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
@@ -119,6 +120,16 @@ class CabinetRun extends Model
     public function cabinets(): HasMany
     {
         return $this->hasMany(Cabinet::class, 'cabinet_run_id');
+    }
+
+    /**
+     * Faceframe (1:1 relationship)
+     *
+     * @return HasOne
+     */
+    public function faceframe(): HasOne
+    {
+        return $this->hasOne(Faceframe::class, 'cabinet_run_id');
     }
 
     /**
@@ -302,6 +313,16 @@ class CabinetRun extends Model
             'specialty' => 'Specialty',
             default => ucfirst($this->run_type ?? 'Unknown'),
         };
+    }
+
+    /**
+     * Check if faceframe exists for this run
+     */
+    public function getHasFaceframeAttribute(): bool
+    {
+        return $this->relationLoaded('faceframe')
+            ? $this->faceframe !== null
+            : $this->faceframe()->exists();
     }
 
     /**
