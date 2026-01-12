@@ -4,22 +4,34 @@
 {{-- - Auto-save indicator removes anxiety about losing work --}}
 {{-- - Back button hidden on Step 1 (no place to go back to) --}}
 {{-- - Outcome-focused labels --}}
+{{-- - Supports both Create and Edit modes via $isEditMode property --}}
+
+@php
+    $isEditMode = $this->isEditMode ?? false;
+@endphp
 
 <div class="wizard-footer flex items-center justify-between gap-4 py-4 px-2 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 rounded-b-xl -mx-6 -mb-6 mt-6">
-    {{-- Left Side: Auto-save Status --}}
+    {{-- Left Side: Auto-save Status (only shown in create mode) --}}
     <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <template x-if="$wire.lastSavedAt">
-            <span class="flex items-center gap-1.5">
-                <x-heroicon-o-cloud-arrow-up class="w-4 h-4 text-green-500" />
-                <span x-text="'Draft saved ' + $wire.lastSavedAt"></span>
+        @if(!$isEditMode)
+            <template x-if="$wire.lastSavedAt">
+                <span class="flex items-center gap-1.5">
+                    <x-heroicon-o-cloud-arrow-up class="w-4 h-4 text-green-500" />
+                    <span x-text="'Draft saved ' + $wire.lastSavedAt"></span>
+                </span>
+            </template>
+            <template x-if="!$wire.lastSavedAt">
+                <span class="flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
+                    <x-heroicon-o-cloud class="w-4 h-4" />
+                    <span>Auto-saving...</span>
+                </span>
+            </template>
+        @else
+            <span class="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                <x-heroicon-o-pencil-square class="w-4 h-4" />
+                <span>Editing Project</span>
             </span>
-        </template>
-        <template x-if="!$wire.lastSavedAt">
-            <span class="flex items-center gap-1.5 text-gray-400 dark:text-gray-500">
-                <x-heroicon-o-cloud class="w-4 h-4" />
-                <span>Auto-saving...</span>
-            </span>
-        </template>
+        @endif
     </div>
 
     {{-- Right Side: Navigation Buttons --}}
@@ -36,14 +48,14 @@
             </x-filament::button>
         </div>
 
-        {{-- Create Now Button (available on all steps except last) --}}
+        {{-- Save/Create Now Button (available on all steps except last) --}}
         <div x-show="! isLastStep()">
             <x-filament::button
                 type="submit"
                 color="success"
-                icon="heroicon-o-rocket-launch"
+                icon="{{ $isEditMode ? 'heroicon-o-check' : 'heroicon-o-rocket-launch' }}"
             >
-                Create Now
+                {{ $isEditMode ? 'Save Now' : 'Create Now' }}
             </x-filament::button>
         </div>
 
@@ -65,7 +77,7 @@
             </x-filament::button>
         </div>
 
-        {{-- Create Project Button (Final Step Only) --}}
+        {{-- Save/Create Project Button (Final Step Only) --}}
         <div x-show="isLastStep()">
             <x-filament::button
                 type="submit"
@@ -73,7 +85,7 @@
                 icon="heroicon-o-check-circle"
                 size="lg"
             >
-                Create Project
+                {{ $isEditMode ? 'Save Changes' : 'Create Project' }}
             </x-filament::button>
         </div>
     </div>

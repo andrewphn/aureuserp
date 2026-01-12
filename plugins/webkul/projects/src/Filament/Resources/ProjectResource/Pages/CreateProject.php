@@ -76,6 +76,16 @@ class CreateProject extends Page implements HasForms
     public ?ProjectDraft $draft = null;
 
     /**
+     * The project record when editing (null when creating)
+     */
+    public ?Project $record = null;
+
+    /**
+     * Whether we're in edit mode (vs create mode)
+     */
+    public bool $isEditMode = false;
+
+    /**
      * Last saved timestamp for auto-save indicator
      * Format: "X minutes ago" or "just now"
      */
@@ -94,11 +104,39 @@ class CreateProject extends Page implements HasForms
     public array $specBreadcrumbs = [];
 
     /**
-     * Mount the wizard
+     * Get the page title - dynamic based on create/edit mode
      */
-    public function mount(): void
+    public function getTitle(): string
     {
-        // Check for existing draft
+        if ($this->isEditMode && $this->record) {
+            return "Edit Project: {$this->record->name}";
+        }
+
+        return 'Create Project';
+    }
+
+    /**
+     * Mount the wizard
+     * Accepts optional record parameter for edit mode
+     */
+    public function mount(?int $record = null): void
+    {
+        // If a record ID is provided, load the project for editing
+        if ($record) {
+            $this->record = Project::with([
+                'rooms.locations.cabinetRuns.cabinets',
+                'addresses',
+                'tags',
+            ])->findOrFail($record);
+            $this->isEditMode = true;
+
+            // Load project data into form
+            $defaults = $this->getProjectDataForForm($this->record);
+            $this->form->fill($defaults);
+            return;
+        }
+
+        // Check for existing draft (only for new projects)
         $this->draft = ProjectDraft::where('user_id', Auth::id())
             ->active()
             ->latest()
@@ -127,10 +165,157 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Get header actions - includes "Create Now" button for early project creation
+     * Convert a Project model to form data array for editing
+     */
+    protected function getProjectDataForForm(Project $project): array
+    {
+        // Get project address
+        $address = $project->addresses()->where('is_primary', true)->first()
+                   ?? $project->addresses()->first();
+
+        // Build base form data from project attributes
+        $data = [
+            'company_id' => $project->company_id,
+            'branch_id' => $project->branch_id,
+            'partner_id' => $project->partner_id,
+            'project_type' => $project->project_type,
+            'project_number' => $project->project_number,
+            'stage_id' => $project->stage_id,
+            'visibility' => $project->visibility,
+            'allow_milestones' => $project->allow_milestones,
+            'allow_timesheets' => $project->allow_timesheets,
+            'user_id' => $project->user_id,
+            'estimated_linear_feet' => $project->estimated_linear_feet,
+            'allocated_hours' => $project->allocated_hours,
+            'budget_range' => $project->budget_range,
+            'complexity_score' => $project->complexity_score,
+            'desired_completion_date' => $project->desired_completion_date?->format('Y-m-d'),
+            'estimated_install_date' => $project->estimated_install_date?->format('Y-m-d'),
+            'description' => $project->description,
+            'lead_source' => $project->lead_source,
+            'tags' => $project->tags->pluck('id')->toArray(),
+            'pricing_mode' => 'quick', // Default to quick mode when editing
+        ];
+
+        // Add address data
+        if ($address) {
+            $data['use_customer_address'] = false;
+            $data['project_address'] = [
+                'street1' => $address->street1,
+                'street2' => $address->street2,
+                'city' => $address->city,
+                'zip' => $address->zip,
+                'country_id' => $address->country_id,
+                'state_id' => $address->state_id,
+            ];
+        } else {
+            $data['use_customer_address'] = true;
+        }
+
+        // Convert rooms/locations/runs/cabinets to spec_data format for detailed mode
+        if ($project->rooms->count() > 0) {
+            $data['spec_data'] = $this->convertProjectToSpecData($project);
+            $data['cabinet_spec_data'] = json_encode($data['spec_data']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Convert project hierarchy to spec_data format
+     */
+    protected function convertProjectToSpecData(Project $project): array
+    {
+        $specData = [];
+
+        foreach ($project->rooms as $room) {
+            $roomData = [
+                'id' => 'room_' . $room->id,
+                'type' => 'room',
+                'name' => $room->name,
+                'room_type' => $room->room_type,
+                'linear_feet' => $room->total_linear_feet ?? 0,
+                'cabinet_level' => (string) ($room->cabinet_level ?? '2'),
+                'material_category' => $room->material_category ?? 'stain_grade',
+                'finish_option' => $room->finish_option ?? 'unfinished',
+                'children' => [],
+            ];
+
+            foreach ($room->locations as $location) {
+                $locationData = [
+                    'id' => 'room_location_' . $location->id,
+                    'type' => 'room_location',
+                    'name' => $location->name,
+                    'location_type' => $location->location_type ?? 'wall',
+                    'linear_feet' => $location->total_linear_feet ?? 0,
+                    'cabinet_level' => (string) ($location->cabinet_level ?? $room->cabinet_level ?? '2'),
+                    'children' => [],
+                ];
+
+                foreach ($location->cabinetRuns as $run) {
+                    $runData = [
+                        'id' => 'cabinet_run_' . $run->id,
+                        'type' => 'cabinet_run',
+                        'name' => $run->name,
+                        'run_type' => $run->run_type ?? 'base',
+                        'linear_feet' => $run->total_linear_feet ?? 0,
+                        'children' => [],
+                    ];
+
+                    foreach ($run->cabinets as $cabinet) {
+                        $cabinetData = [
+                            'id' => 'cabinet_' . $cabinet->id,
+                            'type' => 'cabinet',
+                            'name' => $cabinet->cabinet_number ?? 'Cabinet',
+                            'code' => $cabinet->cabinet_number,
+                            'cabinet_type' => $cabinet->cabinet_type ?? 'base',
+                            'length_inches' => $cabinet->length_inches,
+                            'width_inches' => $cabinet->width_inches,
+                            'height_inches' => $cabinet->height_inches,
+                            'depth_inches' => $cabinet->depth_inches,
+                            'quantity' => $cabinet->quantity ?? 1,
+                            'linear_feet' => $cabinet->linear_feet ?? ($cabinet->length_inches / 12),
+                        ];
+
+                        $runData['children'][] = $cabinetData;
+                    }
+
+                    $locationData['children'][] = $runData;
+                }
+
+                $roomData['children'][] = $locationData;
+            }
+
+            $specData[] = $roomData;
+        }
+
+        return $specData;
+    }
+
+    /**
+     * Get header actions - different actions for create vs edit mode
      */
     protected function getHeaderActions(): array
     {
+        if ($this->isEditMode) {
+            return [
+                Action::make('saveChanges')
+                    ->label('Save Changes')
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->size('lg')
+                    ->action(fn () => $this->create())
+                    ->tooltip('Save changes to project'),
+
+                Action::make('cancelEdit')
+                    ->label('Cancel')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('gray')
+                    ->url(fn () => ProjectResource::getUrl('view', ['record' => $this->record->id]))
+                    ->tooltip('Discard changes and return to project'),
+            ];
+        }
+
         return [
             Action::make('createNow')
                 ->label('Create Now')
@@ -155,28 +340,28 @@ class CreateProject extends Page implements HasForms
                         ->description('Customer, address & project type')
                         ->icon('heroicon-o-bolt')
                         ->schema($this->getStep1Schema())
-                        ->afterValidation(fn () => $this->saveDraft(1)),
+                        ->afterValidation(fn () => $this->saveDraft(step: 1, validated: true)),
 
                     // Step 2: Scope & Budget (Required - Target 2-3 minutes)
                     Step::make('2. Scope & Budget')
                         ->description('Linear feet & budget estimate')
                         ->icon('heroicon-o-calculator')
                         ->schema($this->getStep2Schema())
-                        ->afterValidation(fn () => $this->saveDraft(2)),
+                        ->afterValidation(fn () => $this->saveDraft(step: 2, validated: true)),
 
                     // Step 3: Timeline (Skippable)
                     Step::make('3. Timeline')
                         ->description('Dates & project manager')
                         ->icon('heroicon-o-calendar')
                         ->schema($this->getStep3Schema())
-                        ->afterValidation(fn () => $this->saveDraft(3)),
+                        ->afterValidation(fn () => $this->saveDraft(step: 3, validated: true)),
 
                     // Step 4: Documents & Tags (Skippable)
                     Step::make('4. Documents')
                         ->description('PDFs, tags & notes')
                         ->icon('heroicon-o-document-text')
                         ->schema($this->getStep4Schema())
-                        ->afterValidation(fn () => $this->saveDraft(4)),
+                        ->afterValidation(fn () => $this->saveDraft(step: 4, validated: true)),
 
                     // Step 5: Review & Create
                     Step::make('5. Review & Create')
@@ -184,6 +369,7 @@ class CreateProject extends Page implements HasForms
                         ->icon('heroicon-o-check-circle')
                         ->schema($this->getStep5Schema()),
                 ])
+                    ->startOnStep($this->draft?->current_step ?? 1)
                     ->submitAction(view('webkul-project::filament.components.wizard-submit-button'))
                     ->columnSpanFull(),
             ])
@@ -990,11 +1176,17 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
-     * Create the project
+     * Create or update the project (handles both create and edit modes)
      */
     public function create(): void
     {
         $data = $this->form->getState();
+
+        // In edit mode, update the existing project
+        if ($this->isEditMode && $this->record) {
+            $this->updateProject($data);
+            return;
+        }
 
         // Generate project number if not set
         if (empty($data['project_number'])) {
@@ -1152,6 +1344,95 @@ class CreateProject extends Page implements HasForms
     }
 
     /**
+     * Update an existing project (edit mode)
+     */
+    protected function updateProject(array $data): void
+    {
+        $project = $this->record;
+
+        // Generate project name if not set
+        if (empty($data['name'])) {
+            $data['name'] = $this->generateProjectName($data);
+        }
+
+        // Calculate total linear feet based on pricing mode
+        $pricingMode = $data['pricing_mode'] ?? 'quick';
+
+        if ($pricingMode === 'rooms' && !empty($data['rooms'])) {
+            $totalLf = 0;
+            foreach ($data['rooms'] as $room) {
+                $totalLf += (float) ($room['linear_feet'] ?? 0);
+            }
+            $data['estimated_linear_feet'] = $totalLf;
+        }
+
+        // Update project attributes
+        $project->update([
+            'name' => $data['name'],
+            'project_type' => $data['project_type'] ?? $project->project_type,
+            'lead_source' => $data['lead_source'] ?? $project->lead_source,
+            'budget_range' => $data['budget_range'] ?? $project->budget_range,
+            'complexity_score' => $data['complexity_score'] ?? $project->complexity_score,
+            'description' => $data['description'] ?? $project->description,
+            'visibility' => $data['visibility'] ?? $project->visibility,
+            'start_date' => $data['start_date'] ?? $project->start_date,
+            'desired_completion_date' => $data['desired_completion_date'] ?? $project->desired_completion_date,
+            'allocated_hours' => $data['allocated_hours'] ?? $project->allocated_hours,
+            'estimated_linear_feet' => $data['estimated_linear_feet'] ?? $project->estimated_linear_feet,
+            'allow_timesheets' => $data['allow_timesheets'] ?? $project->allow_timesheets,
+            'allow_milestones' => $data['allow_milestones'] ?? $project->allow_milestones,
+            'stage_id' => $data['stage_id'] ?? $project->stage_id,
+            'partner_id' => $data['partner_id'] ?? $project->partner_id,
+            'use_customer_address' => $data['use_customer_address'] ?? $project->use_customer_address,
+            'company_id' => $data['company_id'] ?? $project->company_id,
+            'branch_id' => $data['branch_id'] ?? $project->branch_id,
+            'user_id' => $data['user_id'] ?? $project->user_id,
+        ]);
+
+        // Update or create project address
+        if (!empty($data['project_address']['street1']) || !empty($data['project_address']['city'])) {
+            $address = $project->addresses()->where('is_primary', true)->first()
+                       ?? $project->addresses()->first();
+
+            $addressData = [
+                'type' => 'project',
+                'street1' => $data['project_address']['street1'] ?? null,
+                'street2' => $data['project_address']['street2'] ?? null,
+                'city' => $data['project_address']['city'] ?? null,
+                'zip' => $data['project_address']['zip'] ?? null,
+                'country_id' => $data['project_address']['country_id'] ?? null,
+                'state_id' => $data['project_address']['state_id'] ?? null,
+                'is_primary' => true,
+            ];
+
+            if ($address) {
+                $address->update($addressData);
+            } else {
+                $project->addresses()->create($addressData);
+            }
+        }
+
+        // Sync tags
+        if (!empty($data['tags'])) {
+            $project->tags()->sync($data['tags']);
+            Cache::forget('project_tags_most_used');
+        }
+
+        // Handle new PDF uploads
+        if (!empty($data['architectural_pdfs'])) {
+            $this->handlePdfUploads($project, $data['architectural_pdfs']);
+        }
+
+        Notification::make()
+            ->success()
+            ->title('Project Updated')
+            ->body("Project '{$project->name}' has been updated successfully.")
+            ->send();
+
+        $this->redirect(ProjectResource::getUrl('view', ['record' => $project->id]));
+    }
+
+    /**
      * Handle spec data updates from CabinetSpecBuilder component
      */
     #[On('spec-data-updated')]
@@ -1187,10 +1468,22 @@ class CreateProject extends Page implements HasForms
     /**
      * Save draft at current step (called by auto-save and step navigation)
      * Public so it can be triggered from Alpine.js auto-save interval
+     *
+     * @param int|null $step The step number (only pass when step validation succeeded)
+     * @param bool $validated Whether to use validated state (triggers validation) or raw state
      */
-    public function saveDraft(?int $step = null): void
+    public function saveDraft(?int $step = null, bool $validated = false): void
     {
-        $data = $this->form->getState();
+        // Use getRawState() to avoid triggering validation during auto-save
+        // This prevents the wizard from exiting when fields with ->live() update
+        // Only use getState() when explicitly requested (e.g., after step validation)
+        try {
+            $data = $validated ? $this->form->getState() : $this->form->getRawState();
+        } catch (\Exception $e) {
+            // If we can't get form state, use the current data property
+            $data = $this->data ?? [];
+        }
+
         $currentStep = $step ?? $this->draft?->current_step ?? 1;
 
         if (!$this->draft) {
@@ -1357,18 +1650,16 @@ class CreateProject extends Page implements HasForms
 
                     $cabinetSort = 1;
                     foreach ($runData['children'] ?? [] as $cabinetData) {
-                        // Create Cabinet Specification
-                        $run->cabinetSpecifications()->create([
+                        // Create Cabinet
+                        $run->cabinets()->create([
                             'project_id' => $project->id,
                             'room_id' => $room->id,
-                            'room_location_id' => $location->id,
-                            'name' => $cabinetData['name'] ?? null,
-                            'cabinet_type' => $cabinetData['cabinet_type'] ?? 'base',
+                            'cabinet_number' => $cabinetData['name'] ?? $cabinetData['code'] ?? null,
                             'length_inches' => $cabinetData['length_inches'] ?? null,
                             'depth_inches' => $cabinetData['depth_inches'] ?? null,
                             'height_inches' => $cabinetData['height_inches'] ?? null,
                             'quantity' => $cabinetData['quantity'] ?? 1,
-                            'sort_order' => $cabinetSort++,
+                            'position_in_run' => $cabinetSort++,
                         ]);
                     }
                 }

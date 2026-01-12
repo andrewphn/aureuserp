@@ -1411,6 +1411,7 @@ class ProjectResource extends Resource
         return [
             'index'         => ListProjects::route('/'),
             'create'        => CreateProject::route('/create'),
+            'wizard-edit'   => CreateProject::route('/{record}/wizard-edit'),
             'edit'          => EditProject::route('/{record}/edit'),
             'view'          => ViewProject::route('/{record}'),
             'milestones'    => ManageMilestones::route('/{record}/milestones'),
