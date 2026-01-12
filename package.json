@@ -4,6 +4,7 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
+        "deploy": "./deploy.sh",
         "test": "vitest",
         "test:unit": "vitest run",
         "test:unit:watch": "vitest watch",
