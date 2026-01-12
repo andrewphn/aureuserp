@@ -8,43 +8,94 @@ use Webkul\Support\Services\MeasurementFormatter;
 /**
  * Measurement Input Component
  *
- * A Filament form component for entering measurements in inches.
- * Supports fractional input (e.g., "41 5/16", "41-5/16") and stores as decimal.
- * Defaults to inches.
+ * A Filament form component for entering measurements with unit conversion.
+ * Supports fractional input (e.g., "41 5/16", "41-5/16") and stores as decimal inches.
+ * Includes unit selector (inches, feet, millimeters) and shows formatted measurement in helper text.
  *
  * Usage:
  *   MeasurementInput::make('width_inches')
  *       ->label('Width')
  *       ->default(24)
  *       ->required()
+ *       ->withUnitSelector() // Enable unit selector
  *
  * The component will:
  * - Accept fractional input like "41 5/16" or "41-5/16"
  * - Allow the user to see and edit the fractional value in the input field
- * - Parse and convert to decimal (41.3125) for storage in the database
+ * - Support unit conversion (inches, feet, millimeters)
+ * - Parse and convert to decimal inches (41.3125) for storage in the database
  * - Display fractional values when loading existing data
+ * - Show formatted measurement in helper text
  */
 class MeasurementInput extends TextInput
 {
-    protected string $unit = 'inches';
-
-    protected bool $showUnitSymbol = true;
+    protected string $view = 'forms.components.measurement-input';
+    
+    protected string $inputUnit = 'inches'; // Unit for input (default: inches)
+    protected bool $showUnitSelector = false; // Whether to show unit selector
+    protected string $unitSelectorField = ''; // Field name for unit selector
 
     protected function setUp(): void
     {
         parent::setUp();
 
+        // Generate unit selector field name if not set
+        if (empty($this->unitSelectorField) && $this->showUnitSelector) {
+            $this->unitSelectorField = $this->getName() . '_unit';
+        }
+
         // Set default placeholder
         $this->placeholder('e.g. 41 5/16 or 41-5/16');
 
-        // Set default helper text
-        $this->helperText('Enter as decimal (41.3125) or fraction (41 5/16). Defaults to inches.');
+        // Set helper text to show formatted measurement
+        $this->helperText(function (callable $get) {
+            $value = $get($this->getName());
+            $unit = $this->showUnitSelector ? ($get($this->unitSelectorField) ?? 'inches') : 'inches';
+            
+            if ($value === null || $value === '') {
+                return 'Enter as decimal (41.3125) or fraction (41 5/16). Defaults to inches.';
+            }
+
+            // Parse the input value (handles fractions, decimals, etc.)
+            $parsed = MeasurementFormatter::parse($value);
+            
+            if ($parsed === null) {
+                return 'Enter as decimal (41.3125) or fraction (41 5/16).';
+            }
+
+            // Convert input value to inches for formatting
+            $inches = $this->convertToInches($parsed, $unit);
+            
+            if ($inches === null) {
+                return 'Enter as decimal (41.3125) or fraction (41 5/16).';
+            }
+
+            // Format the measurement in all formats for display
+            $formatter = new MeasurementFormatter();
+            $formatted = [];
+            
+            // Show fraction format
+            $fraction = $formatter->formatFraction($inches, true);
+            $formatted[] = $fraction;
+            
+            // Show decimal format
+            $decimal = $formatter->formatDecimal($inches, true);
+            if ($decimal !== $fraction) {
+                $formatted[] = $decimal;
+            }
+            
+            // Show metric format
+            $metric = $formatter->formatMetric($inches, true);
+            $formatted[] = $metric;
+            
+            return 'Measurement: ' . implode(' = ', $formatted);
+        });
 
         // Enable live updates with debounce
         $this->live(debounce: 500);
 
         // Format state for display - convert decimal to fraction when loading existing data
-        $this->formatStateUsing(function ($state) {
+        $this->formatStateUsing(function ($state, callable $get) {
             if ($state === null || $state === '') {
                 return null;
             }
@@ -68,22 +119,27 @@ class MeasurementInput extends TextInput
             return $state;
         });
 
-        // Dehydrate state (convert fraction to decimal for storage)
+        // Dehydrate state (convert to decimal inches for storage)
         // This is what gets saved to the database
-        $this->dehydrateStateUsing(function ($state) {
+        $this->dehydrateStateUsing(function ($state, callable $get) {
             if ($state === null || $state === '') {
                 return null;
             }
 
-            // If already a number, return it
-            if (is_numeric($state)) {
-                return round((float) $state, 4);
-            }
-
-            // Parse fractional input and convert to decimal
+            // Get the input unit
+            $unit = $this->showUnitSelector ? ($get($this->unitSelectorField) ?? 'inches') : 'inches';
+            
+            // Parse the input value
             $decimal = MeasurementFormatter::parse($state);
             
-            return $decimal !== null ? round($decimal, 4) : null;
+            if ($decimal === null) {
+                return null;
+            }
+
+            // Convert to inches for storage
+            $inches = $this->convertToInches($decimal, $unit);
+            
+            return $inches !== null ? round($inches, 4) : null;
         });
 
         // After state updated - normalize the display value
@@ -111,39 +167,66 @@ class MeasurementInput extends TextInput
                 }
             }
         });
+
+        // Add suffix if unit selector is not enabled
+        if (!$this->showUnitSelector) {
+            $this->suffix('in');
+        }
     }
 
     /**
-     * Set the unit (default: 'inches')
+     * Convert a value from the specified unit to inches
+     *
+     * @param float $value The value to convert
+     * @param string $unit The unit of the input value ('inches', 'feet', 'millimeters')
+     * @return float|null The value in inches, or null if invalid
      */
-    public function unit(string $unit): static
+    protected function convertToInches(float $value, string $unit): ?float
     {
-        $this->unit = $unit;
+        return match ($unit) {
+            'inches' => $value,
+            'feet' => $value * 12, // 1 foot = 12 inches
+            'millimeters' => $value / MeasurementFormatter::INCHES_TO_MM, // Convert mm to inches
+            default => $value, // Default to inches
+        };
+    }
+
+    /**
+     * Enable unit selector dropdown
+     */
+    public function withUnitSelector(bool $show = true): static
+    {
+        $this->showUnitSelector = $show;
+        
+        if ($show && empty($this->unitSelectorField)) {
+            $this->unitSelectorField = $this->getName() . '_unit';
+        }
+        
         return $this;
     }
 
     /**
-     * Show/hide unit symbol in display
+     * Set the default input unit
      */
-    public function showUnitSymbol(bool $show = true): static
+    public function defaultUnit(string $unit): static
     {
-        $this->showUnitSymbol = $show;
+        $this->inputUnit = $unit;
         return $this;
     }
 
     /**
-     * Get the unit
+     * Get whether unit selector is enabled
      */
-    public function getUnit(): string
+    public function getShowUnitSelector(): bool
     {
-        return $this->unit;
+        return $this->showUnitSelector;
     }
 
     /**
-     * Get whether to show unit symbol
+     * Get the unit selector field name
      */
-    public function getShowUnitSymbol(): bool
+    public function getUnitSelectorField(): string
     {
-        return $this->showUnitSymbol;
+        return $this->unitSelectorField;
     }
 }

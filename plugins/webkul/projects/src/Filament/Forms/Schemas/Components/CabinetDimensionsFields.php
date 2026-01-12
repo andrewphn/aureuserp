@@ -71,10 +71,15 @@ class CabinetDimensionsFields
         ?float $default = null,
         bool $required = false,
         ?float $minValue = null,
-        ?float $maxValue = null
+        ?float $maxValue = null,
+        bool $withUnitSelector = true
     ): MeasurementInput {
         $field = MeasurementInput::make($name)
             ->label($label);
+
+        if ($withUnitSelector) {
+            $field->withUnitSelector();
+        }
 
         if ($default !== null) {
             $field->default($default);
