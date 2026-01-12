@@ -113,7 +113,8 @@ class MeasurementInput extends TextInput
 
         // Format state for display - use settings to determine display format (default: fractional)
         $this->formatStateUsing(function ($state, callable $get) {
-            if ($state === null || $state === '') {
+            // Return null for empty states to show placeholder
+            if ($state === null || $state === '' || $state === 0) {
                 return null;
             }
 
@@ -127,7 +128,7 @@ class MeasurementInput extends TextInput
             }
 
             // If it's a decimal number, format according to settings (default: fractional)
-            if (is_numeric($state)) {
+            if (is_numeric($state) && (float) $state > 0) {
                 $formatter = new MeasurementFormatter();
                 $settings = $formatter->getSettings();
                 
@@ -142,7 +143,8 @@ class MeasurementInput extends TextInput
                 };
             }
 
-            return $state;
+            // Return null for invalid states to show placeholder
+            return null;
         });
 
         // Dehydrate state (convert to decimal inches for storage)

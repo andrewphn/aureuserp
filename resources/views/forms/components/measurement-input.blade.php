@@ -29,7 +29,7 @@
                 </x-filament::input.wrapper>
             </div>
             
-            <div class="flex-shrink-0 w-20">
+            <div class="flex-shrink-0 w-20 relative">
                 <x-filament::input.wrapper
                     :disabled="$isDisabled()"
                     :valid="! $errors->has($unitSelectorField)"
@@ -38,8 +38,7 @@
                     <select
                         wire:model.live="{{ $unitSelectorField }}"
                         @if($isDisabled()) disabled @endif
-                        class="fi-input block w-full border-none bg-transparent px-3 py-1.5 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6 dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)] appearance-none bg-no-repeat bg-right pr-8 cursor-pointer"
-                        style="background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22currentColor%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpolyline points=%226 9 12 15 18 9%22%3E%3C/polyline%3E%3C/svg%3E'); background-position: right 0.5rem center; background-size: 1em 1em;"
+                        class="fi-input block w-full border-none bg-transparent px-3 py-1.5 pr-8 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6 dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)] appearance-none cursor-pointer"
                     >
                         <option value="inches">in</option>
                         <option value="feet">ft</option>
@@ -48,6 +47,11 @@
                         <option value="centimeters">cm</option>
                         <option value="meters">m</option>
                     </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </div>
                 </x-filament::input.wrapper>
             </div>
         </div>
