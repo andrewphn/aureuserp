@@ -64,6 +64,11 @@ use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 use Webkul\Support\Package;
 
+// Project integration imports
+use Webkul\Project\Models\Project;
+use Webkul\Project\Models\CabinetMaterialsBom;
+use Webkul\Project\Models\HardwareRequirement;
+
 /**
  * Order Resource Filament resource
  *
@@ -786,6 +791,22 @@ class OrderResource extends Resource
                 TableColumn::make('price_subtotal')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.columns.amount'))
                     ->width(150),
+                // Project integration columns
+                TableColumn::make('project_id')
+                    ->label('Project')
+                    ->width(200)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(Package::isPluginInstalled('projects')),
+                TableColumn::make('bom_id')
+                    ->label('BOM Entry')
+                    ->width(200)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(Package::isPluginInstalled('projects')),
+                TableColumn::make('hardware_requirement_id')
+                    ->label('Hardware Req')
+                    ->width(200)
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(Package::isPluginInstalled('projects')),
             ])
             ->schema([
                 Select::make('product_id')
@@ -925,6 +946,90 @@ class OrderResource extends Resource
                         self::calculateLineTotals($set, $get);
                     })
                     ->disabled(fn ($record): bool => in_array($record?->order->state, [OrderState::DONE, OrderState::CANCELED])),
+
+                // Project integration fields
+                Select::make('project_id')
+                    ->label('Project')
+                    ->options(function (Get $get) {
+                        $partnerId = $get('../../partner_id');
+                        $query = Project::query()->orderBy('name');
+
+                        // Optionally filter by partner if set
+                        // Note: Projects may or may not have partner_id - show all for flexibility
+                        return $query->limit(50)->pluck('name', 'id');
+                    })
+                    ->getSearchResultsUsing(function (string $search, Get $get): array {
+                        return Project::query()
+                            ->where(function ($q) use ($search) {
+                                $q->where('name', 'like', "%{$search}%")
+                                  ->orWhere('project_number', 'like', "%{$search}%")
+                                  ->orWhere('draft_number', 'like', "%{$search}%");
+                            })
+                            ->limit(50)
+                            ->get()
+                            ->mapWithKeys(fn ($project) => [
+                                $project->id => $project->name ?: ($project->project_number ?: $project->draft_number)
+                            ])
+                            ->toArray();
+                    })
+                    ->getOptionLabelUsing(fn ($value): ?string => Project::find($value)?->name)
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(function (Set $set) {
+                        // Clear BOM and hardware when project changes
+                        $set('bom_id', null);
+                        $set('hardware_requirement_id', null);
+                    })
+                    ->visible(Package::isPluginInstalled('projects'))
+                    ->disabled(fn ($record): bool => in_array($record?->order->state, [OrderState::DONE, OrderState::CANCELED])),
+
+                Select::make('bom_id')
+                    ->label('BOM Entry')
+                    ->options(function (Get $get) {
+                        $projectId = $get('project_id');
+                        if (!$projectId) {
+                            return [];
+                        }
+
+                        return CabinetMaterialsBom::query()
+                            ->whereHas('cabinet', fn ($q) => $q->where('project_id', $projectId))
+                            ->where('material_allocated', false) // Only show unallocated
+                            ->get()
+                            ->mapWithKeys(fn ($bom) => [
+                                $bom->id => "{$bom->component_name} ({$bom->quantity} {$bom->unit_of_measure})"
+                            ])
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn (Get $get) => Package::isPluginInstalled('projects') && $get('project_id'))
+                    ->disabled(fn ($record): bool => in_array($record?->order->state, [OrderState::DONE, OrderState::CANCELED]))
+                    ->helperText('Link to specific BOM entry for auto-allocation'),
+
+                Select::make('hardware_requirement_id')
+                    ->label('Hardware Requirement')
+                    ->options(function (Get $get) {
+                        $projectId = $get('project_id');
+                        if (!$projectId) {
+                            return [];
+                        }
+
+                        return HardwareRequirement::query()
+                            ->whereHas('cabinet', fn ($q) => $q->where('project_id', $projectId))
+                            ->where('hardware_allocated', false) // Only show unallocated
+                            ->get()
+                            ->mapWithKeys(fn ($hw) => [
+                                $hw->id => "{$hw->hardware_type}: {$hw->model_number} (Qty: {$hw->quantity_required})"
+                            ])
+                            ->toArray();
+                    })
+                    ->searchable()
+                    ->preload()
+                    ->visible(fn (Get $get) => Package::isPluginInstalled('projects') && $get('project_id'))
+                    ->disabled(fn ($record): bool => in_array($record?->order->state, [OrderState::DONE, OrderState::CANCELED]))
+                    ->helperText('Link to specific hardware requirement for auto-allocation'),
+
                 TextInput::make('price_subtotal')
                     ->label(__('purchases::filament/admin/clusters/orders/resources/order.form.tabs.products.repeater.products.fields.amount'))
                     ->default(0)

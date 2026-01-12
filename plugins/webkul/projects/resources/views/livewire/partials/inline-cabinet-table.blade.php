@@ -40,7 +40,7 @@
         </span>
         @if($totalLF > 0)
             <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                {{ number_format($totalLF, 1) }} LF Total
+                {{ format_linear_feet($totalLF) }}
             </span>
         @endif
     </div>
@@ -85,39 +85,37 @@
                             </div>
                         </td>
                         <td class="px-2 py-2 text-gray-600 dark:text-gray-300 tabular-nums">
-                            {{ $cabinet['length_inches'] ?? '-' }}"
+                            {{ format_dimension($cabinet['length_inches'] ?? null) }}
                         </td>
                         <td class="px-2 py-2 text-gray-600 dark:text-gray-300 tabular-nums">
-                            {{ $cabinet['depth_inches'] ?? '-' }}"
+                            {{ format_dimension($cabinet['depth_inches'] ?? null) }}
                         </td>
                         <td class="px-2 py-2 text-gray-600 dark:text-gray-300 tabular-nums">
-                            {{ $cabinet['height_inches'] ?? '-' }}"
+                            {{ format_dimension($cabinet['height_inches'] ?? null) }}
                         </td>
                         <td class="px-2 py-2 text-center text-gray-600 dark:text-gray-300 tabular-nums">
                             {{ $cabinet['quantity'] ?? 1 }}
                         </td>
                         <td class="px-2 py-2 text-right font-semibold text-blue-600 dark:text-blue-400 tabular-nums">
-                            {{ number_format($cabinetLF, 1) }}
+                            {{ format_linear_feet($cabinetLF) }}
                         </td>
                         <td class="px-2 py-2">
                             <div class="opacity-0 group-hover:opacity-100 flex items-center gap-0.5 justify-end transition-opacity duration-100">
-                                <button
+                                <x-filament::icon-button
+                                    icon="heroicon-m-pencil"
+                                    color="gray"
+                                    size="xs"
+                                    tooltip="Edit details"
                                     wire:click="openEdit('{{ $cabinetPath }}')"
-                                    type="button"
-                                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                    title="Edit details"
-                                >
-                                    <x-heroicon-m-pencil class="w-3.5 h-3.5" />
-                                </button>
-                                <button
+                                />
+                                <x-filament::icon-button
+                                    icon="heroicon-m-trash"
+                                    color="danger"
+                                    size="xs"
+                                    tooltip="Delete"
                                     wire:click="delete('{{ $cabinetPath }}')"
                                     wire:confirm="Delete this cabinet?"
-                                    type="button"
-                                    class="p-1.5 text-gray-400 hover:text-danger-600 dark:hover:text-danger-400 rounded-md hover:bg-danger-50 dark:hover:bg-danger-900/20 transition-colors"
-                                    title="Delete"
-                                >
-                                    <x-heroicon-m-trash class="w-3.5 h-3.5" />
-                                </button>
+                                />
                             </div>
                         </td>
                     </tr>
@@ -199,27 +197,25 @@
                         </td>
                         <td class="px-2 py-2 text-right">
                             <span class="font-semibold text-primary-600 dark:text-primary-400 tabular-nums">
-                                {{ number_format($this->getNewCabinetLF(), 1) }}
+                                {{ format_linear_feet($this->getNewCabinetLF()) }}
                             </span>
                         </td>
                         <td class="px-2 py-2">
                             <div class="flex items-center gap-0.5 justify-end">
-                                <button
+                                <x-filament::icon-button
+                                    icon="heroicon-m-check"
+                                    color="success"
+                                    size="sm"
+                                    tooltip="Save (Enter)"
                                     wire:click="saveCabinet(false)"
-                                    type="button"
-                                    class="p-1.5 text-green-600 hover:text-green-700 dark:text-green-400 rounded-md hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors"
-                                    title="Save (Enter)"
-                                >
-                                    <x-heroicon-m-check class="w-4 h-4" />
-                                </button>
-                                <button
+                                />
+                                <x-filament::icon-button
+                                    icon="heroicon-m-x-mark"
+                                    color="gray"
+                                    size="sm"
+                                    tooltip="Cancel (Esc)"
                                     wire:click="cancelAdd"
-                                    type="button"
-                                    class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors"
-                                    title="Cancel (Esc)"
-                                >
-                                    <x-heroicon-m-x-mark class="w-4 h-4" />
-                                </button>
+                                />
                             </div>
                         </td>
                     </tr>
@@ -250,14 +246,14 @@
                 </span>
             </div>
         @else
-            <button
+            <x-filament::button
+                size="xs"
+                color="gray"
+                icon="heroicon-m-plus"
                 wire:click="startAddCabinet('{{ $runPath }}')"
-                type="button"
-                class="inline-flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-700 dark:text-primary-400 font-medium px-2.5 py-1.5 rounded-md hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-colors"
             >
-                <x-heroicon-m-plus class="w-3.5 h-3.5" />
                 Add Cabinet
-            </button>
+            </x-filament::button>
         @endif
 
         @if(!$isAddingHere && $hasCabinets)

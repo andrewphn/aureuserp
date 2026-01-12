@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasComplexityScore;
+use Webkul\Support\Traits\HasFormattedDimensions;
 
 /**
  * Cabinet Section Model
@@ -31,13 +33,15 @@ use Webkul\Product\Models\Product;
  * @property float|null $opening_height_inches
  * @property string|null $notes
  * @property int $sort_order
+ * @property float|null $complexity_score Weighted average complexity of components
+ * @property array|null $complexity_breakdown JSON breakdown of component complexities
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property \Carbon\Carbon|null $deleted_at
  */
 class CabinetSection extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasComplexityScore, HasFormattedDimensions;
 
     /**
      * The table associated with the model.

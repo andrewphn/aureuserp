@@ -5,12 +5,19 @@ namespace Webkul\Project;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Webkul\Project\Console\Commands\CleanupExpiredDrafts;
+use Webkul\Project\Console\Commands\RecalculateComplexityScores;
 use Webkul\Project\Events\ProjectStageChanged;
 use Webkul\Project\Listeners\HandleProjectStageChange;
+use Webkul\Project\Models\Door;
+use Webkul\Project\Models\Drawer;
 use Webkul\Project\Models\HardwareRequirement;
 use Webkul\Project\Models\Project;
+use Webkul\Project\Models\Pullout;
+use Webkul\Project\Models\Shelf;
+use Webkul\Project\Observers\ComplexityScoreObserver;
 use Webkul\Project\Observers\HardwareRequirementObserver;
 use Webkul\Project\Observers\ProjectObserver;
+use Webkul\Project\Services\ComplexityScoreService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveAuthService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveFolderService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
@@ -119,11 +126,13 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_11_29_180000_add_room_id_and_title_to_project_inspiration_images',
                 '2025_12_20_000001_create_projects_project_dependencies_table',
                 '2025_12_24_100000_add_google_drive_columns_to_projects_table',
+                '2025_12_31_175144_add_complexity_score_columns',
             ])
             ->runsMigrations()
             ->hasSettings([
                 '2024_12_16_094021_create_project_task_settings',
                 '2024_12_16_094021_create_project_time_settings',
+                '2025_12_31_create_complexity_scoring_settings',
             ])
             ->runsSettings()
             ->hasSeeder('Webkul\\Project\\Database\Seeders\\DatabaseSeeder')
@@ -161,6 +170,7 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('cabinet-ai-assistant', \Webkul\Project\Livewire\CabinetAiAssistant::class);
         \Livewire\Livewire::component('project-gantt-chart', \Webkul\Project\Livewire\ProjectGanttChart::class);
         \Livewire\Livewire::component('quick-actions-panel', \Webkul\Project\Livewire\QuickActions\QuickActionsPanel::class);
+        \Livewire\Livewire::component('project-data-cards', \Webkul\Project\Livewire\ProjectDataCards::class);
         // Old Livewire Kanban archived - now using mokhosh/filament-kanban package
         // \Livewire\Livewire::component('project-kanban-board', \Webkul\Project\Livewire\ProjectKanbanBoard::class);
 
@@ -172,6 +182,16 @@ class ProjectServiceProvider extends PackageServiceProvider
 
         // Register Project observer for Google Drive folder creation
         Project::observe(ProjectObserver::class);
+
+        // Register ComplexityScoreService as singleton
+        $this->app->singleton(ComplexityScoreService::class);
+
+        // Register complexity score observer for component models
+        // This triggers cascade recalculation when components are modified
+        Door::observe(ComplexityScoreObserver::class);
+        Drawer::observe(ComplexityScoreObserver::class);
+        Shelf::observe(ComplexityScoreObserver::class);
+        Pullout::observe(ComplexityScoreObserver::class);
 
         // Register Google Drive services as singletons
         $this->app->singleton(GoogleDriveAuthService::class);
@@ -198,6 +218,7 @@ class ProjectServiceProvider extends PackageServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CleanupExpiredDrafts::class,
+                RecalculateComplexityScores::class,
             ]);
 
             // Schedule the draft cleanup to run daily at 2:00 AM

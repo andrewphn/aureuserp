@@ -10,6 +10,7 @@ use Webkul\Product\Models\Product;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Support\Traits\HasComplexityScore;
 
 /**
  * Cabinet Run Eloquent model
@@ -38,7 +39,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  */
 class CabinetRun extends Model
 {
-    use SoftDeletes, HasChatter, HasLogActivity;
+    use SoftDeletes, HasChatter, HasLogActivity, HasComplexityScore;
 
     protected $table = 'projects_cabinet_runs';
 

@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasComplexityScore;
+use Webkul\Support\Traits\HasFormattedDimensions;
 use Webkul\Support\Traits\HasFullCode;
 
 /**
@@ -17,10 +19,12 @@ use Webkul\Support\Traits\HasFullCode;
  * Hierarchy: Project -> Room -> Location -> Cabinet Run -> Cabinet -> Section -> Pullout
  *
  * @property string|null $full_code Hierarchical code (e.g., TCS-0554-15WSANKATY-K1-SW-B1-C-PULL1)
+ * @property float|null $complexity_score Calculated complexity score
+ * @property array|null $complexity_breakdown JSON breakdown of complexity factors
  */
 class Pullout extends Model
 {
-    use HasFactory, SoftDeletes, HasFullCode;
+    use HasFactory, SoftDeletes, HasFullCode, HasComplexityScore, HasFormattedDimensions;
 
     protected $table = 'projects_pullouts';
 

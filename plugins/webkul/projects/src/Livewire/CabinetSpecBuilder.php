@@ -14,6 +14,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Repeater;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
 use Filament\Notifications\Notification;
@@ -1441,14 +1442,17 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
         $hwCount = count($content['children'] ?? []) + 1;
         $typeName = ucfirst(str_replace('_', ' ', $hardwareType));
 
+        // Get smart defaults for the hardware type
+        $smartDefaults = $this->getSmartHardwareDefaults($hardwareType, $content, $contentPath);
+
         $newHardware = [
             'id' => 'hardware_' . \Illuminate\Support\Str::random(8),
             'type' => 'hardware',
             'component_type' => $hardwareType,
-            'name' => "{$typeName} {$hwCount}",
-            'product_id' => null,
-            'sku' => null,
-            'unit_cost' => null,
+            'name' => $smartDefaults['name'] ?? "{$typeName} {$hwCount}",
+            'product_id' => $smartDefaults['product_id'] ?? null,
+            'sku' => $smartDefaults['sku'] ?? null,
+            'unit_cost' => $smartDefaults['unit_cost'] ?? null,
             'quantity' => $this->getDefaultHardwareQty($hardwareType, $content),
             'source' => 'user',
             'created_at' => now()->toIso8601String(),
@@ -1456,7 +1460,123 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
         ];
 
         $this->addChildToPath($contentPath, $newHardware);
+
+        // If we have a smart default with a product, auto-calculate dimensions
+        if ($smartDefaults['product_id'] && $hardwareType === 'slide') {
+            $product = \Webkul\Product\Models\Product::find($smartDefaults['product_id']);
+            if ($product) {
+                // Get the path to the newly added hardware
+                $updatedContent = $this->getNodeByPath($contentPath);
+                $hwIndex = count($updatedContent['children'] ?? []) - 1;
+                $hardwarePath = $contentPath . '.children.' . $hwIndex;
+                $this->autoCalculateDrawerDimensions($hardwarePath, $product);
+            }
+        }
+
         $this->dispatchSpecDataUpdate();
+    }
+
+    /**
+     * Get smart defaults for hardware based on type and context
+     */
+    protected function getSmartHardwareDefaults(string $hardwareType, array $content, string $contentPath): array
+    {
+        $defaults = [
+            'name' => null,
+            'product_id' => null,
+            'sku' => null,
+            'unit_cost' => null,
+        ];
+
+        // For slides, try to match a slide product based on depth
+        if ($hardwareType === 'slide') {
+            $depth = $this->getContentDepthForSlideMatching($content, $contentPath);
+            if ($depth) {
+                $slide = $this->findMatchingSlideProduct($depth);
+                if ($slide) {
+                    $defaults['name'] = $slide->name;
+                    $defaults['product_id'] = $slide->id;
+                    $defaults['sku'] = $slide->reference;
+                    $defaults['unit_cost'] = $slide->cost;
+                }
+            }
+        }
+
+        // For hinges, could match based on door overlay type, etc.
+        // (Future enhancement)
+
+        return $defaults;
+    }
+
+    /**
+     * Get the depth to use for slide matching
+     */
+    protected function getContentDepthForSlideMatching(array $content, string $contentPath): ?float
+    {
+        // First try the content's own depth
+        $depth = $content['depth_inches'] ?? null;
+        if ($depth && $depth > 0) {
+            return (float) $depth;
+        }
+
+        // Try to get from section (parent)
+        $pathParts = explode('.children.', $contentPath);
+        if (count($pathParts) >= 2) {
+            // Go up one level to section
+            array_pop($pathParts);
+            $sectionPath = implode('.children.', $pathParts);
+            $section = $this->getNodeByPath($sectionPath);
+            if ($section && isset($section['depth_inches']) && $section['depth_inches'] > 0) {
+                return (float) $section['depth_inches'];
+            }
+        }
+
+        // Try cabinet depth
+        if (count($pathParts) >= 2) {
+            array_pop($pathParts);
+            $cabinetPath = implode('.children.', $pathParts);
+            $cabinet = $this->getNodeByPath($cabinetPath);
+            if ($cabinet && isset($cabinet['depth_inches']) && $cabinet['depth_inches'] > 0) {
+                return (float) $cabinet['depth_inches'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find a matching slide product based on depth
+     */
+    protected function findMatchingSlideProduct(float $depth): ?\Webkul\Product\Models\Product
+    {
+        // Standard slide lengths in inches
+        $slideLengths = [21, 18, 15, 12];
+
+        // Find the best matching slide length (closest without exceeding depth)
+        $bestLength = null;
+        foreach ($slideLengths as $length) {
+            if ($length <= $depth) {
+                $bestLength = $length;
+                break; // Take the largest that fits
+            }
+        }
+
+        if (!$bestLength) {
+            $bestLength = 12; // Fallback to smallest
+        }
+
+        // Find a slide product matching this length
+        return \Webkul\Product\Models\Product::where(function ($query) use ($bestLength) {
+            $query->where('name', 'like', "%{$bestLength}%inch%")
+                  ->orWhere('name', 'like', "%{$bestLength}\"%")
+                  ->orWhere('name', 'like', "%{$bestLength} inch%");
+        })
+        ->where(function ($query) {
+            $query->where('name', 'like', '%slide%')
+                  ->orWhere('name', 'like', '%Slide%')
+                  ->orWhere('reference', 'like', '%SLIDE%');
+        })
+        ->first();
     }
 
     /**
@@ -1666,6 +1786,48 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
     }
 
     /**
+     * Search products with detailed info for hover popups
+     */
+    public function searchProductsDetailed(string $search, string $componentType): array
+    {
+        $searchTerms = match ($componentType) {
+            'hinge' => ['hinge'],
+            'slide' => ['slide', 'drawer slide', 'legrabox'],
+            'handle' => ['handle', 'pull'],
+            'knob' => ['knob'],
+            'soft_close' => ['soft close', 'blumotion'],
+            'shelf_pin' => ['shelf pin', 'shelf support'],
+            'bracket' => ['bracket'],
+            default => [],
+        };
+
+        $query = \Webkul\Product\Models\Product::query()
+            ->where(function ($q) use ($search, $searchTerms) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('reference', 'like', "%{$search}%");
+
+                foreach ($searchTerms as $term) {
+                    $q->orWhere('name', 'like', "%{$term}%");
+                }
+            })
+            ->limit(20);
+
+        return $query->get()
+            ->map(fn ($product) => [
+                'id' => $product->id,
+                'name' => $product->name,
+                'sku' => $product->reference,
+                'cost' => $product->cost ? '$' . number_format($product->cost, 2) : null,
+                'price' => $product->price ? '$' . number_format($product->price, 2) : null,
+                'description' => $product->description,
+                'image' => $product->image ?: ($product->getFirstMediaUrl('images') ?: null),
+                'supplier_sku' => $product->supplier_sku,
+                'weight' => $product->weight,
+            ])
+            ->toArray();
+    }
+
+    /**
      * Update a section field inline
      */
     public function updateSectionField(string $path, string $field, mixed $value): void
@@ -1725,6 +1887,7 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
 
     /**
      * Filament Action: Create a new Room
+     * Uses slideOver with nested repeaters for locations → runs → cabinets
      */
     public function createRoomAction(): Action
     {
@@ -1732,57 +1895,286 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             ->label('Add Room')
             ->icon('heroicon-m-plus')
             ->color('primary')
-            ->modalWidth('sm')  // Small modal - only 3 fields needed
-            ->closeModalByClickingAway()
+            ->slideOver()
+            ->modalWidth('2xl')
             ->form([
                 Section::make('Room Details')
                     ->schema([
-                        Select::make('room_type')
-                            ->label('Room Type')
-                            ->options($this->roomTypes)
-                            ->required()
-                            ->default('kitchen')
-                            ->live()
-                            ->afterStateUpdated(function ($state, callable $set) {
-                                // Auto-generate name based on type
-                                $autoName = $this->generateAutoRoomName($state);
-                                $set('name', $autoName);
-                            }),
-                        TextInput::make('name')
-                            ->label('Room Name')
-                            ->required()
-                            ->default(fn () => $this->generateAutoRoomName('kitchen'))
-                            ->helperText('Auto-generated from type. Edit if needed.')
-                            ->autofocus(),
-                        TextInput::make('floor_number')
-                            ->label('Floor Number')
-                            ->numeric()
-                            ->default(1)
-                            ->minValue(0)
-                            ->maxValue(99),
+                        Grid::make(3)->schema([
+                            Select::make('room_type')
+                                ->label('Room Type')
+                                ->options($this->roomTypes)
+                                ->required()
+                                ->default('kitchen')
+                                ->live()
+                                ->afterStateUpdated(function ($state, callable $set) {
+                                    $autoName = $this->generateAutoRoomName($state);
+                                    $set('name', $autoName);
+                                }),
+                            TextInput::make('name')
+                                ->label('Room Name')
+                                ->required()
+                                ->default(fn () => $this->generateAutoRoomName('kitchen'))
+                                ->helperText('Auto-generated. Edit if needed.'),
+                            TextInput::make('floor_number')
+                                ->label('Floor')
+                                ->numeric()
+                                ->default(1)
+                                ->minValue(0)
+                                ->maxValue(99),
+                        ]),
                     ]),
+
                 Section::make('Default Pricing')
                     ->description('These defaults will apply to all cabinets in this room unless overridden.')
                     ->schema([
-                        Select::make('cabinet_level')
-                            ->label('Cabinet Level')
-                            ->options($this->pricingTiers)
-                            ->default('3'),
-                        Select::make('material_category')
-                            ->label('Material Category')
-                            ->options($this->materialOptions)
-                            ->default('stain_grade'),
-                        Select::make('finish_option')
-                            ->label('Finish Option')
-                            ->options($this->finishOptions)
-                            ->default('unfinished'),
+                        Grid::make(3)->schema([
+                            Select::make('cabinet_level')
+                                ->label('Cabinet Level')
+                                ->options($this->pricingTiers)
+                                ->default('3'),
+                            Select::make('material_category')
+                                ->label('Material')
+                                ->options($this->materialOptions)
+                                ->default('stain_grade'),
+                            Select::make('finish_option')
+                                ->label('Finish')
+                                ->options($this->finishOptions)
+                                ->default('unfinished'),
+                        ]),
                     ])
                     ->collapsible()
                     ->collapsed(),
+
+                Section::make('Locations')
+                    ->description('Add locations, runs, and cabinets to this room')
+                    ->schema([
+                        Repeater::make('locations')
+                            ->label('')
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    Select::make('location_type')
+                                        ->label('Location Type')
+                                        ->options($this->locationTypes)
+                                        ->required()
+                                        ->default('wall')
+                                        ->live()
+                                        ->afterStateUpdated(function ($state, callable $set) {
+                                            $typeNames = [
+                                                'wall' => 'Wall',
+                                                'island' => 'Island',
+                                                'peninsula' => 'Peninsula',
+                                                'pantry' => 'Pantry',
+                                                'corner' => 'Corner',
+                                            ];
+                                            $set('name', $typeNames[$state] ?? ucfirst($state));
+                                        }),
+                                    TextInput::make('name')
+                                        ->label('Location Name')
+                                        ->required()
+                                        ->default('Wall'),
+                                ]),
+
+                                Repeater::make('runs')
+                                    ->label('Runs')
+                                    ->schema([
+                                        Grid::make(2)->schema([
+                                            Select::make('run_type')
+                                                ->label('Run Type')
+                                                ->options($this->runTypes)
+                                                ->required()
+                                                ->default('base')
+                                                ->live()
+                                                ->afterStateUpdated(function ($state, callable $set) {
+                                                    $typeNames = [
+                                                        'base' => 'Base Run',
+                                                        'wall' => 'Wall Run',
+                                                        'tall' => 'Tall Run',
+                                                        'island' => 'Island Run',
+                                                        'vanity' => 'Vanity Run',
+                                                    ];
+                                                    $set('name', $typeNames[$state] ?? ucfirst($state) . ' Run');
+                                                }),
+                                            TextInput::make('name')
+                                                ->label('Run Name')
+                                                ->required()
+                                                ->default('Base Run'),
+                                        ]),
+
+                                        Repeater::make('cabinets')
+                                            ->label('Cabinets')
+                                            ->schema([
+                                                Grid::make(5)->schema([
+                                                    TextInput::make('code')
+                                                        ->label('Code')
+                                                        ->placeholder('B24')
+                                                        ->live(debounce: 300)
+                                                        ->afterStateUpdated(function ($state, callable $set) {
+                                                            if ($state) {
+                                                                $parsed = $this->parseFromName($state);
+                                                                if ($parsed['type']) {
+                                                                    $set('cabinet_type', $parsed['type']);
+                                                                    $defaults = $this->typeDefaults[$parsed['type']] ?? [];
+                                                                    $set('depth_inches', $defaults['depth_inches'] ?? 24);
+                                                                    $set('height_inches', $defaults['height_inches'] ?? 34.5);
+                                                                }
+                                                                if ($parsed['width']) {
+                                                                    $set('length_inches', $parsed['width']);
+                                                                }
+                                                            }
+                                                        }),
+                                                    Select::make('cabinet_type')
+                                                        ->label('Type')
+                                                        ->options($this->cabinetTypes)
+                                                        ->required()
+                                                        ->default('base'),
+                                                    TextInput::make('length_inches')
+                                                        ->label('Width')
+                                                        ->numeric()
+                                                        ->required()
+                                                        ->default(24)
+                                                        ->suffix('in'),
+                                                    TextInput::make('height_inches')
+                                                        ->label('Height')
+                                                        ->numeric()
+                                                        ->required()
+                                                        ->default(34.5)
+                                                        ->suffix('in'),
+                                                    TextInput::make('quantity')
+                                                        ->label('Qty')
+                                                        ->numeric()
+                                                        ->default(1)
+                                                        ->minValue(1),
+                                                ]),
+                                            ])
+                                            ->defaultItems(1)
+                                            ->addActionLabel('+ Cabinet')
+                                            ->reorderable()
+                                            ->collapsible()
+                                            ->itemLabel(fn (array $state): ?string => $state['code'] ?? $state['cabinet_type'] ?? 'Cabinet'),
+                                    ])
+                                    ->defaultItems(1)
+                                    ->addActionLabel('+ Run')
+                                    ->reorderable()
+                                    ->collapsible()
+                                    ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Run'),
+                            ])
+                            ->defaultItems(0)
+                            ->addActionLabel('+ Add Location')
+                            ->reorderable()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Location'),
+                    ]),
             ])
             ->action(function (array $data): void {
-                $this->createRoomFromAction($data);
+                $this->createRoomWithChildrenFromAction($data);
             });
+    }
+
+    /**
+     * Create room with nested locations, runs, and cabinets from Filament Action data
+     */
+    protected function createRoomWithChildrenFromAction(array $data): void
+    {
+        // Build locations with nested children
+        $locationChildren = [];
+
+        foreach ($data['locations'] ?? [] as $locationData) {
+            $runChildren = [];
+
+            foreach ($locationData['runs'] ?? [] as $runData) {
+                $cabinetChildren = [];
+
+                foreach ($runData['cabinets'] ?? [] as $cabinetData) {
+                    $quantity = (int) ($cabinetData['quantity'] ?? 1);
+                    for ($i = 0; $i < $quantity; $i++) {
+                        $cabinetChildren[] = [
+                            'id' => 'cabinet_' . Str::random(8),
+                            'type' => 'cabinet',
+                            'source' => 'user',
+                            'created_at' => now()->toIso8601String(),
+                            'code' => $cabinetData['code'] ?? null,
+                            'cabinet_type' => $cabinetData['cabinet_type'] ?? 'base',
+                            'length_inches' => (float) ($cabinetData['length_inches'] ?? 24),
+                            'depth_inches' => (float) ($cabinetData['depth_inches'] ?? 24),
+                            'height_inches' => (float) ($cabinetData['height_inches'] ?? 34.5),
+                        ];
+                    }
+                }
+
+                $runChildren[] = [
+                    'id' => 'cabinet_run_' . Str::random(8),
+                    'type' => 'cabinet_run',
+                    'source' => 'user',
+                    'created_at' => now()->toIso8601String(),
+                    'children' => $cabinetChildren,
+                    'name' => $runData['name'] ?? 'Run',
+                    'run_type' => $runData['run_type'] ?? 'base',
+                ];
+            }
+
+            $locationChildren[] = [
+                'id' => 'room_location_' . Str::random(8),
+                'type' => 'room_location',
+                'source' => 'user',
+                'created_at' => now()->toIso8601String(),
+                'children' => $runChildren,
+                'name' => $locationData['name'] ?? 'Location',
+                'location_type' => $locationData['location_type'] ?? 'wall',
+            ];
+        }
+
+        $newRoom = [
+            'id' => 'room_' . Str::random(8),
+            'type' => 'room',
+            'source' => 'user',
+            'created_at' => now()->toIso8601String(),
+            'children' => $locationChildren,
+            'name' => $data['name'],
+            'room_type' => $data['room_type'] ?? 'kitchen',
+            'floor_number' => $data['floor_number'] ?? 1,
+            'cabinet_level' => $data['cabinet_level'] ?? '3',
+            'material_category' => $data['material_category'] ?? 'stain_grade',
+            'finish_option' => $data['finish_option'] ?? 'unfinished',
+        ];
+
+        $this->specData[] = $newRoom;
+        $this->calculateTotals();
+        $this->dispatchSpecDataUpdate();
+
+        // Auto-select the new room
+        $this->dispatch('selectRoom', roomIdx: count($this->specData) - 1);
+
+        // Count what was created
+        $locationCount = count($locationChildren);
+        $runCount = array_sum(array_map(fn($l) => count($l['children'] ?? []), $locationChildren));
+        $cabinetCount = 0;
+        foreach ($locationChildren as $loc) {
+            foreach ($loc['children'] ?? [] as $run) {
+                $cabinetCount += count($run['children'] ?? []);
+            }
+        }
+
+        $message = "\"{$data['name']}\" created";
+        if ($locationCount > 0) {
+            $message .= " with {$locationCount} location(s), {$runCount} run(s), {$cabinetCount} cabinet(s)";
+        } else {
+            $message .= ". Add locations to continue.";
+        }
+
+        Notification::make()
+            ->success()
+            ->title('Room Added')
+            ->body($message)
+            ->duration(3000)
+            ->send();
+
+        Log::info('CabinetSpecBuilder: Room with children created via Filament Action', [
+            'room' => $newRoom,
+            'locationCount' => $locationCount,
+            'runCount' => $runCount,
+            'cabinetCount' => $cabinetCount,
+        ]);
     }
 
     /**
@@ -1825,6 +2217,7 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
 
     /**
      * Filament Action: Create a new Location within a Room
+     * Uses slideOver with nested repeaters for runs and cabinets
      */
     public function createLocationAction(): Action
     {
@@ -1832,8 +2225,8 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             ->label('Add Location')
             ->icon('heroicon-m-plus')
             ->color('primary')
-            ->modalWidth('sm')  // Small modal - only 2 required fields
-            ->closeModalByClickingAway()
+            ->slideOver()
+            ->modalWidth('xl')
             ->form(function (array $arguments): array {
                 $roomPath = $arguments['roomPath'] ?? '0';
                 $roomIndex = (int) $roomPath;
@@ -1842,50 +2235,218 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
                 return [
                     Section::make('Location Details')
                         ->schema([
-                            Select::make('location_type')
-                                ->label('Location Type')
-                                ->options($this->locationTypes)
-                                ->required()
-                                ->default('wall')
-                                ->live()
-                                ->afterStateUpdated(function ($state, callable $set) use ($room) {
-                                    // Auto-generate name based on type
-                                    $autoName = $this->generateAutoLocationName($state, $room);
-                                    $set('name', $autoName);
-                                }),
-                            TextInput::make('name')
-                                ->label('Location Name')
-                                ->required()
-                                ->default(fn () => $this->generateAutoLocationName('wall', $room))
-                                ->helperText('Auto-generated. Edit if needed.')
-                                ->autofocus(),
+                            Grid::make(2)->schema([
+                                Select::make('location_type')
+                                    ->label('Location Type')
+                                    ->options($this->locationTypes)
+                                    ->required()
+                                    ->default('wall')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $set) use ($room) {
+                                        $autoName = $this->generateAutoLocationName($state, $room);
+                                        $set('name', $autoName);
+                                    }),
+                                TextInput::make('name')
+                                    ->label('Location Name')
+                                    ->required()
+                                    ->default(fn () => $this->generateAutoLocationName('wall', $room))
+                                    ->helperText('Auto-generated. Edit if needed.'),
+                            ]),
                         ]),
+
                     Section::make('Pricing Override')
                         ->description('Leave blank to inherit from room defaults.')
                         ->schema([
-                            Select::make('cabinet_level')
-                                ->label('Cabinet Level')
-                                ->options($this->pricingTiers)
-                                ->placeholder('Inherit from room'),
-                            Select::make('material_category')
-                                ->label('Material Category')
-                                ->options($this->materialOptions)
-                                ->placeholder('Inherit from room'),
-                            Select::make('finish_option')
-                                ->label('Finish Option')
-                                ->options($this->finishOptions)
-                                ->placeholder('Inherit from room'),
+                            Grid::make(3)->schema([
+                                Select::make('cabinet_level')
+                                    ->label('Cabinet Level')
+                                    ->options($this->pricingTiers)
+                                    ->placeholder('Inherit'),
+                                Select::make('material_category')
+                                    ->label('Material')
+                                    ->options($this->materialOptions)
+                                    ->placeholder('Inherit'),
+                                Select::make('finish_option')
+                                    ->label('Finish')
+                                    ->options($this->finishOptions)
+                                    ->placeholder('Inherit'),
+                            ]),
                         ])
                         ->collapsible()
                         ->collapsed(),
+
+                    Section::make('Cabinet Runs')
+                        ->description('Add runs and cabinets to this location')
+                        ->schema([
+                            Repeater::make('runs')
+                                ->label('')
+                                ->schema([
+                                    Grid::make(2)->schema([
+                                        Select::make('run_type')
+                                            ->label('Run Type')
+                                            ->options($this->runTypes)
+                                            ->required()
+                                            ->default('base')
+                                            ->live()
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                $typeNames = [
+                                                    'base' => 'Base Run',
+                                                    'wall' => 'Wall Run',
+                                                    'tall' => 'Tall Run',
+                                                    'island' => 'Island Run',
+                                                    'vanity' => 'Vanity Run',
+                                                ];
+                                                $set('name', $typeNames[$state] ?? ucfirst($state) . ' Run');
+                                            }),
+                                        TextInput::make('name')
+                                            ->label('Run Name')
+                                            ->required()
+                                            ->default('Base Run'),
+                                    ]),
+
+                                    Repeater::make('cabinets')
+                                        ->label('Cabinets')
+                                        ->schema([
+                                            Grid::make(5)->schema([
+                                                TextInput::make('code')
+                                                    ->label('Code')
+                                                    ->placeholder('B24')
+                                                    ->live(debounce: 300)
+                                                    ->afterStateUpdated(function ($state, callable $set) {
+                                                        if ($state) {
+                                                            $parsed = $this->parseFromName($state);
+                                                            if ($parsed['type']) {
+                                                                $set('cabinet_type', $parsed['type']);
+                                                                $defaults = $this->typeDefaults[$parsed['type']] ?? [];
+                                                                $set('depth_inches', $defaults['depth_inches'] ?? 24);
+                                                                $set('height_inches', $defaults['height_inches'] ?? 34.5);
+                                                            }
+                                                            if ($parsed['width']) {
+                                                                $set('length_inches', $parsed['width']);
+                                                            }
+                                                        }
+                                                    }),
+                                                Select::make('cabinet_type')
+                                                    ->label('Type')
+                                                    ->options($this->cabinetTypes)
+                                                    ->required()
+                                                    ->default('base'),
+                                                TextInput::make('length_inches')
+                                                    ->label('Width')
+                                                    ->numeric()
+                                                    ->required()
+                                                    ->default(24)
+                                                    ->suffix('in'),
+                                                TextInput::make('height_inches')
+                                                    ->label('Height')
+                                                    ->numeric()
+                                                    ->required()
+                                                    ->default(34.5)
+                                                    ->suffix('in'),
+                                                TextInput::make('quantity')
+                                                    ->label('Qty')
+                                                    ->numeric()
+                                                    ->default(1)
+                                                    ->minValue(1),
+                                            ]),
+                                        ])
+                                        ->defaultItems(1)
+                                        ->addActionLabel('+ Cabinet')
+                                        ->reorderable()
+                                        ->collapsible()
+                                        ->itemLabel(fn (array $state): ?string => $state['code'] ?? $state['cabinet_type'] ?? 'Cabinet'),
+                                ])
+                                ->defaultItems(1)
+                                ->addActionLabel('+ Add Run')
+                                ->reorderable()
+                                ->collapsible()
+                                ->itemLabel(fn (array $state): ?string => $state['name'] ?? 'Run'),
+                        ]),
                 ];
             })
             ->action(function (array $data, array $arguments): void {
                 $roomPath = $arguments['roomPath'] ?? null;
                 if ($roomPath !== null) {
-                    $this->createLocationFromAction($data, $roomPath);
+                    $this->createLocationWithChildrenFromAction($data, $roomPath);
                 }
             });
+    }
+
+    /**
+     * Create location with nested runs and cabinets from Filament Action data
+     */
+    protected function createLocationWithChildrenFromAction(array $data, string $roomPath): void
+    {
+        // Build the location with nested children
+        $children = [];
+
+        // Process runs
+        foreach ($data['runs'] ?? [] as $runData) {
+            $runChildren = [];
+
+            // Process cabinets within run
+            foreach ($runData['cabinets'] ?? [] as $cabinetData) {
+                $quantity = (int) ($cabinetData['quantity'] ?? 1);
+                for ($i = 0; $i < $quantity; $i++) {
+                    $runChildren[] = [
+                        'id' => 'cabinet_' . Str::random(8),
+                        'type' => 'cabinet',
+                        'source' => 'user',
+                        'created_at' => now()->toIso8601String(),
+                        'code' => $cabinetData['code'] ?? null,
+                        'cabinet_type' => $cabinetData['cabinet_type'] ?? 'base',
+                        'length_inches' => (float) ($cabinetData['length_inches'] ?? 24),
+                        'depth_inches' => (float) ($cabinetData['depth_inches'] ?? 24),
+                        'height_inches' => (float) ($cabinetData['height_inches'] ?? 34.5),
+                    ];
+                }
+            }
+
+            $children[] = [
+                'id' => 'cabinet_run_' . Str::random(8),
+                'type' => 'cabinet_run',
+                'source' => 'user',
+                'created_at' => now()->toIso8601String(),
+                'children' => $runChildren,
+                'name' => $runData['name'] ?? 'Run',
+                'run_type' => $runData['run_type'] ?? 'base',
+            ];
+        }
+
+        $newLocation = [
+            'id' => 'room_location_' . Str::random(8),
+            'type' => 'room_location',
+            'source' => 'user',
+            'created_at' => now()->toIso8601String(),
+            'children' => $children,
+            'name' => $data['name'],
+            'location_type' => $data['location_type'] ?? 'wall',
+            'cabinet_level' => $data['cabinet_level'] ?? null,
+            'material_category' => $data['material_category'] ?? null,
+            'finish_option' => $data['finish_option'] ?? null,
+        ];
+
+        $this->addChildToPath($roomPath, $newLocation);
+        $this->calculateTotals();
+        $this->dispatchSpecDataUpdate();
+
+        // Count what was created
+        $runCount = count($children);
+        $cabinetCount = array_sum(array_map(fn($r) => count($r['children'] ?? []), $children));
+
+        Notification::make()
+            ->success()
+            ->title('Location Added')
+            ->body("\"{$data['name']}\" created with {$runCount} run(s) and {$cabinetCount} cabinet(s).")
+            ->duration(3000)
+            ->send();
+
+        Log::info('CabinetSpecBuilder: Location with children created via Filament Action', [
+            'location' => $newLocation,
+            'roomPath' => $roomPath,
+            'runCount' => $runCount,
+            'cabinetCount' => $cabinetCount,
+        ]);
     }
 
     /**
@@ -1925,6 +2486,7 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
 
     /**
      * Filament Action: Create a new Cabinet Run within a Location
+     * Uses slideOver with nested repeaters for cabinets
      */
     public function createRunAction(): Action
     {
@@ -1932,8 +2494,8 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             ->label('Add Run')
             ->icon('heroicon-m-plus')
             ->color('primary')
-            ->modalWidth('sm')  // Small modal - only 2 required fields
-            ->closeModalByClickingAway()
+            ->slideOver()
+            ->modalWidth('xl')
             ->form(function (array $arguments): array {
                 $locationPath = $arguments['locationPath'] ?? '0.children.0';
                 $location = $this->getNodeByPath($locationPath) ?? [];
@@ -1941,50 +2503,167 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
                 return [
                     Section::make('Run Details')
                         ->schema([
-                            Select::make('run_type')
-                                ->label('Run Type')
-                                ->options($this->runTypes)
-                                ->required()
-                                ->default('base')
-                                ->live()
-                                ->afterStateUpdated(function ($state, callable $set) use ($location) {
-                                    // Auto-generate name based on type
-                                    $autoName = $this->generateAutoRunName($state, $location);
-                                    $set('name', $autoName);
-                                }),
-                            TextInput::make('name')
-                                ->label('Run Name')
-                                ->required()
-                                ->default(fn () => $this->generateAutoRunName('base', $location))
-                                ->helperText('Auto-generated. Edit if needed.')
-                                ->autofocus(),
+                            Grid::make(2)->schema([
+                                Select::make('run_type')
+                                    ->label('Run Type')
+                                    ->options($this->runTypes)
+                                    ->required()
+                                    ->default('base')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, callable $set) use ($location) {
+                                        $autoName = $this->generateAutoRunName($state, $location);
+                                        $set('name', $autoName);
+                                    }),
+                                TextInput::make('name')
+                                    ->label('Run Name')
+                                    ->required()
+                                    ->default(fn () => $this->generateAutoRunName('base', $location))
+                                    ->helperText('Auto-generated. Edit if needed.'),
+                            ]),
                         ]),
+
                     Section::make('Pricing Override')
                         ->description('Leave blank to inherit from location/room defaults.')
                         ->schema([
-                            Select::make('cabinet_level')
-                                ->label('Cabinet Level')
-                                ->options($this->pricingTiers)
-                                ->placeholder('Inherit from parent'),
-                            Select::make('material_category')
-                                ->label('Material Category')
-                                ->options($this->materialOptions)
-                                ->placeholder('Inherit from parent'),
-                            Select::make('finish_option')
-                                ->label('Finish Option')
-                                ->options($this->finishOptions)
-                                ->placeholder('Inherit from parent'),
+                            Grid::make(3)->schema([
+                                Select::make('cabinet_level')
+                                    ->label('Cabinet Level')
+                                    ->options($this->pricingTiers)
+                                    ->placeholder('Inherit'),
+                                Select::make('material_category')
+                                    ->label('Material')
+                                    ->options($this->materialOptions)
+                                    ->placeholder('Inherit'),
+                                Select::make('finish_option')
+                                    ->label('Finish')
+                                    ->options($this->finishOptions)
+                                    ->placeholder('Inherit'),
+                            ]),
                         ])
                         ->collapsible()
                         ->collapsed(),
+
+                    Section::make('Cabinets')
+                        ->description('Add cabinets to this run')
+                        ->schema([
+                            Repeater::make('cabinets')
+                                ->label('')
+                                ->schema([
+                                    Grid::make(5)->schema([
+                                        TextInput::make('code')
+                                            ->label('Code')
+                                            ->placeholder('B24')
+                                            ->live(debounce: 300)
+                                            ->afterStateUpdated(function ($state, callable $set) {
+                                                if ($state) {
+                                                    $parsed = $this->parseFromName($state);
+                                                    if ($parsed['type']) {
+                                                        $set('cabinet_type', $parsed['type']);
+                                                        $defaults = $this->typeDefaults[$parsed['type']] ?? [];
+                                                        $set('depth_inches', $defaults['depth_inches'] ?? 24);
+                                                        $set('height_inches', $defaults['height_inches'] ?? 34.5);
+                                                    }
+                                                    if ($parsed['width']) {
+                                                        $set('length_inches', $parsed['width']);
+                                                    }
+                                                }
+                                            }),
+                                        Select::make('cabinet_type')
+                                            ->label('Type')
+                                            ->options($this->cabinetTypes)
+                                            ->required()
+                                            ->default('base'),
+                                        TextInput::make('length_inches')
+                                            ->label('Width')
+                                            ->numeric()
+                                            ->required()
+                                            ->default(24)
+                                            ->suffix('in'),
+                                        TextInput::make('height_inches')
+                                            ->label('Height')
+                                            ->numeric()
+                                            ->required()
+                                            ->default(34.5)
+                                            ->suffix('in'),
+                                        TextInput::make('quantity')
+                                            ->label('Qty')
+                                            ->numeric()
+                                            ->default(1)
+                                            ->minValue(1),
+                                    ]),
+                                ])
+                                ->defaultItems(1)
+                                ->addActionLabel('+ Add Cabinet')
+                                ->reorderable()
+                                ->collapsible()
+                                ->itemLabel(fn (array $state): ?string => $state['code'] ?? $state['cabinet_type'] ?? 'Cabinet'),
+                        ]),
                 ];
             })
             ->action(function (array $data, array $arguments): void {
                 $locationPath = $arguments['locationPath'] ?? null;
                 if ($locationPath !== null) {
-                    $this->createRunFromAction($data, $locationPath);
+                    $this->createRunWithCabinetsFromAction($data, $locationPath);
                 }
             });
+    }
+
+    /**
+     * Create run with cabinets from Filament Action data
+     */
+    protected function createRunWithCabinetsFromAction(array $data, string $locationPath): void
+    {
+        // Build cabinet children
+        $cabinetChildren = [];
+
+        foreach ($data['cabinets'] ?? [] as $cabinetData) {
+            $quantity = (int) ($cabinetData['quantity'] ?? 1);
+            for ($i = 0; $i < $quantity; $i++) {
+                $cabinetChildren[] = [
+                    'id' => 'cabinet_' . Str::random(8),
+                    'type' => 'cabinet',
+                    'source' => 'user',
+                    'created_at' => now()->toIso8601String(),
+                    'code' => $cabinetData['code'] ?? null,
+                    'cabinet_type' => $cabinetData['cabinet_type'] ?? 'base',
+                    'length_inches' => (float) ($cabinetData['length_inches'] ?? 24),
+                    'depth_inches' => (float) ($cabinetData['depth_inches'] ?? 24),
+                    'height_inches' => (float) ($cabinetData['height_inches'] ?? 34.5),
+                ];
+            }
+        }
+
+        $newRun = [
+            'id' => 'cabinet_run_' . Str::random(8),
+            'type' => 'cabinet_run',
+            'source' => 'user',
+            'created_at' => now()->toIso8601String(),
+            'children' => $cabinetChildren,
+            'name' => $data['name'],
+            'run_type' => $data['run_type'] ?? 'base',
+            'cabinet_level' => $data['cabinet_level'] ?? null,
+            'material_category' => $data['material_category'] ?? null,
+            'finish_option' => $data['finish_option'] ?? null,
+        ];
+
+        $this->addChildToPath($locationPath, $newRun);
+        $this->calculateTotals();
+        $this->dispatchSpecDataUpdate();
+
+        $cabinetCount = count($cabinetChildren);
+
+        Notification::make()
+            ->success()
+            ->title('Run Added')
+            ->body("\"{$data['name']}\" created with {$cabinetCount} cabinet(s).")
+            ->duration(3000)
+            ->send();
+
+        Log::info('CabinetSpecBuilder: Run with cabinets created via Filament Action', [
+            'run' => $newRun,
+            'locationPath' => $locationPath,
+            'cabinetCount' => $cabinetCount,
+        ]);
     }
 
     /**

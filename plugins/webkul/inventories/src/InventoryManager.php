@@ -19,6 +19,7 @@ use Webkul\Inventory\Models\Operation;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Rule;
 use Webkul\Purchase\Facades\PurchaseOrder as PurchaseOrderFacade;
+use Webkul\Purchase\Services\PurchaseAllocationService;
 use Webkul\Sale\Facades\SaleOrder as SaleFacade;
 use Webkul\Support\Package;
 
@@ -95,6 +96,11 @@ class InventoryManager
 
         foreach ($move->lines()->get() as $moveLine) {
             $this->validateTransferMoveLine($moveLine);
+        }
+
+        // Auto-allocate to project if purchase order line has project/BOM/hardware links
+        if ($move->purchase_order_line_id && Package::isPluginInstalled('purchases')) {
+            app(PurchaseAllocationService::class)->onGoodsReceived($move);
         }
 
         return $move;

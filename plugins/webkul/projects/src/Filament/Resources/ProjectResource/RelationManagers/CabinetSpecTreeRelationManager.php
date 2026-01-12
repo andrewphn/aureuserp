@@ -8,6 +8,12 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Livewire\Attributes\On;
 use Webkul\Project\Models\Project;
+use Webkul\Project\Models\CabinetSection;
+use Webkul\Project\Models\Door;
+use Webkul\Project\Models\Drawer;
+use Webkul\Project\Models\Shelf;
+use Webkul\Project\Models\Pullout;
+use Webkul\Project\Models\HardwareRequirement;
 
 /**
  * Cabinet Spec Tree Relation Manager
@@ -358,6 +364,7 @@ class CabinetSpecTreeRelationManager extends RelationManager
 
         foreach ($cabinets as $cabinetData) {
             $dbId = $cabinetData['db_id'] ?? null;
+            $cabinet = null;
 
             $cabinetFields = [
                 'cabinet_number' => $cabinetData['name'],
@@ -382,12 +389,340 @@ class CabinetSpecTreeRelationManager extends RelationManager
                 ]));
                 $processedIds[] = $cabinet->id;
             }
+
+            // Sync cabinet children (sections → contents → hardware)
+            if ($cabinet && !empty($cabinetData['children'])) {
+                $this->syncCabinetChildren($cabinet, $cabinetData['children']);
+            }
         }
 
         // Delete cabinets that were removed
         $toDelete = array_diff($existingIds, $processedIds);
         if (!empty($toDelete)) {
             $run->cabinets()->whereIn('id', $toDelete)->delete();
+        }
+    }
+
+    // =========================================================================
+    // Cabinet Children Sync Methods (Sections, Contents, Hardware)
+    // =========================================================================
+
+    /**
+     * Sync cabinet children (sections)
+     */
+    protected function syncCabinetChildren($cabinet, array $children): void
+    {
+        $existingSectionIds = $cabinet->sections()->pluck('id')->toArray();
+        $processedSectionIds = [];
+
+        foreach ($children as $childData) {
+            $type = $childData['type'] ?? null;
+
+            if ($type === 'section') {
+                $sectionId = $this->syncSection($cabinet, $childData);
+                if ($sectionId) {
+                    $processedSectionIds[] = $sectionId;
+                }
+            }
+        }
+
+        // Delete sections that were removed
+        $toDelete = array_diff($existingSectionIds, $processedSectionIds);
+        if (!empty($toDelete)) {
+            CabinetSection::whereIn('id', $toDelete)->delete();
+        }
+    }
+
+    /**
+     * Sync a section and its contents
+     */
+    protected function syncSection($cabinet, array $sectionData): ?int
+    {
+        $dbId = $sectionData['db_id'] ?? null;
+        $section = null;
+
+        $sectionFields = [
+            'section_code' => $sectionData['name'] ?? 'A',
+            'section_type' => $sectionData['section_type'] ?? 'door',
+            'notes' => $sectionData['notes'] ?? null,
+        ];
+
+        if ($dbId) {
+            $section = CabinetSection::find($dbId);
+            if ($section) {
+                $section->update($sectionFields);
+            }
+        } else {
+            $section = $cabinet->sections()->create($sectionFields);
+        }
+
+        // Sync section contents (doors, drawers, shelves, pullouts)
+        if ($section && !empty($sectionData['children'])) {
+            $this->syncSectionContents($section, $sectionData['children']);
+        }
+
+        return $section?->id;
+    }
+
+    /**
+     * Sync doors, drawers, shelves, pullouts within a section
+     */
+    protected function syncSectionContents($section, array $contents): void
+    {
+        // Track existing content IDs
+        $existingDoorIds = $section->doors()->pluck('id')->toArray();
+        $existingDrawerIds = $section->drawers()->pluck('id')->toArray();
+        $existingShelfIds = $section->shelves()->pluck('id')->toArray();
+        $existingPulloutIds = $section->pullouts()->pluck('id')->toArray();
+
+        $processedDoorIds = [];
+        $processedDrawerIds = [];
+        $processedShelfIds = [];
+        $processedPulloutIds = [];
+
+        foreach ($contents as $contentData) {
+            $type = $contentData['type'] ?? null;
+
+            // CabinetSpecBuilder uses 'content' as type with 'content_type' for actual type
+            // e.g., {type: 'content', content_type: 'drawer'}
+            $contentType = $contentData['content_type'] ?? $type;
+
+            $result = match ($contentType) {
+                'door' => $this->syncDoor($section, $contentData),
+                'drawer' => $this->syncDrawer($section, $contentData),
+                'shelf' => $this->syncShelf($section, $contentData),
+                'pullout' => $this->syncPullout($section, $contentData),
+                default => null,
+            };
+
+            if ($result) {
+                match ($contentType) {
+                    'door' => $processedDoorIds[] = $result['id'],
+                    'drawer' => $processedDrawerIds[] = $result['id'],
+                    'shelf' => $processedShelfIds[] = $result['id'],
+                    'pullout' => $processedPulloutIds[] = $result['id'],
+                    default => null,
+                };
+
+                // Sync hardware for this content
+                if (!empty($contentData['children'])) {
+                    $this->syncContentHardware($result['model'], $contentType, $contentData['children']);
+                }
+            }
+        }
+
+        // Delete removed content items
+        $this->deleteRemovedItems(Door::class, $existingDoorIds, $processedDoorIds);
+        $this->deleteRemovedItems(Drawer::class, $existingDrawerIds, $processedDrawerIds);
+        $this->deleteRemovedItems(Shelf::class, $existingShelfIds, $processedShelfIds);
+        $this->deleteRemovedItems(Pullout::class, $existingPulloutIds, $processedPulloutIds);
+    }
+
+    /**
+     * Sync a door component
+     */
+    protected function syncDoor($section, array $doorData): ?array
+    {
+        $dbId = $doorData['db_id'] ?? null;
+        $door = null;
+
+        $doorFields = [
+            'door_name' => $doorData['name'] ?? 'Door 1',
+            'width_inches' => $doorData['width_inches'] ?? null,
+            'height_inches' => $doorData['height_inches'] ?? null,
+        ];
+
+        if ($dbId) {
+            $door = Door::find($dbId);
+            if ($door) {
+                $door->update($doorFields);
+            }
+        } else {
+            $door = $section->doors()->create(array_merge($doorFields, [
+                'cabinet_id' => $section->cabinet_id,
+            ]));
+        }
+
+        return $door ? ['id' => $door->id, 'model' => $door] : null;
+    }
+
+    /**
+     * Sync a drawer component
+     */
+    protected function syncDrawer($section, array $drawerData): ?array
+    {
+        $dbId = $drawerData['db_id'] ?? null;
+        $drawer = null;
+
+        $drawerFields = [
+            'drawer_name' => $drawerData['name'] ?? 'Drawer 1',
+            'front_width_inches' => $drawerData['width_inches'] ?? null,
+            'front_height_inches' => $drawerData['height_inches'] ?? null,
+            'box_depth_inches' => $drawerData['depth_inches'] ?? null,
+        ];
+
+        if ($dbId) {
+            $drawer = Drawer::find($dbId);
+            if ($drawer) {
+                $drawer->update($drawerFields);
+            }
+        } else {
+            $drawer = $section->drawers()->create(array_merge($drawerFields, [
+                'cabinet_id' => $section->cabinet_id,
+            ]));
+        }
+
+        return $drawer ? ['id' => $drawer->id, 'model' => $drawer] : null;
+    }
+
+    /**
+     * Sync a shelf component
+     */
+    protected function syncShelf($section, array $shelfData): ?array
+    {
+        $dbId = $shelfData['db_id'] ?? null;
+        $shelf = null;
+
+        $shelfFields = [
+            'shelf_name' => $shelfData['name'] ?? 'Shelf 1',
+            'width_inches' => $shelfData['width_inches'] ?? null,
+            'depth_inches' => $shelfData['depth_inches'] ?? null,
+        ];
+
+        if ($dbId) {
+            $shelf = Shelf::find($dbId);
+            if ($shelf) {
+                $shelf->update($shelfFields);
+            }
+        } else {
+            $shelf = $section->shelves()->create(array_merge($shelfFields, [
+                'cabinet_id' => $section->cabinet_id,
+            ]));
+        }
+
+        return $shelf ? ['id' => $shelf->id, 'model' => $shelf] : null;
+    }
+
+    /**
+     * Sync a pullout component
+     */
+    protected function syncPullout($section, array $pulloutData): ?array
+    {
+        $dbId = $pulloutData['db_id'] ?? null;
+        $pullout = null;
+
+        $pulloutFields = [
+            'pullout_name' => $pulloutData['name'] ?? 'Pullout 1',
+            'pullout_type' => $pulloutData['pullout_type'] ?? 'trash',
+            'width_inches' => $pulloutData['width_inches'] ?? null,
+            'depth_inches' => $pulloutData['depth_inches'] ?? null,
+            'height_inches' => $pulloutData['height_inches'] ?? null,
+        ];
+
+        if ($dbId) {
+            $pullout = Pullout::find($dbId);
+            if ($pullout) {
+                $pullout->update($pulloutFields);
+            }
+        } else {
+            $pullout = $section->pullouts()->create(array_merge($pulloutFields, [
+                'cabinet_id' => $section->cabinet_id,
+            ]));
+        }
+
+        return $pullout ? ['id' => $pullout->id, 'model' => $pullout] : null;
+    }
+
+    /**
+     * Sync hardware for a content component (door, drawer, shelf, pullout)
+     * This is the KEY method that creates HardwareRequirement records
+     */
+    protected function syncContentHardware($content, string $contentType, array $hardwareItems): void
+    {
+        // Determine the foreign key based on content type
+        $foreignKey = match ($contentType) {
+            'door' => 'door_id',
+            'drawer' => 'drawer_id',
+            'shelf' => 'shelf_id',
+            'pullout' => 'pullout_id',
+            default => null,
+        };
+
+        if (!$foreignKey) {
+            return;
+        }
+
+        // Get existing hardware for this content
+        $existingIds = HardwareRequirement::where($foreignKey, $content->id)
+            ->pluck('id')
+            ->toArray();
+
+        $processedIds = [];
+
+        foreach ($hardwareItems as $hwData) {
+            // Only process hardware type nodes
+            if (($hwData['type'] ?? '') !== 'hardware') {
+                continue;
+            }
+
+            $dbId = $hwData['db_id'] ?? null;
+            $productId = $hwData['product_id'] ?? null;
+
+            // Skip creating hardware requirement if no product is selected yet
+            // (product_id is required in the database)
+            if (!$productId && !$dbId) {
+                continue;
+            }
+
+            $hwFields = [
+                $foreignKey => $content->id,
+                'cabinet_id' => $content->cabinet_id,
+                'room_id' => $content->cabinet->room_id ?? null,
+                'product_id' => $productId,
+                'hardware_type' => $hwData['component_type'] ?? 'other',
+                'model_number' => $hwData['sku'] ?? null,
+                'quantity_required' => $hwData['quantity'] ?? 1,
+                'unit_cost' => $hwData['unit_cost'] ?? null,
+            ];
+
+            // Calculate total cost
+            if ($hwFields['unit_cost'] && $hwFields['quantity_required']) {
+                $hwFields['total_hardware_cost'] = $hwFields['unit_cost'] * $hwFields['quantity_required'];
+            }
+
+            if ($dbId && in_array($dbId, $existingIds)) {
+                // Update existing hardware
+                $hw = HardwareRequirement::find($dbId);
+                if ($hw) {
+                    // Don't overwrite product_id with null if it was already set
+                    if (!$productId && $hw->product_id) {
+                        unset($hwFields['product_id']);
+                    }
+                    $hw->update($hwFields);
+                    $processedIds[] = $dbId;
+                }
+            } elseif ($productId) {
+                // Create new hardware requirement only if product is selected
+                $hw = HardwareRequirement::create($hwFields);
+                $processedIds[] = $hw->id;
+            }
+        }
+
+        // Delete hardware that was removed
+        $toDelete = array_diff($existingIds, $processedIds);
+        if (!empty($toDelete)) {
+            HardwareRequirement::whereIn('id', $toDelete)->delete();
+        }
+    }
+
+    /**
+     * Helper to delete removed items of a specific model type
+     */
+    protected function deleteRemovedItems(string $modelClass, array $existingIds, array $processedIds): void
+    {
+        $toDelete = array_diff($existingIds, $processedIds);
+        if (!empty($toDelete)) {
+            $modelClass::whereIn('id', $toDelete)->delete();
         }
     }
 }

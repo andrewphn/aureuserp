@@ -20,6 +20,7 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
 use Webkul\Partner\Models\Partner;
+use Webkul\Support\Traits\HasComplexityScore;
 use Webkul\Project\Database\Factories\ProjectFactory;
 use Webkul\Project\Models\Timesheet;
 use Webkul\Security\Models\Scopes\UserPermissionScope;
@@ -86,7 +87,7 @@ use Webkul\Support\Models\Company;
  */
 class Project extends Model implements HasMedia, Sortable
 {
-    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, InteractsWithMedia, SoftDeletes, SortableTrait;
+    use HasChatter, HasCustomFields, HasFactory, HasLogActivity, InteractsWithMedia, SoftDeletes, SortableTrait, HasComplexityScore;
 
     /**
      * Table name.

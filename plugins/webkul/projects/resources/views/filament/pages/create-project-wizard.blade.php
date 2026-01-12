@@ -137,10 +137,10 @@
                 wire:key="sidebar-{{ md5(json_encode($this->data ?? [])) }}"
                 :data="$this->data"
                 :stage="'discovery'"
-                :widgets="['project_preview', 'scope', 'customer', 'customer_history', 'project_type', 'location', 'budget', 'timeline', 'documents', 'lead_source']"
+                :widgets="['project_preview', 'customer', 'checkout_summary', 'capacity', 'project_type', 'location', 'budget', 'timeline', 'documents', 'lead_source']"
                 :show-header="true"
-                :show-footer="true"
-                :footer-widget="'estimate'"
+                :show-footer="false"
+                :footer-widget="null"
                 :price-per-linear-foot="350.00"
                 :collapsible="true"
             />

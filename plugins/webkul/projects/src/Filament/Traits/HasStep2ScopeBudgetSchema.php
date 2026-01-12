@@ -457,7 +457,7 @@ trait HasStep2ScopeBudgetSchema
             ])
             ->compact()
             ->collapsible()
-            ->collapsed(fn (callable $get) => !$get('partner_id'));
+            ->collapsed(true); // Always collapsed by default
     }
 
     /**

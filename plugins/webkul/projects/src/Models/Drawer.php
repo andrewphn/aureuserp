@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Product\Models\Product;
+use Webkul\Support\Traits\HasComplexityScore;
+use Webkul\Support\Traits\HasFormattedDimensions;
 use Webkul\Support\Traits\HasFullCode;
 
 /**
@@ -17,10 +19,12 @@ use Webkul\Support\Traits\HasFullCode;
  * Hierarchy: Project -> Room -> Location -> Cabinet Run -> Cabinet -> Section -> Drawer
  *
  * @property string|null $full_code Hierarchical code (e.g., TCS-0554-15WSANKATY-K1-SW-B1-A-DRW1)
+ * @property float|null $complexity_score Calculated complexity score
+ * @property array|null $complexity_breakdown JSON breakdown of complexity factors
  */
 class Drawer extends Model
 {
-    use HasFactory, SoftDeletes, HasFullCode;
+    use HasFactory, SoftDeletes, HasFullCode, HasComplexityScore, HasFormattedDimensions;
 
     protected $table = 'projects_drawers';
 
@@ -106,6 +110,44 @@ class Drawer extends Model
             'qc_passed' => 'boolean',
             'qc_inspected_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Override width field for HasFormattedDimensions trait.
+     * Drawer uses front_width_inches for display width.
+     */
+    protected function getWidthField(): string
+    {
+        return 'front_width_inches';
+    }
+
+    /**
+     * Override height field for HasFormattedDimensions trait.
+     * Drawer uses front_height_inches for display height.
+     */
+    protected function getHeightField(): string
+    {
+        return 'front_height_inches';
+    }
+
+    /**
+     * Drawer front has no depth, only the box does.
+     */
+    protected function hasDepthField(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Get formatted box dimensions separately.
+     */
+    public function getFormattedBoxDimensionsAttribute(): string
+    {
+        return $this->getMeasurementFormatter()->formatDimensions(
+            $this->box_width_inches,
+            $this->box_height_inches,
+            $this->box_depth_inches
+        );
     }
 
     public function cabinet(): BelongsTo

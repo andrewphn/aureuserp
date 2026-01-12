@@ -39,7 +39,7 @@
                     <div class="font-medium truncate text-sm text-gray-900 dark:text-gray-100" x-text="room.name || 'Untitled Room'"></div>
                     <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300">
                         <span class="capitalize" x-text="room.room_type || 'other'"></span>
-                        <span x-show="(room.linear_feet || 0) > 0" class="font-medium text-blue-600 dark:text-blue-400" x-text="(room.linear_feet || 0).toFixed(1) + ' LF'"></span>
+                        <span x-show="(room.linear_feet || 0) > 0" class="font-medium text-blue-600 dark:text-blue-400" x-text="formatLinearFeet(room.linear_feet || 0)"></span>
                     </div>
                 </div>
 
@@ -94,7 +94,7 @@
                                     <div class="font-medium truncate text-sm text-gray-800 dark:text-gray-200" x-text="location.name || 'Untitled'"></div>
                                     <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-300">
                                         <span>L<span x-text="location.cabinet_level || '2'"></span></span>
-                                        <span x-show="(location.linear_feet || 0) > 0" class="text-blue-600 dark:text-blue-400" x-text="(location.linear_feet || 0).toFixed(1) + ' LF'"></span>
+                                        <span x-show="(location.linear_feet || 0) > 0" class="text-blue-600 dark:text-blue-400" x-text="formatLinearFeet(location.linear_feet || 0)"></span>
                                     </div>
                                 </div>
 
@@ -132,7 +132,7 @@
                                         {{-- Stats --}}
                                         <div class="flex items-center gap-1.5 text-xs text-gray-500">
                                             <span x-show="(run.children || []).length > 0" x-text="(run.children || []).length + ' cab'"></span>
-                                            <span x-show="(run.linear_feet || 0) > 0" class="text-blue-600 dark:text-blue-400" x-text="(run.linear_feet || 0).toFixed(1) + ' LF'"></span>
+                                            <span x-show="(run.linear_feet || 0) > 0" class="text-blue-600 dark:text-blue-400" x-text="formatLinearFeet(run.linear_feet || 0)"></span>
                                         </div>
 
                                         {{-- Selection indicator --}}
@@ -141,37 +141,43 @@
                                 </template>
 
                                 {{-- Add Run Button (Filament Action) --}}
-                                <button
-                                    @click.stop="$wire.mountAction('createRun', { locationPath: roomIdx + '.children.' + locIdx })"
-                                    class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+                                <x-filament::button
+                                    size="xs"
+                                    color="gray"
+                                    icon="heroicon-m-plus"
+                                    class="w-full justify-start"
+                                    x-on:click.stop="$wire.mountAction('createRun', { locationPath: roomIdx + '.children.' + locIdx })"
                                 >
-                                    <x-heroicon-m-plus class="w-3.5 h-3.5" />
                                     Add Run
-                                </button>
+                                </x-filament::button>
                             </div>
                         </div>
                     </template>
 
                     {{-- Add Location Button (Filament Action) --}}
-                    <button
-                        @click.stop="$wire.mountAction('createLocation', { roomPath: roomIdx.toString() })"
-                        class="w-full flex items-center gap-1.5 px-2.5 py-1.5 text-xs rounded-lg transition-colors ml-1 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20"
+                    <x-filament::button
+                        size="xs"
+                        color="gray"
+                        icon="heroicon-m-plus"
+                        class="w-full justify-start ml-1"
+                        x-on:click.stop="$wire.mountAction('createLocation', { roomPath: roomIdx.toString() })"
                     >
-                        <x-heroicon-m-plus class="w-3.5 h-3.5" />
                         Add Location
-                    </button>
+                    </x-filament::button>
                 </div>
             </div>
         </div>
     </template>
 
     {{-- Add Room Button (Filament Action) --}}
-    <button
-        @click="$wire.mountAction('createRoom')"
-        type="button"
-        class="w-full flex items-center justify-center gap-1.5 px-3 py-2.5 text-sm font-medium border border-dashed rounded-lg transition-colors text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-800 border-blue-300 dark:border-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+    <x-filament::button
+        size="sm"
+        color="gray"
+        icon="heroicon-m-plus"
+        outlined
+        class="w-full"
+        x-on:click="$wire.mountAction('createRoom')"
     >
-        <x-heroicon-m-plus class="w-4 h-4" />
         Add Room
-    </button>
+    </x-filament::button>
 </div>

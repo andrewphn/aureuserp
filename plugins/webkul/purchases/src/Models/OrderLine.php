@@ -22,6 +22,11 @@ use Webkul\Support\Models\Company;
 use Webkul\Support\Models\Currency;
 use Webkul\Support\Models\UOM;
 
+// Project integration models
+use Webkul\Project\Models\Project;
+use Webkul\Project\Models\CabinetMaterialsBom;
+use Webkul\Project\Models\HardwareRequirement;
+
 /**
  * Order Line Eloquent model
  *
@@ -60,6 +65,9 @@ use Webkul\Support\Models\UOM;
  * @property int $creator_id
  * @property int $final_location_id
  * @property int $order_point_id
+ * @property int|null $project_id
+ * @property int|null $bom_id
+ * @property int|null $hardware_requirement_id
  * @property-read \Illuminate\Database\Eloquent\Collection $accountMoveLines
  * @property-read \Illuminate\Database\Eloquent\Collection $inventoryMoves
  * @property-read \Illuminate\Database\Eloquent\Model|null $order
@@ -73,6 +81,9 @@ use Webkul\Support\Models\UOM;
  * @property-read \Illuminate\Database\Eloquent\Model|null $creator
  * @property-read \Illuminate\Database\Eloquent\Model|null $finalLocation
  * @property-read \Illuminate\Database\Eloquent\Model|null $orderPoint
+ * @property-read \Illuminate\Database\Eloquent\Model|null $project
+ * @property-read \Illuminate\Database\Eloquent\Model|null $bom
+ * @property-read \Illuminate\Database\Eloquent\Model|null $hardwareRequirement
  * @property-read \Illuminate\Database\Eloquent\Collection $taxes
  *
  */
@@ -125,6 +136,10 @@ class OrderLine extends Model implements Sortable
         'creator_id',
         'final_location_id',
         'order_point_id',
+        // Project integration fields
+        'project_id',
+        'bom_id',
+        'hardware_requirement_id',
     ];
 
     /**
@@ -282,6 +297,42 @@ class OrderLine extends Model implements Sortable
     public function orderPoint(): BelongsTo
     {
         return $this->belongsTo(OrderPoint::class, 'order_point_id');
+    }
+
+    // =========================================================================
+    // Project Integration Relationships
+    // =========================================================================
+
+    /**
+     * Project - which project this line item is for
+     *
+     * @return BelongsTo
+     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * BOM - links to specific cabinet materials BOM entry
+     * Used for sheet goods, panels, and other materials
+     *
+     * @return BelongsTo
+     */
+    public function bom(): BelongsTo
+    {
+        return $this->belongsTo(CabinetMaterialsBom::class, 'bom_id');
+    }
+
+    /**
+     * Hardware Requirement - links to specific hardware requirement
+     * Used for hinges, slides, and other cabinet hardware
+     *
+     * @return BelongsTo
+     */
+    public function hardwareRequirement(): BelongsTo
+    {
+        return $this->belongsTo(HardwareRequirement::class);
     }
 
     protected static function newFactory(): OrderLineFactory

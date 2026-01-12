@@ -88,6 +88,8 @@ class ProjectSummarySidebar extends Component
         'project_preview' => 'widgets.project-preview',
         'customer' => 'widgets.customer',
         'customer_history' => 'widgets.customer-history',
+        'checkout_summary' => 'widgets.checkout-summary',
+        'capacity' => 'widgets.capacity',
         'location' => 'widgets.location',
         'project_type' => 'widgets.project-type',
         'lead_source' => 'widgets.lead-source',
@@ -108,10 +110,10 @@ class ProjectSummarySidebar extends Component
      * Stage-specific default widget configurations
      */
     protected array $stageWidgetDefaults = [
-        'discovery' => ['customer', 'location', 'project_type', 'lead_source', 'budget', 'documents'],
-        'design' => ['customer', 'location', 'scope', 'budget', 'timeline', 'rooms', 'documents'],
-        'sourcing' => ['customer', 'location', 'scope', 'materials', 'timeline'],
-        'production' => ['customer', 'scope', 'production_progress', 'timeline'],
+        'discovery' => ['customer', 'checkout_summary', 'capacity', 'location', 'project_type', 'lead_source', 'budget', 'documents'],
+        'design' => ['customer', 'checkout_summary', 'capacity', 'location', 'budget', 'timeline', 'documents'],
+        'sourcing' => ['customer', 'location', 'scope', 'capacity', 'materials', 'timeline'],
+        'production' => ['customer', 'scope', 'capacity', 'production_progress', 'timeline'],
         'delivery' => ['customer', 'location', 'scope', 'delivery_status', 'qc_status'],
     ];
 
@@ -246,6 +248,8 @@ class ProjectSummarySidebar extends Component
             'rooms' => $this->roomsCount > 0,
             'customer_history' => !empty($this->customerHistory),
             'estimate' => !empty($this->quickEstimate),
+            'checkout_summary' => true, // Always show checkout summary
+            'capacity' => !empty($this->data['estimated_linear_feet']), // Show when LF is entered
             'progress' => true, // Always show progress
             // Production/Delivery widgets - always show if in those stages
             'production_progress', 'delivery_status', 'qc_status', 'materials' => true,
@@ -453,6 +457,43 @@ class ProjectSummarySidebar extends Component
             'projects' => $projects,
             'totalProjects' => $totalProjects,
             'totalLinearFeet' => $totalLinearFeet,
+        ];
+    }
+
+    /**
+     * Get customer chatter (messages/activities) for the customer widget
+     */
+    public function getCustomerChatterProperty(): ?array
+    {
+        $partnerId = $this->data['partner_id'] ?? null;
+
+        if (!$partnerId) {
+            return null;
+        }
+
+        $partner = Partner::find($partnerId);
+        if (!$partner) {
+            return null;
+        }
+
+        // Get recent messages/activities using HasChatter trait
+        $messages = $partner->messages()
+            ->with('creator')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        $activities = $partner->activities()
+            ->with('creator')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
+        return [
+            'messages' => $messages,
+            'activities' => $activities,
+            'totalMessages' => $partner->messages()->count(),
+            'totalActivities' => $partner->activities()->count(),
         ];
     }
 

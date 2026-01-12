@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Support\Traits\HasComplexityScore;
 
 /**
  * Room Location Eloquent model
@@ -36,7 +37,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  */
 class RoomLocation extends Model
 {
-    use SoftDeletes, HasChatter, HasLogActivity;
+    use SoftDeletes, HasChatter, HasLogActivity, HasComplexityScore;
 
     protected $table = 'projects_room_locations';
 

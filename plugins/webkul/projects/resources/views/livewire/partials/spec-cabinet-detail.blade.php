@@ -3,15 +3,17 @@
 
 <div class="space-y-4">
     {{-- Back Button - Prominent and Touch-Friendly --}}
-    <button
-        @click="selectedCabinetIndex = null"
-        class="w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-colors min-h-[48px] group bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300"
-        title="Back to cabinet list (Esc)"
+    <x-filament::button
+        color="gray"
+        icon="heroicon-m-arrow-left"
+        class="w-full justify-start"
+        x-on:click="selectedCabinetIndex = null"
     >
-        <x-heroicon-m-arrow-left class="w-5 h-5 transition-colors text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200" />
-        <span class="text-sm font-medium">Back to Cabinet List</span>
-        <kbd class="ml-auto text-xs px-1.5 py-0.5 rounded hidden sm:inline bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">Esc</kbd>
-    </button>
+        Back to Cabinet List
+        <x-slot name="badge">
+            <kbd class="text-xs px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">Esc</kbd>
+        </x-slot>
+    </x-filament::button>
 
     {{-- Cabinet Header --}}
     <div class="rounded-lg border p-4 bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
@@ -24,11 +26,11 @@
                 <span class="text-xs font-normal text-gray-500 dark:text-gray-400" x-text="(selectedRun.children || [])[selectedCabinetIndex]?.code || ''"></span>
             </h3>
             <div class="flex items-center gap-2 text-sm">
-                <span class="text-gray-500 dark:text-gray-400">
-                    <span x-text="(selectedRun.children || [])[selectedCabinetIndex]?.length_inches || 0"></span>"W ×
-                    <span x-text="(selectedRun.children || [])[selectedCabinetIndex]?.height_inches || 0"></span>"H ×
-                    <span x-text="(selectedRun.children || [])[selectedCabinetIndex]?.depth_inches || 0"></span>"D
-                </span>
+                <span class="text-gray-500 dark:text-gray-400" x-text="formatDimensions(
+                    (selectedRun.children || [])[selectedCabinetIndex]?.length_inches,
+                    (selectedRun.children || [])[selectedCabinetIndex]?.height_inches,
+                    (selectedRun.children || [])[selectedCabinetIndex]?.depth_inches
+                )"></span>
             </div>
         </div>
     </div>
@@ -37,13 +39,14 @@
     <div class="rounded-lg border overflow-hidden bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
         <div class="px-4 py-3 border-b flex items-center justify-between bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
             <h4 class="text-sm font-semibold text-gray-900 dark:text-gray-100">Sections / Openings</h4>
-            <button
-                @click="$wire.addSection(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex)"
-                class="text-xs hover:text-primary-700 font-medium flex items-center gap-1 text-primary-600 dark:text-primary-400"
+            <x-filament::button
+                size="xs"
+                color="gray"
+                icon="heroicon-m-plus"
+                x-on:click="$wire.addSection(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex)"
             >
-                <x-heroicon-m-plus class="w-3.5 h-3.5" />
                 Add Section
-            </button>
+            </x-filament::button>
         </div>
 
         <div class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -109,13 +112,13 @@
                                     placeholder="D"
                                 />
                             </div>
-                            <button
-                                @click="$wire.delete(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx)"
-                                class="p-1 rounded text-gray-400 hover:text-red-600 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
-                                title="Delete Section"
-                            >
-                                <x-heroicon-m-trash class="w-3.5 h-3.5" />
-                            </button>
+                            <x-filament::icon-button
+                                icon="heroicon-m-trash"
+                                color="danger"
+                                size="xs"
+                                tooltip="Delete Section"
+                                x-on:click="$wire.delete(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx)"
+                            />
                         </div>
                     </div>
 
@@ -189,13 +192,13 @@
                                                 title="Depth (auto-calculated from slide)"
                                             />
                                         </div>
-                                        <button
-                                            @click="$wire.delete(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx)"
-                                            class="p-1 rounded text-gray-400 hover:text-red-600 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
-                                            title="Delete Content"
-                                        >
-                                            <x-heroicon-m-trash class="w-3 h-3" />
-                                        </button>
+                                        <x-filament::icon-button
+                                            icon="heroicon-m-trash"
+                                            color="danger"
+                                            size="xs"
+                                            tooltip="Delete Content"
+                                            x-on:click="$wire.delete(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx)"
+                                        />
                                     </div>
                                 </div>
 
@@ -227,24 +230,185 @@
                                     <div class="space-y-1">
                                         <template x-for="(hw, hwIdx) in (content.children || [])" :key="hw.id || hwIdx">
                                             <div class="flex items-center justify-between px-2 py-1.5 rounded text-xs bg-white dark:bg-gray-800/50">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="capitalize text-gray-600 dark:text-gray-300" x-text="hw.component_type?.replace('_', ' ') || 'Hardware'"></span>
-                                                    <template x-if="hw.product_id">
-                                                        <span class="text-primary-600 dark:text-primary-400" x-text="hw.name"></span>
-                                                    </template>
-                                                    <template x-if="!hw.product_id">
-                                                        <select
-                                                            x-data="{ products: [] }"
-                                                            x-init="products = await $wire.searchProducts('', hw.component_type)"
-                                                            @change="$wire.updateHardwareProduct(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx + '.children.' + hwIdx, parseInt($event.target.value))"
-                                                            class="px-2 py-1 text-xs border rounded w-40 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600"
-                                                        >
-                                                            <option value="">Select product...</option>
-                                                            <template x-for="(label, id) in products" :key="id">
-                                                                <option :value="id" x-text="label"></option>
-                                                            </template>
-                                                        </select>
-                                                    </template>
+                                                <div class="flex items-center gap-2 flex-1 min-w-0">
+                                                    <span class="capitalize text-gray-600 dark:text-gray-300 whitespace-nowrap" x-text="hw.component_type?.replace('_', ' ') || 'Hardware'"></span>
+
+                                                    {{-- Searchable Product Input with Hover Details --}}
+                                                    <div
+                                                        x-data="{
+                                                            open: false,
+                                                            search: '',
+                                                            results: [],
+                                                            loading: false,
+                                                            hoveredProduct: null,
+                                                            selectedName: hw.name && hw.product_id ? hw.name : '',
+                                                            hwPath: selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx + '.children.' + hwIdx,
+                                                            async doSearch() {
+                                                                this.loading = true;
+                                                                this.results = await $wire.searchProductsDetailed(this.search || '', hw.component_type);
+                                                                this.loading = false;
+                                                            },
+                                                            selectProduct(product) {
+                                                                this.selectedName = product.name;
+                                                                this.search = '';
+                                                                this.open = false;
+                                                                this.hoveredProduct = null;
+                                                                $wire.updateHardwareProduct(this.hwPath, parseInt(product.id));
+                                                            }
+                                                        }"
+                                                        x-init="doSearch()"
+                                                        @click.away="open = false; hoveredProduct = null"
+                                                        class="fi-dropdown relative flex-1 max-w-[200px]"
+                                                    >
+                                                        {{-- Show selected product name or search input --}}
+                                                        <template x-if="selectedName && !open">
+                                                            <button
+                                                                type="button"
+                                                                @click="open = true; $nextTick(() => $refs.searchInput?.focus())"
+                                                                class="fi-btn fi-btn-size-xs fi-color-custom fi-color-primary w-full text-left truncate"
+                                                                x-text="selectedName"
+                                                            ></button>
+                                                        </template>
+
+                                                        <template x-if="!selectedName || open">
+                                                            <div>
+                                                                <x-filament::input.wrapper class="fi-size-xs">
+                                                                    <input
+                                                                        x-ref="searchInput"
+                                                                        type="text"
+                                                                        x-model="search"
+                                                                        @input.debounce.300ms="doSearch()"
+                                                                        @focus="open = true; if (!results.length) doSearch()"
+                                                                        @keydown.escape="open = false; hoveredProduct = null"
+                                                                        @keydown.enter.prevent="if (results.length === 1) selectProduct(results[0])"
+                                                                        placeholder="Search products..."
+                                                                        class="fi-input block w-full border-none bg-transparent py-1.5 text-xs text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)]"
+                                                                    />
+                                                                </x-filament::input.wrapper>
+
+                                                                {{-- Dropdown Results with Hover Preview --}}
+                                                                <div
+                                                                    x-show="open"
+                                                                    x-transition:enter="fi-transition-enter"
+                                                                    x-transition:enter-start="fi-opacity-0"
+                                                                    x-transition:leave="fi-transition-leave"
+                                                                    x-transition:leave-end="fi-opacity-0"
+                                                                    class="absolute z-50 mt-1 flex"
+                                                                >
+                                                                    {{-- Results List --}}
+                                                                    <div class="fi-dropdown-panel w-64 max-h-48 overflow-y-auto rounded-lg bg-white shadow-lg ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10">
+                                                                        <template x-if="loading">
+                                                                            <div class="fi-dropdown-list p-1">
+                                                                                <div class="fi-dropdown-list-item flex items-center gap-2 px-3 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                                                                    <x-filament::loading-indicator class="h-4 w-4" />
+                                                                                    <span>Searching...</span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </template>
+                                                                        <template x-if="!loading && results.length === 0">
+                                                                            <div class="fi-dropdown-list p-1">
+                                                                                <div class="px-3 py-2 text-sm text-gray-500 dark:text-gray-400">No products found</div>
+                                                                            </div>
+                                                                        </template>
+                                                                        <div class="fi-dropdown-list p-1" x-show="!loading && results.length > 0">
+                                                                            <template x-for="product in results" :key="product.id">
+                                                                                <button
+                                                                                    type="button"
+                                                                                    @click="selectProduct(product)"
+                                                                                    @mouseenter="hoveredProduct = product"
+                                                                                    @mouseleave="hoveredProduct = null"
+                                                                                    class="fi-dropdown-list-item flex w-full items-start gap-2 whitespace-nowrap rounded-md p-2 text-sm transition-colors duration-75 outline-none hover:bg-gray-50 focus-visible:bg-gray-50 dark:hover:bg-white/5 dark:focus-visible:bg-white/5"
+                                                                                >
+                                                                                    <div class="flex-1 min-w-0 text-left">
+                                                                                        <div class="font-medium text-gray-950 dark:text-white truncate" x-text="product.name"></div>
+                                                                                        <div class="flex items-center gap-2 mt-0.5">
+                                                                                            <span x-show="product.sku" class="text-xs text-gray-500 dark:text-gray-400" x-text="product.sku"></span>
+                                                                                            <span x-show="product.cost" class="fi-badge fi-badge-size-xs fi-color-success gap-x-1 rounded-md text-xs font-medium ring-1 ring-inset px-1 py-0.5 bg-success-50 text-success-600 ring-success-600/10 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/30" x-text="product.cost"></span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </button>
+                                                                            </template>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {{-- Hover Preview Card (Filament Section Style) --}}
+                                                                    <div
+                                                                        x-show="hoveredProduct"
+                                                                        x-transition:enter="fi-transition-enter"
+                                                                        x-transition:enter-start="fi-opacity-0"
+                                                                        x-transition:leave="fi-transition-leave"
+                                                                        x-transition:leave-end="fi-opacity-0"
+                                                                        class="fi-section ml-2 w-64 rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 dark:bg-gray-900 dark:ring-white/10"
+                                                                    >
+                                                                        {{-- Product Image --}}
+                                                                        <template x-if="hoveredProduct?.image">
+                                                                            <div class="rounded-t-xl overflow-hidden bg-gray-50 dark:bg-gray-800">
+                                                                                <img
+                                                                                    :src="hoveredProduct.image"
+                                                                                    :alt="hoveredProduct.name"
+                                                                                    class="w-full h-28 object-contain"
+                                                                                    onerror="this.parentElement.style.display='none'"
+                                                                                />
+                                                                            </div>
+                                                                        </template>
+
+                                                                        <div class="fi-section-content p-4">
+                                                                            {{-- Product Name --}}
+                                                                            <h3 class="fi-section-header-heading text-sm font-semibold leading-6 text-gray-950 dark:text-white" x-text="hoveredProduct?.name"></h3>
+
+                                                                            {{-- Info List (Filament Infolist Style) --}}
+                                                                            <dl class="fi-infolist mt-3 space-y-2">
+                                                                                {{-- SKU --}}
+                                                                                <template x-if="hoveredProduct?.sku">
+                                                                                    <div class="fi-in-entry flex gap-x-3 text-sm">
+                                                                                        <dt class="fi-in-entry-label text-gray-500 dark:text-gray-400 min-w-[60px]">SKU</dt>
+                                                                                        <dd class="fi-in-entry-content text-gray-950 dark:text-white" x-text="hoveredProduct.sku"></dd>
+                                                                                    </div>
+                                                                                </template>
+
+                                                                                {{-- Supplier SKU --}}
+                                                                                <template x-if="hoveredProduct?.supplier_sku">
+                                                                                    <div class="fi-in-entry flex gap-x-3 text-sm">
+                                                                                        <dt class="fi-in-entry-label text-gray-500 dark:text-gray-400 min-w-[60px]">Supplier</dt>
+                                                                                        <dd class="fi-in-entry-content text-gray-950 dark:text-white" x-text="hoveredProduct.supplier_sku"></dd>
+                                                                                    </div>
+                                                                                </template>
+
+                                                                                {{-- Weight --}}
+                                                                                <template x-if="hoveredProduct?.weight">
+                                                                                    <div class="fi-in-entry flex gap-x-3 text-sm">
+                                                                                        <dt class="fi-in-entry-label text-gray-500 dark:text-gray-400 min-w-[60px]">Weight</dt>
+                                                                                        <dd class="fi-in-entry-content text-gray-950 dark:text-white" x-text="hoveredProduct.weight + ' lbs'"></dd>
+                                                                                    </div>
+                                                                                </template>
+                                                                            </dl>
+
+                                                                            {{-- Pricing Badges --}}
+                                                                            <div class="mt-3 flex flex-wrap gap-2">
+                                                                                <template x-if="hoveredProduct?.cost">
+                                                                                    <span class="fi-badge fi-badge-size-sm fi-color-success gap-x-1 rounded-md text-xs font-medium ring-1 ring-inset px-1.5 py-0.5 bg-success-50 text-success-600 ring-success-600/10 dark:bg-success-400/10 dark:text-success-400 dark:ring-success-400/30">
+                                                                                        <span class="opacity-75">Cost:</span>
+                                                                                        <span x-text="hoveredProduct.cost"></span>
+                                                                                    </span>
+                                                                                </template>
+                                                                                <template x-if="hoveredProduct?.price">
+                                                                                    <span class="fi-badge fi-badge-size-sm fi-color-primary gap-x-1 rounded-md text-xs font-medium ring-1 ring-inset px-1.5 py-0.5 bg-primary-50 text-primary-600 ring-primary-600/10 dark:bg-primary-400/10 dark:text-primary-400 dark:ring-primary-400/30">
+                                                                                        <span class="opacity-75">Price:</span>
+                                                                                        <span x-text="hoveredProduct.price"></span>
+                                                                                    </span>
+                                                                                </template>
+                                                                            </div>
+
+                                                                            {{-- Description --}}
+                                                                            <template x-if="hoveredProduct?.description">
+                                                                                <p class="fi-section-header-description mt-3 text-sm text-gray-500 dark:text-gray-400 line-clamp-3 border-t border-gray-200 dark:border-white/10 pt-3" x-text="hoveredProduct.description"></p>
+                                                                            </template>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
                                                 </div>
                                                 <div class="flex items-center gap-2">
                                                     <template x-if="hw.sku">
@@ -260,12 +424,12 @@
                                                         @blur="$wire.updateHardwareField(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx + '.children.' + hwIdx, 'quantity', $event.target.value)"
                                                         class="w-10 px-1 py-0.5 text-center text-xs border-0 rounded bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100"
                                                     />
-                                                    <button
-                                                        @click="$wire.delete(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx + '.children.' + hwIdx)"
-                                                        class="p-0.5 rounded text-gray-400 hover:text-red-600 transition-colors hover:bg-red-100 dark:hover:bg-red-900/30"
-                                                    >
-                                                        <x-heroicon-m-x-mark class="w-3 h-3" />
-                                                    </button>
+                                                    <x-filament::icon-button
+                                                        icon="heroicon-m-x-mark"
+                                                        color="danger"
+                                                        size="xs"
+                                                        x-on:click="$wire.delete(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex + '.children.' + secIdx + '.children.' + contIdx + '.children.' + hwIdx)"
+                                                    />
                                                 </div>
                                             </div>
                                         </template>

@@ -11,6 +11,7 @@ use Webkul\Project\Database\Factories\RoomFactory;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Support\Traits\HasComplexityScore;
 
 /**
  * Room Eloquent model
@@ -42,7 +43,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  */
 class Room extends Model
 {
-    use HasFactory, SoftDeletes, HasChatter, HasLogActivity;
+    use HasFactory, SoftDeletes, HasChatter, HasLogActivity, HasComplexityScore;
 
     protected $table = 'projects_rooms';
 

@@ -53,69 +53,167 @@
 
     {{-- Action Buttons --}}
     <div class="flex items-center gap-1">
-        {{-- Sort Button with Dropdown --}}
-        <div class="relative">
-            <button
-                @click="sortMenuOpen = !sortMenuOpen"
-                class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100 flex items-center gap-0.5"
-                :class="{ 'bg-white/20 text-white': sortBy !== 'default' }"
-                title="Sort column"
-            >
-                <span class="text-xs font-medium" x-text="currentSortLabel"></span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-3 h-3" :class="{ 'rotate-180': sortDir === 'desc' && sortBy !== 'default' }">
-                    <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                </svg>
-            </button>
+        {{-- Sort Dropdown (Filament Component) --}}
+        <x-filament::dropdown placement="bottom-end">
+            <x-slot name="trigger">
+                <button
+                    type="button"
+                    class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100 flex items-center gap-0.5"
+                    :class="{ 'bg-white/20 text-white': sortBy !== 'default' }"
+                    title="Sort column"
+                >
+                    <x-filament::icon
+                        x-show="sortBy === 'default'"
+                        icon="heroicon-m-bars-3"
+                        class="h-4 w-4"
+                    />
+                    <x-filament::icon
+                        x-show="sortBy === 'name'"
+                        x-cloak
+                        icon="heroicon-m-language"
+                        class="h-4 w-4"
+                    />
+                    <x-filament::icon
+                        x-show="sortBy === 'due_date'"
+                        x-cloak
+                        icon="heroicon-m-calendar"
+                        class="h-4 w-4"
+                    />
+                    <x-filament::icon
+                        x-show="sortBy === 'linear_feet'"
+                        x-cloak
+                        icon="heroicon-m-chart-bar"
+                        class="h-4 w-4"
+                    />
+                    <x-filament::icon
+                        x-show="sortBy === 'days_left'"
+                        x-cloak
+                        icon="heroicon-m-bolt"
+                        class="h-4 w-4"
+                    />
+                    <x-filament::icon
+                        icon="heroicon-m-chevron-down"
+                        class="h-3 w-3 transition-transform"
+                        ::class="{ 'rotate-180': sortDir === 'desc' && sortBy !== 'default' }"
+                    />
+                </button>
+            </x-slot>
 
-            {{-- Sort Dropdown Menu --}}
-            <div
-                x-show="sortMenuOpen"
-                @click.away="sortMenuOpen = false"
-                x-cloak
-                x-transition:enter="transition ease-out duration-100"
-                x-transition:enter-start="opacity-0 scale-95"
-                x-transition:enter-end="opacity-100 scale-100"
-                x-transition:leave="transition ease-in duration-75"
-                x-transition:leave-start="opacity-100 scale-100"
-                x-transition:leave-end="opacity-0 scale-95"
-                style="position: absolute; top: 100%; right: 0; margin-top: 4px; background: white; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border: 1px solid #e5e7eb; min-width: 150px; z-index: 50;"
-            >
-                <div style="padding: 4px 0;">
-                    <template x-for="opt in sortOptions" :key="opt.key">
-                        <button
-                            @click="setSort(opt.key)"
-                            type="button"
-                            style="width: 100%; padding: 8px 12px; text-align: left; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: #374151; background: transparent; border: none; cursor: pointer;"
-                            :style="sortBy === opt.key ? 'background: #f3f4f6; font-weight: 600;' : ''"
-                            onmouseover="if(this.style.background !== 'rgb(243, 244, 246)') this.style.background='#f9fafb'"
-                            onmouseout="if(this.style.fontWeight !== '600') this.style.background='transparent'"
-                        >
-                            <span class="flex items-center gap-2">
-                                <span x-text="opt.icon" style="width: 20px; text-align: center;"></span>
-                                <span x-text="opt.label"></span>
-                            </span>
-                            <span x-show="sortBy === opt.key" style="color: #3b82f6;">
-                                <svg x-show="sortDir === 'asc'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width: 14px; height: 14px;">
-                                    <path fill-rule="evenodd" d="M11.78 9.78a.75.75 0 0 1-1.06 0L8 7.06 5.28 9.78a.75.75 0 0 1-1.06-1.06l3.25-3.25a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" />
-                                </svg>
-                                <svg x-show="sortDir === 'desc'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" style="width: 14px; height: 14px;">
-                                    <path fill-rule="evenodd" d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-                                </svg>
-                            </span>
-                        </button>
-                    </template>
-                </div>
-            </div>
-        </div>
+            <x-filament::dropdown.list>
+                <x-filament::dropdown.list.item
+                    @click="setSort('default')"
+                    icon="heroicon-m-bars-3"
+                    :class="sortBy === 'default' ? 'bg-gray-100 dark:bg-gray-800' : ''"
+                >
+                    <span class="flex items-center justify-between w-full">
+                        Default
+                        <x-filament::icon
+                            x-show="sortBy === 'default'"
+                            icon="heroicon-m-check"
+                            class="h-4 w-4 text-primary-500"
+                        />
+                    </span>
+                </x-filament::dropdown.list.item>
+
+                <x-filament::dropdown.list.item
+                    @click="setSort('name')"
+                    icon="heroicon-m-language"
+                >
+                    <span class="flex items-center justify-between w-full">
+                        Name
+                        <span x-show="sortBy === 'name'" class="flex items-center text-primary-500">
+                            <x-filament::icon
+                                x-show="sortDir === 'asc'"
+                                icon="heroicon-m-arrow-up"
+                                class="h-4 w-4"
+                            />
+                            <x-filament::icon
+                                x-show="sortDir === 'desc'"
+                                x-cloak
+                                icon="heroicon-m-arrow-down"
+                                class="h-4 w-4"
+                            />
+                        </span>
+                    </span>
+                </x-filament::dropdown.list.item>
+
+                <x-filament::dropdown.list.item
+                    @click="setSort('due_date')"
+                    icon="heroicon-m-calendar"
+                >
+                    <span class="flex items-center justify-between w-full">
+                        Due Date
+                        <span x-show="sortBy === 'due_date'" class="flex items-center text-primary-500">
+                            <x-filament::icon
+                                x-show="sortDir === 'asc'"
+                                icon="heroicon-m-arrow-up"
+                                class="h-4 w-4"
+                            />
+                            <x-filament::icon
+                                x-show="sortDir === 'desc'"
+                                x-cloak
+                                icon="heroicon-m-arrow-down"
+                                class="h-4 w-4"
+                            />
+                        </span>
+                    </span>
+                </x-filament::dropdown.list.item>
+
+                <x-filament::dropdown.list.item
+                    @click="setSort('linear_feet')"
+                    icon="heroicon-m-chart-bar"
+                >
+                    <span class="flex items-center justify-between w-full">
+                        Linear Feet
+                        <span x-show="sortBy === 'linear_feet'" class="flex items-center text-primary-500">
+                            <x-filament::icon
+                                x-show="sortDir === 'asc'"
+                                icon="heroicon-m-arrow-up"
+                                class="h-4 w-4"
+                            />
+                            <x-filament::icon
+                                x-show="sortDir === 'desc'"
+                                x-cloak
+                                icon="heroicon-m-arrow-down"
+                                class="h-4 w-4"
+                            />
+                        </span>
+                    </span>
+                </x-filament::dropdown.list.item>
+
+                <x-filament::dropdown.list.item
+                    @click="setSort('days_left')"
+                    icon="heroicon-m-bolt"
+                >
+                    <span class="flex items-center justify-between w-full">
+                        Urgency
+                        <span x-show="sortBy === 'days_left'" class="flex items-center text-primary-500">
+                            <x-filament::icon
+                                x-show="sortDir === 'asc'"
+                                icon="heroicon-m-arrow-up"
+                                class="h-4 w-4"
+                            />
+                            <x-filament::icon
+                                x-show="sortDir === 'desc'"
+                                x-cloak
+                                icon="heroicon-m-arrow-down"
+                                class="h-4 w-4"
+                            />
+                        </span>
+                    </span>
+                </x-filament::dropdown.list.item>
+            </x-filament::dropdown.list>
+        </x-filament::dropdown>
 
         {{-- Add button --}}
-        <button
+        <x-filament::icon-button
             wire:click="openCreateModal('{{ $status['id'] }}')"
-            class="text-white/60 hover:text-white hover:bg-white/10 rounded p-1 transition-all duration-100"
-            title="Add project"
-        >
-            <x-heroicon-m-plus class="w-4 h-4" />
-        </button>
+            icon="heroicon-m-plus"
+            color="gray"
+            size="sm"
+            class="text-white/60 hover:text-white hover:bg-white/10"
+            label="Add project"
+        />
     </div>
 </div>
 

@@ -42,6 +42,7 @@ class Calendar extends Model
         'timezone',
         'hours_per_day',
         'is_active',
+        'is_default',
         'two_weeks_calendar',
         'flexible_hours',
         'full_time_required_hours',

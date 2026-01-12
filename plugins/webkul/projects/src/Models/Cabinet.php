@@ -12,6 +12,8 @@ use Webkul\Sale\Models\OrderLine;
 use Webkul\Security\Models\User;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
+use Webkul\Support\Traits\HasComplexityScore;
+use Webkul\Support\Traits\HasFormattedDimensions;
 
 /**
  * Cabinet Eloquent model
@@ -58,7 +60,7 @@ use Webkul\Chatter\Traits\HasLogActivity;
  */
 class Cabinet extends Model
 {
-    use SoftDeletes, HasChatter, HasLogActivity;
+    use SoftDeletes, HasChatter, HasLogActivity, HasComplexityScore, HasFormattedDimensions;
 
     protected $table = 'projects_cabinets';
 
@@ -140,6 +142,15 @@ class Cabinet extends Model
         'pocket_holes_at' => 'datetime',
         'doweled_at' => 'datetime',
     ];
+
+    /**
+     * Override width field for HasFormattedDimensions trait.
+     * Cabinet uses length_inches for cabinet width.
+     */
+    protected function getWidthField(): string
+    {
+        return 'length_inches';
+    }
 
     /**
      * Attributes to log for Chatter activity tracking

@@ -87,7 +87,7 @@
             {{-- Linear Feet Badge --}}
             @if(isset($node['linear_feet']) && $node['linear_feet'] > 0)
                 <span class="text-xs bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded font-semibold whitespace-nowrap">
-                    {{ number_format($node['linear_feet'], 1) }} LF
+                    {{ format_linear_feet($node['linear_feet']) }}
                 </span>
             @endif
 

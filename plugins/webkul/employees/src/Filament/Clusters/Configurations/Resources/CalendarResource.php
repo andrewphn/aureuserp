@@ -143,6 +143,19 @@ class CalendarResource extends Resource
                                             ->label(__('employees::filament/clusters/configurations/resources/calendar.form.sections.flexibility.fields.status'))
                                             ->default(true)
                                             ->inline(false),
+                                        Toggle::make('is_default')
+                                            ->label('Default Schedule')
+                                            ->helperText('Use this schedule for production estimates')
+                                            ->inline(false)
+                                            ->afterStateUpdated(function ($state, $record) {
+                                                if ($state && $record) {
+                                                    // Unset other defaults when this one is set
+                                                    \Webkul\Employee\Models\Calendar::where('id', '!=', $record->id)
+                                                        ->where('is_default', true)
+                                                        ->update(['is_default' => false]);
+                                                }
+                                            })
+                                            ->live(),
                                         Toggle::make('two_weeks_calendar')
                                             ->label(__('employees::filament/clusters/configurations/resources/calendar.form.sections.flexibility.fields.two-weeks-calendar'))
                                             ->inline(false)
@@ -196,6 +209,13 @@ class CalendarResource extends Resource
                     ->sortable()
                     ->label(__('employees::filament/clusters/configurations/resources/calendar.table.columns.status'))
                     ->boolean(),
+                IconColumn::make('is_default')
+                    ->sortable()
+                    ->label('Default')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-star')
+                    ->falseIcon('heroicon-o-minus')
+                    ->trueColor('warning'),
                 TextColumn::make('hours_per_day')
                     ->label(__('employees::filament/clusters/configurations/resources/calendar.table.columns.daily-hours'))
                     ->numeric()
@@ -414,6 +434,12 @@ class CalendarResource extends Resource
                                     IconEntry::make('is_active')
                                         ->boolean()
                                         ->label(__('employees::filament/clusters/configurations/resources/calendar.infolist.sections.flexibility.entries.status')),
+                                    IconEntry::make('is_default')
+                                        ->boolean()
+                                        ->label('Default Schedule')
+                                        ->trueIcon('heroicon-o-star')
+                                        ->falseIcon('heroicon-o-minus')
+                                        ->trueColor('warning'),
                                     IconEntry::make('two_weeks_calendar')
                                         ->boolean()
                                         ->placeholder('—')

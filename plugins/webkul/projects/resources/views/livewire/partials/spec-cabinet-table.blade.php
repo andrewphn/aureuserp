@@ -86,7 +86,7 @@
                             class="w-16 text-center px-2 py-2 rounded-md tabular-nums transition-all border border-transparent hover:border-dashed hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
                             title="Click to edit"
                         >
-                            <span class="text-gray-800 dark:text-gray-100" x-text="cabinet.length_inches ? cabinet.length_inches + '\"' : '-'"></span>
+                            <span class="text-gray-800 dark:text-gray-100" x-text="formatDimension(cabinet.length_inches)"></span>
                         </button>
                     </template>
                 </td>
@@ -112,7 +112,7 @@
                             class="w-16 text-center px-2 py-2 rounded-md tabular-nums transition-all border border-transparent hover:border-dashed hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
                             title="Click to edit"
                         >
-                            <span class="text-gray-800 dark:text-gray-100" x-text="cabinet.height_inches ? cabinet.height_inches + '\"' : '-'"></span>
+                            <span class="text-gray-800 dark:text-gray-100" x-text="formatDimension(cabinet.height_inches)"></span>
                         </button>
                     </template>
                 </td>
@@ -138,7 +138,7 @@
                             class="w-16 text-center px-2 py-2 rounded-md tabular-nums transition-all border border-transparent hover:border-dashed hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-300 dark:border-gray-600"
                             title="Click to edit"
                         >
-                            <span class="text-gray-800 dark:text-gray-100" x-text="cabinet.depth_inches ? cabinet.depth_inches + '\"' : '-'"></span>
+                            <span class="text-gray-800 dark:text-gray-100" x-text="formatDimension(cabinet.depth_inches)"></span>
                         </button>
                     </template>
                 </td>
@@ -194,20 +194,20 @@
                             <x-heroicon-m-square-2-stack class="w-4 h-4" />
                             <span x-show="(cabinet.children || []).length > 0" class="text-xs font-bold" x-text="(cabinet.children || []).length"></span>
                         </button>
-                        <button
-                            @click="$wire.mountAction('editNode', { nodePath: selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + cabIdx })"
-                            class="p-2 rounded-lg text-gray-400 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-600 hover:text-gray-700 dark:hover:text-gray-200"
-                            title="Edit Cabinet Details"
-                        >
-                            <x-heroicon-m-pencil-square class="w-4 h-4" />
-                        </button>
-                        <button
-                            @click="if(confirm('Delete this cabinet?')) deleteCabinet(cabIdx)"
-                            class="p-2 rounded-lg text-gray-400 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/40 hover:text-red-600 dark:hover:text-red-400"
-                            title="Delete Cabinet"
-                        >
-                            <x-heroicon-m-trash class="w-4 h-4" />
-                        </button>
+                        <x-filament::icon-button
+                            icon="heroicon-m-pencil-square"
+                            color="gray"
+                            size="sm"
+                            tooltip="Edit Cabinet Details"
+                            x-on:click="$wire.mountAction('editNode', { nodePath: selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + cabIdx })"
+                        />
+                        <x-filament::icon-button
+                            icon="heroicon-m-trash"
+                            color="danger"
+                            size="sm"
+                            tooltip="Delete Cabinet"
+                            x-on:click="if(confirm('Delete this cabinet?')) deleteCabinet(cabIdx)"
+                        />
                     </div>
                 </td>
             </tr>

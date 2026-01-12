@@ -27,7 +27,7 @@
                 <div class="flex items-center gap-4 text-sm">
                     <div class="flex items-center gap-1.5">
                         <span class="text-gray-500 dark:text-gray-300">Total:</span>
-                        <strong class="tabular-nums text-blue-600 dark:text-blue-400">{{ number_format($totalLinearFeet, 1) }} LF</strong>
+                        <strong class="tabular-nums text-blue-600 dark:text-blue-400">{{ format_linear_feet($totalLinearFeet) }}</strong>
                     </div>
                     <div class="flex items-center gap-1.5">
                         <span class="text-gray-500 dark:text-gray-300">Est:</span>
@@ -58,9 +58,9 @@
         {{-- Main Layout: Sidebar (40%) + Inspector (60%) --}}
         <div class="flex min-h-[550px] border rounded-xl overflow-hidden border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
 
-            {{-- Navigation Sidebar - 40% when expanded --}}
+            {{-- Navigation Sidebar - 200px min, 280px max when expanded --}}
             <div
-                :style="sidebarCollapsed ? 'width: 56px; flex: 0 0 56px;' : 'flex: 0 0 40%;'"
+                :style="sidebarCollapsed ? 'width: 56px; flex: 0 0 56px;' : 'flex: 0 0 280px; min-width: 200px; max-width: 280px;'"
                 class="border-r transition-all duration-200 flex flex-col overflow-hidden border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
             >
                 {{-- Sidebar Header with Collapse Toggle --}}
@@ -106,9 +106,9 @@
                 </div>
             </div>
 
-            {{-- Inspector Panel - 60% when sidebar expanded --}}
+            {{-- Inspector Panel - fills remaining space --}}
             <div
-                :style="sidebarCollapsed ? 'flex: 1 1 auto;' : 'flex: 0 0 60%;'"
+                style="flex: 1 1 auto; min-width: 0;"
                 class="flex flex-col overflow-hidden"
             >
                 {{-- Inspector Content --}}
@@ -126,7 +126,7 @@
                     <div class="flex items-center gap-6">
                         <div class="text-right">
                             <div class="text-[10px] uppercase tracking-wider font-medium text-gray-500 dark:text-gray-300">Total Linear Feet</div>
-                            <div class="text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">{{ number_format($totalLinearFeet, 1) }} LF</div>
+                            <div class="text-xl font-bold tabular-nums text-blue-600 dark:text-blue-400">{{ format_linear_feet($totalLinearFeet) }}</div>
                         </div>
                         <div class="w-px h-10 hidden sm:block bg-gray-200 dark:bg-gray-700"></div>
                         <div class="text-right">
@@ -218,6 +218,11 @@
 
 @script
 <script>
+// Initialize MeasurementFormatter with settings from PHP
+if (window.MeasurementFormatter) {
+    window.MeasurementFormatter.init(@js(measurement_settings()));
+}
+
 Alpine.data('specAccordionBuilder', (specData, expanded, pricingTiers, materialOptions, finishOptions) => ({
     specData: specData,
     expanded: expanded,

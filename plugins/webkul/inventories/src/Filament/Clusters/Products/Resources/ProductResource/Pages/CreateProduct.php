@@ -132,6 +132,13 @@ class CreateProduct extends BaseCreateProduct
         // Add any AI-collected images to Spatie media library
         $aiImages = $this->getAiImagesToAdd();
 
+        Log::info('handleRecordCreation - Checking for AI images', [
+            'product_id' => $record->id,
+            'ai_images_count' => count($aiImages),
+            'ai_images' => $aiImages,
+            'session_data' => session('ai_images_to_add'),
+        ]);
+
         if (!empty($aiImages)) {
             foreach ($aiImages as $imagePath) {
                 $fullPath = storage_path('app/public/' . $imagePath);
@@ -193,6 +200,10 @@ class CreateProduct extends BaseCreateProduct
                         }
                         if (!empty($currentData['reference'])) {
                             $searchContext['reference'] = $currentData['reference'];
+                        }
+                        // Include source_url if user provided one (for direct image extraction)
+                        if (!empty($currentData['source_url'])) {
+                            $searchContext['source_url'] = $currentData['source_url'];
                         }
                         // Try to get brand from tags or other fields if available
 
@@ -376,10 +387,14 @@ class CreateProduct extends BaseCreateProduct
                         // Download product image from URL
                         // For Richelieu products, extract the real image URL from the product page
                         $imageUrl = $data['image_url'] ?? null;
-                        $sourceUrl = $data['source_url'] ?? null;
+                        // Prefer user-provided source_url over AI-returned one for image extraction
+                        $sourceUrl = $currentData['source_url'] ?? $data['source_url'] ?? null;
 
                         if (!empty($sourceUrl) && str_contains($sourceUrl, 'richelieu.com')) {
-                            Log::info('AI Populate - Attempting to extract image from Richelieu page', ['source_url' => $sourceUrl]);
+                            Log::info('AI Populate - Attempting to extract image from Richelieu page', [
+                                'source_url' => $sourceUrl,
+                                'from_user' => !empty($currentData['source_url']),
+                            ]);
                             $extractedImageUrl = GeminiProductService::extractRichelieuImageUrl($sourceUrl);
                             if ($extractedImageUrl) {
                                 $imageUrl = $extractedImageUrl;
@@ -396,10 +411,9 @@ class CreateProduct extends BaseCreateProduct
                                 $downloadedPath = 'products/images/' . $downloadedImage;
                                 $this->addAiImageToAdd($downloadedPath);
                                 Log::info('AI Populate - Image queued for Spatie', ['path' => $downloadedPath]);
-
-                                // Also add to form state so it shows in preview
-                                // The SpatieMediaLibraryFileUpload expects file paths relative to storage/app/public
-                                $aiUpdates['product-images'] = [$downloadedPath];
+                                // NOTE: Do NOT add to form state - Spatie's addMedia() moves the file,
+                                // which causes saveRelationships() to fail and rollback the transaction.
+                                // The image will be added via handleRecordCreation after the product is saved.
                             }
                         }
 
