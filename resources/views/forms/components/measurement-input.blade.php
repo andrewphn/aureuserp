@@ -10,6 +10,15 @@
         fn($matches) => '[' . $matches[1] . ']',
         $statePath
     );
+    
+    // Build unit selector field path (same as state path but with _unit suffix)
+    // For nested repeaters, we need the full path
+    $unitSelectorPath = $statePath . '_unit';
+    $alpineUnitSelectorPath = preg_replace_callback(
+        '/\.(\d+)(?=\.|$)/',
+        fn($matches) => '[' . $matches[1] . ']',
+        $unitSelectorPath
+    );
 @endphp
 
 <x-dynamic-component :component="$getFieldWrapperView()" :field="$field">
@@ -45,7 +54,7 @@
                     class="fi-fo-select"
                 >
                     <select
-                        wire:model.live="{{ $unitSelectorField }}"
+                        x-model="{{ $alpineUnitSelectorPath }}"
                         @if($isDisabled()) disabled @endif
                         class="fi-input block w-full border-none bg-transparent px-3 py-1.5 pr-8 text-base text-gray-950 outline-none transition duration-75 placeholder:text-gray-400 focus:ring-0 disabled:text-gray-500 disabled:[-webkit-text-fill-color:theme(colors.gray.500)] disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.400)] sm:text-sm sm:leading-6 dark:text-white dark:placeholder:text-gray-500 dark:disabled:text-gray-400 dark:disabled:[-webkit-text-fill-color:theme(colors.gray.400)] dark:disabled:placeholder:[-webkit-text-fill-color:theme(colors.gray.500)] appearance-none cursor-pointer"
                     >
