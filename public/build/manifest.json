@@ -1,0 +1,82 @@
+{
+  "__commonjsHelpers-Cpj98o6Y.js": {
+    "file": "assets/_commonjsHelpers-Cpj98o6Y.js",
+    "name": "_commonjsHelpers"
+  },
+  "_pdf-BnRl7pXp.js": {
+    "file": "assets/pdf-BnRl7pXp.js",
+    "name": "pdf"
+  },
+  "plugins/webkul/projects/resources/css/pdf-annotation-viewer.css": {
+    "file": "assets/pdf-annotation-viewer-C7h5RnYx.css",
+    "src": "plugins/webkul/projects/resources/css/pdf-annotation-viewer.css",
+    "isEntry": true
+  },
+  "plugins/webkul/projects/resources/js/pdf-viewer.js": {
+    "file": "assets/pdf-viewer-DY7ZUxcN.js",
+    "name": "pdf-viewer",
+    "src": "plugins/webkul/projects/resources/js/pdf-viewer.js",
+    "isEntry": true,
+    "imports": [
+      "_pdf-BnRl7pXp.js"
+    ]
+  },
+  "resources/css/app.css": {
+    "file": "assets/app-tn0RQdqM.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/css/filament/admin/theme.css": {
+    "file": "assets/app-tn0RQdqM.css",
+    "src": "resources/css/app.css",
+    "isEntry": true
+  },
+  "resources/js/annotations.js": {
+    "file": "assets/annotations-x1wwyz0Y.js",
+    "name": "annotations",
+    "src": "resources/js/annotations.js",
+    "isEntry": true,
+    "imports": [
+      "_pdf-BnRl7pXp.js",
+      "resources/js/pdf-document-manager.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-B4pqbnMV.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-Cpj98o6Y.js",
+      "plugins/webkul/projects/resources/js/pdf-viewer.js",
+      "_pdf-BnRl7pXp.js"
+    ]
+  },
+  "resources/js/pdf-document-manager.js": {
+    "file": "assets/pdf-document-manager-BLVVX3om.js",
+    "name": "pdf-document-manager",
+    "src": "resources/js/pdf-document-manager.js",
+    "isEntry": true,
+    "imports": [
+      "_pdf-BnRl7pXp.js"
+    ]
+  },
+  "resources/js/pdf-thumbnail.js": {
+    "file": "assets/pdf-thumbnail-BZsB6Pf2.js",
+    "name": "pdf-thumbnail",
+    "src": "resources/js/pdf-thumbnail.js",
+    "isEntry": true,
+    "imports": [
+      "_pdf-BnRl7pXp.js"
+    ]
+  },
+  "resources/js/pdf-viewer.js": {
+    "file": "assets/pdf-viewer-YAUn02-E.js",
+    "name": "pdf-viewer",
+    "src": "resources/js/pdf-viewer.js",
+    "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-Cpj98o6Y.js"
+    ]
+  }
+}
