@@ -55,6 +55,7 @@ class CabinetDimensionsFields
     /**
      * Get dimension input field with fractional support
      * Allows entering "41 5/16", "41-5/16", "41.3125", etc. and converts to decimal
+     * Displays the original fraction in brackets after conversion
      * 
      * @param string $name Field name
      * @param string $label Field label
@@ -72,11 +73,20 @@ class CabinetDimensionsFields
         ?float $minValue = null,
         ?float $maxValue = null
     ): TextInput {
+        $originalFieldName = $name . '_original_fraction';
+        
         $field = TextInput::make($name)
             ->label($label)
             ->placeholder('e.g. 41 5/16 or 41-5/16')
-            ->suffix('in')
-            ->helperText('Enter as decimal (41.3125) or fraction (41 5/16)')
+            ->helperText(function (callable $get) use ($name, $originalFieldName) {
+                $original = $get($originalFieldName);
+                if ($original) {
+                    // Show the fractional representation
+                    return $original;
+                }
+                // Default helper text
+                return 'Enter as decimal (41.3125) or fraction (41 5/16)';
+            })
             ->live(debounce: 500);
 
         if ($default !== null) {
@@ -88,18 +98,35 @@ class CabinetDimensionsFields
         }
 
         // Parse fractional input and convert to decimal
-        $field->afterStateUpdated(function ($state, callable $set) use ($name) {
+        $field->afterStateUpdated(function ($state, callable $set, callable $get) use ($name, $originalFieldName) {
             if ($state !== null && $state !== '') {
+                // Check if input looks like a fraction (contains / or space/dash before /)
+                $isFractionInput = preg_match('/[\d\s\-]+\/\d+/', (string) $state) || 
+                                   preg_match('/\d+\s+\d+\/\d+/', (string) $state) ||
+                                   preg_match('/\d+-\d+\/\d+/', (string) $state);
+                
                 $decimal = MeasurementFormatter::parse($state);
                 if ($decimal !== null) {
                     // Round to 4 decimal places for precision
                     $rounded = round($decimal, 4);
-                    // Only update if the parsed value differs from what was entered
-                    // This allows users to see their fraction while we store the decimal
-                    if (abs($rounded - (float) $state) > 0.0001) {
+                    
+                    // If input was a fraction, store the original fraction
+                    if ($isFractionInput && abs($rounded - (float) $state) > 0.0001) {
+                        $set($originalFieldName, $state);
+                        // Store the decimal value (this is what gets saved)
                         $set($name, $rounded);
+                    } else {
+                        // User entered decimal directly - clear original fraction
+                        $set($originalFieldName, null);
+                        // Store the decimal value
+                        if (abs($rounded - (float) $state) > 0.0001) {
+                            $set($name, $rounded);
+                        }
                     }
                 }
+            } else {
+                // Clear original when field is cleared
+                $set($originalFieldName, null);
             }
         });
 
