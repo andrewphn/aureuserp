@@ -5,6 +5,11 @@
 
     RewriteEngine On
 
+    # Force HTTPS redirect (for staging/production)
+    RewriteCond %{HTTPS} off
+    RewriteCond %{HTTP_HOST} ^(staging\.|www\.)?tcswoodwork\.com$ [NC]
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
