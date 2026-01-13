@@ -173,7 +173,8 @@ class MeasurementInput extends TextInput
             // Convert to inches for storage
             $inches = $this->convertToInches($decimal, $unit);
             
-            return $inches !== null ? round($inches, 4) : null;
+            // Return exact value without rounding to preserve precision
+            return $inches;
         });
 
         // After state updated (on blur/tab) - normalize the display value according to settings
