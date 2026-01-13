@@ -21,9 +21,9 @@
                         :required="$isRequired()"
                         :placeholder="$getPlaceholder()"
                         {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
-                        :attributes="
+                        {{
                             \Filament\Support\prepare_inherited_attributes($attributes)
-                        "
+                        }}
                     />
                 </x-filament::input.wrapper>
             </div>
@@ -69,9 +69,9 @@
                 :required="$isRequired()"
                 :placeholder="$getPlaceholder()"
                 {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
-                :attributes="
+                {{
                     \Filament\Support\prepare_inherited_attributes($attributes)
-                "
+                }}
             />
         </x-filament::input.wrapper>
     @endif
