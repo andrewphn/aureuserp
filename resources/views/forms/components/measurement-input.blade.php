@@ -16,13 +16,15 @@
                 >
                     <x-filament::input
                         type="text"
-                        id="{{ $getId() }}"
-                        @if($isDisabled()) disabled @endif
-                        @if($isRequired()) required @endif
-                        @if($getPlaceholder()) placeholder="{{ $getPlaceholder() }}" @endif
-                        {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
                         {{
-                            \Filament\Support\prepare_inherited_attributes($attributes)
+                            $getExtraInputAttributeBag()
+                                ->merge([
+                                    'id' => $getId(),
+                                    'disabled' => $isDisabled(),
+                                    'required' => $isRequired(),
+                                    'placeholder' => filled($getPlaceholder()) ? e($getPlaceholder()) : null,
+                                    $applyStateBindingModifiers('wire:model') => $statePath,
+                                ], escape: false)
                         }}
                     />
                 </x-filament::input.wrapper>
@@ -64,13 +66,15 @@
         >
             <x-filament::input
                 type="text"
-                id="{{ $getId() }}"
-                @if($isDisabled()) disabled @endif
-                @if($isRequired()) required @endif
-                @if($getPlaceholder()) placeholder="{{ $getPlaceholder() }}" @endif
-                {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
                 {{
-                    \Filament\Support\prepare_inherited_attributes($attributes)
+                    $getExtraInputAttributeBag()
+                        ->merge([
+                            'id' => $getId(),
+                            'disabled' => $isDisabled(),
+                            'required' => $isRequired(),
+                            'placeholder' => filled($getPlaceholder()) ? e($getPlaceholder()) : null,
+                            $applyStateBindingModifiers('wire:model') => $statePath,
+                        ], escape: false)
                 }}
             />
         </x-filament::input.wrapper>
