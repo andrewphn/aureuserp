@@ -96,8 +96,9 @@ class MeasurementFormatter
      */
     public function formatDecimal(float $inches, bool $showSymbol = true): string
     {
-        // Format with 2 decimals, then trim trailing zeros
-        $formatted = number_format($inches, 2);
+        // Format with 4 decimals to preserve precision (e.g., 41.3125), then trim trailing zeros
+        // This ensures fractional measurements like "41-5/16" (41.3125) display correctly
+        $formatted = number_format($inches, 4);
         $formatted = rtrim(rtrim($formatted, '0'), '.');
 
         return $showSymbol ? $formatted . '"' : $formatted;
