@@ -24,15 +24,16 @@ class ManageMeasurement extends SettingsPage
 {
     use HasPageShield;
 
+    protected static ?string $cluster = Settings::class;
+
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-ruler-scale';
-
-    protected static string|UnitEnum|null $navigationGroup = 'General';
-
-    protected static ?int $navigationSort = 5;
 
     protected static string $settings = MeasurementSettings::class;
 
-    protected static ?string $cluster = Settings::class;
+    public static function getNavigationGroup(): string
+    {
+        return Settings::getNavigationGroup();
+    }
 
     public function getBreadcrumbs(): array
     {
