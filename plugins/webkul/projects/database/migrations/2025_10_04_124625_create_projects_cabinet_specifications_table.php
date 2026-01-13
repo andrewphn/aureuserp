@@ -49,15 +49,16 @@ class extends Migration
                 ->comment('Selected cabinet variant (determines price/LF and attributes)');
 
             // Physical Dimensions (what shop needs to build)
-            $table->decimal('length_inches', 8, 2)
+            // Using decimal(10,4) to support fractional measurements like "41-5/16" (41.3125) without rounding
+            $table->decimal('length_inches', 10, 4)
                 ->comment('Cabinet length in inches (determines linear feet)');
-            $table->decimal('width_inches', 8, 2)
+            $table->decimal('width_inches', 10, 4)
                 ->nullable()
                 ->comment('Cabinet width/depth in inches');
-            $table->decimal('depth_inches', 8, 2)
+            $table->decimal('depth_inches', 10, 4)
                 ->nullable()
                 ->comment('Cabinet depth in inches (12" for wall, 24" for base standard)');
-            $table->decimal('height_inches', 8, 2)
+            $table->decimal('height_inches', 10, 4)
                 ->nullable()
                 ->comment('Cabinet height in inches (30" for base, 84-96" for tall)');
 
