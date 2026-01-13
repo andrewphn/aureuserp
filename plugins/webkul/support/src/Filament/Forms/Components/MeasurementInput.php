@@ -119,12 +119,15 @@ class MeasurementInput extends TextInput
             }
 
             // If state is already a fraction string (user is typing), return it as-is
-            if (is_string($state) && (
-                str_contains($state, '/') || 
-                preg_match('/\d+\s+\d+\/\d+/', $state) ||
-                preg_match('/\d+-\d+\/\d+/', $state)
+            // Strip quote marks for matching but preserve the original state for display
+            $cleanState = is_string($state) ? rtrim($state, ' "\'') : $state;
+            if (is_string($cleanState) && (
+                str_contains($cleanState, '/') || 
+                preg_match('/\d+\s+\d+\/\d+/', $cleanState) ||
+                preg_match('/\d+-\d+\/\d+/', $cleanState)
             )) {
-                return $state;
+                // Return cleaned state (without quote marks) for consistent formatting
+                return $cleanState;
             }
 
             // If it's a decimal number, format according to settings (default: fractional)
@@ -154,11 +157,14 @@ class MeasurementInput extends TextInput
                 return null;
             }
 
+            // Strip quote marks and other unit symbols from the end for parsing
+            $cleanState = is_string($state) ? rtrim($state, ' "\'') : $state;
+
             // Get the input unit
             $unit = $this->showUnitSelector ? ($get($this->unitSelectorField) ?? 'inches') : 'inches';
             
             // Parse the input value
-            $decimal = MeasurementFormatter::parse($state);
+            $decimal = MeasurementFormatter::parse($cleanState);
             
             if ($decimal === null) {
                 return null;
@@ -179,10 +185,12 @@ class MeasurementInput extends TextInput
             }
 
             // Check if input looks like a fraction (with dash or space)
-            $isFractionInput = is_string($state) && (
-                str_contains($state, '/') || 
-                preg_match('/\d+\s+\d+\/\d+/', $state) ||
-                preg_match('/\d+-\d+\/\d+/', $state)
+            // Strip quote marks and unit symbols for matching
+            $cleanState = is_string($state) ? rtrim($state, ' "\'') : $state;
+            $isFractionInput = is_string($cleanState) && (
+                str_contains($cleanState, '/') || 
+                preg_match('/\d+\s+\d+\/\d+/', $cleanState) ||
+                preg_match('/\d+-\d+\/\d+/', $cleanState)
             );
 
             if ($isFractionInput) {
@@ -190,8 +198,8 @@ class MeasurementInput extends TextInput
                 // This converts "41-5/16" → 41.3125 → "41 5/16" (proper format with space)
                 $formatter = new MeasurementFormatter();
                 
-                // Parse the fraction to decimal
-                $decimal = MeasurementFormatter::parse($state);
+                // Parse the fraction to decimal (use cleaned state without quote marks)
+                $decimal = MeasurementFormatter::parse($cleanState);
                 
                 if ($decimal !== null) {
                     // Get settings to determine display format (default to imperial_fraction)
