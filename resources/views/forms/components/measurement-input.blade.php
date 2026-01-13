@@ -16,10 +16,10 @@
                 >
                     <x-filament::input
                         type="text"
-                        :id="$getId()"
-                        :disabled="$isDisabled()"
-                        :required="$isRequired()"
-                        :placeholder="$getPlaceholder()"
+                        id="{{ $getId() }}"
+                        @if($isDisabled()) disabled @endif
+                        @if($isRequired()) required @endif
+                        @if($getPlaceholder()) placeholder="{{ $getPlaceholder() }}" @endif
                         {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
                         {{
                             \Filament\Support\prepare_inherited_attributes($attributes)
@@ -64,10 +64,10 @@
         >
             <x-filament::input
                 type="text"
-                :id="$getId()"
-                :disabled="$isDisabled()"
-                :required="$isRequired()"
-                :placeholder="$getPlaceholder()"
+                id="{{ $getId() }}"
+                @if($isDisabled()) disabled @endif
+                @if($isRequired()) required @endif
+                @if($getPlaceholder()) placeholder="{{ $getPlaceholder() }}" @endif
                 {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
                 {{
                     \Filament\Support\prepare_inherited_attributes($attributes)
