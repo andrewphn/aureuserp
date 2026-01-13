@@ -81,9 +81,11 @@ class ManageMeasurement extends SettingsPage
                                 4 => 'Quarters (1/4")',
                                 8 => 'Eighths (1/8")',
                                 16 => 'Sixteenths (1/16")',
+                                32 => 'Thirty-seconds (1/32")',
+                                64 => 'Sixty-fourths (1/64")',
                             ])
                             ->visible(fn ($get) => $get('display_unit') === 'imperial_fraction')
-                            ->helperText('Smallest fraction unit to display. Eighths (1/8") is recommended for woodworking.'),
+                            ->helperText('Smallest fraction unit to display. Sixty-fourths (1/64") provides the finest precision for woodworking.'),
 
                         Toggle::make('show_unit_symbol')
                             ->label('Show Unit Symbol')
@@ -126,15 +128,16 @@ class ManageMeasurement extends SettingsPage
                             ->label('')
                             ->content(function ($get) {
                                 $displayUnit = $get('display_unit') ?? 'imperial_decimal';
-                                $fractionPrecision = $get('fraction_precision') ?? 8;
+                                $fractionPrecision = $get('fraction_precision') ?? 64;
                                 $showSymbol = $get('show_unit_symbol') ?? true;
 
-                                // Example values
+                                // Example values including fractional precision examples
                                 $examples = [
-                                    24.5 => 'Width example',
-                                    36.0 => 'Height example',
-                                    0.75 => 'Material thickness',
-                                    18.125 => 'Custom dimension',
+                                    24.5 => 'Width example (24.5")',
+                                    36.0 => 'Height example (36")',
+                                    0.75 => 'Material thickness (3/4")',
+                                    18.125 => 'Custom dimension (18 1/8")',
+                                    41.3125 => 'Fine precision (41 5/16")',
                                 ];
 
                                 $previews = [];
