@@ -57,19 +57,23 @@ class MeasurementInput extends TextInput
                 return 'Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm, 41 cm, 41 m). Defaults to inches.';
             }
 
+            // Strip quote marks and unit symbols before parsing to ensure accurate parsing
+            $cleanValue = is_string($value) ? rtrim($value, ' "\'') : $value;
+
             // Detect unit from input string (before parsing)
-            $detectedUnit = $this->detectUnitFromInput($value);
+            $detectedUnit = $this->detectUnitFromInput($cleanValue);
             $inputUnit = $detectedUnit ?? $unit;
             
             // Extract numeric value from input (remove unit suffix for display)
-            $numericValue = $value;
+            $numericValue = $cleanValue;
             if ($detectedUnit) {
                 $unitPattern = '/\s*(yd|yard|yards|ft|feet|foot|\'|in|inch|inches|"|mm|millimeter|millimeters|cm|centimeter|centimeters|m|meter|meters)\s*$/i';
-                $numericValue = preg_replace($unitPattern, '', $value);
+                $numericValue = preg_replace($unitPattern, '', $cleanValue);
             }
             
             // Parse the input value (handles fractions, decimals, etc.) - this converts to inches
-            $inches = MeasurementFormatter::parse($value);
+            // Use cleanValue to ensure quote marks don't interfere with parsing
+            $inches = MeasurementFormatter::parse($cleanValue);
             
             if ($inches === null) {
                 return 'Invalid format. Enter as decimal (41.3125), fraction (41 5/16), or with unit (41 yd, 41 mm).';
