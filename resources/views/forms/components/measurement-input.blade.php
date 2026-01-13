@@ -14,8 +14,7 @@
                     :valid="! $errors->has($getStatePath())"
                     class="fi-fo-text-input"
                 >
-                    <x-filament::input
-                        type="text"
+                    <input
                         {{
                             $getExtraInputAttributeBag()
                                 ->merge([
@@ -23,8 +22,10 @@
                                     'disabled' => $isDisabled(),
                                     'required' => $isRequired(),
                                     'placeholder' => filled($getPlaceholder()) ? e($getPlaceholder()) : null,
+                                    'type' => 'text',
                                     $applyStateBindingModifiers('wire:model') => $statePath,
                                 ], escape: false)
+                                ->class(['fi-input'])
                         }}
                     />
                 </x-filament::input.wrapper>
@@ -64,8 +65,7 @@
             :valid="! $errors->has($getStatePath())"
             class="fi-fo-text-input"
         >
-            <x-filament::input
-                type="text"
+            <input
                 {{
                     $getExtraInputAttributeBag()
                         ->merge([
@@ -73,8 +73,10 @@
                             'disabled' => $isDisabled(),
                             'required' => $isRequired(),
                             'placeholder' => filled($getPlaceholder()) ? e($getPlaceholder()) : null,
+                            'type' => 'text',
                             $applyStateBindingModifiers('wire:model') => $statePath,
                         ], escape: false)
+                        ->class(['fi-input'])
                 }}
             />
         </x-filament::input.wrapper>
