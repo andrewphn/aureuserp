@@ -26,7 +26,7 @@ class ManageMeasurement extends SettingsPage
 
     protected static ?string $cluster = Settings::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-ruler';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
     protected static string $settings = MeasurementSettings::class;
 
