@@ -278,6 +278,15 @@ class ProjectSummarySidebar extends Component
     }
 
     /**
+     * Get the project record (alias for getProjectProperty for compatibility with Filament patterns)
+     * Used by widgets that expect getRecord() method
+     */
+    public function getRecord(): ?Project
+    {
+        return $this->project;
+    }
+
+    /**
      * Get the customer name from partner_id
      */
     public function getCustomerNameProperty(): ?string
