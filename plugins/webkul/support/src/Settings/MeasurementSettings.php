@@ -20,7 +20,8 @@ class MeasurementSettings extends Settings
 
     /**
      * Fraction precision for imperial_fraction mode.
-     * Options: 2 (1/2), 4 (1/4), 8 (1/8), 16 (1/16)
+     * Options: 2 (1/2), 4 (1/4), 8 (1/8), 16 (1/16), 32 (1/32), 64 (1/64)
+     * Default: 64 for fine woodworking precision
      */
     public int $fraction_precision;
 

@@ -33,7 +33,7 @@ class MeasurementFormatter
      */
     protected array $defaults = [
         'display_unit' => 'imperial_fraction',
-        'fraction_precision' => 8,
+        'fraction_precision' => 64, // Support up to 1/64" precision for fine woodworking measurements
         'show_unit_symbol' => true,
         'metric_precision' => 0,
         'linear_feet_precision' => 2,

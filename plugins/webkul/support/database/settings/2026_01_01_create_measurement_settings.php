@@ -13,8 +13,9 @@ return new class extends SettingsMigration
         // Default to imperial_fraction to show fractional inches by default
         $this->migrator->add('measurement.display_unit', 'imperial_fraction');
 
-        // Fraction precision: 2 (1/2), 4 (1/4), 8 (1/8), 16 (1/16)
-        $this->migrator->add('measurement.fraction_precision', 8);
+        // Fraction precision: 2 (1/2), 4 (1/4), 8 (1/8), 16 (1/16), 32 (1/32), 64 (1/64)
+        // Default to 64 for fine woodworking precision
+        $this->migrator->add('measurement.fraction_precision', 64);
 
         // Whether to show unit symbol (" or mm)
         $this->migrator->add('measurement.show_unit_symbol', true);
