@@ -4,8 +4,11 @@
             apiEndpoint: '{{ $getApiEndpoint() }}',
             documentType: '{{ $getDocumentType() }}',
             fieldMappings: @js($getFieldMappings()),
+            lineMappings: @js($getLineMappings()),
             showCamera: {{ $getShowCamera() ? 'true' : 'false' }},
-            autoApply: {{ $getAutoApply() ? 'true' : 'false' }}
+            autoApply: {{ $getAutoApply() ? 'true' : 'false' }},
+            confidenceThreshold: {{ $getConfidenceThreshold() }},
+            autoApplyThreshold: {{ $getAutoApplyThreshold() }}
         })"
         class="ai-document-scanner"
     >
@@ -207,12 +210,29 @@
                         x-show="result?.confidence"
                         class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium"
                         :class="{
-                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': result?.confidence >= 0.8,
-                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': result?.confidence >= 0.5 && result?.confidence < 0.8,
+                            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': result?.confidence >= autoApplyThreshold,
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': result?.confidence >= confidenceThreshold && result?.confidence < autoApplyThreshold,
+                            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': result?.confidence >= 0.5 && result?.confidence < confidenceThreshold,
                             'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': result?.confidence < 0.5
                         }"
                     >
                         <span x-text="Math.round((result?.confidence || 0) * 100) + '% confidence'"></span>
+                    </span>
+                    {{-- Review Badge --}}
+                    <span
+                        x-show="result?.needs_review"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                    >
+                        <x-heroicon-m-exclamation-triangle class="w-3 h-3 mr-1" />
+                        Review Needed
+                    </span>
+                    {{-- Auto-apply eligible --}}
+                    <span
+                        x-show="result?.can_auto_apply"
+                        class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                    >
+                        <x-heroicon-m-check-badge class="w-3 h-3 mr-1" />
+                        Auto-Apply OK
                     </span>
                 </div>
             </div>
@@ -288,11 +308,36 @@
                                 </div>
                                 <div class="text-right">
                                     <p class="text-sm font-medium" x-text="'Qty: ' + (line.quantity_shipped || line.quantity || 0)"></p>
-                                    <span
-                                        :class="(line.product_match?.matched || line.product_matched) ? 'text-green-600' : 'text-yellow-600'"
-                                        class="text-xs"
-                                        x-text="(line.product_match?.matched || line.product_matched) ? 'Matched' : 'Not Found'"
-                                    ></span>
+                                    <div class="flex items-center gap-1 justify-end">
+                                        <span
+                                            :class="(line.product_match?.matched || line.product_matched) ? 'text-green-600' : 'text-yellow-600'"
+                                            class="text-xs"
+                                            x-text="(line.product_match?.matched || line.product_matched) ? 'Matched' : 'Not Found'"
+                                        ></span>
+                                        {{-- Line confidence --}}
+                                        <span
+                                            x-show="line.product_match?.confidence"
+                                            class="text-xs px-1.5 py-0.5 rounded"
+                                            :class="{
+                                                'bg-green-100 text-green-700': line.product_match?.confidence >= 0.9,
+                                                'bg-yellow-100 text-yellow-700': line.product_match?.confidence >= 0.7 && line.product_match?.confidence < 0.9,
+                                                'bg-red-100 text-red-700': line.product_match?.confidence < 0.7
+                                            }"
+                                            x-text="Math.round((line.product_match?.confidence || 0) * 100) + '%'"
+                                        ></span>
+                                        {{-- Review flag --}}
+                                        <span
+                                            x-show="line.requires_review"
+                                            class="text-yellow-500"
+                                            title="Needs manual review"
+                                        >⚠️</span>
+                                    </div>
+                                    {{-- Match method --}}
+                                    <p
+                                        x-show="line.product_match?.match_method"
+                                        class="text-xs text-gray-400 mt-0.5"
+                                        x-text="'via ' + (line.product_match?.match_method || '').replace('_', ' ')"
+                                    ></p>
                                 </div>
                             </div>
                             {{-- Verification Status --}}
@@ -314,6 +359,106 @@
                 </div>
             </div>
 
+            {{-- Unmatched Items Review Panel --}}
+            <div x-show="getUnmatchedItems().length > 0" class="mb-3">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs font-medium text-yellow-600 dark:text-yellow-400 uppercase flex items-center gap-1">
+                        <x-heroicon-m-exclamation-triangle class="w-4 h-4" />
+                        Unmatched Items - Review & Learn
+                    </span>
+                    <button
+                        type="button"
+                        x-on:click="showUnmatchedReview = !showUnmatchedReview"
+                        class="text-xs text-primary-600 hover:text-primary-700"
+                    >
+                        <span x-text="showUnmatchedReview ? 'Hide Review' : 'Review Items'"></span>
+                    </button>
+                </div>
+                
+                <div x-show="showUnmatchedReview" x-collapse class="space-y-3">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 bg-yellow-50 dark:bg-yellow-900/20 p-2 rounded">
+                        Match unmatched vendor SKUs to your products. The AI will learn these mappings for future scans.
+                    </p>
+                    
+                    <template x-for="(item, idx) in getUnmatchedItems()" :key="idx">
+                        <div class="p-3 bg-white dark:bg-gray-800 rounded-lg border border-yellow-200 dark:border-yellow-800">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <p class="font-medium text-sm text-gray-900 dark:text-white" x-text="item.description || 'Unknown Product'"></p>
+                                    <div class="flex gap-3 text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        <span>Vendor SKU: <strong class="text-gray-700 dark:text-gray-300" x-text="item.vendor_sku || item.sku || 'N/A'"></strong></span>
+                                        <span x-show="item.internal_sku">Internal: <strong x-text="item.internal_sku"></strong></span>
+                                        <span>Qty: <strong x-text="item.quantity_shipped || item.quantity || 0"></strong></span>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                    Needs Match
+                                </span>
+                            </div>
+                            
+                            {{-- Product Selection --}}
+                            <div class="mt-3">
+                                <label class="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                    Match to Product:
+                                </label>
+                                <div class="flex gap-2">
+                                    <select
+                                        x-model="unmatchedSelections[idx]"
+                                        class="flex-1 text-sm rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                                    >
+                                        <option value="">-- Select Product --</option>
+                                        <template x-for="product in allProducts" :key="product.id">
+                                            <option :value="product.id" x-text="product.name + (product.reference ? ' [' + product.reference + ']' : '')"></option>
+                                        </template>
+                                    </select>
+                                    <button
+                                        type="button"
+                                        x-on:click="openCreateProductModal(idx, item)"
+                                        class="px-3 py-2 text-xs font-medium text-primary-600 bg-primary-50 dark:bg-primary-900/30 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/50"
+                                        title="Create New Product"
+                                    >
+                                        <x-heroicon-m-plus class="w-4 h-4" />
+                                    </button>
+                                </div>
+                                {{-- Suggested Matches --}}
+                                <div x-show="item.suggestions?.length > 0" class="mt-2">
+                                    <span class="text-xs text-gray-400">Suggested:</span>
+                                    <div class="flex flex-wrap gap-1 mt-1">
+                                        <template x-for="suggestion in (item.suggestions || []).slice(0, 3)" :key="suggestion.id">
+                                            <button
+                                                type="button"
+                                                x-on:click="unmatchedSelections[idx] = suggestion.id"
+                                                class="px-2 py-1 text-xs rounded bg-gray-100 dark:bg-gray-700 hover:bg-primary-100 dark:hover:bg-primary-900/50 text-gray-700 dark:text-gray-300"
+                                                x-text="suggestion.name"
+                                            ></button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    
+                    {{-- Learn All Button --}}
+                    <div class="flex gap-2 pt-2">
+                        <button
+                            type="button"
+                            x-on:click="learnAllMappings()"
+                            :disabled="!hasUnmatchedSelections()"
+                            :class="hasUnmatchedSelections() ? 'bg-primary-600 hover:bg-primary-700' : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'"
+                            class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-colors"
+                        >
+                            <x-heroicon-m-academic-cap class="w-4 h-4" />
+                            Learn & Save Mappings
+                        </button>
+                    </div>
+                    
+                    {{-- Learning Status --}}
+                    <div x-show="learningStatus" class="p-2 rounded-lg text-sm" :class="learningStatus?.success ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300' : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'">
+                        <span x-text="learningStatus?.message"></span>
+                    </div>
+                </div>
+            </div>
+
             {{-- Action Buttons --}}
             <div class="flex gap-2 mt-4">
                 <button
@@ -332,6 +477,108 @@
                     <x-heroicon-m-x-mark class="w-4 h-4" />
                     Clear
                 </button>
+            </div>
+        </div>
+
+        {{-- Create Product Modal --}}
+        <div
+            x-show="showCreateProductModal"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+            x-cloak
+        >
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-lg w-full mx-4 overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                    <h4 class="text-lg font-medium text-gray-900 dark:text-white">Create New Product</h4>
+                    <button
+                        type="button"
+                        x-on:click="showCreateProductModal = false"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                        <x-heroicon-m-x-mark class="w-6 h-6" />
+                    </button>
+                </div>
+                <div class="p-4 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Product Name</label>
+                        <input
+                            type="text"
+                            x-model="newProduct.name"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                        />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Internal SKU/Reference</label>
+                        <input
+                            type="text"
+                            x-model="newProduct.reference"
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                        />
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Thickness</label>
+                            <input
+                                type="text"
+                                x-model="newProduct.thickness"
+                                placeholder="e.g., 3/4"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sheet Size</label>
+                            <select
+                                x-model="newProduct.sheet_size"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                            >
+                                <option value="">Select...</option>
+                                <option value="4x8">4x8 (32 sqft)</option>
+                                <option value="4x10">4x10 (40 sqft)</option>
+                                <option value="5x10">5x10 (50 sqft)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sqft/Sheet</label>
+                            <input
+                                type="number"
+                                x-model="newProduct.sqft_per_sheet"
+                                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-primary-500 focus:border-primary-500"
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vendor SKU (from scan)</label>
+                        <input
+                            type="text"
+                            x-model="newProduct.vendor_sku"
+                            readonly
+                            class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white bg-gray-50 dark:bg-gray-900"
+                        />
+                    </div>
+                </div>
+                <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                    <button
+                        type="button"
+                        x-on:click="showCreateProductModal = false"
+                        class="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        x-on:click="createProduct()"
+                        :disabled="isCreatingProduct"
+                        class="px-4 py-2 rounded-lg text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 transition-colors disabled:bg-gray-400"
+                    >
+                        <span x-show="!isCreatingProduct">Create Product</span>
+                        <span x-show="isCreatingProduct">Creating...</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -357,8 +604,11 @@
                         apiEndpoint: config.apiEndpoint,
                         documentType: config.documentType,
                         fieldMappings: config.fieldMappings,
+                        lineMappings: config.lineMappings || {},
                         showCamera: config.showCamera,
                         autoApply: config.autoApply,
+                        confidenceThreshold: config.confidenceThreshold || 0.70,
+                        autoApplyThreshold: config.autoApplyThreshold || 0.95,
 
                         // State
                         isLoading: false,
@@ -373,6 +623,25 @@
                         previewUrl: null,
                         selectedFile: null,
                         cameraStream: null,
+                        
+                        // Unmatched items review state
+                        showUnmatchedReview: false,
+                        unmatchedSelections: {},
+                        allProducts: [],
+                        learningStatus: null,
+                        
+                        // Create product modal state
+                        showCreateProductModal: false,
+                        newProduct: {
+                            name: '',
+                            reference: '',
+                            thickness: '',
+                            sheet_size: '',
+                            sqft_per_sheet: null,
+                            vendor_sku: '',
+                        },
+                        isCreatingProduct: false,
+                        createProductIndex: null,
 
                         // Methods
                         handleDrop(event) {
@@ -624,6 +893,268 @@
                             this.result = null;
                             this.applied = false;
                             this.showLineItems = false;
+                            this.showUnmatchedReview = false;
+                            this.unmatchedSelections = {};
+                            this.learningStatus = null;
+                        },
+
+                        // Unmatched items methods
+                        getUnmatchedItems() {
+                            const lines = this.result?.line_items || this.result?.lines || [];
+                            return lines.filter((l, idx) => {
+                                const isUnmatched = !(l.product_match?.matched || l.product_matched);
+                                const lowConfidence = (l.product_match?.confidence || 0) < this.confidenceThreshold;
+                                return isUnmatched || lowConfidence;
+                            }).map((l, idx) => ({
+                                ...l,
+                                originalIndex: (this.result?.line_items || this.result?.lines || []).indexOf(l),
+                                suggestions: l.product_match?.candidates ? 
+                                    Object.entries(l.product_match.candidates).map(([id, name]) => ({ id: parseInt(id), name })) : 
+                                    []
+                            }));
+                        },
+
+                        hasUnmatchedSelections() {
+                            return Object.values(this.unmatchedSelections).some(v => v && v !== '');
+                        },
+
+                        async loadProducts() {
+                            if (this.allProducts.length > 0) return;
+                            
+                            try {
+                                const response = await fetch('/api/products/list?limit=500', {
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                    },
+                                    credentials: 'same-origin',
+                                });
+                                
+                                if (response.ok) {
+                                    const data = await response.json();
+                                    this.allProducts = data.products || data.data || [];
+                                }
+                            } catch (err) {
+                                console.error('Failed to load products:', err);
+                            }
+                        },
+
+                        async learnAllMappings() {
+                            const vendorId = this.result?.vendor_match?.id;
+                            if (!vendorId) {
+                                this.learningStatus = {
+                                    success: false,
+                                    message: 'Cannot learn mappings: Vendor not matched. Match vendor first.'
+                                };
+                                return;
+                            }
+
+                            const unmatchedItems = this.getUnmatchedItems();
+                            const mappings = [];
+
+                            unmatchedItems.forEach((item, idx) => {
+                                const productId = this.unmatchedSelections[idx];
+                                if (productId) {
+                                    mappings.push({
+                                        line_index: item.originalIndex,
+                                        product_id: parseInt(productId),
+                                        vendor_sku: item.vendor_sku || item.sku || '',
+                                        vendor_product_name: item.description || '',
+                                        price: item.unit_price || null,
+                                    });
+                                }
+                            });
+
+                            if (mappings.length === 0) {
+                                this.learningStatus = {
+                                    success: false,
+                                    message: 'No products selected. Select products to learn mappings.'
+                                };
+                                return;
+                            }
+
+                            this.isLoading = true;
+                            this.loadingMessage = 'Learning vendor SKU mappings...';
+
+                            try {
+                                const sourceDoc = this.result?.document?.slip_number || 
+                                                  this.result?.document?.invoice_number || 
+                                                  'scan-' + Date.now();
+
+                                const response = await fetch('/api/document-scanner/learn-mappings', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({
+                                        vendor_id: vendorId,
+                                        mappings: mappings,
+                                        source_document: sourceDoc,
+                                    })
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success) {
+                                    this.learningStatus = {
+                                        success: true,
+                                        message: `Learned ${data.created || mappings.length} vendor SKU mappings! Future scans will auto-match.`
+                                    };
+
+                                    // Update the result to reflect new matches
+                                    mappings.forEach(m => {
+                                        if (this.result?.line_items?.[m.line_index]) {
+                                            const product = this.allProducts.find(p => p.id === m.product_id);
+                                            this.result.line_items[m.line_index].product_match = {
+                                                matched: true,
+                                                product_id: m.product_id,
+                                                product_name: product?.name || 'Unknown',
+                                                vendor_sku: m.vendor_sku,
+                                                confidence: 1.0,
+                                                match_method: 'vendor_sku',
+                                                ai_learned: true,
+                                            };
+                                            this.result.line_items[m.line_index].requires_review = false;
+                                        }
+                                    });
+
+                                    // Clear selections
+                                    this.unmatchedSelections = {};
+                                    
+                                    // Show notification
+                                    if (window.Filament?.notifications) {
+                                        window.Filament.notifications.notification({
+                                            title: 'Mappings Learned!',
+                                            description: `${data.created || mappings.length} vendor SKU mappings saved.`,
+                                            status: 'success',
+                                        });
+                                    }
+                                } else {
+                                    throw new Error(data.error || 'Failed to learn mappings');
+                                }
+
+                            } catch (err) {
+                                console.error('Learn mappings error:', err);
+                                this.learningStatus = {
+                                    success: false,
+                                    message: err.message || 'Failed to learn mappings. Please try again.'
+                                };
+                            } finally {
+                                this.isLoading = false;
+                            }
+                        },
+
+                        // Create product modal methods
+                        openCreateProductModal(idx, item) {
+                            this.createProductIndex = idx;
+                            this.newProduct = {
+                                name: item.description || '',
+                                reference: item.internal_sku || '',
+                                thickness: this.parseThickness(item.description),
+                                sheet_size: this.parseSheetSize(item.description),
+                                sqft_per_sheet: null,
+                                vendor_sku: item.vendor_sku || item.sku || '',
+                            };
+                            
+                            // Auto-calculate sqft
+                            if (this.newProduct.sheet_size === '4x8') this.newProduct.sqft_per_sheet = 32;
+                            else if (this.newProduct.sheet_size === '4x10') this.newProduct.sqft_per_sheet = 40;
+                            else if (this.newProduct.sheet_size === '5x10') this.newProduct.sqft_per_sheet = 50;
+                            
+                            this.showCreateProductModal = true;
+                        },
+
+                        parseThickness(description) {
+                            if (!description) return '';
+                            const match = description.match(/(\d+)\/(\d+)/);
+                            if (match) return `${match[1]}/${match[2]}`;
+                            return '';
+                        },
+
+                        parseSheetSize(description) {
+                            if (!description) return '';
+                            if (/48\s*[xX]\s*96|4\s*[xX]\s*8/i.test(description)) return '4x8';
+                            if (/48\s*[xX]\s*120|4\s*[xX]\s*10/i.test(description)) return '4x10';
+                            if (/60\s*[xX]\s*120|5\s*[xX]\s*10/i.test(description)) return '5x10';
+                            return '4x8'; // Default
+                        },
+
+                        async createProduct() {
+                            if (!this.newProduct.name) {
+                                this.error = 'Product name is required';
+                                return;
+                            }
+
+                            this.isCreatingProduct = true;
+                            const vendorId = this.result?.vendor_match?.id;
+
+                            try {
+                                const response = await fetch('/api/document-scanner/create-product', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Accept': 'application/json',
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                                    },
+                                    credentials: 'same-origin',
+                                    body: JSON.stringify({
+                                        name: this.newProduct.name,
+                                        reference: this.newProduct.reference,
+                                        thickness: this.newProduct.thickness,
+                                        sheet_size: this.newProduct.sheet_size,
+                                        sqft_per_sheet: this.newProduct.sqft_per_sheet,
+                                        vendor_id: vendorId,
+                                        vendor_sku: this.newProduct.vendor_sku,
+                                    })
+                                });
+
+                                const data = await response.json();
+
+                                if (data.success && data.product_id) {
+                                    // Add to products list and select it
+                                    this.allProducts.unshift({
+                                        id: data.product_id,
+                                        name: this.newProduct.name,
+                                        reference: this.newProduct.reference,
+                                    });
+                                    
+                                    // Select this product for the line item
+                                    if (this.createProductIndex !== null) {
+                                        this.unmatchedSelections[this.createProductIndex] = data.product_id;
+                                    }
+
+                                    this.showCreateProductModal = false;
+                                    
+                                    if (window.Filament?.notifications) {
+                                        window.Filament.notifications.notification({
+                                            title: 'Product Created',
+                                            description: `${this.newProduct.name} has been created.`,
+                                            status: 'success',
+                                        });
+                                    }
+                                } else {
+                                    throw new Error(data.error || 'Failed to create product');
+                                }
+
+                            } catch (err) {
+                                console.error('Create product error:', err);
+                                this.error = err.message || 'Failed to create product';
+                            } finally {
+                                this.isCreatingProduct = false;
+                            }
+                        },
+
+                        // Initialize - load products when component mounts
+                        init() {
+                            this.$watch('result', (value) => {
+                                if (value && this.getUnmatchedItems().length > 0) {
+                                    this.loadProducts();
+                                    this.showUnmatchedReview = true;
+                                }
+                            });
                         },
                     }));
                 });

@@ -650,6 +650,10 @@ class OperationResource extends Resource
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.product'))
                     ->width(250)
                     ->markAsRequired(),
+                TableColumn::make('ai_confidence')
+                    ->label('AI')
+                    ->width(60)
+                    ->toggleable(isToggledHiddenByDefault: false),
                 TableColumn::make('final_location_id')
                     ->label(__('inventories::filament/clusters/operations/resources/operation.form.tabs.operations.columns.final-location'))
                     ->width(250)
@@ -813,8 +817,39 @@ class OperationResource extends Resource
                     ->default(0)
                     ->inline(false)
                     ->disabled(fn ($record): bool => in_array($record?->state, [MoveState::DONE, MoveState::CANCELED])),
+                \Filament\Forms\Components\Placeholder::make('ai_confidence_display')
+                    ->label('AI Confidence')
+                    ->content(function (?Move $record): \Illuminate\Contracts\Support\Htmlable|string {
+                        if (!$record || $record->ai_confidence === null) {
+                            return '-';
+                        }
+
+                        $percent = $record->ai_confidence_percent;
+                        $color = $record->ai_confidence_color;
+
+                        $colorClasses = match ($color) {
+                            'success' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+                            'warning' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+                            'danger' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+                            default => 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+                        };
+
+                        $matchMethod = $record->ai_matched_by ? " ({$record->ai_matched_by})" : '';
+
+                        return new \Illuminate\Support\HtmlString(
+                            "<span class=\"inline-flex items-center px-2 py-1 text-xs font-medium rounded-full {$colorClasses}\">"
+                            . "{$percent}%{$matchMethod}"
+                            . ($record->requires_review ? ' ⚠️' : '')
+                            . "</span>"
+                        );
+                    })
+                    ->visible(fn (?Move $record): bool => $record?->ai_confidence !== null),
                 Hidden::make('product_qty')
                     ->default(0),
+                Hidden::make('ai_confidence'),
+                Hidden::make('ai_source_sku'),
+                Hidden::make('ai_matched_by'),
+                Hidden::make('requires_review'),
             ])
             ->columns(4)
             ->mutateRelationshipDataBeforeCreateUsing(function (array $data, $record) {

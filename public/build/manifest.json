@@ -42,7 +42,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-b7axYGC1.js",
+    "file": "assets/app-CF9lVSSx.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -51,6 +51,12 @@
       "plugins/webkul/projects/resources/js/pdf-viewer.js",
       "_pdf-BnRl7pXp.js"
     ]
+  },
+  "resources/js/dwg-parser.js": {
+    "file": "assets/dwg-parser-CeVZBTBf.js",
+    "name": "dwg-parser",
+    "src": "resources/js/dwg-parser.js",
+    "isEntry": true
   },
   "resources/js/pdf-document-manager.js": {
     "file": "assets/pdf-document-manager-BLVVX3om.js",

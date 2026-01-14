@@ -55,6 +55,37 @@ class Shelf extends Model implements CabinetComponentInterface
         'finish_type',
         'paint_color',
         'stain_color',
+        // Opening reference (source dimensions)
+        'opening_width_inches',
+        'opening_height_inches',
+        'opening_depth_inches',
+        // Calculated dimensions
+        'cut_width_inches',
+        'cut_depth_inches',
+        // Pin hole specifications
+        'pin_setback_front_inches',
+        'pin_setback_back_inches',
+        'pin_vertical_spacing_inches',
+        'pin_hole_diameter_mm',
+        'has_center_support',
+        // Notch specifications
+        'notch_depth_inches',
+        'notch_count',
+        // Clearances
+        'clearance_side_inches',
+        'clearance_back_inches',
+        // Edge banding
+        'edge_band_front',
+        'edge_band_back',
+        'edge_band_sides',
+        'edge_band_length_inches',
+        // Hardware
+        'shelf_pin_product_id',
+        'shelf_pin_quantity',
+        // Metadata
+        'spec_source',
+        'dimensions_calculated_at',
+        // Production tracking
         'cnc_cut_at',
         'manually_cut_at',
         'edge_banded_at',
@@ -82,6 +113,35 @@ class Shelf extends Model implements CabinetComponentInterface
             'slide_length_inches' => 'float',
             'soft_close' => 'boolean',
             'weight_capacity_lbs' => 'float',
+            // Opening reference
+            'opening_width_inches' => 'float',
+            'opening_height_inches' => 'float',
+            'opening_depth_inches' => 'float',
+            // Calculated dimensions
+            'cut_width_inches' => 'float',
+            'cut_depth_inches' => 'float',
+            // Pin hole specifications
+            'pin_setback_front_inches' => 'float',
+            'pin_setback_back_inches' => 'float',
+            'pin_vertical_spacing_inches' => 'float',
+            'pin_hole_diameter_mm' => 'float',
+            'has_center_support' => 'boolean',
+            // Notch specifications
+            'notch_depth_inches' => 'float',
+            'notch_count' => 'integer',
+            // Clearances
+            'clearance_side_inches' => 'float',
+            'clearance_back_inches' => 'float',
+            // Edge banding
+            'edge_band_front' => 'boolean',
+            'edge_band_back' => 'boolean',
+            'edge_band_sides' => 'boolean',
+            'edge_band_length_inches' => 'float',
+            // Hardware
+            'shelf_pin_quantity' => 'integer',
+            // Metadata
+            'dimensions_calculated_at' => 'datetime',
+            // Production tracking
             'cnc_cut_at' => 'datetime',
             'manually_cut_at' => 'datetime',
             'edge_banded_at' => 'datetime',
@@ -131,6 +191,14 @@ class Shelf extends Model implements CabinetComponentInterface
     public function slideProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'slide_product_id');
+    }
+
+    /**
+     * Shelf pin product (5mm standard)
+     */
+    public function shelfPinProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'shelf_pin_product_id');
     }
 
     /**

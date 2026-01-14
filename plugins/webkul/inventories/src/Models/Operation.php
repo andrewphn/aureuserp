@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Field\Traits\HasCustomFields;
+use Illuminate\Database\Eloquent\Relations\HasMany as HasManyRelation;
 use Webkul\Inventory\Database\Factories\OperationFactory;
 use Webkul\Inventory\Enums\MoveType;
 use Webkul\Inventory\Enums\OperationState;
@@ -85,6 +86,11 @@ class Operation extends Model
     protected $fillable = [
         'name',
         'origin',
+        'packing_slip_number',
+        'tracking_number',
+        'carrier_id',
+        'ai_scan_confidence',
+        'ai_populated_at',
         'move_type',
         'state',
         'is_favorite',
@@ -123,6 +129,8 @@ class Operation extends Model
         'deadline'           => 'datetime',
         'scheduled_at'       => 'datetime',
         'closed_at'          => 'datetime',
+        'ai_scan_confidence' => 'decimal:2',
+        'ai_populated_at'    => 'datetime',
     ];
 
     protected array $logAttributes = [
@@ -231,6 +239,16 @@ class Operation extends Model
     }
 
     /**
+     * Carrier (shipping company)
+     *
+     * @return BelongsTo
+     */
+    public function carrier(): BelongsTo
+    {
+        return $this->belongsTo(Partner::class, 'carrier_id');
+    }
+
+    /**
      * Company
      *
      * @return BelongsTo
@@ -293,6 +311,35 @@ class Operation extends Model
     public function saleOrder(): BelongsTo
     {
         return $this->belongsTo(SaleOrder::class, 'sale_order_id');
+    }
+
+    /**
+     * Document Scan Logs
+     *
+     * @return HasManyRelation
+     */
+    public function scanLogs(): HasManyRelation
+    {
+        return $this->hasMany(\App\Models\DocumentScanLog::class, 'operation_id');
+    }
+
+    /**
+     * Check if this operation was populated by AI
+     */
+    public function wasAiPopulated(): bool
+    {
+        return $this->ai_populated_at !== null;
+    }
+
+    /**
+     * Get the AI confidence as a percentage
+     */
+    public function getAiConfidencePercentAttribute(): ?int
+    {
+        if ($this->ai_scan_confidence === null) {
+            return null;
+        }
+        return (int) round($this->ai_scan_confidence * 100);
     }
 
     /**

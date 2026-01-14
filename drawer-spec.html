@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drawer Box Specification - 12x6x19 - Blum TANDEM 563H</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .spec-sheet {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #1a5f7a; border-bottom: 3px solid #1a5f7a; padding-bottom: 10px; margin-top: 0; }
+        h2 { color: #2c3e50; margin-top: 30px; padding: 10px; background: #ecf0f1; border-left: 4px solid #1a5f7a; }
+        h3 { color: #34495e; margin-top: 20px; }
+        .opening-box {
+            background: #e8f4f8; padding: 20px; border-radius: 8px;
+            text-align: center; font-size: 1.3em; margin: 20px 0;
+        }
+        .opening-box strong { color: #1a5f7a; font-size: 1.4em; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #34495e; color: white; font-weight: 600; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .highlight { background: #fff3cd !important; font-weight: bold; }
+        .dimension { font-family: 'Courier New', monospace; font-weight: bold; color: #c0392b; }
+        .drawing-container {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        .scale-bar {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        .scale-bar svg { margin-right: 10px; }
+        .hardware-box { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; }
+        .hardware-item { background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dee2e6; }
+        .hardware-item h4 { margin: 0 0 10px 0; color: #495057; }
+        .hardware-item .model { font-family: monospace; font-size: 1.2em; color: #1a5f7a; }
+        .notes { background: #ffeaa7; padding: 15px; border-radius: 8px; margin: 15px 0; }
+        .notes ul { margin: 0; padding-left: 20px; }
+        .check-item { padding: 10px 15px; margin: 8px 0; background: #fafafa; border-left: 4px solid #3498db; display: flex; align-items: center; }
+        .check-item input { margin-right: 15px; transform: scale(1.5); }
+        .check-item.confirmed { border-left-color: #27ae60; background: #e8f8f0; }
+        .logo-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .date { color: #7f8c8d; font-size: 0.9em; }
+        .material-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0; }
+        .material-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+        .material-card h4 { margin: 0 0 10px 0; font-size: 1em; opacity: 0.9; }
+        .material-card .value { font-size: 2em; font-weight: bold; }
+        .material-card .unit { font-size: 0.9em; opacity: 0.8; }
+        .cnc-piece { background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px; padding: 15px; margin: 10px 0; }
+        .cnc-piece h4 { margin: 0 0 10px 0; color: #1a5f7a; display: flex; align-items: center; gap: 10px; }
+        .cnc-piece .dims { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .cnc-piece .dim-box { background: white; padding: 10px; border-radius: 5px; text-align: center; }
+        .cnc-piece .dim-label { font-size: 0.8em; color: #666; }
+        .cnc-piece .dim-value { font-size: 1.2em; font-weight: bold; color: #c0392b; font-family: monospace; }
+        .piece-color { width: 20px; height: 20px; border-radius: 3px; display: inline-block; }
+        @media print {
+            body { background: white; }
+            .spec-sheet { box-shadow: none; }
+            .material-card { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+    <div class="spec-sheet">
+        <div class="logo-header">
+            <h1>🗄️ Drawer Box Specification</h1>
+            <div class="date">Generated: January 14, 2026</div>
+        </div>
+
+        <p><strong>Slide System:</strong> Blum TANDEM Plus BLUMOTION 563H</p>
+        <p><strong>Construction:</strong> Dovetail joints, 1/2" sides, 1/4" bottom</p>
+
+        <div class="opening-box">
+            Cabinet Opening: <strong>12" W × 6" H × 19" D</strong>
+        </div>
+
+        <h2>🔢 CNC Cut Pieces - Drawing & Dimensions</h2>
+        
+        <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <strong>📏 Shop Values Explained:</strong>
+            <ul style="margin: 10px 0 0 0; padding-left: 20px;">
+                <li><strong>Heights:</strong> <span style="color: #c0392b;">Theoretical 5-3/16"</span> → <span style="color: #27ae60;">Shop 5"</span> (rounded DOWN to nearest 1/2")</li>
+                <li><strong>Depths (Sides):</strong> <span style="color: #c0392b;">Theoretical 18"</span> → <span style="color: #27ae60;">Shop 18-1/4"</span> (add 1/4" to slide length)</li>
+            </ul>
+            <p style="margin: 10px 0 0 0; font-size: 0.9em;"><strong>Scale:</strong> 10px = 1 inch in all drawings</p>
+        </div>
+
+        <!-- SIDES (×2) - Drawing and Table Side by Side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; align-items: start;">
+            <div class="drawing-container" style="margin: 0;">
+                <svg viewBox="0 0 250 100" style="width: 100%; max-width: 350px; height: auto;">
+                    <!-- Side piece: 5" height × 18-1/4" length = 50×182.5 px -->
+                    <rect x="20" y="15" width="182.5" height="50" fill="#f5e6d3" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dado groove -->
+                    <rect x="20" y="60" width="182.5" height="2.5" fill="#8b5a2b"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="75" x2="202.5" y2="75" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="20" y1="72" x2="20" y2="78" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="202.5" y1="72" x2="202.5" y2="78" stroke="#27ae60" stroke-width="1"/>
+                    <text x="111" y="88" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">18-1/4"</text>
+                    <line x1="218" y1="15" x2="218" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="215" y1="15" x2="221" y2="15" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="215" y1="65" x2="221" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <text x="235" y="43" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">5"</text>
+                    <!-- Dado callout -->
+                    <text x="111" y="10" font-size="8" fill="#666" text-anchor="middle">SIDE (×2) - 1/2" ply</text>
+                </svg>
+            </div>
+            <div>
+                <table style="margin: 0; font-size: 0.9em;">
+                    <tr style="background: #5c4033; color: white;">
+                        <th colspan="3">SIDES (Qty: 2)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td style="color: #c0392b;"><strong>Theoretical</strong></td>
+                        <td style="color: #27ae60; background: #e8f5e9;"><strong>Shop ✓</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td style="color: #c0392b;">5-3/16" (5.1875")</td>
+                        <td style="color: #27ae60; background: #e8f5e9; font-weight: bold;">5" (5.0000")</td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td style="color: #c0392b;">18" (18.0000")</td>
+                        <td style="color: #27ae60; background: #e8f5e9; font-weight: bold;">18-1/4" (18.2500")</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td colspan="2">1/2" (0.5000")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="3" style="font-size: 0.85em;">
+                            <strong>Dado:</strong> 1/4" × 1/4", 1/2" from bottom<br>
+                            <strong>Joinery:</strong> Dovetail tails on ends
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- FRONT (×1) - Drawing and Table Side by Side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; align-items: start;">
+            <div class="drawing-container" style="margin: 0;">
+                <svg viewBox="0 0 180 100" style="width: 100%; max-width: 260px; height: auto;">
+                    <!-- Front piece: 5" height × 10-3/8" length = 50×103.75 px -->
+                    <rect x="20" y="15" width="103.75" height="50" fill="#d4a574" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dado groove -->
+                    <rect x="20" y="60" width="103.75" height="2.5" fill="#8b5a2b"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="75" x2="123.75" y2="75" stroke="#333" stroke-width="1"/>
+                    <line x1="20" y1="72" x2="20" y2="78" stroke="#333" stroke-width="1"/>
+                    <line x1="123.75" y1="72" x2="123.75" y2="78" stroke="#333" stroke-width="1"/>
+                    <text x="71" y="88" font-size="10" fill="#333" text-anchor="middle" font-weight="bold">10-3/8"</text>
+                    <line x1="140" y1="15" x2="140" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="137" y1="15" x2="143" y2="15" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="137" y1="65" x2="143" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <text x="158" y="43" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">5"</text>
+                    <!-- Label -->
+                    <text x="71" y="10" font-size="8" fill="#666" text-anchor="middle">FRONT (×1) - 1/2" ply</text>
+                </svg>
+            </div>
+            <div>
+                <table style="margin: 0; font-size: 0.9em;">
+                    <tr style="background: #a67c52; color: white;">
+                        <th colspan="3">FRONT (Qty: 1)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td style="color: #c0392b;"><strong>Theoretical</strong></td>
+                        <td style="color: #27ae60; background: #e8f5e9;"><strong>Shop ✓</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td style="color: #c0392b;">5-3/16" (5.1875")</td>
+                        <td style="color: #27ae60; background: #e8f5e9; font-weight: bold;">5" (5.0000")</td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td colspan="2">10-3/8" (10.3750")</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td colspan="2">1/2" (0.5000")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="3" style="font-size: 0.85em;">
+                            <strong>Dado:</strong> 1/4" × 1/4", 1/2" from bottom<br>
+                            <strong>Joinery:</strong> Dovetail pins on ends
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- BACK (×1) - Drawing and Table Side by Side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; align-items: start;">
+            <div class="drawing-container" style="margin: 0;">
+                <svg viewBox="0 0 180 100" style="width: 100%; max-width: 260px; height: auto;">
+                    <!-- Back piece: 5" height × 10-3/8" length = 50×103.75 px -->
+                    <rect x="20" y="15" width="103.75" height="50" fill="#d4a574" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dado groove -->
+                    <rect x="20" y="60" width="103.75" height="2.5" fill="#8b5a2b"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="75" x2="123.75" y2="75" stroke="#333" stroke-width="1"/>
+                    <line x1="20" y1="72" x2="20" y2="78" stroke="#333" stroke-width="1"/>
+                    <line x1="123.75" y1="72" x2="123.75" y2="78" stroke="#333" stroke-width="1"/>
+                    <text x="71" y="88" font-size="10" fill="#333" text-anchor="middle" font-weight="bold">10-3/8"</text>
+                    <line x1="140" y1="15" x2="140" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="137" y1="15" x2="143" y2="15" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="137" y1="65" x2="143" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <text x="158" y="43" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">5"</text>
+                    <!-- Label -->
+                    <text x="71" y="10" font-size="8" fill="#666" text-anchor="middle">BACK (×1) - 1/2" ply</text>
+                </svg>
+            </div>
+            <div>
+                <table style="margin: 0; font-size: 0.9em;">
+                    <tr style="background: #a67c52; color: white;">
+                        <th colspan="3">BACK (Qty: 1)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td style="color: #c0392b;"><strong>Theoretical</strong></td>
+                        <td style="color: #27ae60; background: #e8f5e9;"><strong>Shop ✓</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td style="color: #c0392b;">5-3/16" (5.1875")</td>
+                        <td style="color: #27ae60; background: #e8f5e9; font-weight: bold;">5" (5.0000")</td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td colspan="2">10-3/8" (10.3750")</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td colspan="2">1/2" (0.5000")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="3" style="font-size: 0.85em;">
+                            <strong>Dado:</strong> 1/4" × 1/4", 1/2" from bottom<br>
+                            <strong>Joinery:</strong> Dovetail pins on ends
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- BOTTOM (×1) - Drawing and Table Side by Side -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; align-items: start;">
+            <div class="drawing-container" style="margin: 0;">
+                <svg viewBox="0 0 230 150" style="width: 100%; max-width: 320px; height: auto;">
+                    <!-- Bottom piece: 10-13/16" × 17-7/16" = 108.125 × 174.375 px -->
+                    <rect x="20" y="15" width="174" height="108" fill="#deb887" stroke="#8b5a2b" stroke-width="2"/>
+                    <!-- Wood grain lines -->
+                    <line x1="30" y1="43" x2="184" y2="43" stroke="#c9a66b" stroke-width="0.5" opacity="0.5"/>
+                    <line x1="30" y1="70" x2="184" y2="70" stroke="#c9a66b" stroke-width="0.5" opacity="0.5"/>
+                    <line x1="30" y1="97" x2="184" y2="97" stroke="#c9a66b" stroke-width="0.5" opacity="0.5"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="133" x2="194" y2="133" stroke="#333" stroke-width="1"/>
+                    <line x1="20" y1="130" x2="20" y2="136" stroke="#333" stroke-width="1"/>
+                    <line x1="194" y1="130" x2="194" y2="136" stroke="#333" stroke-width="1"/>
+                    <text x="107" y="145" font-size="9" fill="#333" text-anchor="middle" font-weight="bold">17-7/16"</text>
+                    <line x1="208" y1="15" x2="208" y2="123" stroke="#333" stroke-width="1"/>
+                    <line x1="205" y1="15" x2="211" y2="15" stroke="#333" stroke-width="1"/>
+                    <line x1="205" y1="123" x2="211" y2="123" stroke="#333" stroke-width="1"/>
+                    <text x="220" y="72" font-size="9" fill="#333" text-anchor="middle" font-weight="bold">10-13/16"</text>
+                    <!-- Label -->
+                    <text x="107" y="10" font-size="8" fill="#666" text-anchor="middle">BOTTOM (×1) - 1/4" ply</text>
+                </svg>
+            </div>
+            <div>
+                <table style="margin: 0; font-size: 0.9em;">
+                    <tr style="background: #8b5a2b; color: white;">
+                        <th colspan="2">BOTTOM (Qty: 1)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td><strong>Value</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Width (Y)</td>
+                        <td class="dimension">10-13/16" (10.8125")</td>
+                    </tr>
+                    <tr>
+                        <td>Length (X)</td>
+                        <td class="dimension">17-7/16" (17.4375")</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td>1/4" (0.2500")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="2" style="font-size: 0.85em;">
+                            <strong>Note:</strong> Floats in dado grooves<br>
+                            <strong>Grain:</strong> Run lengthwise (X direction)
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Reference Summary -->
+        <div style="background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 15px 0; color: #1a5f7a;">📋 CNC Cut Summary (Shop Dimensions)</h3>
+            <table style="margin: 0;">
+                <tr>
+                    <th>Piece</th>
+                    <th>Qty</th>
+                    <th>Height/Width</th>
+                    <th>Length</th>
+                    <th>Material</th>
+                    <th>Dado</th>
+                </tr>
+                <tr>
+                    <td><strong>Sides</strong></td>
+                    <td>2</td>
+                    <td style="color: #27ae60; font-weight: bold;">5"</td>
+                    <td style="color: #27ae60; font-weight: bold;">18-1/4"</td>
+                    <td>1/2" ply</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <td><strong>Front</strong></td>
+                    <td>1</td>
+                    <td style="color: #27ae60; font-weight: bold;">5"</td>
+                    <td>10-3/8"</td>
+                    <td>1/2" ply</td>
+                    <td>Yes</td>
+                </tr>
+                <tr>
+                    <td><strong>Back</strong></td>
+                    <td>1</td>
+                    <td style="color: #27ae60; font-weight: bold;">5"</td>
+                    <td>10-3/8"</td>
+                    <td>1/2" ply</td>
+                    <td>Yes</td>
+                </tr>
+                <tr style="background: #fff3cd;">
+                    <td><strong>Bottom</strong></td>
+                    <td>1</td>
+                    <td>10-13/16"</td>
+                    <td>17-7/16"</td>
+                    <td>1/4" ply</td>
+                    <td>—</td>
+                </tr>
+            </table>
+            <p style="margin: 10px 0 0 0; font-size: 0.85em; color: #666;">
+                <strong>All dados:</strong> 1/4" wide × 1/4" deep, 1/2" from bottom edge, full length
+            </p>
+        </div>
+
+        <h2>📊 Material Requirements</h2>
+        
+        <div class="material-summary">
+            <div class="material-card">
+                <h4>1/2" Plywood</h4>
+                <div class="value">2.93</div>
+                <div class="unit">Square Feet</div>
+                <p style="font-size: 0.8em; margin-top: 10px; opacity: 0.9;">421.88 sq in total</p>
+            </div>
+            <div class="material-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                <h4>1/4" Plywood</h4>
+                <div class="value">1.31</div>
+                <div class="unit">Square Feet</div>
+                <p style="font-size: 0.8em; margin-top: 10px; opacity: 0.9;">188.55 sq in total</p>
+            </div>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Material</th>
+                <th>Pieces</th>
+                <th>Dimensions</th>
+                <th>Area (sq in)</th>
+                <th>Area (sq ft)</th>
+            </tr>
+            <tr>
+                <td rowspan="3"><strong>1/2" Plywood</strong></td>
+                <td>Sides × 2</td>
+                <td>5.1875" × 18"</td>
+                <td>186.75</td>
+                <td>1.30</td>
+            </tr>
+            <tr>
+                <td>Front × 1</td>
+                <td>5.1875" × 10.375"</td>
+                <td>53.82</td>
+                <td>0.37</td>
+            </tr>
+            <tr>
+                <td>Back × 1</td>
+                <td>5.1875" × 10.375"</td>
+                <td>53.82</td>
+                <td>0.37</td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>1/2" Subtotal</strong></td>
+                <td>4 pieces</td>
+                <td>—</td>
+                <td><strong>294.39</strong></td>
+                <td><strong>2.04</strong></td>
+            </tr>
+            <tr>
+                <td><strong>1/4" Plywood</strong></td>
+                <td>Bottom × 1</td>
+                <td>10.8125" × 17.4375"</td>
+                <td>188.55</td>
+                <td>1.31</td>
+            </tr>
+            <tr class="highlight">
+                <td colspan="3"><strong>TOTAL MATERIAL</strong></td>
+                <td><strong>482.94</strong></td>
+                <td><strong>3.35 sq ft</strong></td>
+            </tr>
+        </table>
+        
+        <div class="notes">
+            <strong>📝 Material Notes:</strong>
+            <ul>
+                <li><strong>Waste Factor:</strong> Add 15-20% for cuts, setup, and defects</li>
+                <li><strong>Recommended Order:</strong> 1/2" ply: 2.5 sq ft | 1/4" ply: 1.5 sq ft</li>
+                <li><strong>Sheet Yield:</strong> From 4×8 sheet (32 sq ft), can cut ~9-10 drawer boxes</li>
+            </ul>
+        </div>
+
+        <h2>📐 Scale Drawings</h2>
+        <p><strong>Scale: 1" = 20 pixels</strong> (proportionally accurate)</p>
+
+        <h3>Top View (Looking Down into Drawer)</h3>
+        <div class="drawing-container">
+            <svg viewBox="0 0 380 460" style="width: 100%; max-width: 475px; height: auto;">
+                <defs>
+                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#f0f0f0" stroke-width="0.5"/>
+                    </pattern>
+                </defs>
+                <rect x="50" y="50" width="227.5" height="360" fill="url(#grid)"/>
+                <rect x="50" y="50" width="227.5" height="360" fill="#d4a574" stroke="#5c4033" stroke-width="2"/>
+                <rect x="50" y="50" width="10" height="360" fill="#b8956a" stroke="#5c4033" stroke-width="1"/>
+                <rect x="267.5" y="50" width="10" height="360" fill="#b8956a" stroke="#5c4033" stroke-width="1"/>
+                <rect x="60" y="50" width="207.5" height="10" fill="#a67c52" stroke="#5c4033" stroke-width="1"/>
+                <text x="163.75" y="58" font-size="8" fill="#fff" text-anchor="middle">FRONT</text>
+                <rect x="60" y="400" width="207.5" height="10" fill="#a67c52" stroke="#5c4033" stroke-width="1"/>
+                <text x="163.75" y="408" font-size="8" fill="#fff" text-anchor="middle">BACK</text>
+                <rect x="62" y="62" width="203.5" height="336" fill="#deb887" stroke="#8b5a2b" stroke-width="1" stroke-dasharray="4,2" opacity="0.7"/>
+                <text x="163.75" y="230" font-size="10" fill="#5c4033" text-anchor="middle">BOTTOM PANEL</text>
+                <text x="163.75" y="245" font-size="8" fill="#666" text-anchor="middle">(1/4" plywood in dado)</text>
+                <line x1="50" y1="30" x2="277.5" y2="30" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="50" y1="23" x2="50" y2="37" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="277.5" y1="23" x2="277.5" y2="37" stroke="#c0392b" stroke-width="1.5"/>
+                <rect x="120" y="18" width="70" height="16" fill="white"/>
+                <text x="163.75" y="30" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">11-3/8"</text>
+                <line x1="310" y1="50" x2="310" y2="410" stroke="#27ae60" stroke-width="1.5"/>
+                <line x1="303" y1="50" x2="317" y2="50" stroke="#27ae60" stroke-width="1.5"/>
+                <line x1="303" y1="410" x2="317" y2="410" stroke="#27ae60" stroke-width="1.5"/>
+                <text x="340" y="235" font-size="12" fill="#27ae60" text-anchor="middle" font-weight="bold" transform="rotate(90, 340, 235)">18"</text>
+                <line x1="60" y1="430" x2="267.5" y2="430" stroke="#2980b9" stroke-width="1"/>
+                <line x1="60" y1="425" x2="60" y2="435" stroke="#2980b9" stroke-width="1"/>
+                <line x1="267.5" y1="425" x2="267.5" y2="435" stroke="#2980b9" stroke-width="1"/>
+                <text x="163.75" y="448" font-size="10" fill="#2980b9" text-anchor="middle">Front/Back: 10-3/8"</text>
+                <text x="55" y="235" font-size="8" fill="#4a3520" transform="rotate(-90, 55, 235)">SIDE</text>
+                <text x="272.5" y="235" font-size="8" fill="#4a3520" transform="rotate(-90, 272.5, 235)">SIDE</text>
+            </svg>
+            <div class="scale-bar">
+                <svg width="120" height="20">
+                    <rect x="0" y="8" width="100" height="4" fill="#333"/>
+                    <line x1="0" y1="5" x2="0" y2="15" stroke="#333" stroke-width="2"/>
+                    <line x1="20" y1="7" x2="20" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="40" y1="7" x2="40" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="60" y1="7" x2="60" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="80" y1="7" x2="80" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="100" y1="5" x2="100" y2="15" stroke="#333" stroke-width="2"/>
+                </svg>
+                <span>Scale: 100px = 5 inches</span>
+            </div>
+        </div>
+
+        <h3>Side Profile (Section View)</h3>
+        <div class="drawing-container">
+            <svg viewBox="0 0 500 220" style="width: 100%; max-width: 625px; height: auto;">
+                <rect x="50" y="50" width="360" height="103.75" fill="#b8956a" stroke="#5c4033" stroke-width="2"/>
+                <rect x="50" y="141.25" width="360" height="5" fill="#8b5a2b" stroke="#5c4033" stroke-width="1"/>
+                <rect x="55" y="142.25" width="350" height="3" fill="#deb887" stroke="#8b5a2b" stroke-width="0.5"/>
+                <line x1="30" y1="153.75" x2="30" y2="143.75" stroke="#e74c3c" stroke-width="1"/>
+                <line x1="25" y1="153.75" x2="35" y2="153.75" stroke="#e74c3c" stroke-width="1"/>
+                <line x1="25" y1="143.75" x2="35" y2="143.75" stroke="#e74c3c" stroke-width="1"/>
+                <text x="20" y="150" font-size="9" fill="#e74c3c" text-anchor="end">1/2"</text>
+                <line x1="415" y1="141.25" x2="450" y2="125" stroke="#666" stroke-width="1"/>
+                <text x="452" y="128" font-size="9" fill="#666">Dado: 1/4" deep × 1/4" wide</text>
+                <text x="230" y="95" font-size="11" fill="#4a3520" text-anchor="middle" font-weight="bold">SIDE PANEL</text>
+                <text x="230" y="110" font-size="9" fill="#666" text-anchor="middle">(1/2" plywood)</text>
+                <line x1="50" y1="175" x2="410" y2="175" stroke="#27ae60" stroke-width="1.5"/>
+                <line x1="50" y1="168" x2="50" y2="182" stroke="#27ae60" stroke-width="1.5"/>
+                <line x1="410" y1="168" x2="410" y2="182" stroke="#27ae60" stroke-width="1.5"/>
+                <text x="230" y="195" font-size="12" fill="#27ae60" text-anchor="middle" font-weight="bold">18" (depth/length)</text>
+                <line x1="440" y1="50" x2="440" y2="153.75" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="433" y1="50" x2="447" y2="50" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="433" y1="153.75" x2="447" y2="153.75" stroke="#c0392b" stroke-width="1.5"/>
+                <text x="470" y="105" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(90, 470, 105)">5-3/16"</text>
+            </svg>
+            <div class="scale-bar">
+                <svg width="120" height="20">
+                    <rect x="0" y="8" width="100" height="4" fill="#333"/>
+                    <line x1="0" y1="5" x2="0" y2="15" stroke="#333" stroke-width="2"/>
+                    <line x1="20" y1="7" x2="20" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="40" y1="7" x2="40" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="60" y1="7" x2="60" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="80" y1="7" x2="80" y2="13" stroke="#333" stroke-width="1"/>
+                    <line x1="100" y1="5" x2="100" y2="15" stroke="#333" stroke-width="2"/>
+                </svg>
+                <span>Scale: 100px = 5 inches</span>
+            </div>
+        </div>
+
+        <h3>Front Profile (Section View)</h3>
+        <div class="drawing-container">
+            <svg viewBox="0 0 380 220" style="width: 100%; max-width: 475px; height: auto;">
+                <rect x="50" y="50" width="227.5" height="103.75" fill="#d4a574" stroke="#5c4033" stroke-width="2"/>
+                <rect x="50" y="50" width="10" height="103.75" fill="#b8956a" stroke="#5c4033" stroke-width="1"/>
+                <rect x="267.5" y="50" width="10" height="103.75" fill="#b8956a" stroke="#5c4033" stroke-width="1"/>
+                <rect x="60" y="50" width="207.5" height="103.75" fill="#a67c52" stroke="#5c4033" stroke-width="2"/>
+                <text x="163.75" y="105" font-size="12" fill="#fff" text-anchor="middle" font-weight="bold">FRONT PANEL</text>
+                <polygon points="60,55 65,50 65,60" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="60,75 65,70 65,80" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="60,95 65,90 65,100" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="60,115 65,110 65,120" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="60,135 65,130 65,140" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="267.5,55 262.5,50 262.5,60" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="267.5,75 262.5,70 262.5,80" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="267.5,95 262.5,90 262.5,100" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="267.5,115 262.5,110 262.5,120" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <polygon points="267.5,135 262.5,130 262.5,140" fill="#b8956a" stroke="#5c4033" stroke-width="0.5"/>
+                <line x1="50" y1="175" x2="277.5" y2="175" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="50" y1="168" x2="50" y2="182" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="277.5" y1="168" x2="277.5" y2="182" stroke="#c0392b" stroke-width="1.5"/>
+                <text x="163.75" y="195" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold">11-3/8" (outside width)</text>
+                <line x1="310" y1="50" x2="310" y2="153.75" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="303" y1="50" x2="317" y2="50" stroke="#c0392b" stroke-width="1.5"/>
+                <line x1="303" y1="153.75" x2="317" y2="153.75" stroke="#c0392b" stroke-width="1.5"/>
+                <text x="340" y="105" font-size="12" fill="#c0392b" text-anchor="middle" font-weight="bold" transform="rotate(90, 340, 105)">5-3/16"</text>
+                <line x1="55" y1="35" x2="55" y2="45" stroke="#2980b9" stroke-width="1"/>
+                <text x="55" y="30" font-size="9" fill="#2980b9" text-anchor="middle">1/2"</text>
+            </svg>
+        </div>
+
+        <h2>🔲 Dado Specification</h2>
+        <table>
+            <tr><th>Specification</th><th>Value</th></tr>
+            <tr><td>Dado Width</td><td class="dimension">1/4" (0.2500")</td></tr>
+            <tr><td>Dado Depth</td><td class="dimension">1/4" (0.2500")</td></tr>
+            <tr class="highlight"><td>Height from Bottom Edge</td><td class="dimension">1/2" (0.5000")</td></tr>
+            <tr><td>Cut In</td><td>All 4 pieces (sides, front, back) - full length</td></tr>
+        </table>
+
+        <h2>🔧 Hardware</h2>
+        <div class="hardware-box">
+            <div class="hardware-item">
+                <h4>Drawer Slides (pair)</h4>
+                <div class="model">563H4570B</div>
+                <p>Blum TANDEM 18" pair<br><strong>Qty:</strong> 1 pair (2 slides)</p>
+            </div>
+            <div class="hardware-item">
+                <h4>Locking Device</h4>
+                <div class="model">T51.1901</div>
+                <p>Blum TANDEM Locking Device<br><strong>Qty:</strong> 1 per drawer</p>
+            </div>
+        </div>
+
+        <h3>📏 Minimum Cabinet Depth Requirements</h3>
+        <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong>📋 For 18" Slide (563H4570B):</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">
+                <div style="background: white; padding: 12px; border-radius: 5px; border-left: 4px solid #c0392b;">
+                    <div style="font-size: 0.9em; color: #666;">Blum Official Spec</div>
+                    <div style="font-size: 1.4em; font-weight: bold; color: #c0392b; font-family: monospace;">18-29/32"</div>
+                    <div style="font-size: 0.85em; color: #888;">(480mm = 18.906")</div>
+                </div>
+                <div style="background: #e8f5e9; padding: 12px; border-radius: 5px; border-left: 4px solid #27ae60;">
+                    <div style="font-size: 0.9em; color: #666;">Shop Practice ✓</div>
+                    <div style="font-size: 1.4em; font-weight: bold; color: #27ae60; font-family: monospace;">18-3/4"</div>
+                    <div style="font-size: 0.85em; color: #888;">(Slide + 3/4" = 18.75")</div>
+                </div>
+            </div>
+            <p style="margin: 10px 0 0 0; font-size: 0.9em; color: #555;">
+                <strong>Your cabinet:</strong> 20" depth ✅ — Exceeds both requirements
+            </p>
+        </div>
+
+        <details style="margin-bottom: 20px;">
+            <summary style="cursor: pointer; font-weight: bold; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                📊 All Slide Minimum Cabinet Depths (Reference)
+            </summary>
+            <table style="margin-top: 10px;">
+                <tr>
+                    <th>Slide Length</th>
+                    <th>Blum Min Depth</th>
+                    <th>Shop Min Depth</th>
+                    <th>Rule</th>
+                </tr>
+                <tr>
+                    <td>21"</td>
+                    <td class="dimension">21-15/16" (557mm)</td>
+                    <td class="dimension" style="color: #27ae60;">21-3/4"</td>
+                    <td>21" + 3/4"</td>
+                </tr>
+                <tr class="highlight">
+                    <td><strong>18"</strong></td>
+                    <td class="dimension">18-29/32" (480mm)</td>
+                    <td class="dimension" style="color: #27ae60;"><strong>18-3/4"</strong></td>
+                    <td>18" + 3/4"</td>
+                </tr>
+                <tr>
+                    <td>15"</td>
+                    <td class="dimension">15-29/32" (404mm)</td>
+                    <td class="dimension" style="color: #27ae60;">15-3/4"</td>
+                    <td>15" + 3/4"</td>
+                </tr>
+                <tr>
+                    <td>12"</td>
+                    <td class="dimension">12-29/32" (328mm)</td>
+                    <td class="dimension" style="color: #27ae60;">12-3/4"</td>
+                    <td>12" + 3/4"</td>
+                </tr>
+                <tr>
+                    <td>9"</td>
+                    <td class="dimension">10-15/32" (266mm)</td>
+                    <td class="dimension" style="color: #27ae60;">9-3/4"</td>
+                    <td>9" + 3/4"</td>
+                </tr>
+            </table>
+            <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                <strong>Shop Rule:</strong> Minimum cabinet depth = Slide length + 3/4" (simpler than Blum's ~29/32" spec, works reliably in practice)
+            </p>
+        </details>
+
+        <h2>📍 Slide Mounting Position</h2>
+        <p>Cabinet runner mounting specifications per Blum TANDEM 563H documentation:</p>
+        
+        <div class="drawing-container">
+            <svg viewBox="0 0 500 320" style="width: 100%; max-width: 625px; height: auto;">
+                <!-- Title -->
+                <text x="250" y="25" font-size="14" fill="#333" text-anchor="middle" font-weight="bold">CABINET CROSS-SECTION - Slide Mounting</text>
+                
+                <!-- Cabinet outline -->
+                <rect x="50" y="50" width="400" height="240" fill="none" stroke="#333" stroke-width="3"/>
+                
+                <!-- Left cabinet side panel -->
+                <rect x="50" y="50" width="15" height="240" fill="#a0522d" stroke="#333" stroke-width="1"/>
+                
+                <!-- Right cabinet side panel -->
+                <rect x="435" y="50" width="15" height="240" fill="#a0522d" stroke="#333" stroke-width="1"/>
+                
+                <!-- Cabinet bottom -->
+                <rect x="50" y="275" width="400" height="15" fill="#a0522d" stroke="#333" stroke-width="1"/>
+                
+                <!-- Left slide runner (cabinet-mounted) -->
+                <rect x="65" y="219" width="180" height="8" fill="#666" stroke="#333" stroke-width="1"/>
+                <text x="155" y="215" font-size="9" fill="#666" text-anchor="middle">Cabinet Runner</text>
+                
+                <!-- Right slide runner -->
+                <rect x="255" y="219" width="180" height="8" fill="#666" stroke="#333" stroke-width="1"/>
+                
+                <!-- Drawer box outline (dashed) -->
+                <rect x="100" y="120" width="300" height="104" fill="none" stroke="#1a5f7a" stroke-width="2" stroke-dasharray="8,4"/>
+                <text x="250" y="175" font-size="11" fill="#1a5f7a" text-anchor="middle">DRAWER BOX</text>
+                
+                <!-- Drawer bottom line -->
+                <line x1="100" y1="224" x2="400" y2="224" stroke="#1a5f7a" stroke-width="2" stroke-dasharray="8,4"/>
+                
+                <!-- Dimension: Bottom clearance 9/16" -->
+                <line x1="30" y1="227" x2="30" y2="275" stroke="#e74c3c" stroke-width="1.5"/>
+                <line x1="23" y1="227" x2="37" y2="227" stroke="#e74c3c" stroke-width="1.5"/>
+                <line x1="23" y1="275" x2="37" y2="275" stroke="#e74c3c" stroke-width="1.5"/>
+                <text x="25" y="255" font-size="10" fill="#e74c3c" text-anchor="end" transform="rotate(-90, 25, 255)">9/16"</text>
+                
+                <!-- Dimension: Top clearance 1/4" -->
+                <line x1="30" y1="120" x2="30" y2="50" stroke="#27ae60" stroke-width="1.5"/>
+                <line x1="23" y1="120" x2="37" y2="120" stroke="#27ae60" stroke-width="1.5"/>
+                <line x1="23" y1="50" x2="37" y2="50" stroke="#27ae60" stroke-width="1.5"/>
+                <text x="25" y="90" font-size="10" fill="#27ae60" text-anchor="end" transform="rotate(-90, 25, 90)">1/4"</text>
+                
+                <!-- Dimension: Runner height from cabinet bottom -->
+                <line x1="470" y1="223" x2="470" y2="275" stroke="#2980b9" stroke-width="1.5"/>
+                <line x1="463" y1="223" x2="477" y2="223" stroke="#2980b9" stroke-width="1.5"/>
+                <line x1="463" y1="275" x2="477" y2="275" stroke="#2980b9" stroke-width="1.5"/>
+                <text x="485" y="252" font-size="10" fill="#2980b9" font-weight="bold">37mm</text>
+                <text x="485" y="265" font-size="9" fill="#2980b9">(1-7/16")</text>
+                
+                <!-- Front setback dimension -->
+                <line x1="65" y1="300" x2="65" y2="310" stroke="#9b59b6" stroke-width="1"/>
+                <line x1="50" y1="305" x2="65" y2="305" stroke="#9b59b6" stroke-width="1.5"/>
+                <text x="57" y="318" font-size="9" fill="#9b59b6" text-anchor="middle">0"</text>
+                <text x="120" y="305" font-size="9" fill="#666">(flush with cabinet front)</text>
+                
+                <!-- Labels -->
+                <text x="65" y="45" font-size="9" fill="#666">Cabinet Side</text>
+                <text x="250" y="295" font-size="9" fill="#666" text-anchor="middle">Cabinet Bottom</text>
+            </svg>
+        </div>
+        
+        <table>
+            <tr>
+                <th>Mounting Dimension</th>
+                <th>Value</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td><strong>Runner Height</strong> (center, from cabinet bottom)</td>
+                <td class="dimension">1-7/16" (37mm)</td>
+                <td>Measured to runner centerline</td>
+            </tr>
+            <tr>
+                <td><strong>Front Setback</strong></td>
+                <td class="dimension">0" (flush)</td>
+                <td>Runner front edge flush with cabinet front</td>
+            </tr>
+            <tr>
+                <td><strong>Side Clearance</strong> (each side)</td>
+                <td class="dimension">5/16" (8mm)</td>
+                <td>Between drawer side and cabinet side</td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>Minimum Cabinet Depth</strong></td>
+                <td class="dimension">18-1/2" (470mm)</td>
+                <td>Required for 18" slide</td>
+            </tr>
+        </table>
+        
+        <div class="notes">
+            <strong>📝 Slide Installation Notes:</strong>
+            <ul>
+                <li><strong>Cabinet Runner:</strong> Screw to cabinet side panel at 37mm (1-7/16") from bottom</li>
+                <li><strong>Drawer Member:</strong> Clips onto drawer side bottom edge automatically</li>
+                <li><strong>Locking Device:</strong> Mounts at rear of drawer, centered on back panel</li>
+                <li><strong>Adjustment:</strong> Height ±2mm, side ±1.5mm after installation</li>
+            </ul>
+        </div>
+
+        <h2>🔨 Assembly Order</h2>
+        
+        <div style="display: grid; gap: 15px; margin: 20px 0;">
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
+                <div style="background: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">1</div>
+                <div>
+                    <strong>CNC Cut All Pieces</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Cut sides (2), front (1), back (1), bottom (1) to exact dimensions. Ensure square corners.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
+                <div style="background: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">2</div>
+                <div>
+                    <strong>Cut Dado Grooves</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Route 1/4" × 1/4" dado, 1/2" from bottom edge on ALL 4 box pieces (sides, front, back). Full length.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
+                <div style="background: #3498db; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">3</div>
+                <div>
+                    <strong>Cut Dovetail Joints</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;"><strong>Sides:</strong> Cut tails on front and back edges (vertical grain).<br><strong>Front/Back:</strong> Cut pins on both ends to mate with side tails.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #e67e22;">
+                <div style="background: #e67e22; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">4</div>
+                <div>
+                    <strong>Dry Fit Test</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Assemble without glue. Slide bottom panel into dados during assembly. Check for square. Verify all joints seat fully.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #27ae60;">
+                <div style="background: #27ae60; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">5</div>
+                <div>
+                    <strong>Glue & Clamp</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Apply glue to dovetail joints only. <strong>DO NOT glue bottom panel</strong> — it floats in dado to allow wood movement. Clamp square and let cure.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #9b59b6;">
+                <div style="background: #9b59b6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">6</div>
+                <div>
+                    <strong>Install Cabinet Runners</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Mount slide runners to cabinet sides at 37mm (1-7/16") from cabinet bottom. Front of runner flush with cabinet front.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #9b59b6;">
+                <div style="background: #9b59b6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">7</div>
+                <div>
+                    <strong>Attach Drawer Members</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Clip drawer slide members onto bottom edge of drawer sides. They self-locate using the bottom panel as reference.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #9b59b6;">
+                <div style="background: #9b59b6; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">8</div>
+                <div>
+                    <strong>Install Locking Device</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Mount T51.1901 locking device centered on drawer back panel. This engages with cabinet runner for full extension lock.</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                <div style="background: #e74c3c; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">9</div>
+                <div>
+                    <strong>Insert Drawer & Test</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Slide drawer into cabinet runners. Test full extension and soft-close function. Adjust if needed (±2mm height, ±1.5mm side).</p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px; align-items: flex-start; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #1abc9c;">
+                <div style="background: #1abc9c; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">10</div>
+                <div>
+                    <strong>Apply False Front</strong>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Attach decorative drawer front using screws from inside drawer box. Adjust for even gaps/reveals.</p>
+                </div>
+            </div>
+        </div>
+
+        <h2>✅ Verification Checklist</h2>
+        <div class="check-item confirmed"><input type="checkbox" checked disabled><span>Outside width <strong>11-3/8"</strong> (11.3750") — CONFIRMED by carpenter</span></div>
+        <div class="check-item"><input type="checkbox"><span>Front/back piece length <strong>10-3/8"</strong> (10.3750") — correct?</span></div>
+        <div class="check-item"><input type="checkbox"><span>Bottom panel size <strong>10-13/16" × 17-7/16"</strong> — correct?</span></div>
+        <div class="check-item"><input type="checkbox"><span>Dado position <strong>1/2" up</strong> from bottom edge — correct?</span></div>
+        <div class="check-item"><input type="checkbox"><span>Drawer height <strong>5-3/16"</strong> (5.1875") — correct for 6" opening?</span></div>
+        <div class="check-item"><input type="checkbox"><span>Material ordered: ~2.5 sq ft 1/2" ply + ~1.5 sq ft 1/4" ply</span></div>
+
+        <hr style="margin: 30px 0;">
+        <p style="text-align: center; color: #7f8c8d; font-size: 0.9em;">
+            Generated by TCS Woodwork ERP — Blum TANDEM 563H Drawer Configurator<br>
+            <strong>Scale: 20 pixels = 1 inch</strong>
+        </p>
+    </div>
+</body>
+</html>

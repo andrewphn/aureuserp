@@ -327,6 +327,58 @@ Route::middleware(['web', 'auth:web'])->prefix('cabinet-ai')->name('api.cabinet-
         ->name('spec');
 });
 
+// DWG/DXF Parser API Routes - CAD File Parsing
+Route::middleware(['web', 'auth:web'])->prefix('dwg')->name('api.dwg.')->group(function () {
+    // Parse uploaded DWG/DXF file
+    Route::post('/parse', [App\Http\Controllers\Api\DwgController::class, 'parse'])
+        ->middleware('throttle:30,1')
+        ->name('parse');
+
+    // Parse file from storage path
+    Route::post('/parse-path', [App\Http\Controllers\Api\DwgController::class, 'parseFromPath'])
+        ->middleware('throttle:30,1')
+        ->name('parse-path');
+
+    // Convert to SVG
+    Route::post('/to-svg', [App\Http\Controllers\Api\DwgController::class, 'toSvg'])
+        ->middleware('throttle:30,1')
+        ->name('to-svg');
+
+    // Get layer statistics
+    Route::post('/layer-stats', [App\Http\Controllers\Api\DwgController::class, 'layerStats'])
+        ->middleware('throttle:30,1')
+        ->name('layer-stats');
+
+    // Check parsing capabilities
+    Route::get('/capabilities', [App\Http\Controllers\Api\DwgController::class, 'capabilities'])
+        ->name('capabilities');
+});
+
+// Document Scanner API Routes - AI-powered document scanning
+Route::middleware(['web', 'auth:web'])->prefix('document-scanner')->name('api.document-scanner.')->group(function () {
+    // Scan receiving document (packing slip)
+    Route::post('/scan-receiving', [App\Http\Controllers\Api\DocumentScannerApiController::class, 'scanReceiving'])
+        ->middleware('throttle:10,1')
+        ->name('scan-receiving');
+
+    // Learn vendor SKU mappings from user confirmations
+    Route::post('/learn-mappings', [App\Http\Controllers\Api\DocumentScannerApiController::class, 'learnMappings'])
+        ->middleware('throttle:30,1')
+        ->name('learn-mappings');
+
+    // Create new product from scan data
+    Route::post('/create-product', [App\Http\Controllers\Api\DocumentScannerApiController::class, 'createProduct'])
+        ->middleware('throttle:30,1')
+        ->name('create-product');
+});
+
+// Products API Routes - Product listing for scanner
+Route::middleware(['web', 'auth:web'])->prefix('products')->name('api.products.')->group(function () {
+    // List products for dropdown
+    Route::get('/list', [App\Http\Controllers\Api\DocumentScannerApiController::class, 'listProducts'])
+        ->name('list');
+});
+
 // Clock API Routes - Time Clock System for TCS Employees
 Route::middleware(['web', 'auth:web'])->prefix('clock')->name('api.clock.')->group(function () {
     // Authenticated user clock operations

@@ -222,6 +222,17 @@ class VendorPriceResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('ai_created')
+                    ->label('AI Created')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state ? 'AI' : 'Manual')
+                    ->color(fn ($state) => $state ? 'info' : 'gray')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: false),
+                TextColumn::make('ai_source_document')
+                    ->label('Source Doc')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->groups([
                 Tables\Grouping\Group::make('partner.name')

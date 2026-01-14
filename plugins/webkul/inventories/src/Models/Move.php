@@ -116,6 +116,10 @@ class Move extends Model
         'is_scraped',
         'is_inventory',
         'is_refund',
+        'ai_confidence',
+        'ai_source_sku',
+        'ai_matched_by',
+        'requires_review',
         'deadline',
         'reservation_date',
         'scheduled_at',
@@ -151,6 +155,8 @@ class Move extends Model
         'is_scraped'       => 'boolean',
         'is_inventory'     => 'boolean',
         'is_refund'        => 'boolean',
+        'requires_review'  => 'boolean',
+        'ai_confidence'    => 'decimal:2',
         'reservation_date' => 'date',
         'scheduled_at'     => 'datetime',
         'deadline'         => 'datetime',
@@ -418,5 +424,42 @@ class Move extends Model
     protected static function newFactory(): MoveFactory
     {
         return MoveFactory::new();
+    }
+
+    /**
+     * Check if this move was populated by AI
+     */
+    public function wasAiPopulated(): bool
+    {
+        return $this->ai_confidence !== null;
+    }
+
+    /**
+     * Get the AI confidence as a percentage
+     */
+    public function getAiConfidencePercentAttribute(): ?int
+    {
+        if ($this->ai_confidence === null) {
+            return null;
+        }
+        return (int) round($this->ai_confidence * 100);
+    }
+
+    /**
+     * Get the confidence badge color
+     */
+    public function getAiConfidenceColorAttribute(): string
+    {
+        if ($this->ai_confidence === null) {
+            return 'gray';
+        }
+
+        if ($this->ai_confidence >= 0.9) {
+            return 'success';
+        } elseif ($this->ai_confidence >= 0.7) {
+            return 'warning';
+        } else {
+            return 'danger';
+        }
     }
 }

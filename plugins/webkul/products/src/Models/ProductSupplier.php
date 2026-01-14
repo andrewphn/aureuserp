@@ -69,11 +69,16 @@ class ProductSupplier extends Model implements Sortable
         'currency_id',
         'company_id',
         'creator_id',
+        'ai_created',
+        'ai_source_document',
+        'ai_created_at',
     ];
 
     protected $casts = [
-        'starts_at' => 'date',
-        'ends_at'   => 'date',
+        'starts_at'     => 'date',
+        'ends_at'       => 'date',
+        'ai_created'    => 'boolean',
+        'ai_created_at' => 'datetime',
     ];
 
     public $sortable = [

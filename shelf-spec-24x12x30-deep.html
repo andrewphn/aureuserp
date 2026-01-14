@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjustable Shelf Specification - 24" × 12" × 30" (Deep - Center Support)</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #2c3e50; border-bottom: 3px solid #e74c3c; padding-bottom: 10px; }
+        h2 { color: #34495e; margin-top: 30px; border-left: 4px solid #e74c3c; padding-left: 10px; }
+        h3 { color: #7f8c8d; margin-top: 20px; }
+        
+        .info-box {
+            background: #fdecea;
+            border: 1px solid #e74c3c;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .warning-box {
+            background: #fef9e7;
+            border: 1px solid #f39c12;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .center-support-alert {
+            background: #e74c3c;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin: 15px 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 12px 15px; 
+            text-align: left; 
+        }
+        th { 
+            background: #e74c3c; 
+            color: white;
+            font-weight: 600;
+        }
+        tr:nth-child(even) { background: #f9f9f9; }
+        tr:hover { background: #f1f1f1; }
+        
+        .dimension { font-weight: bold; color: #c0392b; }
+        .fraction { font-family: monospace; font-size: 1.1em; }
+        
+        .svg-container {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .cut-piece {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .cut-piece svg { flex-shrink: 0; }
+        .cut-piece table { margin: 0; box-shadow: none; }
+        
+        .legend { 
+            display: flex; 
+            gap: 30px; 
+            margin: 20px 0;
+            padding: 15px;
+            background: #ecf0f1;
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        
+        .highlight { background: #fffde7; }
+        .shop-value { color: #27ae60; font-weight: bold; }
+        .center-highlight { background: #fdecea; }
+        .note { font-size: 0.9em; color: #7f8c8d; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Adjustable Shelf Specification</h1>
+        <h2 style="border-left: none; padding-left: 0;">Opening: 24" W × 12" H × 30" D</h2>
+        
+        <!-- Center Support Alert -->
+        <div class="center-support-alert">
+            ⚠️ DEPTH ≥ 28" — CENTER SUPPORT REQUIRED — 3 PIN HOLE COLUMNS
+        </div>
+        
+        <p class="note">Deep shelf (28"+ depth) - 3 pin hole columns with center support to prevent sag</p>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h3 style="margin-top: 0;">Center Support Rule</h3>
+            <p>At <strong>28" or greater DEPTH</strong>, shelves require a <strong>3rd center column</strong> of pin holes to prevent sagging under load.</p>
+            <ul>
+                <li><strong>This shelf:</strong> 30" deep → Center support required</li>
+                <li><strong>Pin columns on cabinet sides:</strong> Front (2"), Center (15"), Back (2" from back = 28")</li>
+                <li><strong>Notches:</strong> 6 total (4 corners + 2 center)</li>
+                <li><strong>Pins:</strong> 6 total (one per notch)</li>
+            </ul>
+        </div>
+
+        <!-- Summary Table -->
+        <h2>Calculated Dimensions</h2>
+        <table>
+            <tr>
+                <th>Dimension</th>
+                <th>Value</th>
+                <th>Fraction</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td>Opening Width</td>
+                <td>24.0000"</td>
+                <td class="fraction">24"</td>
+                <td>Cabinet opening</td>
+            </tr>
+            <tr>
+                <td>Opening Height</td>
+                <td>12.0000"</td>
+                <td class="fraction">12"</td>
+                <td>Cabinet opening</td>
+            </tr>
+            <tr class="center-highlight">
+                <td><strong>Opening Depth</strong></td>
+                <td><strong>30.0000"</strong></td>
+                <td class="fraction"><strong>30"</strong></td>
+                <td><strong>≥28" = center support required</strong></td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>Shelf Cut Width</strong></td>
+                <td class="shop-value">23.8750"</td>
+                <td class="fraction shop-value">23-7/8"</td>
+                <td>Opening - 1/8" (side clearances)</td>
+            </tr>
+            <tr class="highlight">
+                <td><strong>Shelf Cut Depth</strong></td>
+                <td class="shop-value">29.7500"</td>
+                <td class="fraction shop-value">29-3/4"</td>
+                <td>Opening - 1/4" (back clearance)</td>
+            </tr>
+            <tr>
+                <td>Shelf Thickness</td>
+                <td>0.7500"</td>
+                <td class="fraction">3/4"</td>
+                <td>Standard</td>
+            </tr>
+        </table>
+
+        <!-- Pin Hole Layout -->
+        <h2>Pin Hole Layout (Cabinet Sides) - 3 Columns</h2>
+        <p>For shelves <strong>28" or deeper</strong>, use <strong>3 columns</strong> of pin holes (front, center, back).</p>
+        
+        <div class="svg-container">
+            <svg width="500" height="350" viewBox="0 0 500 350">
+                <!-- Title -->
+                <text x="250" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#c0392b">
+                    Cabinet Side Panel - 3 Column Pin Hole Layout
+                </text>
+                <text x="250" y="45" text-anchor="middle" font-size="12" fill="#7f8c8d">
+                    (3 columns for 30" DEPTH - CENTER SUPPORT)
+                </text>
+                
+                <!-- Cabinet side panel outline -->
+                <rect x="50" y="70" width="400" height="250" fill="#e8e8e8" stroke="#333" stroke-width="2"/>
+                
+                <!-- Front edge label -->
+                <text x="50" y="340" text-anchor="middle" font-size="11" fill="#333">Front Edge</text>
+                
+                <!-- Back edge label -->
+                <text x="450" y="340" text-anchor="middle" font-size="11" fill="#333">Back Edge</text>
+                
+                <!-- Column position lines -->
+                <line x1="90" y1="70" x2="90" y2="320" stroke="#3498db" stroke-width="1" stroke-dasharray="5,5"/>
+                <line x1="250" y1="70" x2="250" y2="320" stroke="#e74c3c" stroke-width="2" stroke-dasharray="5,5"/>
+                <line x1="410" y1="70" x2="410" y2="320" stroke="#3498db" stroke-width="1" stroke-dasharray="5,5"/>
+                
+                <!-- Setback dimension - front -->
+                <line x1="50" y1="330" x2="90" y2="330" stroke="#3498db" stroke-width="1"/>
+                <text x="70" y="328" text-anchor="middle" font-size="12" fill="#3498db" font-weight="bold">2"</text>
+                
+                <!-- Center position dimension -->
+                <line x1="50" y1="60" x2="250" y2="60" stroke="#e74c3c" stroke-width="1"/>
+                <text x="150" y="58" text-anchor="middle" font-size="12" fill="#e74c3c" font-weight="bold">15" (center = depth ÷ 2)</text>
+                
+                <!-- Setback dimension - back -->
+                <line x1="410" y1="330" x2="450" y2="330" stroke="#3498db" stroke-width="1"/>
+                <text x="430" y="328" text-anchor="middle" font-size="12" fill="#3498db" font-weight="bold">2"</text>
+                
+                <!-- Pin holes - front column -->
+                <circle cx="90" cy="120" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                <circle cx="90" cy="160" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                <circle cx="90" cy="200" r="6" fill="#f39c12" stroke="#d68910" stroke-width="2"/>
+                <circle cx="90" cy="240" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                <circle cx="90" cy="280" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                
+                <!-- Pin holes - CENTER column (highlighted) -->
+                <circle cx="250" cy="120" r="7" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                <circle cx="250" cy="160" r="7" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                <circle cx="250" cy="200" r="7" fill="#f39c12" stroke="#d68910" stroke-width="3"/>
+                <circle cx="250" cy="240" r="7" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                <circle cx="250" cy="280" r="7" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                
+                <!-- Pin holes - back column -->
+                <circle cx="410" cy="120" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                <circle cx="410" cy="160" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                <circle cx="410" cy="200" r="6" fill="#f39c12" stroke="#d68910" stroke-width="2"/>
+                <circle cx="410" cy="240" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                <circle cx="410" cy="280" r="6" fill="#27ae60" stroke="#1e8449" stroke-width="2"/>
+                
+                <!-- Shelf position line -->
+                <line x1="85" y1="200" x2="415" y2="200" stroke="#f39c12" stroke-width="2" stroke-dasharray="10,5"/>
+                <text x="250" y="218" text-anchor="middle" font-size="10" fill="#f39c12">← Shelf Position →</text>
+                
+                <!-- Vertical spacing dimension -->
+                <line x1="70" y1="160" x2="70" y2="200" stroke="#9b59b6" stroke-width="1"/>
+                <line x1="65" y1="160" x2="75" y2="160" stroke="#9b59b6" stroke-width="1"/>
+                <line x1="65" y1="200" x2="75" y2="200" stroke="#9b59b6" stroke-width="1"/>
+                <text x="55" y="185" text-anchor="middle" font-size="12" fill="#9b59b6" font-weight="bold">2"</text>
+                
+                <!-- Column labels -->
+                <text x="90" y="305" text-anchor="middle" font-size="10" fill="#333">Front</text>
+                <text x="250" y="305" text-anchor="middle" font-size="12" fill="#e74c3c" font-weight="bold">CENTER</text>
+                <text x="410" y="305" text-anchor="middle" font-size="10" fill="#333">Back</text>
+            </svg>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #27ae60;"></div>
+                <span>Front/Back pin positions</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #e74c3c;"></div>
+                <span>CENTER SUPPORT column</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #f39c12;"></div>
+                <span>Current shelf position</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #3498db;"></div>
+                <span>Edge setbacks (2")</span>
+            </div>
+        </div>
+
+        <!-- Pin Hole Specifications -->
+        <h3>Pin Hole Specifications</h3>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td>Hole Diameter</td>
+                <td class="fraction">5mm (0.1969")</td>
+                <td>Industry standard</td>
+            </tr>
+            <tr>
+                <td>Front Column Setback</td>
+                <td class="fraction">2"</td>
+                <td>From front edge</td>
+            </tr>
+            <tr class="center-highlight">
+                <td><strong>Center Column Position</strong></td>
+                <td class="fraction"><strong>15"</strong></td>
+                <td><strong>Center of 30" depth (depth ÷ 2)</strong></td>
+            </tr>
+            <tr>
+                <td>Back Column Setback</td>
+                <td class="fraction">2"</td>
+                <td>From back edge (28" from front)</td>
+            </tr>
+            <tr>
+                <td>Vertical Spacing</td>
+                <td class="fraction">2"</td>
+                <td>Between holes</td>
+            </tr>
+            <tr>
+                <td>Total Columns</td>
+                <td class="dimension">3</td>
+                <td>Front + Center + Back</td>
+            </tr>
+            <tr>
+                <td>Drill Bit</td>
+                <td>5mm brad point</td>
+                <td>CNC operation</td>
+            </tr>
+        </table>
+
+        <!-- Shelf Cut Diagram -->
+        <h2>Shelf Panel - Cut Specifications (6 Notches)</h2>
+        
+        <div class="cut-piece">
+            <svg width="350" height="200" viewBox="0 0 350 200">
+                <!-- Title -->
+                <text x="175" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="#c0392b">
+                    Shelf Panel - 6 Notches (with Center)
+                </text>
+                
+                <!-- Shelf panel -->
+                <rect x="30" y="40" width="290" height="130" fill="#d4a574" stroke="#8b4513" stroke-width="2"/>
+                
+                <!-- Notches at corners -->
+                <rect x="30" y="40" width="12" height="12" fill="#fff" stroke="#8b4513" stroke-width="1"/>
+                <rect x="308" y="40" width="12" height="12" fill="#fff" stroke="#8b4513" stroke-width="1"/>
+                <rect x="30" y="158" width="12" height="12" fill="#fff" stroke="#8b4513" stroke-width="1"/>
+                <rect x="308" y="158" width="12" height="12" fill="#fff" stroke="#8b4513" stroke-width="1"/>
+                
+                <!-- CENTER notches (highlighted) -->
+                <rect x="169" y="40" width="12" height="12" fill="#fdecea" stroke="#e74c3c" stroke-width="2"/>
+                <rect x="169" y="158" width="12" height="12" fill="#fdecea" stroke="#e74c3c" stroke-width="2"/>
+                
+                <!-- Front edge highlight (edge banded) -->
+                <line x1="30" y1="170" x2="320" y2="170" stroke="#27ae60" stroke-width="4"/>
+                <text x="175" y="190" text-anchor="middle" font-size="10" fill="#27ae60" font-weight="bold">
+                    FRONT EDGE (Edge Banded)
+                </text>
+                
+                <!-- Width dimension -->
+                <line x1="30" y1="30" x2="320" y2="30" stroke="#333" stroke-width="1"/>
+                <line x1="30" y1="25" x2="30" y2="35" stroke="#333" stroke-width="1"/>
+                <line x1="320" y1="25" x2="320" y2="35" stroke="#333" stroke-width="1"/>
+                <text x="175" y="15" text-anchor="middle" font-size="12" fill="#333" font-weight="bold">23-7/8"</text>
+                
+                <!-- Notch labels -->
+                <text x="36" y="53" font-size="7" fill="#8b4513">N</text>
+                <text x="311" y="53" font-size="7" fill="#8b4513">N</text>
+                <text x="36" y="168" font-size="7" fill="#8b4513">N</text>
+                <text x="311" y="168" font-size="7" fill="#8b4513">N</text>
+                <text x="172" y="53" font-size="7" fill="#e74c3c" font-weight="bold">C</text>
+                <text x="172" y="168" font-size="7" fill="#e74c3c" font-weight="bold">C</text>
+            </svg>
+            
+            <table>
+                <tr><th colspan="2">Shelf Panel Dimensions</th></tr>
+                <tr><td>Width (Cut)</td><td class="shop-value">23-7/8" (23.875")</td></tr>
+                <tr><td>Depth (Cut)</td><td class="shop-value">29-3/4" (29.75")</td></tr>
+                <tr><td>Thickness</td><td>3/4"</td></tr>
+                <tr><td>Material</td><td>3/4" plywood (match cabinet)</td></tr>
+                <tr class="center-highlight"><td><strong>Notches</strong></td><td><strong>6 total (4 corners + 2 center)</strong></td></tr>
+                <tr><td>Edge Banding</td><td>Front edge only: 23-7/8"</td></tr>
+            </table>
+        </div>
+
+        <!-- Notch Detail -->
+        <h3>Notch Detail</h3>
+        <table>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td>Notch Depth</td>
+                <td class="fraction">3/8"</td>
+                <td>Standard for 5mm pins</td>
+            </tr>
+            <tr class="center-highlight">
+                <td><strong>Notch Count</strong></td>
+                <td><strong>6</strong></td>
+                <td><strong>4 corners + 2 center (for center support)</strong></td>
+            </tr>
+            <tr>
+                <td>Corner Notches</td>
+                <td>4</td>
+                <td>Front-left, Front-right, Back-left, Back-right</td>
+            </tr>
+            <tr class="center-highlight">
+                <td><strong>Center Notches</strong></td>
+                <td><strong>2</strong></td>
+                <td><strong>Front-center, Back-center (at 16")</strong></td>
+            </tr>
+        </table>
+
+        <!-- Hardware -->
+        <h2>Hardware Requirements</h2>
+        <table>
+            <tr>
+                <th>Item</th>
+                <th>Quantity</th>
+                <th>Specification</th>
+                <th>Notes</th>
+            </tr>
+            <tr class="center-highlight">
+                <td><strong>Shelf Pins</strong></td>
+                <td class="shop-value"><strong>6</strong></td>
+                <td>5mm spoon-style</td>
+                <td><strong>+2 for center support</strong></td>
+            </tr>
+            <tr>
+                <td>Edge Banding</td>
+                <td>23-7/8"</td>
+                <td>Match cabinet interior</td>
+                <td>Pre-finished maple typical</td>
+            </tr>
+        </table>
+
+        <!-- Comparison Table -->
+        <h2>Standard vs Deep Shelf Comparison</h2>
+        <table>
+            <tr>
+                <th>Feature</th>
+                <th>Standard Depth (&lt;28")</th>
+                <th>Deep (≥28")</th>
+            </tr>
+            <tr>
+                <td>Pin Hole Columns</td>
+                <td>2 (Front + Back)</td>
+                <td class="dimension">3 (Front + CENTER + Back)</td>
+            </tr>
+            <tr>
+                <td>Notch Count</td>
+                <td>4 (corners)</td>
+                <td class="dimension">6 (corners + center)</td>
+            </tr>
+            <tr>
+                <td>Shelf Pins</td>
+                <td>4</td>
+                <td class="dimension">6</td>
+            </tr>
+            <tr>
+                <td>Center Support</td>
+                <td>Not needed</td>
+                <td class="dimension">Required (prevents sag)</td>
+            </tr>
+        </table>
+
+        <!-- Validation -->
+        <h2>Validation</h2>
+        <table>
+            <tr>
+                <th>Check</th>
+                <th>Status</th>
+                <th>Notes</th>
+            </tr>
+            <tr>
+                <td>Opening Height ≥ 5.5"</td>
+                <td style="color: #27ae60;">✓ PASS</td>
+                <td>12" > 5.5" minimum</td>
+            </tr>
+            <tr class="center-highlight">
+                <td><strong>Depth ≥ 28" (center support)</strong></td>
+                <td style="color: #e74c3c;"><strong>⚠️ TRIGGERED</strong></td>
+                <td><strong>30" ≥ 28" — 3 columns required</strong></td>
+            </tr>
+            <tr>
+                <td>Pin setbacks fit</td>
+                <td style="color: #27ae60;">✓ PASS</td>
+                <td>2" + 15" + 2" fits in 30" depth</td>
+            </tr>
+        </table>
+
+        <!-- Footer -->
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #7f8c8d; font-size: 0.9em;">
+            <p>Generated by ShelfConfiguratorService | Scale: Not to scale | All dimensions in inches unless noted</p>
+            <p><strong>Shop rules:</strong> Pin holes 2" from edges, 2" vertical spacing, edge band front only, <strong>CENTER SUPPORT AT 28"+ DEPTH</strong></p>
+        </div>
+    </div>
+</body>
+</html>

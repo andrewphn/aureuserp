@@ -32,13 +32,49 @@ class AiDocumentScanner extends Component
 
     /**
      * Field mappings for receiving forms
+     *
+     * Maps AI scan result keys to form field names.
+     * Format: 'ai_result_key' => 'form_field_name'
      */
     protected array $receivingFieldMappings = [
+        // Vendor mapping
         'vendor_id' => 'partner_id',
+        'vendor_match.id' => 'partner_id',
+
+        // Document/reference fields
         'po_reference' => 'origin',
+        'document.po_reference' => 'origin',
         'po_id' => 'purchase_order_id',
-        'tracking_number' => 'carrier_tracking_ref',
-        'ship_date' => 'scheduled_date',
+        'po_match.id' => 'purchase_order_id',
+
+        // New AI tracking fields
+        'document.slip_number' => 'packing_slip_number',
+        'slip_number' => 'packing_slip_number',
+        'document.tracking_number' => 'tracking_number',
+        'tracking_number' => 'tracking_number',
+        'package_info.carrier' => 'carrier_name',
+
+        // Scheduling
+        'document.ship_date' => 'scheduled_at',
+        'ship_date' => 'scheduled_at',
+
+        // AI confidence tracking
+        'confidence' => 'ai_scan_confidence',
+    ];
+
+    /**
+     * Field mappings for move/line items in receiving forms
+     *
+     * Maps AI line item result keys to move form field names.
+     */
+    protected array $receivingLineMappings = [
+        'product_match.product_id' => 'product_id',
+        'quantity_shipped' => 'product_uom_qty',
+        'quantity' => 'product_uom_qty',
+        'sku' => 'ai_source_sku',
+        'product_match.confidence' => 'ai_confidence',
+        'product_match.match_method' => 'ai_matched_by',
+        'requires_review' => 'requires_review',
     ];
 
     /**
@@ -46,10 +82,16 @@ class AiDocumentScanner extends Component
      */
     protected array $invoiceFieldMappings = [
         'vendor_id' => 'partner_id',
+        'vendor_match.id' => 'partner_id',
+        'document.invoice_number' => 'reference',
         'invoice_number' => 'reference',
+        'document.invoice_date' => 'invoice_date',
         'invoice_date' => 'invoice_date',
+        'document.due_date' => 'invoice_date_due',
         'due_date' => 'invoice_date_due',
+        'document.po_reference' => 'invoice_origin',
         'po_reference' => 'invoice_origin',
+        'totals.total' => 'amount_total',
         'total' => 'amount_total',
     ];
 
@@ -167,6 +209,30 @@ class AiDocumentScanner extends Component
         return $this->documentType === 'packing_slip'
             ? $this->receivingFieldMappings
             : $this->invoiceFieldMappings;
+    }
+
+    /**
+     * Get the line item field mappings for receiving forms
+     */
+    public function getLineMappings(): array
+    {
+        return $this->receivingLineMappings;
+    }
+
+    /**
+     * Get the confidence threshold for auto-apply
+     */
+    public function getConfidenceThreshold(): float
+    {
+        return (float) config('ai.scan_confidence_threshold', 0.70);
+    }
+
+    /**
+     * Get the auto-apply confidence threshold
+     */
+    public function getAutoApplyThreshold(): float
+    {
+        return (float) config('ai.scan_auto_apply_threshold', 0.95);
     }
 
     /**

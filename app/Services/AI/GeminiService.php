@@ -50,7 +50,14 @@ class GeminiService
      */
     public function __construct()
     {
+        // Use gemini-1.5-flash as the default - it supports both text and vision
         $this->modelName = config('gemini.default_model', 'gemini-1.5-flash');
+        
+        // Ensure we're not using deprecated models
+        if (in_array($this->modelName, ['gemini-pro', 'gemini-pro-vision'])) {
+            $this->modelName = 'gemini-1.5-flash';
+        }
+        
         $this->initializeModel();
         $this->setupSystemContext();
     }
