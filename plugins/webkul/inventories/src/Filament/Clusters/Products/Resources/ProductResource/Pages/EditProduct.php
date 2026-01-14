@@ -891,7 +891,7 @@ class EditProduct extends BaseEditProduct
 
                         // Quantity from user input
                         if (!empty($data['quantity']) && $data['quantity'] > 0) {
-                            $this->applyInventoryQuantity($record, (float) $data['quantity']);
+                            $this->applyInventoryQuantity($record, (float) $data['quantity'], null, 'AI Photo');
                         }
 
                         if (!empty($updates) || $attributesCreated > 0) {
@@ -987,12 +987,17 @@ class EditProduct extends BaseEditProduct
                         $record = InventoryProduct::find($data['product_id']);
                     }
 
-                    $this->applyInventoryQuantity($record, (float) $data['quantity'], $data['location_id'] ?? null);
+                    $this->applyInventoryQuantity($record, (float) $data['quantity'], $data['location_id'] ?? null, 'Manual adjustment');
                 }),
         ], parent::getHeaderActions());
     }
 
-    protected function applyInventoryQuantity(InventoryProduct $record, float $newQuantity, ?int $locationId = null): void
+    protected function applyInventoryQuantity(
+        InventoryProduct $record,
+        float $newQuantity,
+        ?int $locationId = null,
+        string $source = 'Adjustment'
+    ): void
     {
         $previousQuantity = $record->on_hand_quantity;
 
@@ -1046,5 +1051,23 @@ class EditProduct extends BaseEditProduct
         }
 
         ProductResource::createMove($productQuantity, $currentQuantity, $sourceLocationId, $destinationLocationId);
+
+        $location = Location::query()->find($targetLocationId);
+        if ($location) {
+            $record->addMessage([
+                'type' => 'activity',
+                'subject' => 'Inventory quantity adjusted',
+                'body' => "{$source} set quantity from {$previousQuantity} to {$newQuantity} at {$location->full_name}.",
+                'summary' => "{$source} quantity: {$newQuantity}",
+                'is_internal' => true,
+                'properties' => [
+                    'source' => $source,
+                    'previous_quantity' => $previousQuantity,
+                    'new_quantity' => $newQuantity,
+                    'location_id' => $location->id,
+                    'location_name' => $location->full_name,
+                ],
+            ]);
+        }
     }
 }

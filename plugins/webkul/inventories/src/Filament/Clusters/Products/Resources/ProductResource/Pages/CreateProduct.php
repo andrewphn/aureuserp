@@ -186,7 +186,7 @@ class CreateProduct extends BaseCreateProduct
 
         $aiQuantity = session('ai_user_quantity');
         if (!empty($aiQuantity) && $aiQuantity > 0) {
-            $this->createInitialQuantity($record, (float) $aiQuantity);
+            $this->createInitialQuantity($record, (float) $aiQuantity, 'AI Photo');
             session()->forget('ai_user_quantity');
         }
 
@@ -1283,7 +1283,7 @@ class CreateProduct extends BaseCreateProduct
     /**
      * Create an initial inventory quantity record for a new product.
      */
-    protected function createInitialQuantity(Product $product, float $quantity): void
+    protected function createInitialQuantity(Product $product, float $quantity, string $source): void
     {
         if ($quantity <= 0 || ! $product->is_storable) {
             return;
@@ -1352,6 +1352,23 @@ class CreateProduct extends BaseCreateProduct
             );
 
             ProductResource::createMove($record, $record->quantity, $adjustmentLocationId, $record->location_id);
+        }
+
+        $location = Location::query()->find($locationId);
+        if ($location) {
+            $product->addMessage([
+                'type' => 'activity',
+                'subject' => 'Inventory quantity set',
+                'body' => "{$source} set quantity to {$quantity} at {$location->full_name}.",
+                'summary' => "{$source} quantity: {$quantity}",
+                'is_internal' => true,
+                'properties' => [
+                    'source' => $source,
+                    'new_quantity' => $quantity,
+                    'location_id' => $location->id,
+                    'location_name' => $location->full_name,
+                ],
+            ]);
         }
     }
 
