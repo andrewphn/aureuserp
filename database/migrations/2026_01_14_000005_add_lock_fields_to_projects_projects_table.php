@@ -17,32 +17,29 @@ return new class extends Migration
     {
         Schema::table('projects_projects', function (Blueprint $table) {
             // Design lock - prevents cabinet spec edits
-            $table->timestamp('design_locked_at')->nullable()->after('stage_entered_at');
+            $table->timestamp('design_locked_at')->nullable();
             $table->foreignId('design_locked_by')
                 ->nullable()
-                ->after('design_locked_at')
                 ->constrained('users')
                 ->nullOnDelete();
             
             // Procurement lock - prevents BOM quantity changes
-            $table->timestamp('procurement_locked_at')->nullable()->after('design_locked_by');
+            $table->timestamp('procurement_locked_at')->nullable();
             $table->foreignId('procurement_locked_by')
                 ->nullable()
-                ->after('procurement_locked_at')
                 ->constrained('users')
                 ->nullOnDelete();
             
             // Production lock - prevents geometry/dimension changes
-            $table->timestamp('production_locked_at')->nullable()->after('procurement_locked_by');
+            $table->timestamp('production_locked_at')->nullable();
             $table->foreignId('production_locked_by')
                 ->nullable()
-                ->after('production_locked_at')
                 ->constrained('users')
                 ->nullOnDelete();
             
             // Snapshots at lock time for comparison and change order tracking
-            $table->json('bom_snapshot_json')->nullable()->after('production_locked_by');
-            $table->json('pricing_snapshot_json')->nullable()->after('bom_snapshot_json');
+            $table->json('bom_snapshot_json')->nullable();
+            $table->json('pricing_snapshot_json')->nullable();
             
             // Index for quick lock status queries
             $table->index(['design_locked_at', 'procurement_locked_at', 'production_locked_at'], 'projects_lock_status_idx');
