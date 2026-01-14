@@ -43,6 +43,23 @@ class LeadResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    /**
+     * Get the attributes that should be used for global search.
+     * Using actual database columns instead of the 'full_name' accessor.
+     */
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['first_name', 'last_name', 'email', 'phone', 'company_name'];
+    }
+
+    /**
+     * Get the title for a global search result record.
+     */
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->full_name ?: $record->email ?: 'Lead #' . $record->id;
+    }
+
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::inbox()->count() ?: null;
