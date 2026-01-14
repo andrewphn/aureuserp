@@ -102,9 +102,6 @@ class CreateProduct extends BaseCreateProduct
             'ai_similar_products',
             'ai_pending_image_path',
             'ai_images_to_add',
-            'ai_user_quantity',
-            'ai_photo_gps',
-            'ai_work_location_id',
         ]);
     }
 
@@ -190,6 +187,7 @@ class CreateProduct extends BaseCreateProduct
             $this->createInitialQuantity($record, (float) $aiQuantity, 'AI Photo');
             session()->forget('ai_user_quantity');
         }
+        session()->forget(['ai_photo_gps', 'ai_work_location_id']);
 
         return $record;
     }
@@ -1086,6 +1084,7 @@ class CreateProduct extends BaseCreateProduct
             }
             session()->forget('ai_user_quantity');
         }
+        session()->forget(['ai_photo_gps', 'ai_work_location_id']);
 
         // Clear session data
         $this->clearPendingAiSession();
