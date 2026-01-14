@@ -891,7 +891,7 @@ class EditProduct extends BaseEditProduct
 
                         // Quantity from user input
                         if (!empty($data['quantity']) && $data['quantity'] > 0) {
-                            $updates['qty_available'] = $data['quantity'];
+                            $this->applyInventoryQuantity($record, (float) $data['quantity']);
                         }
 
                         if (!empty($updates) || $attributesCreated > 0) {
@@ -987,52 +987,64 @@ class EditProduct extends BaseEditProduct
                         $record = InventoryProduct::find($data['product_id']);
                     }
 
-                    $previousQuantity = $record->on_hand_quantity;
-
-                    if ($previousQuantity == $data['quantity']) {
-                        return;
-                    }
-
-                    $warehouse = Warehouse::first();
-
-                    $adjustmentLocation = Location::where('type', LocationType::INVENTORY)
-                        ->where('is_scrap', false)
-                        ->first();
-
-                    $currentQuantity = $data['quantity'] - $previousQuantity;
-
-                    if ($currentQuantity < 0) {
-                        $sourceLocationId = $data['location_id'] ?? $warehouse->lot_stock_location_id;
-
-                        $destinationLocationId = $adjustmentLocation->id;
-                    } else {
-                        $sourceLocationId = $data['location_id'] ?? $adjustmentLocation->id;
-
-                        $destinationLocationId = $warehouse->lot_stock_location_id;
-                    }
-
-                    $productQuantity = ProductQuantity::where('product_id', $record->id)
-                        ->where('location_id', $data['location_id'] ?? $warehouse->lot_stock_location_id)
-                        ->first();
-
-                    if ($productQuantity) {
-                        $productQuantity->update(['quantity' => $data['quantity']]);
-                    } else {
-                        $productQuantity = ProductQuantity::create([
-                            'product_id'        => $record->id,
-                            'company_id'        => $record->company_id,
-                            'location_id'       => $data['location_id'] ?? $warehouse->lot_stock_location_id,
-                            'package_id'        => $data['package_id'] ?? null,
-                            'lot_id'            => $data['lot_id'] ?? null,
-                            'quantity'          => $data['quantity'],
-                            'reserved_quantity' => 0,
-                            'incoming_at'       => now(),
-                            'creator_id'        => Auth::id(),
-                        ]);
-                    }
-
-                    ProductResource::createMove($productQuantity, $currentQuantity, $sourceLocationId, $destinationLocationId);
+                    $this->applyInventoryQuantity($record, (float) $data['quantity'], $data['location_id'] ?? null);
                 }),
         ], parent::getHeaderActions());
+    }
+
+    protected function applyInventoryQuantity(InventoryProduct $record, float $newQuantity, ?int $locationId = null): void
+    {
+        $previousQuantity = $record->on_hand_quantity;
+
+        if ($previousQuantity == $newQuantity) {
+            return;
+        }
+
+        $warehouse = Warehouse::first();
+        $targetLocationId = $locationId ?? $warehouse?->lot_stock_location_id;
+
+        if (! $targetLocationId) {
+            return;
+        }
+
+        $adjustmentLocation = Location::where('type', LocationType::INVENTORY)
+            ->where('is_scrap', false)
+            ->first();
+
+        if (! $adjustmentLocation) {
+            return;
+        }
+
+        $currentQuantity = $newQuantity - $previousQuantity;
+
+        if ($currentQuantity < 0) {
+            $sourceLocationId = $targetLocationId;
+            $destinationLocationId = $adjustmentLocation->id;
+        } else {
+            $sourceLocationId = $adjustmentLocation->id;
+            $destinationLocationId = $targetLocationId;
+        }
+
+        $productQuantity = ProductQuantity::where('product_id', $record->id)
+            ->where('location_id', $targetLocationId)
+            ->first();
+
+        if ($productQuantity) {
+            $productQuantity->update(['quantity' => $newQuantity]);
+        } else {
+            $productQuantity = ProductQuantity::create([
+                'product_id'        => $record->id,
+                'company_id'        => $record->company_id,
+                'location_id'       => $targetLocationId,
+                'package_id'        => null,
+                'lot_id'            => null,
+                'quantity'          => $newQuantity,
+                'reserved_quantity' => 0,
+                'incoming_at'       => now(),
+                'creator_id'        => Auth::id(),
+            ]);
+        }
+
+        ProductResource::createMove($productQuantity, $currentQuantity, $sourceLocationId, $destinationLocationId);
     }
 }
