@@ -42,6 +42,11 @@ return [
 
     'google' => [
         'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+        'api_key' => env('GOOGLE_API_KEY', env('GEMINI_API_KEY')),
+    ],
+
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
     ],
 
     'google_drive' => [
@@ -71,6 +76,10 @@ return [
 
     'scrapeops' => [
         'api_key' => env('SCRAPEOPS_API_KEY'),
+    ],
+
+    'libredwg' => [
+        'path' => env('LIBREDWG_PATH', '/Users/andrewphan/bin'),
     ],
 
 ];
