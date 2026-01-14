@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\Product as InventoryProduct;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Warehouse;
 use Webkul\Employee\Models\WorkLocation;
@@ -1052,6 +1053,7 @@ class CreateProduct extends BaseCreateProduct
     protected function redirectToExistingProduct(int $productId): void
     {
         $pendingImagePath = $this->getPendingImagePath();
+        $aiQuantity = session('ai_user_quantity');
 
         // Add the uploaded image to the existing product using Spatie
         if (!empty($pendingImagePath)) {
@@ -1077,6 +1079,14 @@ class CreateProduct extends BaseCreateProduct
             }
         }
 
+        if (!empty($aiQuantity) && $aiQuantity > 0) {
+            $inventoryProduct = InventoryProduct::find($productId);
+            if ($inventoryProduct) {
+                $this->applyInventoryQuantity($inventoryProduct, (float) $aiQuantity, null, 'AI Photo');
+            }
+            session()->forget('ai_user_quantity');
+        }
+
         // Clear session data
         $this->clearPendingAiSession();
 
@@ -1088,6 +1098,87 @@ class CreateProduct extends BaseCreateProduct
 
         // Redirect to the edit page
         $this->redirect(ProductResource::getUrl('edit', ['record' => $productId]));
+    }
+
+    protected function applyInventoryQuantity(
+        InventoryProduct $product,
+        float $newQuantity,
+        ?int $locationId = null,
+        string $source = 'Adjustment'
+    ): void
+    {
+        $previousQuantity = $product->on_hand_quantity;
+
+        if ($previousQuantity == $newQuantity) {
+            return;
+        }
+
+        $warehouse = Warehouse::query()->first();
+        $targetLocationId = $locationId ?? $warehouse?->lot_stock_location_id;
+
+        if (! $targetLocationId) {
+            return;
+        }
+
+        $adjustmentLocation = Location::query()
+            ->where('type', LocationType::INVENTORY)
+            ->where('is_scrap', false)
+            ->first();
+
+        if (! $adjustmentLocation) {
+            return;
+        }
+
+        $currentQuantity = $newQuantity - $previousQuantity;
+
+        if ($currentQuantity < 0) {
+            $sourceLocationId = $targetLocationId;
+            $destinationLocationId = $adjustmentLocation->id;
+        } else {
+            $sourceLocationId = $adjustmentLocation->id;
+            $destinationLocationId = $targetLocationId;
+        }
+
+        $productQuantity = ProductQuantity::query()
+            ->where('product_id', $product->id)
+            ->where('location_id', $targetLocationId)
+            ->first();
+
+        if ($productQuantity) {
+            $productQuantity->update(['quantity' => $newQuantity]);
+        } else {
+            $productQuantity = ProductQuantity::create([
+                'product_id'        => $product->id,
+                'company_id'        => $product->company_id,
+                'location_id'       => $targetLocationId,
+                'package_id'        => null,
+                'lot_id'            => null,
+                'quantity'          => $newQuantity,
+                'reserved_quantity' => 0,
+                'incoming_at'       => now(),
+                'creator_id'        => Auth::id(),
+            ]);
+        }
+
+        ProductResource::createMove($productQuantity, $currentQuantity, $sourceLocationId, $destinationLocationId);
+
+        $location = Location::query()->find($targetLocationId);
+        if ($location) {
+            $product->addMessage([
+                'type' => 'activity',
+                'subject' => 'Inventory quantity adjusted',
+                'body' => "{$source} set quantity from {$previousQuantity} to {$newQuantity} at {$location->full_name}.",
+                'summary' => "{$source} quantity: {$newQuantity}",
+                'is_internal' => true,
+                'properties' => [
+                    'source' => $source,
+                    'previous_quantity' => $previousQuantity,
+                    'new_quantity' => $newQuantity,
+                    'location_id' => $location->id,
+                    'location_name' => $location->full_name,
+                ],
+            ]);
+        }
     }
 
     /**
