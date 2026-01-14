@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasColumn('projects_cabinet_sections', 'opening_depth_inches')) {
+            return;
+        }
+
         Schema::table('projects_cabinet_sections', function (Blueprint $table) {
             $table->decimal('opening_depth_inches', 8, 3)
                 ->nullable()
@@ -26,6 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasColumn('projects_cabinet_sections', 'opening_depth_inches')) {
+            return;
+        }
+
         Schema::table('projects_cabinet_sections', function (Blueprint $table) {
             $table->dropColumn('opening_depth_inches');
         });
