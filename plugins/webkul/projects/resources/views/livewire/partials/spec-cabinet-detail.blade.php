@@ -27,9 +27,9 @@
             </h3>
             <div class="flex items-center gap-2 text-sm">
                 <span class="text-gray-500 dark:text-gray-400" x-text="formatDimensions(
-                    (selectedRun.children || [])[selectedCabinetIndex]?.length_inches,
-                    (selectedRun.children || [])[selectedCabinetIndex]?.height_inches,
-                    (selectedRun.children || [])[selectedCabinetIndex]?.depth_inches
+                    (selectedRun.children || [])[selectedCabinetIndex]?.length_inches || 0,
+                    (selectedRun.children || [])[selectedCabinetIndex]?.height_inches || 0,
+                    (selectedRun.children || [])[selectedCabinetIndex]?.depth_inches || 0
                 )"></span>
             </div>
         </div>
@@ -53,13 +53,13 @@
             {{-- Empty state --}}
             <template x-if="!((selectedRun.children || [])[selectedCabinetIndex]?.children || []).length">
                 <div class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                    <div class="w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-700">
-                        <x-heroicon-o-squares-2x2 class="w-5 h-5 text-gray-400" />
-                    </div>
+                            <div class="w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-800">
+                                <x-heroicon-o-squares-2x2 class="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                            </div>
                     No sections defined yet.
                     <button
                         @click="$wire.addSection(selectedRoomIndex + '.children.' + selectedLocationIndex + '.children.' + selectedRunIndex + '.children.' + selectedCabinetIndex)"
-                        class="text-primary-600 hover:text-primary-700 font-medium ml-1"
+                        class="text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium ml-1"
                     >Add your first section</button>
                 </div>
             </template>
@@ -153,8 +153,8 @@
                                             </div>
                                         </template>
                                         <template x-if="!['drawer', 'door'].includes(content.content_type)">
-                                            <div class="p-1 rounded bg-gray-200 dark:bg-gray-600">
-                                                <x-heroicon-s-square-2-stack class="w-3 h-3 text-gray-500" />
+                                            <div class="p-1 rounded bg-gray-200 dark:bg-gray-700">
+                                                <x-heroicon-s-square-2-stack class="w-3 h-3 text-gray-500 dark:text-gray-400" />
                                             </div>
                                         </template>
                                         <span class="font-medium text-sm capitalize text-gray-700 dark:text-gray-200" x-text="content.content_type || content.name || 'Content'"></span>
@@ -229,7 +229,7 @@
                                     {{-- Hardware List --}}
                                     <div class="space-y-1">
                                         <template x-for="(hw, hwIdx) in (content.children || [])" :key="hw.id || hwIdx">
-                                            <div class="flex items-center justify-between px-2 py-1.5 rounded text-xs bg-white dark:bg-gray-800/50">
+                                            <div class="flex items-center justify-between px-2 py-1.5 rounded text-xs bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700">
                                                 <div class="flex items-center gap-2 flex-1 min-w-0">
                                                     <span class="capitalize text-gray-600 dark:text-gray-300 whitespace-nowrap" x-text="hw.component_type?.replace('_', ' ') || 'Hardware'"></span>
 

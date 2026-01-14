@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Webkul\Product\Models\Product;
+use Webkul\Project\Contracts\CabinetComponentInterface;
 use Webkul\Support\Traits\HasComplexityScore;
 use Webkul\Support\Traits\HasFormattedDimensions;
 use Webkul\Support\Traits\HasFullCode;
+use Webkul\Project\Traits\HasEntityLock;
 
 /**
  * Shelf Model
@@ -22,9 +24,9 @@ use Webkul\Support\Traits\HasFullCode;
  * @property float|null $complexity_score Calculated complexity score
  * @property array|null $complexity_breakdown JSON breakdown of complexity factors
  */
-class Shelf extends Model
+class Shelf extends Model implements CabinetComponentInterface
 {
-    use HasFactory, SoftDeletes, HasFullCode, HasComplexityScore, HasFormattedDimensions;
+    use HasFactory, SoftDeletes, HasFullCode, HasComplexityScore, HasFormattedDimensions, HasEntityLock;
 
     protected $table = 'projects_shelves';
 
@@ -158,5 +160,29 @@ class Shelf extends Model
     public function getComponentCode(): string
     {
         return 'SHELF' . ($this->shelf_number ?? 1);
+    }
+
+    /**
+     * Get the component's name.
+     */
+    public function getComponentName(): ?string
+    {
+        return $this->shelf_name;
+    }
+
+    /**
+     * Get the component's number.
+     */
+    public function getComponentNumber(): ?int
+    {
+        return $this->shelf_number;
+    }
+
+    /**
+     * Get the component type identifier.
+     */
+    public static function getComponentType(): string
+    {
+        return 'shelf';
     }
 }

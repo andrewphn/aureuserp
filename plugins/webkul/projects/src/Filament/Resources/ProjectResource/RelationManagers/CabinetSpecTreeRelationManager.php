@@ -14,6 +14,7 @@ use Webkul\Project\Models\Drawer;
 use Webkul\Project\Models\Shelf;
 use Webkul\Project\Models\Pullout;
 use Webkul\Project\Models\HardwareRequirement;
+use Webkul\Project\Services\CabinetComponentRegistry;
 
 /**
  * Cabinet Spec Tree Relation Manager
@@ -466,19 +467,21 @@ class CabinetSpecTreeRelationManager extends RelationManager
 
     /**
      * Sync doors, drawers, shelves, pullouts within a section
+     *
+     * Uses CabinetComponentRegistry for centralized component type mapping.
+     * This allows consistent handling of component types across the application.
      */
     protected function syncSectionContents($section, array $contents): void
     {
-        // Track existing content IDs
-        $existingDoorIds = $section->doors()->pluck('id')->toArray();
-        $existingDrawerIds = $section->drawers()->pluck('id')->toArray();
-        $existingShelfIds = $section->shelves()->pluck('id')->toArray();
-        $existingPulloutIds = $section->pullouts()->pluck('id')->toArray();
+        // Track existing IDs by component type using the registry
+        $existing = [];
+        $processed = [];
 
-        $processedDoorIds = [];
-        $processedDrawerIds = [];
-        $processedShelfIds = [];
-        $processedPulloutIds = [];
+        foreach (CabinetComponentRegistry::getTypes() as $type) {
+            $relationship = CabinetComponentRegistry::getRelationship($type);
+            $existing[$type] = $section->$relationship()->pluck('id')->toArray();
+            $processed[$type] = [];
+        }
 
         foreach ($contents as $contentData) {
             $type = $contentData['type'] ?? null;
@@ -487,22 +490,15 @@ class CabinetSpecTreeRelationManager extends RelationManager
             // e.g., {type: 'content', content_type: 'drawer'}
             $contentType = $contentData['content_type'] ?? $type;
 
-            $result = match ($contentType) {
-                'door' => $this->syncDoor($section, $contentData),
-                'drawer' => $this->syncDrawer($section, $contentData),
-                'shelf' => $this->syncShelf($section, $contentData),
-                'pullout' => $this->syncPullout($section, $contentData),
-                default => null,
-            };
+            // Use registry to sync the component
+            if (!CabinetComponentRegistry::isValidType($contentType)) {
+                continue;
+            }
+
+            $result = CabinetComponentRegistry::syncFromSpec($contentType, $section, $contentData);
 
             if ($result) {
-                match ($contentType) {
-                    'door' => $processedDoorIds[] = $result['id'],
-                    'drawer' => $processedDrawerIds[] = $result['id'],
-                    'shelf' => $processedShelfIds[] = $result['id'],
-                    'pullout' => $processedPulloutIds[] = $result['id'],
-                    default => null,
-                };
+                $processed[$contentType][] = $result['id'];
 
                 // Sync hardware for this content
                 if (!empty($contentData['children'])) {
@@ -511,11 +507,14 @@ class CabinetSpecTreeRelationManager extends RelationManager
             }
         }
 
-        // Delete removed content items
-        $this->deleteRemovedItems(Door::class, $existingDoorIds, $processedDoorIds);
-        $this->deleteRemovedItems(Drawer::class, $existingDrawerIds, $processedDrawerIds);
-        $this->deleteRemovedItems(Shelf::class, $existingShelfIds, $processedShelfIds);
-        $this->deleteRemovedItems(Pullout::class, $existingPulloutIds, $processedPulloutIds);
+        // Delete removed content items using registry
+        foreach (CabinetComponentRegistry::getTypes() as $type) {
+            $modelClass = CabinetComponentRegistry::getModelClass($type);
+            $toDelete = array_diff($existing[$type], $processed[$type]);
+            if (!empty($toDelete)) {
+                $modelClass::whereIn('id', $toDelete)->delete();
+            }
+        }
     }
 
     /**

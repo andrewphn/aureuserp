@@ -112,6 +112,42 @@ class ProjectStage extends Model implements Sortable
     }
 
     /**
+     * Gates for this stage.
+     *
+     * @return HasMany
+     */
+    public function gates(): HasMany
+    {
+        return $this->hasMany(Gate::class, 'stage_id')
+            ->where('is_active', true)
+            ->orderBy('sequence');
+    }
+
+    /**
+     * All gates including inactive.
+     *
+     * @return HasMany
+     */
+    public function allGates(): HasMany
+    {
+        return $this->hasMany(Gate::class, 'stage_id')
+            ->orderBy('sequence');
+    }
+
+    /**
+     * Get blocking gates for this stage.
+     *
+     * @return HasMany
+     */
+    public function blockingGates(): HasMany
+    {
+        return $this->hasMany(Gate::class, 'stage_id')
+            ->where('is_active', true)
+            ->where('is_blocking', true)
+            ->orderBy('sequence');
+    }
+
+    /**
      * New Factory
      *
      * @return ProjectStageFactory

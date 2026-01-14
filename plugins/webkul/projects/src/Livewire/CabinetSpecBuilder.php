@@ -25,6 +25,7 @@ use Webkul\Project\Filament\Forms\Schemas\RoomFormSchema;
 use Webkul\Project\Filament\Forms\Schemas\LocationFormSchema;
 use Webkul\Project\Filament\Forms\Schemas\RunFormSchema;
 use Webkul\Project\Filament\Forms\Schemas\CabinetFormSchema;
+use Webkul\Project\Services\CabinetComponentRegistry;
 
 /**
  * Cabinet Spec Builder
@@ -119,11 +120,12 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
     protected ?TcsPricingService $pricingService = null;
 
     // Content types (what goes inside a section/opening)
-    public array $contentTypes = [
-        'door' => 'Door',
-        'drawer' => 'Drawer',
-        'shelf' => 'Shelf',
-        'pullout' => 'Pull-out',
+    // Primary types are loaded from CabinetComponentRegistry
+    // Additional types (panel, appliance, divider) are UI-only placeholders
+    public array $contentTypes = [];
+
+    // Additional content types that don't map to component tables
+    protected array $additionalContentTypes = [
         'panel' => 'Panel',
         'appliance' => 'Appliance Opening',
         'divider' => 'Divider',
@@ -154,6 +156,12 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
         // Initialize pricing service and load options from database
         $this->pricingService = app(TcsPricingService::class);
         $this->loadPricingOptions();
+
+        // Load content types from CabinetComponentRegistry + additional types
+        $this->contentTypes = array_merge(
+            CabinetComponentRegistry::getTypeOptions(),
+            $this->additionalContentTypes
+        );
 
         $this->calculateTotals();
     }
@@ -622,12 +630,14 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
         $this->isAddingCabinet = true;
         $this->addingToRunPath = $runPath;
         $this->activeField = 'name';
+        // Initialize with smart defaults based on run type
+        $defaults = $this->typeDefaults[$runType] ?? [];
         $this->newCabinetData = [
-            'name' => $nextNumber,  // Auto-fill with next number (B1, B2, etc.)
+            'name' => '',  // User enters code here (B24, W30, etc.) - sequential name auto-generated
             'cabinet_type' => $runType === 'island' ? 'base' : $runType,
-            'length_inches' => null,
-            'depth_inches' => $this->typeDefaults[$runType]['depth_inches'] ?? 24,
-            'height_inches' => $this->typeDefaults[$runType]['height_inches'] ?? 34.5,
+            'length_inches' => null,  // Will be parsed from name or user enters
+            'depth_inches' => $defaults['depth_inches'] ?? 24,
+            'height_inches' => $defaults['height_inches'] ?? 34.5,
             'quantity' => 1,
         ];
 
@@ -714,9 +724,27 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
 
         // Validate minimum data - user must enter at least width or a cabinet code
         $userInput = trim($this->newCabinetData['name'] ?? '');
-        $hasWidth = !empty($this->newCabinetData['length_inches']);
+        $hasWidth = !empty($this->newCabinetData['length_inches']) && $this->newCabinetData['length_inches'] > 0;
 
         if (empty($userInput) && !$hasWidth) {
+            // Show validation feedback - don't save empty entries
+            Notification::make()
+                ->warning()
+                ->title('Enter cabinet code or width')
+                ->body('Please enter a cabinet code (e.g., B24) or width to add a cabinet.')
+                ->duration(2000)
+                ->send();
+            return;
+        }
+
+        // Validate dimensions if provided
+        if (isset($this->newCabinetData['length_inches']) && ($this->newCabinetData['length_inches'] <= 0 || $this->newCabinetData['length_inches'] > 120)) {
+            Notification::make()
+                ->warning()
+                ->title('Invalid width')
+                ->body('Width must be between 0 and 120 inches.')
+                ->duration(2000)
+                ->send();
             return;
         }
 
@@ -737,6 +765,12 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
         // The sequential name (B1, W1) is auto-generated
         $cabinetCode = $userInput ?: null;
 
+        // Ensure required dimensions have defaults
+        $defaults = $this->typeDefaults[$runType] ?? $this->typeDefaults['base'];
+        $length = $this->newCabinetData['length_inches'] ?? null;
+        $depth = $this->newCabinetData['depth_inches'] ?? $defaults['depth_inches'] ?? 24;
+        $height = $this->newCabinetData['height_inches'] ?? $defaults['height_inches'] ?? 34.5;
+
         // Create cabinet node with proper naming
         $newCabinet = array_merge($this->newCabinetData, [
             'id' => 'cabinet_' . Str::random(8),
@@ -745,6 +779,10 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             'code' => $cabinetCode, // User-entered: DB18, SB36, etc.
             'source' => 'user', // Track as user-created
             'created_at' => now()->toIso8601String(),
+            'length_inches' => $length,
+            'depth_inches' => $depth,
+            'height_inches' => $height,
+            'quantity' => $this->newCabinetData['quantity'] ?? 1,
             'children' => [],
         ]);
 
@@ -754,6 +792,15 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
         // Recalculate totals
         $this->calculateTotals();
         $this->dispatchSpecDataUpdate();
+
+        // Show success feedback
+        $width = $length ?? '?';
+        Notification::make()
+            ->success()
+            ->title("Cabinet {$sequentialName} Added")
+            ->body("{$width}\" wide cabinet added to run.")
+            ->duration(1500)
+            ->send();
 
         if ($addAnother) {
             // Reset form for another entry
@@ -1039,14 +1086,15 @@ class CabinetSpecBuilder extends Component implements HasActions, HasForms
             return;
         }
 
-        // Validate and cast numeric fields
+        // Validate and cast numeric fields with immediate feedback
         if (in_array($field, ['length_inches', 'height_inches', 'depth_inches'])) {
             $value = (float) $value;
-            if ($value <= 0) {
-                return; // Don't save invalid dimensions
+            if ($value <= 0 || $value > 120) { // Reasonable max: 10 feet
+                // Don't save invalid dimensions - user will see value revert
+                return;
             }
         } elseif ($field === 'quantity') {
-            $value = max(1, (int) $value);
+            $value = max(1, min(100, (int) $value)); // Reasonable max: 100 cabinets
         }
 
         // Update the specific field

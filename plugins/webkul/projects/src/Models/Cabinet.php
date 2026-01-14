@@ -14,6 +14,7 @@ use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Chatter\Traits\HasLogActivity;
 use Webkul\Support\Traits\HasComplexityScore;
 use Webkul\Support\Traits\HasFormattedDimensions;
+use Webkul\Project\Traits\HasEntityLock;
 
 /**
  * Cabinet Eloquent model
@@ -60,7 +61,7 @@ use Webkul\Support\Traits\HasFormattedDimensions;
  */
 class Cabinet extends Model
 {
-    use SoftDeletes, HasChatter, HasLogActivity, HasComplexityScore, HasFormattedDimensions;
+    use SoftDeletes, HasChatter, HasLogActivity, HasComplexityScore, HasFormattedDimensions, HasEntityLock;
 
     protected $table = 'projects_cabinets';
 

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "../../public/css/annotation-system-v2.css";
+@import "./cabinet-spec-tokens.css";
 
 /* ============================================
    TWO-COLUMN LAYOUT RESPONSIVE UTILITIES

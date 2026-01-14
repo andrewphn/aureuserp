@@ -163,6 +163,15 @@ class Project extends Model implements HasMedia, Sortable
         'google_drive_folder_url',
         'google_drive_synced_at',
         'google_drive_enabled',
+        // Lock status fields (Stage & Gate system)
+        'design_locked_at',
+        'design_locked_by',
+        'procurement_locked_at',
+        'procurement_locked_by',
+        'production_locked_at',
+        'production_locked_by',
+        'bom_snapshot_json',
+        'pricing_snapshot_json',
     ];
 
     /**
@@ -200,6 +209,12 @@ class Project extends Model implements HasMedia, Sortable
         // Google Drive integration
         'google_drive_synced_at' => 'datetime',
         'google_drive_enabled'   => 'boolean',
+        // Lock status fields (Stage & Gate system)
+        'design_locked_at' => 'datetime',
+        'procurement_locked_at' => 'datetime',
+        'production_locked_at' => 'datetime',
+        'bom_snapshot_json' => 'array',
+        'pricing_snapshot_json' => 'array',
     ];
 
     protected array $logAttributes = [
@@ -297,6 +312,146 @@ class Project extends Model implements HasMedia, Sortable
     public function stage(): BelongsTo
     {
         return $this->belongsTo(ProjectStage::class);
+    }
+
+    /**
+     * Gate Evaluations - audit log of gate checks for this project.
+     *
+     * @return HasMany
+     */
+    public function gateEvaluations(): HasMany
+    {
+        return $this->hasMany(GateEvaluation::class, 'project_id');
+    }
+
+    /**
+     * Stage Transitions - audit log of all stage changes for this project.
+     *
+     * @return HasMany
+     */
+    public function stageTransitions(): HasMany
+    {
+        return $this->hasMany(StageTransition::class, 'project_id');
+    }
+
+    /**
+     * Get the most recent stage transition.
+     *
+     * @return HasMany
+     */
+    public function latestTransition(): HasMany
+    {
+        return $this->hasMany(StageTransition::class, 'project_id')
+            ->latest('transitioned_at')
+            ->limit(1);
+    }
+
+    /**
+     * User who locked the design.
+     *
+     * @return BelongsTo
+     */
+    public function designLockedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'design_locked_by');
+    }
+
+    /**
+     * User who locked procurement.
+     *
+     * @return BelongsTo
+     */
+    public function procurementLockedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'procurement_locked_by');
+    }
+
+    /**
+     * User who locked production.
+     *
+     * @return BelongsTo
+     */
+    public function productionLockedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'production_locked_by');
+    }
+
+    /**
+     * Check if project has design lock applied.
+     *
+     * @return bool
+     */
+    public function isDesignLocked(): bool
+    {
+        return $this->design_locked_at !== null;
+    }
+
+    /**
+     * Check if project has procurement lock applied.
+     *
+     * @return bool
+     */
+    public function isProcurementLocked(): bool
+    {
+        return $this->procurement_locked_at !== null;
+    }
+
+    /**
+     * Check if project has production lock applied.
+     *
+     * @return bool
+     */
+    public function isProductionLocked(): bool
+    {
+        return $this->production_locked_at !== null;
+    }
+
+    /**
+     * Check if any lock is applied.
+     *
+     * @return bool
+     */
+    public function hasAnyLock(): bool
+    {
+        return $this->isDesignLocked() 
+            || $this->isProcurementLocked() 
+            || $this->isProductionLocked();
+    }
+
+    /**
+     * Get the current gate for the project's stage.
+     * Returns the first blocking gate for the current stage that hasn't passed.
+     *
+     * @return Gate|null
+     */
+    public function getCurrentGate(): ?Gate
+    {
+        if (!$this->stage_id) {
+            return null;
+        }
+
+        return Gate::where('stage_id', $this->stage_id)
+            ->where('is_active', true)
+            ->where('is_blocking', true)
+            ->orderBy('sequence')
+            ->first();
+    }
+
+    /**
+     * Get all gates for the current stage.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getCurrentStageGates()
+    {
+        if (!$this->stage_id) {
+            return collect();
+        }
+
+        return Gate::where('stage_id', $this->stage_id)
+            ->where('is_active', true)
+            ->orderBy('sequence')
+            ->get();
     }
 
     /**
