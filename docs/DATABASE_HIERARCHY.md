@@ -1399,6 +1399,16 @@ Current stock quantities per product/location/lot.
 | `user_id` | FK | Assigned user |
 | `company_id` | FK | Company |
 
+**Quantity Entry & Adjustments (UI):**
+- **Operations → Quantities** (`QuantityResource`): users enter `counted_quantity` which sets `inventory_quantity_set = true` and `inventory_diff_quantity = counted - quantity`. Applying the count updates `quantity` and creates an adjustment move between the inventory adjustment location and the counted location.
+- **Products → Manage Quantities**: editing `quantity` directly creates an inventory adjustment move and updates the adjustment location record to keep system totals aligned.
+- **Operations (receipts, deliveries, internal transfers, scrap)**: moves and move lines update `inventories_product_quantities` through normal stock flows.
+
+**AI Photo → Inventory Flow:**
+- **Create Product (AI from Photo)** writes the new product record, then creates an initial `inventories_product_quantities` row for the entered quantity in the default warehouse location (or first internal location).
+- A matching **adjustment move** is created to keep stock history consistent with manual quantity edits.
+- If no internal location exists, the system skips quantity creation and logs a warning.
+
 ---
 
 ### 23. `inventories_lots` (Lot/Batch Tracking)

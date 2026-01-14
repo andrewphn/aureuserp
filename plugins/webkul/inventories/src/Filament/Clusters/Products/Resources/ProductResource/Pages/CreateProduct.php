@@ -13,8 +13,13 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\View;
 use Filament\Notifications\Notification;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
+use Webkul\Inventory\Enums\LocationType;
+use Webkul\Inventory\Models\Location;
+use Webkul\Inventory\Models\ProductQuantity;
+use Webkul\Inventory\Models\Warehouse;
 use Webkul\Product\Models\Tag;
 use Webkul\Product\Models\Product;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
@@ -168,6 +173,12 @@ class CreateProduct extends BaseCreateProduct
             }
             // Clear the session
             session()->forget('ai_images_to_add');
+        }
+
+        $aiQuantity = session('ai_user_quantity');
+        if (!empty($aiQuantity) && $aiQuantity > 0) {
+            $this->createInitialQuantity($record, (float) $aiQuantity);
+            session()->forget('ai_user_quantity');
         }
 
         return $record;
@@ -1211,7 +1222,7 @@ class CreateProduct extends BaseCreateProduct
 
         // Quantity from user input
         if (!empty($aiData['_user_quantity']) && $aiData['_user_quantity'] > 0) {
-            $updates['qty_available'] = $aiData['_user_quantity'];
+            session(['ai_user_quantity' => (float) $aiData['_user_quantity']]);
         }
 
         if (!empty($updates)) {
@@ -1240,5 +1251,77 @@ class CreateProduct extends BaseCreateProduct
 
         // Clear pending session data
         $this->clearPendingAiSession();
+    }
+
+    /**
+     * Create an initial inventory quantity record for a new product.
+     */
+    protected function createInitialQuantity(Product $product, float $quantity): void
+    {
+        if ($quantity <= 0 || ! $product->is_storable) {
+            return;
+        }
+
+        $warehouse = Warehouse::query()->first();
+        $locationId = $warehouse?->lot_stock_location_id;
+
+        if (! $locationId) {
+            $locationId = Location::query()
+                ->where('type', LocationType::INTERNAL)
+                ->value('id');
+        }
+
+        if (! $locationId) {
+            Log::warning('AI Photo - No inventory location found for initial quantity', [
+                'product_id' => $product->id,
+                'quantity' => $quantity,
+            ]);
+            return;
+        }
+
+        $exists = ProductQuantity::query()
+            ->where('location_id', $locationId)
+            ->where('product_id', $product->id)
+            ->whereNull('package_id')
+            ->whereNull('lot_id')
+            ->exists();
+
+        if ($exists) {
+            return;
+        }
+
+        $record = ProductQuantity::create([
+            'product_id' => $product->id,
+            'location_id' => $locationId,
+            'quantity' => $quantity,
+            'counted_quantity' => 0,
+            'inventory_quantity_set' => false,
+            'incoming_at' => now(),
+            'creator_id' => Auth::id(),
+            'company_id' => $product->company_id,
+        ]);
+
+        $adjustmentLocationId = Location::query()
+            ->where('type', LocationType::INVENTORY)
+            ->where('is_scrap', false)
+            ->value('id');
+
+        if ($adjustmentLocationId) {
+            ProductQuantity::updateOrCreate(
+                [
+                    'location_id' => $adjustmentLocationId,
+                    'product_id' => $record->product_id,
+                    'lot_id' => $record->lot_id,
+                ], [
+                    'quantity' => -$record->product->on_hand_quantity,
+                    'company_id' => $record->company_id,
+                    'creator_id' => Auth::id(),
+                    'incoming_at' => now(),
+                    'inventory_quantity_set' => false,
+                ]
+            );
+
+            ProductResource::createMove($record, $record->quantity, $adjustmentLocationId, $record->location_id);
+        }
     }
 }
