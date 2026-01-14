@@ -20,6 +20,7 @@ use Webkul\Inventory\Enums\LocationType;
 use Webkul\Inventory\Models\Location;
 use Webkul\Inventory\Models\ProductQuantity;
 use Webkul\Inventory\Models\Warehouse;
+use Webkul\Employee\Models\WorkLocation;
 use Webkul\Product\Models\Tag;
 use Webkul\Product\Models\Product;
 use Webkul\Inventory\Filament\Clusters\Products\Resources\ProductResource;
@@ -95,7 +96,15 @@ class CreateProduct extends BaseCreateProduct
      */
     protected function clearPendingAiSession(): void
     {
-        session()->forget(['ai_pending_data', 'ai_similar_products', 'ai_pending_image_path', 'ai_images_to_add']);
+        session()->forget([
+            'ai_pending_data',
+            'ai_similar_products',
+            'ai_pending_image_path',
+            'ai_images_to_add',
+            'ai_user_quantity',
+            'ai_photo_gps',
+            'ai_work_location_id',
+        ]);
     }
 
     /**
@@ -639,6 +648,24 @@ class CreateProduct extends BaseCreateProduct
                         $imageData = file_get_contents($fullPath);
                         $base64Image = base64_encode($imageData);
                         $mimeType = mime_content_type($fullPath);
+
+                        $gps = GeminiProductService::extractGpsFromImage($fullPath);
+                        if ($gps) {
+                            session(['ai_photo_gps' => $gps]);
+                            $matchedWorkLocation = $this->matchWorkLocationFromGps($gps['latitude'], $gps['longitude']);
+                            if ($matchedWorkLocation) {
+                                session(['ai_work_location_id' => $matchedWorkLocation->id]);
+                                Log::info('AI Photo - GPS matched work location', [
+                                    'work_location_id' => $matchedWorkLocation->id,
+                                    'work_location_name' => $matchedWorkLocation->name,
+                                ]);
+                            } else {
+                                Log::info('AI Photo - GPS found but no work location match', [
+                                    'latitude' => $gps['latitude'],
+                                    'longitude' => $gps['longitude'],
+                                ]);
+                            }
+                        }
 
                         // Call AI service
                         $service = new GeminiProductService();
@@ -1262,7 +1289,10 @@ class CreateProduct extends BaseCreateProduct
             return;
         }
 
-        $warehouse = Warehouse::query()->first();
+        $warehouse = $this->resolveWarehouseFromGps();
+        if (! $warehouse) {
+            $warehouse = Warehouse::query()->first();
+        }
         $locationId = $warehouse?->lot_stock_location_id;
 
         if (! $locationId) {
@@ -1323,5 +1353,69 @@ class CreateProduct extends BaseCreateProduct
 
             ProductResource::createMove($record, $record->quantity, $adjustmentLocationId, $record->location_id);
         }
+    }
+
+    protected function resolveWarehouseFromGps(): ?Warehouse
+    {
+        $workLocationId = session('ai_work_location_id');
+        if (! $workLocationId) {
+            return null;
+        }
+
+        $workLocation = WorkLocation::query()->find($workLocationId);
+        if (! $workLocation) {
+            return null;
+        }
+
+        return Warehouse::query()
+            ->where('company_id', $workLocation->company_id)
+            ->first();
+    }
+
+    protected function matchWorkLocationFromGps(float $latitude, float $longitude): ?WorkLocation
+    {
+        $workLocations = WorkLocation::query()
+            ->active()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get();
+
+        $closest = null;
+        $closestDistance = null;
+
+        foreach ($workLocations as $location) {
+            $distance = $this->haversineDistanceKm(
+                (float) $latitude,
+                (float) $longitude,
+                (float) $location->latitude,
+                (float) $location->longitude
+            );
+
+            if ($closestDistance === null || $distance < $closestDistance) {
+                $closestDistance = $distance;
+                $closest = $location;
+            }
+        }
+
+        if ($closestDistance === null) {
+            return null;
+        }
+
+        $maxDistanceKm = 0.5;
+        return $closestDistance <= $maxDistanceKm ? $closest : null;
+    }
+
+    protected function haversineDistanceKm(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371;
+        $latDelta = deg2rad($lat2 - $lat1);
+        $lonDelta = deg2rad($lon2 - $lon1);
+
+        $a = sin($latDelta / 2) ** 2
+            + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($lonDelta / 2) ** 2;
+
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
     }
 }

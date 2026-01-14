@@ -1408,6 +1408,7 @@ Current stock quantities per product/location/lot.
 - **Create Product (AI from Photo)** writes the new product record, then creates an initial `inventories_product_quantities` row for the entered quantity in the default warehouse location (or first internal location).
 - A matching **adjustment move** is created to keep stock history consistent with manual quantity edits.
 - If no internal location exists, the system skips quantity creation and logs a warning.
+- If GPS EXIF data exists, it is matched against **employees_work_locations** (lat/long). A close match selects the **company’s warehouse** for the initial quantity location.
 
 ---
 
