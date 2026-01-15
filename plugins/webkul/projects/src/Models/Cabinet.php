@@ -119,6 +119,12 @@ class Cabinet extends Model
         // Hardware products
         'pullout_product_id',
         'lazy_susan_product_id',
+        // Cabinet configurator fields
+        'construction_type',
+        'section_layout_type',
+        'face_frame_stile_width_inches',
+        'face_frame_rail_width_inches',
+        'face_frame_mid_stile_count',
     ];
 
     protected $casts = [
@@ -142,6 +148,10 @@ class Cabinet extends Model
         'hardware_installed_at' => 'datetime',
         'pocket_holes_at' => 'datetime',
         'doweled_at' => 'datetime',
+        // Cabinet configurator casts
+        'face_frame_stile_width_inches' => 'decimal:3',
+        'face_frame_rail_width_inches' => 'decimal:3',
+        'face_frame_mid_stile_count' => 'integer',
     ];
 
     /**
@@ -300,6 +310,110 @@ class Cabinet extends Model
     public function hardwareRequirements(): HasMany
     {
         return $this->hasMany(HardwareRequirement::class, 'cabinet_id');
+    }
+
+    /**
+     * Stretchers for this cabinet
+     *
+     * Stretchers are horizontal rails at the top of base cabinets that:
+     * - Hold the cabinet square and stable
+     * - Provide a surface to attach the countertop
+     * - Give drawer slides something to mount to
+     *
+     * Rule: Number of stretchers = 2 (front + back) + drawer_count
+     *
+     * @return HasMany
+     */
+    public function stretchers(): HasMany
+    {
+        return $this->hasMany(Stretcher::class, 'cabinet_id');
+    }
+
+    /**
+     * Determine if this cabinet needs stretchers
+     *
+     * Stretchers are required for:
+     * - Base cabinets with face frame construction
+     * - Cabinets with drawers (for slide mounting)
+     * - Vanity cabinets
+     * - Island cabinets
+     *
+     * Stretchers are NOT required for:
+     * - Wall cabinets
+     * - Frameless cabinets with full top construction
+     *
+     * @return bool
+     */
+    public function needsStretchers(): bool
+    {
+        // Get cabinet type from product or attributes
+        $cabinetType = $this->cabinet_type
+            ?? $this->productVariant?->category_name
+            ?? $this->product?->category_name
+            ?? 'base';
+
+        $cabinetType = strtolower($cabinetType);
+
+        // Wall cabinets don't need stretchers
+        $wallTypes = ['wall', 'wall_diagonal_corner', 'wall_blind_corner'];
+        if (in_array($cabinetType, $wallTypes)) {
+            return false;
+        }
+
+        // Check construction style if available
+        $constructionStyle = $this->construction_style ?? 'face_frame';
+        $topConstruction = $this->top_construction ?? 'stretchers';
+
+        // Frameless cabinets with full top don't need stretchers
+        if ($constructionStyle === 'frameless' && $topConstruction === 'full_top') {
+            return false;
+        }
+
+        // Face frame cabinets typically use stretchers
+        if ($constructionStyle === 'face_frame') {
+            return true;
+        }
+
+        // Base/tall cabinets with drawers need stretchers for slide mounting
+        if (($this->drawer_count ?? 0) > 0) {
+            return true;
+        }
+
+        // Check if cabinet type is in the stretcher-requiring list
+        $stretcherTypes = [
+            'base', 'sink_base', 'drawer_base', 'blind_base_corner', 'lazy_susan',
+            'vanity', 'vanity_drawer', 'vanity_sink', 'island', 'tall', 'tall_pantry',
+        ];
+
+        return in_array($cabinetType, $stretcherTypes);
+    }
+
+    /**
+     * Get the required stretcher count for this cabinet
+     *
+     * Rule: 2 structural (front + back) + drawer count
+     *
+     * @return int
+     */
+    public function getRequiredStretcherCountAttribute(): int
+    {
+        if (!$this->needsStretchers()) {
+            return 0;
+        }
+
+        return 2 + ($this->drawer_count ?? 0);
+    }
+
+    /**
+     * Auto-create stretchers for this cabinet using StretcherCalculator
+     *
+     * @param bool $force If true, delete existing stretchers first
+     * @return \Illuminate\Support\Collection Collection of created stretchers
+     */
+    public function createStretchers(bool $force = false): \Illuminate\Support\Collection
+    {
+        $calculator = app(\App\Services\StretcherCalculator::class);
+        return $calculator->createStretchersForCabinet($this, $force);
     }
 
     /**

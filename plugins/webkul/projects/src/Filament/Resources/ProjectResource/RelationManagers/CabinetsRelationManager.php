@@ -399,6 +399,15 @@ class CabinetsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
+                \Filament\Actions\Action::make('configure')
+                    ->label('Configure')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->color('primary')
+                    ->modalWidth('7xl')
+                    ->modalHeading(fn (Cabinet $record): string => "Configure {$record->cabinet_number}")
+                    ->modalContent(fn (Cabinet $record) => view('webkul-project::livewire.cabinet-configurator-modal', ['cabinetId' => $record->id]))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close'),
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])

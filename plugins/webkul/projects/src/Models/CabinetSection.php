@@ -18,7 +18,7 @@ use Webkul\Support\Traits\HasFormattedDimensions;
  * Hierarchy: Project → Room → Room Location → Cabinet Run → Cabinet → Section → Components
  *
  * @property int $id
- * @property int $cabinet_specification_id
+ * @property int $cabinet_id
  * @property int|null $section_number
  * @property string|null $section_code
  * @property string|null $full_code
@@ -56,7 +56,7 @@ class CabinetSection extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'cabinet_specification_id',
+        'cabinet_id',
         'section_number',
         'section_code',
         'full_code',
@@ -82,6 +82,11 @@ class CabinetSection extends Model
         'top_reveal_inches',
         'bottom_reveal_inches',
         'component_gap_inches',
+        // Cabinet configurator positioning fields
+        'cabinet_position_from_left_inches',
+        'cabinet_position_from_top_inches',
+        'section_width_ratio',
+        'section_height_ratio',
     ];
 
     /**
@@ -112,6 +117,11 @@ class CabinetSection extends Model
             'top_reveal_inches' => 'float',
             'bottom_reveal_inches' => 'float',
             'component_gap_inches' => 'float',
+            // Cabinet configurator positioning casts
+            'cabinet_position_from_left_inches' => 'float',
+            'cabinet_position_from_top_inches' => 'float',
+            'section_width_ratio' => 'float',
+            'section_height_ratio' => 'float',
         ];
     }
 
@@ -125,6 +135,7 @@ class CabinetSection extends Model
         'appliance' => 'Appliance Opening',
         'pullout' => 'Pullout Section',
         'mixed' => 'Mixed (Doors & Drawers)',
+        'false_front' => 'False Front Section',
     ];
 
     /**
@@ -182,7 +193,7 @@ class CabinetSection extends Model
 
         // Explicitly load relationships to ensure they're available
         // This is necessary because during boot/saving, relationships may not be loaded
-        if ($this->cabinet_specification_id && !$this->relationLoaded('cabinet')) {
+        if ($this->cabinet_id && !$this->relationLoaded('cabinet')) {
             $this->load('cabinet.cabinetRun.roomLocation.room.project');
         }
 
@@ -222,9 +233,9 @@ class CabinetSection extends Model
      */
     public function regenerateDescendantCodes(): void
     {
-        $this->load(['doors', 'drawers', 'shelves', 'pullouts']);
+        $this->load(['doors', 'drawers', 'shelves', 'pullouts', 'falseFronts']);
 
-        foreach (['doors', 'drawers', 'shelves', 'pullouts'] as $relation) {
+        foreach (['doors', 'drawers', 'shelves', 'pullouts', 'falseFronts'] as $relation) {
             foreach ($this->$relation as $component) {
                 $component->full_code = $component->generateFullCode();
                 $component->saveQuietly();
@@ -237,7 +248,7 @@ class CabinetSection extends Model
      */
     public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(Cabinet::class, 'cabinet_specification_id');
+        return $this->belongsTo(Cabinet::class, 'cabinet_id');
     }
 
     /**
@@ -289,6 +300,14 @@ class CabinetSection extends Model
     }
 
     /**
+     * Get false fronts for this section.
+     */
+    public function falseFronts(): HasMany
+    {
+        return $this->hasMany(FalseFront::class, 'section_id');
+    }
+
+    /**
      * Get all components count for this section.
      */
     public function getTotalComponentsAttribute(): int
@@ -296,7 +315,8 @@ class CabinetSection extends Model
         return $this->doors()->count()
             + $this->drawers()->count()
             + $this->pullouts()->count()
-            + $this->shelves()->count();
+            + $this->shelves()->count()
+            + $this->falseFronts()->count();
     }
 
     /**

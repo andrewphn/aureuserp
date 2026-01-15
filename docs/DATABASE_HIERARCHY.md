@@ -1409,6 +1409,7 @@ Current stock quantities per product/location/lot.
 - A matching **adjustment move** is created to keep stock history consistent with manual quantity edits.
 - If no internal location exists, the system skips quantity creation and logs a warning.
 - If GPS EXIF data exists, it is matched against **employees_work_locations** (lat/long). A close match selects the **company’s warehouse** for the initial quantity location.
+- **Edit Product (AI from Photo)** applies the entered quantity the same way as a manual adjustment: it updates/creates the `inventories_product_quantities` row, posts an adjustment move, and records a chatter activity entry on the product.
 
 ---
 
