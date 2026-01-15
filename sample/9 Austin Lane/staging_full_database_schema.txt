@@ -2649,7 +2649,7 @@ total_production_cost|decimal(10,2)|NULL|-
 
 === projects_cabinet_sections ===
 id|bigint(20) unsigned|NOT NULL|PRI
-cabinet_specification_id|bigint(20) unsigned|NOT NULL|MUL
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
 section_number|int(11)|NOT NULL|-
 section_code|varchar(5)|NULL|-
 full_code|varchar(100)|NULL|MUL
@@ -2661,6 +2661,10 @@ width_inches|decimal(8,3)|NULL|-
 height_inches|decimal(8,3)|NULL|-
 position_from_left_inches|decimal(8,3)|NULL|-
 position_from_bottom_inches|decimal(8,3)|NULL|-
+cabinet_position_from_left_inches|decimal(8,4)|NULL|-
+cabinet_position_from_top_inches|decimal(8,4)|NULL|-
+section_width_ratio|decimal(5,3)|NULL|-
+section_height_ratio|decimal(5,3)|NULL|-
 component_count|int(11)|NOT NULL|-
 opening_width_inches|decimal(8,3)|NULL|-
 opening_height_inches|decimal(8,3)|NULL|-
@@ -2693,15 +2697,20 @@ cabinet_run_id|bigint(20) unsigned|NULL|MUL
 cabinet_number|varchar(255)|NULL|MUL
 full_code|varchar(100)|NULL|MUL
 cabinet_level|varchar(10)|NULL|-
+construction_type|varchar(50)|NOT NULL|-
+section_layout_type|varchar(50)|NOT NULL|-
+face_frame_stile_width_inches|decimal(5,3)|NOT NULL|-
+face_frame_rail_width_inches|decimal(5,3)|NOT NULL|-
+face_frame_mid_stile_count|int(10) unsigned|NOT NULL|-
 material_category|varchar(50)|NULL|-
 finish_option|varchar(50)|NULL|-
 position_in_run|int(11)|NULL|-
 wall_position_start_inches|decimal(8,2)|NULL|-
 product_variant_id|bigint(20) unsigned|NULL|-
-length_inches|decimal(8,2)|NULL|-
-width_inches|decimal(8,2)|NULL|-
-depth_inches|decimal(8,2)|NULL|-
-height_inches|decimal(8,2)|NULL|-
+length_inches|decimal(10,4)|NULL|-
+width_inches|decimal(10,4)|NULL|-
+depth_inches|decimal(10,4)|NULL|-
+height_inches|decimal(10,4)|NULL|-
 linear_feet|decimal(8,2)|NULL|-
 quantity|int(10) unsigned|NOT NULL|-
 unit_price_per_lf|decimal(10,2)|NULL|-
@@ -2881,6 +2890,25 @@ creator_id|bigint(20) unsigned|NULL|MUL
 created_at|timestamp|NULL|-
 updated_at|timestamp|NULL|-
 
+=== projects_door_presets ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+description|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+sort_order|int(11)|NOT NULL|-
+profile_type|varchar(255)|NULL|-
+fabrication_method|varchar(255)|NULL|-
+hinge_type|varchar(255)|NULL|-
+default_hinge_quantity|int(11)|NOT NULL|-
+has_glass|tinyint(1)|NOT NULL|-
+glass_type|varchar(255)|NULL|-
+has_check_rail|tinyint(1)|NOT NULL|-
+default_rail_width_inches|decimal(8,3)|NULL|-
+default_style_width_inches|decimal(8,3)|NULL|-
+estimated_complexity_score|decimal(8,2)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
 === projects_doors ===
 id|bigint(20) unsigned|NOT NULL|PRI
 product_id|bigint(20) unsigned|NULL|MUL
@@ -2935,6 +2963,22 @@ notes|text|NULL|-
 created_at|timestamp|NULL|-
 updated_at|timestamp|NULL|-
 deleted_at|timestamp|NULL|-
+
+=== projects_drawer_presets ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+description|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+sort_order|int(11)|NOT NULL|-
+profile_type|varchar(255)|NULL|-
+box_material|varchar(255)|NULL|-
+joinery_method|varchar(255)|NULL|-
+slide_type|varchar(255)|NULL|-
+slide_model|varchar(255)|NULL|-
+soft_close|tinyint(1)|NOT NULL|-
+estimated_complexity_score|decimal(8,2)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
 
 === projects_drawers ===
 id|bigint(20) unsigned|NOT NULL|PRI
@@ -3043,6 +3087,82 @@ unlocked_by|bigint(20) unsigned|NULL|MUL
 created_at|timestamp|NULL|-
 updated_at|timestamp|NULL|-
 
+=== projects_faceframes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cabinet_run_id|bigint(20) unsigned|NOT NULL|UNI
+face_frame_type|varchar(50)|NULL|-
+face_frame_thickness|varchar(50)|NULL|-
+face_frame_linear_feet|decimal(8,2)|NULL|-
+stile_width|decimal(5,3)|NULL|-
+rail_width|decimal(5,3)|NULL|-
+material_thickness|decimal(5,3)|NULL|-
+material|varchar(100)|NULL|-
+finish_option|varchar(100)|NULL|-
+joinery_type|varchar(50)|NULL|-
+beaded_face_frame|tinyint(1)|NOT NULL|-
+overlay_type|varchar(50)|NULL|-
+flush_with_carcass|tinyint(1)|NOT NULL|-
+overhang_left|decimal(5,3)|NULL|-
+overhang_right|decimal(5,3)|NULL|-
+overhang_top|decimal(5,3)|NULL|-
+overhang_bottom|decimal(5,3)|NULL|-
+notes|text|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_false_fronts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+false_front_number|int(11)|NOT NULL|-
+false_front_name|varchar(100)|NULL|-
+full_code|varchar(255)|NULL|-
+sort_order|int(11)|NOT NULL|-
+false_front_type|enum('fixed','tilt_out')|NOT NULL|-
+width_inches|decimal(8,4)|NULL|-
+height_inches|decimal(8,4)|NULL|-
+thickness_inches|decimal(5,3)|NOT NULL|-
+has_backing_rail|tinyint(1)|NOT NULL|-
+backing_rail_width_inches|decimal(5,3)|NOT NULL|-
+backing_rail_height_inches|decimal(5,3)|NULL|-
+backing_rail_thickness_inches|decimal(5,3)|NOT NULL|-
+backing_rail_material|varchar(100)|NOT NULL|-
+backing_rail_position|varchar(50)|NOT NULL|-
+profile_type|varchar(100)|NULL|-
+rail_width_inches|decimal(5,3)|NULL|-
+stile_width_inches|decimal(5,3)|NULL|-
+finish_type|varchar(100)|NULL|-
+paint_color|varchar(100)|NULL|-
+stain_color|varchar(100)|NULL|-
+has_tilt_hardware|tinyint(1)|NOT NULL|-
+tilt_hardware_model|varchar(100)|NULL|-
+tilt_hardware_product_id|bigint(20) unsigned|NULL|MUL
+has_decorative_hardware|tinyint(1)|NOT NULL|-
+decorative_hardware_model|varchar(100)|NULL|-
+decorative_hardware_product_id|bigint(20) unsigned|NULL|MUL
+mounting_screw_length_inches|decimal(4,2)|NOT NULL|-
+mounting_screw_count|int(11)|NOT NULL|-
+position_in_opening_inches|decimal(8,4)|NULL|-
+consumed_height_inches|decimal(8,4)|NULL|-
+position_from_left_inches|decimal(8,4)|NULL|-
+consumed_width_inches|decimal(8,4)|NULL|-
+panel_cnc_cut_at|timestamp|NULL|-
+panel_edge_banded_at|timestamp|NULL|-
+panel_sanded_at|timestamp|NULL|-
+panel_finished_at|timestamp|NULL|-
+backing_rail_cut_at|timestamp|NULL|-
+backing_rail_installed_at|timestamp|NULL|-
+installed_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|-
+qc_notes|text|NULL|-
+product_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
 === projects_gate_evaluations ===
 id|bigint(20) unsigned|NOT NULL|PRI
 project_id|bigint(20) unsigned|NOT NULL|MUL
@@ -3091,6 +3211,28 @@ applies_procurement_lock|tinyint(1)|NOT NULL|-
 applies_production_lock|tinyint(1)|NOT NULL|-
 creates_tasks_on_pass|tinyint(1)|NOT NULL|-
 task_templates_json|json|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_hardware_packages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+description|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_default|tinyint(1)|NOT NULL|-
+sort_order|int(11)|NOT NULL|-
+pricing_tier|varchar(255)|NULL|-
+price_multiplier|decimal(5,2)|NOT NULL|-
+default_hinge_type|varchar(255)|NULL|-
+default_hinge_model|varchar(255)|NULL|-
+hinges_per_door|int(11)|NOT NULL|-
+default_slide_type|varchar(255)|NULL|-
+default_slide_model|varchar(255)|NULL|-
+default_soft_close|tinyint(1)|NOT NULL|-
+default_joinery_method|varchar(255)|NULL|-
+default_box_material|varchar(255)|NULL|-
+color|varchar(255)|NULL|-
+icon|varchar(255)|NULL|-
 created_at|timestamp|NULL|-
 updated_at|timestamp|NULL|-
 
@@ -3204,6 +3346,10 @@ tags|json|NULL|-
 is_active|tinyint(1)|NOT NULL|-
 is_collapsed|tinyint(1)|NOT NULL|-
 wip_limit|int(10) unsigned|NULL|-
+max_days_in_stage|int(10) unsigned|NULL|-
+expiry_warning_days|int(10) unsigned|NOT NULL|-
+notice_message|text|NULL|-
+notice_severity|enum('info','warning','danger')|NOT NULL|-
 sort|int(11)|NULL|-
 company_id|bigint(20) unsigned|NULL|MUL
 creator_id|bigint(20) unsigned|NULL|MUL
@@ -3251,6 +3397,7 @@ google_drive_synced_at|timestamp|NULL|-
 google_drive_enabled|tinyint(1)|NOT NULL|-
 converted_at|timestamp|NULL|-
 stage_id|bigint(20) unsigned|NULL|MUL
+stage_entered_at|timestamp|NULL|-
 current_production_stage|enum('discovery','design','sourcing','production','delivery')|NOT NULL|-
 design_approved_at|timestamp|NULL|-
 redline_approved_at|timestamp|NULL|-
@@ -3290,6 +3437,24 @@ production_locked_at|timestamp|NULL|-
 production_locked_by|bigint(20) unsigned|NULL|MUL
 bom_snapshot_json|json|NULL|-
 pricing_snapshot_json|json|NULL|-
+
+=== projects_pullout_presets ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+description|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+sort_order|int(11)|NOT NULL|-
+pullout_type|varchar(255)|NULL|-
+manufacturer|varchar(255)|NULL|-
+model_number|varchar(255)|NULL|-
+mounting_type|varchar(255)|NULL|-
+slide_type|varchar(255)|NULL|-
+slide_model|varchar(255)|NULL|-
+soft_close|tinyint(1)|NOT NULL|-
+product_id|bigint(20) unsigned|NULL|MUL
+estimated_complexity_score|decimal(8,2)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
 
 === projects_pullouts ===
 id|bigint(20) unsigned|NOT NULL|PRI
@@ -3449,6 +3614,22 @@ labor_hours_estimate|decimal(8,2)|NULL|-
 last_pricing_calculation|timestamp|NULL|-
 pricing_notes|text|NULL|-
 
+=== projects_shelf_presets ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+description|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+sort_order|int(11)|NOT NULL|-
+shelf_type|varchar(255)|NULL|-
+material|varchar(255)|NULL|-
+edge_treatment|varchar(255)|NULL|-
+slide_type|varchar(255)|NULL|-
+slide_model|varchar(255)|NULL|-
+soft_close|tinyint(1)|NOT NULL|-
+estimated_complexity_score|decimal(8,2)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
 === projects_shelves ===
 id|bigint(20) unsigned|NOT NULL|PRI
 product_id|bigint(20) unsigned|NULL|MUL
@@ -3536,6 +3717,36 @@ metadata|json|NULL|-
 duration_minutes|int(10) unsigned|NULL|-
 created_at|timestamp|NULL|-
 updated_at|timestamp|NULL|-
+
+=== projects_stretchers ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+position|enum('front','back','drawer_support')|NOT NULL|MUL
+stretcher_number|int(11)|NOT NULL|-
+full_code|varchar(100)|NULL|-
+width_inches|decimal(8,4)|NOT NULL|-
+depth_inches|decimal(8,4)|NOT NULL|-
+thickness_inches|decimal(5,3)|NOT NULL|-
+position_from_front_inches|decimal(8,4)|NULL|-
+position_from_top_inches|decimal(8,4)|NULL|-
+material|varchar(100)|NOT NULL|-
+product_id|bigint(20) unsigned|NULL|MUL
+supports_drawer|tinyint(1)|NOT NULL|-
+drawer_id|bigint(20) unsigned|NULL|MUL
+cut_width_inches|decimal(8,4)|NULL|-
+cut_width_shop_inches|decimal(8,4)|NULL|-
+cut_depth_inches|decimal(8,4)|NULL|-
+cut_depth_shop_inches|decimal(8,4)|NULL|-
+cut_at|timestamp|NULL|-
+edge_banded_at|timestamp|NULL|-
+installed_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|-
+qc_notes|text|NULL|-
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
 
 === projects_tags ===
 id|bigint(20) unsigned|NOT NULL|PRI
