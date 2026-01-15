@@ -15,7 +15,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_cabinet_specifications', function (Blueprint $table) {
+        // Table was renamed from projects_cabinet_specifications to projects_cabinets
+        Schema::table('projects_cabinets', function (Blueprint $table) {
             // Increase precision to support fractional measurements (e.g., 5/16 = 0.3125)
             // decimal(10,4) allows up to 999999.9999 inches with 4 decimal precision
             $table->decimal('length_inches', 10, 4)->nullable()->change();
@@ -30,7 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('projects_cabinet_specifications', function (Blueprint $table) {
+        Schema::table('projects_cabinets', function (Blueprint $table) {
             // Revert to original precision
             $table->decimal('length_inches', 8, 2)->nullable()->change();
             $table->decimal('width_inches', 8, 2)->nullable()->change();
