@@ -18,7 +18,7 @@ use Webkul\Support\Traits\HasFormattedDimensions;
  * Hierarchy: Project → Room → Room Location → Cabinet Run → Cabinet → Section → Components
  *
  * @property int $id
- * @property int $cabinet_id
+ * @property int $cabinet_specification_id
  * @property int|null $section_number
  * @property string|null $section_code
  * @property string|null $full_code
@@ -56,7 +56,7 @@ class CabinetSection extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'cabinet_id',
+        'cabinet_specification_id',
         'section_number',
         'section_code',
         'full_code',
@@ -73,6 +73,15 @@ class CabinetSection extends Model
         'opening_height_inches',
         'notes',
         'sort_order',
+        // Opening layout fields
+        'total_consumed_height_inches',
+        'total_consumed_width_inches',
+        'remaining_height_inches',
+        'remaining_width_inches',
+        'layout_direction',
+        'top_reveal_inches',
+        'bottom_reveal_inches',
+        'component_gap_inches',
     ];
 
     /**
@@ -95,6 +104,14 @@ class CabinetSection extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            // Opening layout casts
+            'total_consumed_height_inches' => 'float',
+            'total_consumed_width_inches' => 'float',
+            'remaining_height_inches' => 'float',
+            'remaining_width_inches' => 'float',
+            'top_reveal_inches' => 'float',
+            'bottom_reveal_inches' => 'float',
+            'component_gap_inches' => 'float',
         ];
     }
 
@@ -108,6 +125,16 @@ class CabinetSection extends Model
         'appliance' => 'Appliance Opening',
         'pullout' => 'Pullout Section',
         'mixed' => 'Mixed (Doors & Drawers)',
+    ];
+
+    /**
+     * Layout directions for component arrangement
+     * @see docs/OPENING_CONFIGURATOR_SYSTEM.md
+     */
+    public const LAYOUT_DIRECTIONS = [
+        'vertical' => 'Vertical (Stacked)',
+        'horizontal' => 'Horizontal (Side-by-Side)',
+        'grid' => 'Grid Layout',
     ];
 
     /**
@@ -155,7 +182,7 @@ class CabinetSection extends Model
 
         // Explicitly load relationships to ensure they're available
         // This is necessary because during boot/saving, relationships may not be loaded
-        if ($this->cabinet_id && !$this->relationLoaded('cabinet')) {
+        if ($this->cabinet_specification_id && !$this->relationLoaded('cabinet')) {
             $this->load('cabinet.cabinetRun.roomLocation.room.project');
         }
 
@@ -210,7 +237,7 @@ class CabinetSection extends Model
      */
     public function cabinet(): BelongsTo
     {
-        return $this->belongsTo(Cabinet::class, 'cabinet_id');
+        return $this->belongsTo(Cabinet::class, 'cabinet_specification_id');
     }
 
     /**

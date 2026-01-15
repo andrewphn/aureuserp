@@ -13,6 +13,7 @@ use Webkul\Support\Traits\HasComplexityScore;
 use Webkul\Support\Traits\HasFormattedDimensions;
 use Webkul\Support\Traits\HasFullCode;
 use Webkul\Project\Traits\HasEntityLock;
+use Webkul\Project\Traits\HasOpeningPosition;
 
 /**
  * Door Model
@@ -26,7 +27,7 @@ use Webkul\Project\Traits\HasEntityLock;
  */
 class Door extends Model implements CabinetComponentInterface
 {
-    use HasFactory, SoftDeletes, HasFullCode, HasComplexityScore, HasFormattedDimensions, HasEntityLock;
+    use HasFactory, SoftDeletes, HasFullCode, HasComplexityScore, HasFormattedDimensions, HasEntityLock, HasOpeningPosition;
 
     protected $table = 'projects_doors';
 
@@ -73,6 +74,11 @@ class Door extends Model implements CabinetComponentInterface
         'qc_inspected_at',
         'qc_inspector_id',
         'notes',
+        // Opening position fields
+        'position_in_opening_inches',
+        'consumed_height_inches',
+        'position_from_left_inches',
+        'consumed_width_inches',
     ];
 
     protected function casts(): array
@@ -99,6 +105,11 @@ class Door extends Model implements CabinetComponentInterface
             'installed_in_cabinet_at' => 'datetime',
             'qc_passed' => 'boolean',
             'qc_inspected_at' => 'datetime',
+            // Opening position casts
+            'position_in_opening_inches' => 'float',
+            'consumed_height_inches' => 'float',
+            'position_from_left_inches' => 'float',
+            'consumed_width_inches' => 'float',
         ];
     }
 

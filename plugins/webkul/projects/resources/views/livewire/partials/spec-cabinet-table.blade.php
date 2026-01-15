@@ -236,7 +236,7 @@
                     <span
                         aria-label="Calculated linear feet"
                         class="font-semibold tabular-nums text-blue-600 dark:text-blue-400"
-                        x-text="((newCabinetData.length_inches || 0) / 12 * (newCabinetData.quantity || 1)).toFixed(2)"
+                        x-text="formatLinearFeet((newCabinetData.length_inches || 0) / 12 * (newCabinetData.quantity || 1))"
                     ></span>
                     <span class="sr-only">linear feet</span>
                 </td>
@@ -492,9 +492,9 @@
                 {{-- Linear Feet (calculated) --}}
                 <td role="gridcell" aria-colindex="6" class="px-3 py-2 text-right">
                     <span
-                        :aria-label="((cabinet.length_inches / 12) * (cabinet.quantity || 1)).toFixed(2) + ' linear feet'"
+                        :aria-label="formatLinearFeet((cabinet.length_inches / 12) * (cabinet.quantity || 1)) + ' linear feet'"
                         class="font-semibold tabular-nums text-blue-600 dark:text-blue-400"
-                        x-text="((cabinet.length_inches / 12) * (cabinet.quantity || 1)).toFixed(2)"
+                        x-text="formatLinearFeet((cabinet.length_inches / 12) * (cabinet.quantity || 1))"
                     ></span>
                 </td>
 
@@ -564,10 +564,10 @@
                 ></span>
             </td>
             <td role="gridcell" class="px-3 py-3 text-right font-bold tabular-nums text-base text-blue-600 dark:text-blue-400">
-                <span 
-                    x-text="((selectedRun.children || []).reduce((sum, c) => sum + ((c.length_inches / 12) * (c.quantity || 1)), 0)).toFixed(2)"
-                    :aria-label="((selectedRun.children || []).reduce((sum, c) => sum + ((c.length_inches / 12) * (c.quantity || 1)), 0)).toFixed(2) + ' total linear feet'"
-                ></span> LF
+                <span
+                    x-text="formatLinearFeet((selectedRun.children || []).reduce((sum, c) => sum + ((c.length_inches / 12) * (c.quantity || 1)), 0))"
+                    :aria-label="formatLinearFeet((selectedRun.children || []).reduce((sum, c) => sum + ((c.length_inches / 12) * (c.quantity || 1)), 0)) + ' total linear feet'"
+                ></span>
             </td>
             <td role="gridcell"></td>
         </tr>
