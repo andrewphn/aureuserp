@@ -9,9 +9,9 @@
   },
 
   "_tcs_material_standards": {
-    "_note": "TCS Woodwork standard material thicknesses",
+    "_note": "TCS Woodwork standard material thicknesses (Bryan Patton, Jan 2025)",
     "cabinet_box": "3/4\" prefinished maple plywood",
-    "cabinet_back": "1/4\" plywood",
+    "cabinet_back": "3/4\" plywood (TCS uses full 3/4\" backs)",
     "face_frame": "3/4\" solid wood or MDF",
     "drawer_box_sides": "1/2\" maple plywood",
     "drawer_box_front_back": "1/2\" maple plywood",
@@ -514,6 +514,41 @@
     "_table": "projects_doors",
     "_count": 0,
     "_note": "Bathroom vanity has drawers only, no doors"
+  },
+
+  "false_fronts": {
+    "_status": "❌ MISSING - 1 needed for sink vanity",
+    "_table": "projects_false_fronts",
+    "_count": 0,
+    "_note": "Fixed panel below sink - looks like drawer but doesn't open due to plumbing",
+
+    "bathroom_sink_false_front": {
+      "_status": "📋 FROM CAD - Ready to enter",
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "section_id": { "value": "TBD", "status": "📋" },
+      "false_front_number": { "value": 1, "status": "📋" },
+      "false_front_name": { "value": "Sink False Front", "status": "📋" },
+      "false_front_type": { "value": "fixed", "status": "📋", "note": "Fixed panel - does not open" },
+      "sort_order": { "value": 1, "status": "📋" },
+
+      "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" matches drawer opening width - VERIFIED FROM CAD" },
+      "height_inches": { "value": 4.1875, "status": "📋", "note": "~4-3/16\" - calculated from CAD (needs verification)" },
+      "thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
+
+      "profile_type": { "value": "2-1/4 Shaker", "status": "📋", "note": "Match drawer fronts" },
+      "rail_width_inches": { "value": 2.25, "status": "📋" },
+      "stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - match drawer fronts" },
+
+      "has_backing_rail": { "value": true, "status": "📋" },
+      "backing_rail_width_inches": { "value": 3.5, "status": "📋", "note": "3-1/2\" TCS standard" },
+      "backing_rail_position": { "value": "center", "status": "📋" },
+      "backing_rail_material": { "value": "plywood", "status": "📋" },
+
+      "finish_type": { "value": "paint", "status": "📋" },
+      "has_decorative_hardware": { "value": false, "status": "📋", "note": "No handles - matches drawers" },
+
+      "notes": { "value": "Fixed false front panel below sink. Plumbing prevents real drawer. Must match 2-1/4 Shaker profile of drawer fronts.", "status": "📋" }
+    }
   },
 
   "hardware_requirements": {
