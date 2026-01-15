@@ -289,11 +289,11 @@
       "drawer_position": { "value": "upper", "status": "📋" },
 
       "opening_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" face frame opening - VERIFIED FROM CAD" },
-      "opening_height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "opening_height_inches": { "value": 11.1875, "status": "✅", "note": "11-3/16\" - VERIFIED FROM CAD front elevation" },
       "opening_depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" },
 
-      "front_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
-      "front_height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "front_width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" (opening - 1/8\" gap each side) - VERIFIED FROM CAD" },
+      "front_height_inches": { "value": 11.1875, "status": "✅", "note": "11-3/16\" - VERIFIED FROM CAD front elevation" },
       "front_thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
 
       "top_rail_width_inches": { "value": 2.25, "status": "📋", "note": "2-1/4\" Shaker profile" },
@@ -305,8 +305,8 @@
       "box_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
       "box_depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
       "box_depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" },
-      "box_height_inches": { "value": 6.1875, "status": "✅", "note": "6-3/16\" theoretical (opening - 13/16\" clearance)" },
-      "box_height_shop_inches": { "value": 6, "status": "✅", "note": "6\" SHOP CUT (rounded down to 1/2\")" },
+      "box_height_inches": { "value": 10.375, "status": "✅", "note": "10-3/8\" theoretical (11-3/16\" opening - 13/16\" clearance)" },
+      "box_height_shop_inches": { "value": 10, "status": "✅", "note": "10\" SHOP CUT (rounded down to 1/2\")" },
       "box_outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\"" },
       "box_inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
       "box_material": { "value": "maple_plywood", "status": "📋", "note": "3/4\" prefinished maple plywood - TCS standard" },
@@ -320,21 +320,21 @@
         "sides": {
           "quantity": 2,
           "material": "1/2\" maple plywood",
-          "width_inches": { "value": 6, "status": "✅", "note": "SHOP HEIGHT" },
+          "width_inches": { "value": 10, "status": "✅", "note": "SHOP HEIGHT (10\" based on 11-3/16\" opening)" },
           "length_inches": { "value": 18.25, "status": "✅", "note": "SHOP DEPTH" },
           "notes": "Dovetail tails on front/back edges"
         },
         "front": {
           "quantity": 1,
           "material": "1/2\" maple plywood",
-          "width_inches": { "value": 6, "status": "✅" },
+          "width_inches": { "value": 10, "status": "✅" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
         "back": {
           "quantity": 1,
           "material": "1/2\" maple plywood",
-          "width_inches": { "value": 6, "status": "✅" },
+          "width_inches": { "value": 10, "status": "✅" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
@@ -374,7 +374,7 @@
         },
         "build_instruction": "Build drawer box as standard rectangle. U-cutout to be done ON-SITE after plumbing rough-in.",
         "known_dimensions": {
-          "drawer_opening_width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" - VERIFIED FROM CAD" },
+          "drawer_front_width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" drawer front width - VERIFIED FROM CAD" },
           "clearance_height_inches": { "value": 13.1875, "status": "✅", "note": "13-3/16\" - VERIFIED FROM CAD" },
           "sink_centerline_from_left_inches": { "value": 15.125, "status": "📋", "note": "15-1/8\" from plan view - approximate" },
           "cutout_position": { "value": "offset_left", "status": "📋", "note": "Sink appears offset toward left side" }
@@ -416,11 +416,11 @@
       "drawer_position": { "value": "lower", "status": "📋" },
 
       "opening_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" face frame opening - VERIFIED FROM CAD" },
-      "opening_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
+      "opening_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD side view" },
       "opening_depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" },
 
-      "front_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
-      "front_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
+      "front_width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" (opening - 1/8\" gap each side) - VERIFIED FROM CAD" },
+      "front_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD side view" },
       "front_thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
 
       "top_rail_width_inches": { "value": 2.25, "status": "📋" },
@@ -531,8 +531,8 @@
       "false_front_type": { "value": "fixed", "status": "📋", "note": "Fixed panel - does not open" },
       "sort_order": { "value": 1, "status": "📋" },
 
-      "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" matches drawer opening width - VERIFIED FROM CAD" },
-      "height_inches": { "value": 4.1875, "status": "📋", "note": "~4-3/16\" - calculated from CAD (needs verification)" },
+      "width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" (opening - 1/8\" gap each side) - matches drawer fronts" },
+      "height_inches": { "value": 7, "status": "✅", "note": "7\" - VERIFIED FROM CAD side view" },
       "thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
 
       "profile_type": { "value": "2-1/4 Shaker", "status": "📋", "note": "Match drawer fronts" },
