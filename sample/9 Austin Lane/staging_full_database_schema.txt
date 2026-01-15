@@ -2690,6 +2690,9 @@ deleted_at|timestamp|NULL|-
 === projects_cabinets ===
 id|bigint(20) unsigned|NOT NULL|PRI
 product_id|bigint(20) unsigned|NULL|MUL
+box_material_product_id|bigint(20) unsigned|NULL|MUL
+face_frame_material_product_id|bigint(20) unsigned|NULL|MUL
+edge_banding_product_id|bigint(20) unsigned|NULL|MUL
 order_line_id|bigint(20) unsigned|NULL|-
 project_id|bigint(20) unsigned|NULL|MUL
 room_id|bigint(20) unsigned|NULL|MUL
@@ -2698,10 +2701,15 @@ cabinet_number|varchar(255)|NULL|MUL
 full_code|varchar(100)|NULL|MUL
 cabinet_level|varchar(10)|NULL|-
 construction_type|varchar(50)|NOT NULL|-
+top_construction_type|varchar(20)|NOT NULL|-
+stretcher_height_inches|decimal(5,3)|NOT NULL|-
+sink_requires_extended_sides|tinyint(1)|NOT NULL|-
+sink_side_extension_inches|decimal(5,3)|NOT NULL|-
 section_layout_type|varchar(50)|NOT NULL|-
 face_frame_stile_width_inches|decimal(5,3)|NOT NULL|-
 face_frame_rail_width_inches|decimal(5,3)|NOT NULL|-
 face_frame_mid_stile_count|int(10) unsigned|NOT NULL|-
+face_frame_door_gap_inches|decimal(5,3)|NOT NULL|-
 material_category|varchar(50)|NULL|-
 finish_option|varchar(50)|NULL|-
 position_in_run|int(11)|NULL|-
@@ -3159,6 +3167,25 @@ qc_passed|tinyint(1)|NULL|-
 qc_notes|text|NULL|-
 product_id|bigint(20) unsigned|NULL|MUL
 notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_fixed_dividers ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+position_from_left_inches|decimal(8,4)|NULL|-
+position_from_bottom_inches|decimal(8,4)|NULL|-
+orientation|varchar(20)|NOT NULL|-
+purpose|varchar(50)|NOT NULL|MUL
+width_inches|decimal(5,3)|NULL|-
+height_inches|decimal(5,3)|NULL|-
+depth_inches|decimal(5,3)|NULL|-
+thickness_inches|decimal(5,3)|NOT NULL|-
+material|varchar(100)|NOT NULL|-
+material_product_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+sort_order|int(11)|NOT NULL|-
 created_at|timestamp|NULL|-
 updated_at|timestamp|NULL|-
 deleted_at|timestamp|NULL|-
