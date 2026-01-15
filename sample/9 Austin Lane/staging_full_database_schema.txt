@@ -1,0 +1,4729 @@
+Unsuccessful stat on filename containing newline at /var/cpanel/ea4/ea_php_cli.pm line 86.
+
+=== accounts_account_account_tags ===
+account_id|bigint(20) unsigned|NOT NULL|MUL
+account_tag_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_account_journals ===
+account_id|bigint(20) unsigned|NOT NULL|MUL
+journal_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_account_move_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+move_id|bigint(20) unsigned|NOT NULL|MUL
+journal_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+company_currency_id|bigint(20) unsigned|NULL|MUL
+reconcile_id|bigint(20) unsigned|NULL|MUL
+full_reconcile_id|bigint(20) unsigned|NULL|MUL
+payment_id|bigint(20) unsigned|NULL|MUL
+tax_repartition_line_id|bigint(20) unsigned|NULL|MUL
+account_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+group_tax_id|bigint(20) unsigned|NULL|MUL
+tax_line_id|bigint(20) unsigned|NULL|MUL
+tax_group_id|bigint(20) unsigned|NULL|MUL
+statement_id|bigint(20) unsigned|NULL|MUL
+statement_line_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NULL|MUL
+uom_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+move_name|varchar(255)|NULL|-
+parent_state|varchar(255)|NULL|-
+reference|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+matching_number|varchar(255)|NULL|-
+display_type|varchar(255)|NULL|-
+date|date|NULL|-
+invoice_date|date|NULL|-
+date_maturity|date|NULL|-
+discount_date|date|NULL|-
+analytic_distribution|json|NULL|-
+debit|decimal(15,4)|NULL|-
+credit|decimal(15,4)|NULL|-
+balance|decimal(15,4)|NULL|-
+amount_currency|decimal(15,4)|NULL|-
+tax_base_amount|decimal(15,4)|NULL|-
+amount_residual|decimal(15,4)|NULL|-
+amount_residual_currency|decimal(15,4)|NULL|-
+quantity|decimal(15,4)|NULL|-
+price_unit|decimal(15,4)|NULL|-
+price_subtotal|decimal(15,4)|NULL|-
+price_total|decimal(15,4)|NULL|-
+discount|decimal(5,2)|NULL|-
+discount_amount_currency|decimal(15,4)|NULL|-
+discount_balance|decimal(15,4)|NULL|-
+is_imported|tinyint(1)|NOT NULL|-
+tax_tag_invert|tinyint(1)|NOT NULL|-
+reconciled|tinyint(1)|NOT NULL|-
+is_downpayment|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+purchase_order_line_id|bigint(20) unsigned|NULL|MUL
+
+=== accounts_account_moves ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+journal_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+tax_cash_basis_origin_move_id|bigint(20) unsigned|NULL|MUL
+tax_cash_basis_reconcile_id|bigint(20) unsigned|NULL|MUL
+auto_post_origin_id|bigint(20) unsigned|NULL|MUL
+origin_payment_id|bigint(20) unsigned|NULL|MUL
+secure_sequence_number|int(11)|NULL|-
+invoice_payment_term_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+commercial_partner_id|bigint(20) unsigned|NULL|MUL
+partner_shipping_id|bigint(20) unsigned|NULL|MUL
+partner_bank_id|bigint(20) unsigned|NULL|MUL
+fiscal_position_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+reversed_entry_id|bigint(20) unsigned|NULL|MUL
+campaign_id|bigint(20) unsigned|NULL|MUL
+invoice_user_id|bigint(20) unsigned|NULL|MUL
+statement_line_id|bigint(20) unsigned|NULL|MUL
+invoice_incoterm_id|bigint(20) unsigned|NULL|MUL
+preferred_payment_method_line_id|bigint(20) unsigned|NULL|MUL
+invoice_cash_rounding_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+sequence_prefix|varchar(255)|NULL|-
+access_token|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+reference|varchar(255)|NULL|-
+state|varchar(255)|NOT NULL|-
+move_type|varchar(255)|NOT NULL|-
+auto_post|tinyint(1)|NOT NULL|-
+inalterable_hash|varchar(255)|NULL|-
+payment_reference|varchar(255)|NULL|-
+qr_code_method|varchar(255)|NULL|-
+payment_state|varchar(255)|NULL|-
+invoice_source_email|varchar(255)|NULL|-
+invoice_partner_display_name|varchar(255)|NULL|-
+invoice_origin|varchar(255)|NULL|-
+incoterm_location|varchar(255)|NULL|-
+date|date|NOT NULL|-
+auto_post_until|date|NULL|-
+invoice_date|date|NULL|-
+invoice_date_due|date|NULL|-
+delivery_date|date|NULL|-
+sending_data|json|NULL|-
+narration|text|NULL|-
+invoice_currency_rate|decimal(15,4)|NULL|-
+amount_untaxed|decimal(15,4)|NULL|-
+amount_tax|decimal(15,4)|NULL|-
+amount_total|decimal(15,4)|NULL|-
+amount_residual|decimal(15,4)|NULL|-
+amount_untaxed_signed|decimal(15,4)|NULL|-
+amount_untaxed_in_currency_signed|decimal(15,4)|NULL|-
+amount_tax_signed|decimal(15,4)|NULL|-
+amount_total_signed|decimal(15,4)|NULL|-
+amount_total_in_currency_signed|decimal(15,4)|NULL|-
+amount_residual_signed|decimal(15,4)|NULL|-
+quick_edit_total_amount|decimal(15,4)|NULL|-
+is_storno|tinyint(1)|NOT NULL|-
+always_tax_exigible|tinyint(1)|NOT NULL|-
+checked|tinyint(1)|NOT NULL|-
+posted_before|tinyint(1)|NOT NULL|-
+made_sequence_gap|tinyint(1)|NOT NULL|-
+is_manually_modified|tinyint(1)|NOT NULL|-
+is_move_sent|tinyint(1)|NOT NULL|-
+source_id|bigint(20) unsigned|NULL|MUL
+medium_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_account_payment_register_move_lines ===
+payment_register_id|bigint(20) unsigned|NOT NULL|MUL
+move_line_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_account_payments ===
+id|bigint(20) unsigned|NOT NULL|PRI
+journal_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+partner_bank_id|bigint(20) unsigned|NULL|MUL
+paired_internal_transfer_payment_id|bigint(20) unsigned|NULL|MUL
+payment_method_line_id|bigint(20) unsigned|NULL|MUL
+payment_method_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+outstanding_account_id|bigint(20) unsigned|NULL|MUL
+destination_account_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NULL|-
+state|varchar(255)|NOT NULL|-
+payment_type|varchar(255)|NULL|-
+partner_type|varchar(255)|NULL|-
+memo|varchar(255)|NULL|-
+payment_reference|varchar(255)|NULL|-
+date|date|NULL|-
+amount|decimal(15,4)|NULL|-
+amount_company_currency_signed|decimal(15,4)|NULL|-
+is_reconciled|tinyint(1)|NULL|-
+is_matched|tinyint(1)|NULL|-
+is_sent|tinyint(1)|NULL|-
+source_payment_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+move_id|bigint(20) unsigned|NULL|MUL
+payment_token_id|bigint(20) unsigned|NULL|MUL
+payment_transaction_id|bigint(20) unsigned|NULL|MUL
+
+=== accounts_account_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+color|varchar(255)|NULL|-
+country_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+applicability|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+tax_negate|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_account_taxes ===
+account_id|bigint(20) unsigned|NOT NULL|MUL
+tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_accounts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+currency_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+account_type|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+code|varchar(255)|NULL|-
+note|varchar(255)|NULL|-
+deprecated|tinyint(1)|NULL|-
+reconcile|tinyint(1)|NULL|-
+non_trade|tinyint(1)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_accounts_move_line_taxes ===
+move_line_id|bigint(20) unsigned|NOT NULL|MUL
+tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_accounts_move_payment ===
+invoice_id|bigint(20) unsigned|NOT NULL|MUL
+payment_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_accounts_move_reversal_move ===
+move_id|bigint(20) unsigned|NOT NULL|MUL
+reversal_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_accounts_move_reversal_new_move ===
+new_move_id|bigint(20) unsigned|NOT NULL|MUL
+reversal_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_accounts_move_reversals ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+reason|text|NULL|-
+date|date|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_bank_statement_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+journal_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+statement_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+move_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+foreign_currency_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+account_number|varchar(255)|NULL|-
+partner_name|varchar(255)|NULL|-
+transaction_type|varchar(255)|NULL|-
+payment_reference|varchar(255)|NULL|-
+internal_index|varchar(255)|NULL|-
+transaction_details|json|NULL|-
+amount|decimal(15,4)|NULL|-
+amount_currency|decimal(15,4)|NULL|-
+is_reconciled|tinyint(1)|NOT NULL|-
+amount_residual|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_bank_statements ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NULL|MUL
+journal_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NULL|-
+reference|varchar(255)|NULL|-
+first_line_index|varchar(255)|NULL|-
+date|date|NULL|-
+balance_start|decimal(15,4)|NOT NULL|-
+balance_end|decimal(15,4)|NOT NULL|-
+balance_end_real|decimal(15,4)|NOT NULL|-
+is_completed|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_cash_roundings ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+strategy|varchar(255)|NOT NULL|-
+rounding_method|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+rounding|decimal(15,4)|NOT NULL|-
+profit_account_id|bigint(20) unsigned|NULL|MUL
+loss_account_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_fiscal_position_taxes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+fiscal_position_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+tax_source_id|bigint(20) unsigned|NOT NULL|MUL
+tax_destination_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_fiscal_positions ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NOT NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+country_group_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+zip_from|varchar(255)|NULL|-
+zip_to|varchar(255)|NULL|-
+foreign_vat|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+notes|text|NULL|-
+auto_reply|tinyint(1)|NOT NULL|-
+vat_required|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_full_reconciles ===
+id|bigint(20) unsigned|NOT NULL|PRI
+exchange_move_id|bigint(20) unsigned|NULL|MUL
+created_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_incoterms ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+code|varchar(3)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_journal_accounts ===
+journal_id|bigint(20) unsigned|NOT NULL|MUL
+account_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_journals ===
+id|bigint(20) unsigned|NOT NULL|PRI
+default_account_id|bigint(20) unsigned|NULL|MUL
+suspense_account_id|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NULL|-
+currency_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+profit_account_id|bigint(20) unsigned|NULL|MUL
+loss_account_id|bigint(20) unsigned|NULL|MUL
+bank_account_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+color|varchar(255)|NULL|-
+access_token|varchar(255)|NULL|-
+code|varchar(255)|NULL|-
+type|varchar(255)|NOT NULL|-
+invoice_reference_type|varchar(255)|NOT NULL|-
+invoice_reference_model|varchar(255)|NOT NULL|-
+bank_statements_source|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+order_override_regex|text|NULL|-
+auto_check_on_post|tinyint(1)|NULL|-
+restrict_mode_hash_table|tinyint(1)|NULL|-
+refund_order|tinyint(1)|NULL|-
+payment_order|tinyint(1)|NULL|-
+show_on_dashboard|tinyint(1)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_partial_reconciles ===
+id|bigint(20) unsigned|NOT NULL|PRI
+debit_move_id|bigint(20) unsigned|NULL|MUL
+credit_move_id|bigint(20) unsigned|NULL|MUL
+full_reconcile_id|bigint(20) unsigned|NULL|MUL
+exchange_move_id|bigint(20) unsigned|NULL|MUL
+debit_currency_id|bigint(20) unsigned|NULL|MUL
+credit_currency_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+max_date|date|NULL|-
+amount|decimal(15,4)|NULL|-
+debit_amount_currency|decimal(15,4)|NULL|-
+credit_amount_currency|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_payment_due_terms ===
+id|bigint(20) unsigned|NOT NULL|PRI
+nb_days|int(11)|NULL|-
+payment_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+value|varchar(255)|NOT NULL|-
+delay_type|varchar(255)|NOT NULL|-
+days_next_month|varchar(255)|NULL|-
+value_amount|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_payment_method_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+payment_method_id|bigint(20) unsigned|NULL|MUL
+payment_account_id|bigint(20) unsigned|NULL|MUL
+journal_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_payment_methods ===
+id|bigint(20) unsigned|NOT NULL|PRI
+code|varchar(255)|NOT NULL|-
+payment_type|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+created_by|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_payment_registers ===
+id|bigint(20) unsigned|NOT NULL|PRI
+currency_id|bigint(20) unsigned|NULL|MUL
+journal_id|bigint(20) unsigned|NULL|MUL
+partner_bank_id|bigint(20) unsigned|NULL|MUL
+custom_user_currency_id|bigint(20) unsigned|NULL|MUL
+source_currency_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+payment_method_line_id|bigint(20) unsigned|NULL|MUL
+writeoff_account_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+communication|varchar(255)|NULL|-
+installments_mode|varchar(255)|NULL|-
+payment_type|varchar(255)|NULL|-
+partner_type|varchar(255)|NULL|-
+payment_difference_handling|varchar(255)|NULL|-
+writeoff_label|varchar(255)|NULL|-
+payment_date|date|NULL|-
+amount|decimal(15,4)|NULL|-
+custom_user_amount|decimal(15,4)|NULL|-
+source_amount|decimal(15,4)|NULL|-
+source_amount_currency|decimal(15,4)|NULL|-
+group_payment|tinyint(1)|NULL|-
+can_group_payments|tinyint(1)|NULL|-
+payment_token_id|int(11)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_payment_terms ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NULL|-
+discount_days|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+early_pay_discount|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+note|text|NULL|-
+display_on_invoice|tinyint(1)|NULL|-
+early_discount|tinyint(1)|NULL|-
+discount_percentage|decimal(15,4)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_product_supplier_taxes ===
+product_id|bigint(20) unsigned|NOT NULL|MUL
+tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_product_taxes ===
+product_id|bigint(20) unsigned|NOT NULL|MUL
+tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_reconciles ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NOT NULL|MUL
+past_months_limit|int(11)|NULL|-
+created_by|bigint(20) unsigned|NULL|MUL
+rule_type|varchar(255)|NOT NULL|-
+matching_order|varchar(255)|NOT NULL|-
+counter_part_type|varchar(255)|NULL|-
+match_nature|varchar(255)|NULL|-
+match_amount|varchar(255)|NULL|-
+match_label|varchar(255)|NULL|-
+match_level_parameters|varchar(255)|NULL|-
+match_note|varchar(255)|NULL|-
+match_note_parameters|varchar(255)|NULL|-
+match_transaction_type|varchar(255)|NULL|-
+match_transaction_type_parameters|varchar(255)|NULL|-
+payment_tolerance_type|varchar(255)|NULL|-
+decimal_separator|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+auto_reconcile|tinyint(1)|NOT NULL|-
+to_check|tinyint(1)|NOT NULL|-
+match_text_location_label|tinyint(1)|NOT NULL|-
+match_text_location_note|tinyint(1)|NOT NULL|-
+match_text_location_reference|tinyint(1)|NOT NULL|-
+match_same_currency|tinyint(1)|NOT NULL|-
+allow_payment_tolerance|tinyint(1)|NOT NULL|-
+match_partner|tinyint(1)|NOT NULL|-
+match_amount_min|decimal(15,4)|NULL|-
+match_amount_max|decimal(15,4)|NULL|-
+payment_tolerance_parameters|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_tax_groups ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+preceding_subtotal|varchar(255)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_tax_partition_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+account_id|bigint(20) unsigned|NULL|MUL
+tax_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NULL|-
+repartition_type|varchar(255)|NOT NULL|-
+document_type|varchar(255)|NOT NULL|-
+use_in_tax_closing|varchar(255)|NULL|-
+factor|decimal(15,4)|NULL|-
+factor_percent|decimal(8,2)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== accounts_tax_taxes ===
+parent_tax_id|bigint(20) unsigned|NOT NULL|MUL
+child_tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== accounts_taxes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NOT NULL|MUL
+tax_group_id|bigint(20) unsigned|NOT NULL|MUL
+cash_basis_transition_account_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+type_tax_use|varchar(255)|NOT NULL|-
+tax_scope|varchar(255)|NULL|-
+formula|varchar(255)|NULL|-
+amount_type|varchar(255)|NOT NULL|-
+price_include_override|varchar(255)|NULL|-
+tax_exigibility|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+description|text|NULL|-
+invoice_label|varchar(255)|NULL|-
+invoice_legal_notes|text|NULL|-
+amount|decimal(15,4)|NULL|-
+is_active|tinyint(1)|NULL|-
+include_base_amount|tinyint(1)|NULL|-
+is_base_affected|tinyint(1)|NULL|-
+analytic|tinyint(1)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== activity_plan_templates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+plan_id|bigint(20) unsigned|NOT NULL|MUL
+activity_type_id|bigint(20) unsigned|NOT NULL|MUL
+responsible_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+delay_count|int(11)|NULL|-
+delay_unit|varchar(255)|NOT NULL|-
+delay_from|varchar(255)|NOT NULL|-
+summary|text|NULL|-
+responsible_type|varchar(255)|NOT NULL|-
+note|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== activity_plans ===
+id|bigint(20) unsigned|NOT NULL|PRI
+plugin|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+department_id|bigint(20) unsigned|NULL|MUL
+
+=== activity_type_suggestions ===
+activity_type_id|bigint(20) unsigned|NOT NULL|MUL
+suggested_activity_type_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== activity_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+delay_count|int(11)|NULL|-
+delay_unit|varchar(255)|NOT NULL|-
+delay_from|varchar(255)|NOT NULL|-
+icon|varchar(255)|NULL|-
+decoration_type|varchar(255)|NULL|-
+chaining_type|varchar(255)|NULL|-
+plugin|varchar(255)|NULL|-
+category|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+summary|text|NULL|-
+default_note|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+keep_done|tinyint(1)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+default_user_id|bigint(20) unsigned|NULL|MUL
+activity_plan_id|bigint(20) unsigned|NULL|MUL
+triggered_next_type_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== analytic_records ===
+id|bigint(20) unsigned|NOT NULL|PRI
+type|varchar(255)|NOT NULL|-
+name|varchar(255)|NULL|-
+date|date|NOT NULL|-
+clock_in_time|time|NULL|-
+clock_out_time|time|NULL|-
+lunch_start_time|time|NULL|-
+lunch_end_time|time|NULL|-
+break_duration_minutes|smallint(5) unsigned|NOT NULL|-
+entry_type|enum('timesheet','clock','manual')|NOT NULL|MUL
+approved_by|bigint(20) unsigned|NULL|MUL
+approved_at|timestamp|NULL|-
+work_location_id|bigint(20) unsigned|NULL|MUL
+clock_notes|text|NULL|-
+amount|decimal(12,4)|NOT NULL|-
+unit_amount|decimal(12,4)|NOT NULL|-
+user_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+project_id|bigint(20) unsigned|NULL|MUL
+task_id|bigint(20) unsigned|NULL|MUL
+
+=== banks ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NULL|-
+code|varchar(255)|NULL|-
+email|varchar(255)|NULL|-
+phone|varchar(255)|NULL|-
+street1|varchar(255)|NULL|-
+street2|varchar(255)|NULL|-
+city|varchar(255)|NULL|-
+zip|varchar(255)|NULL|-
+state_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NOT NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== blogs_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+sub_title|text|NULL|-
+slug|varchar(255)|NOT NULL|UNI
+image|varchar(255)|NULL|-
+meta_title|varchar(255)|NULL|-
+meta_keywords|varchar(255)|NULL|-
+meta_description|text|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== blogs_post_tags ===
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+post_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== blogs_posts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|-
+sub_title|text|NULL|-
+content|text|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+image|varchar(255)|NULL|-
+author_name|varchar(255)|NULL|-
+is_published|tinyint(1)|NOT NULL|-
+published_at|datetime|NULL|-
+visits|int(11)|NOT NULL|-
+meta_title|text|NULL|-
+meta_keywords|text|NULL|-
+meta_description|text|NULL|-
+category_id|bigint(20) unsigned|NOT NULL|MUL
+author_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+last_editor_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== blogs_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+color|varchar(255)|NULL|-
+sort|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== cache ===
+key|varchar(255)|NOT NULL|PRI
+value|mediumtext|NOT NULL|-
+expiration|int(11)|NOT NULL|-
+
+=== cache_locks ===
+key|varchar(255)|NOT NULL|PRI
+owner|varchar(255)|NOT NULL|-
+expiration|int(11)|NOT NULL|-
+
+=== chatter_attachments ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+message_id|bigint(20) unsigned|NULL|MUL
+file_size|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+messageable_type|varchar(255)|NOT NULL|MUL
+messageable_id|bigint(20) unsigned|NOT NULL|-
+file_path|varchar(255)|NULL|-
+original_file_name|varchar(255)|NULL|-
+mime_type|varchar(255)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== chatter_followers ===
+id|bigint(20) unsigned|NOT NULL|PRI
+followable_type|varchar(255)|NOT NULL|MUL
+followable_id|bigint(20) unsigned|NOT NULL|-
+partner_id|bigint(20) unsigned|NULL|MUL
+followed_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== chatter_messages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NULL|MUL
+activity_type_id|bigint(20) unsigned|NULL|MUL
+assigned_to|bigint(20) unsigned|NULL|MUL
+messageable_type|varchar(255)|NOT NULL|MUL
+messageable_id|bigint(20) unsigned|NOT NULL|-
+type|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+subject|varchar(255)|NULL|-
+body|text|NULL|-
+summary|text|NULL|-
+is_internal|tinyint(1)|NULL|-
+is_read|tinyint(1)|NOT NULL|-
+date_deadline|date|NULL|-
+pinned_at|date|NULL|-
+log_name|varchar(255)|NULL|-
+causer_type|varchar(255)|NOT NULL|MUL
+causer_id|bigint(20) unsigned|NOT NULL|-
+event|varchar(255)|NULL|-
+properties|json|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== companies ===
+id|bigint(20) unsigned|NOT NULL|PRI
+parent_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+acronym|varchar(10)|NULL|-
+company_id|varchar(255)|NULL|UNI
+tax_id|varchar(255)|NULL|UNI
+registration_number|varchar(255)|NULL|-
+email|varchar(255)|NULL|-
+phone|varchar(255)|NULL|-
+mobile|varchar(255)|NULL|-
+website|varchar(255)|NULL|-
+color|varchar(255)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_default|tinyint(1)|NOT NULL|MUL
+founded_date|date|NULL|-
+deleted_at|timestamp|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+street1|varchar(255)|NULL|-
+street2|varchar(255)|NULL|-
+city|varchar(255)|NULL|-
+zip|varchar(255)|NULL|-
+state_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+shop_capacity_per_day|decimal(10,2)|NULL|-
+shop_capacity_per_month|decimal(10,2)|NULL|-
+shop_capacity_per_hour|decimal(10,2)|NULL|-
+working_hours_per_day|decimal(10,2)|NULL|-
+working_days_per_month|int(11)|NULL|-
+project_number_start|int(10) unsigned|NULL|-
+draft_number_start|int(10) unsigned|NULL|-
+
+=== countries ===
+id|bigint(20) unsigned|NOT NULL|PRI
+currency_id|bigint(20) unsigned|NULL|MUL
+phone_code|varchar(255)|NULL|-
+code|varchar(2)|NULL|-
+name|varchar(255)|NULL|-
+state_required|tinyint(1)|NOT NULL|-
+zip_required|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== currencies ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+symbol|varchar(255)|NULL|-
+iso_numeric|int(11)|NULL|-
+decimal_places|tinyint(4)|NULL|-
+full_name|varchar(255)|NULL|-
+rounding|decimal(8,2)|NOT NULL|-
+active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== custom_fields ===
+id|bigint(20) unsigned|NOT NULL|PRI
+code|varchar(255)|NOT NULL|MUL
+name|varchar(255)|NOT NULL|-
+type|varchar(255)|NOT NULL|-
+input_type|varchar(255)|NULL|-
+is_multiselect|tinyint(1)|NOT NULL|-
+datalist|json|NULL|-
+options|json|NULL|-
+form_settings|json|NULL|-
+use_in_table|tinyint(1)|NOT NULL|-
+table_settings|json|NULL|-
+infolist_settings|json|NULL|-
+sort|int(11)|NULL|MUL
+customizable_type|varchar(255)|NOT NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== document_scan_logs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+operation_id|bigint(20) unsigned|NULL|MUL
+document_type|varchar(255)|NOT NULL|MUL
+file_path|varchar(255)|NULL|-
+original_filename|varchar(255)|NULL|-
+file_size|int(10) unsigned|NULL|-
+raw_ai_response|json|NULL|-
+extracted_data|json|NULL|-
+overall_confidence|decimal(3,2)|NULL|-
+vendor_confidence|decimal(3,2)|NULL|-
+po_confidence|decimal(3,2)|NULL|-
+vendor_matched|tinyint(1)|NOT NULL|MUL
+matched_vendor_id|bigint(20) unsigned|NULL|MUL
+po_matched|tinyint(1)|NOT NULL|-
+matched_po_id|bigint(20) unsigned|NULL|MUL
+lines_total_count|int(10) unsigned|NOT NULL|-
+lines_matched_count|int(10) unsigned|NOT NULL|-
+lines_unmatched_count|int(10) unsigned|NOT NULL|-
+status|varchar(255)|NOT NULL|MUL
+reviewed_by|bigint(20) unsigned|NULL|MUL
+reviewed_at|datetime|NULL|-
+review_notes|text|NULL|-
+processing_time_ms|int(10) unsigned|NULL|-
+error_message|varchar(255)|NULL|-
+created_by|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|MUL
+updated_at|timestamp|NULL|-
+
+=== email_logs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+recipient_email|varchar(255)|NOT NULL|-
+recipient_name|varchar(255)|NOT NULL|-
+subject|varchar(255)|NOT NULL|-
+status|varchar(255)|NOT NULL|-
+error_message|text|NULL|-
+sent_at|timestamp|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_calendar_attendances ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+day_of_week|varchar(255)|NOT NULL|-
+day_period|varchar(255)|NOT NULL|-
+week_type|varchar(255)|NULL|-
+display_type|varchar(255)|NULL|-
+date_from|varchar(255)|NULL|-
+date_to|varchar(255)|NULL|-
+duration_days|varchar(255)|NULL|-
+hour_from|varchar(255)|NOT NULL|-
+hour_to|varchar(255)|NOT NULL|-
+calendar_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_calendar_leaves ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+time_type|varchar(255)|NOT NULL|-
+date_from|varchar(255)|NOT NULL|-
+date_to|varchar(255)|NOT NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+calendar_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_calendars ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+timezone|varchar(255)|NOT NULL|-
+hours_per_day|double|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_default|tinyint(1)|NOT NULL|-
+two_weeks_calendar|tinyint(1)|NULL|-
+flexible_hours|tinyint(1)|NULL|-
+full_time_required_hours|double|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+color|varchar(255)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_departments ===
+id|bigint(20) unsigned|NOT NULL|PRI
+manager_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+parent_id|bigint(20) unsigned|NULL|MUL
+master_department_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NULL|-
+complete_name|varchar(255)|NULL|-
+parent_path|varchar(255)|NULL|-
+color|text|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_departure_reasons ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+reason_code|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_employee_categories ===
+employee_id|bigint(20) unsigned|NULL|MUL
+category_id|bigint(20) unsigned|NULL|MUL
+
+=== employees_employee_resume_line_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_employee_resumes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+employee_id|bigint(20) unsigned|NOT NULL|MUL
+employee_resume_line_type_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+display_type|varchar(255)|NOT NULL|-
+start_date|date|NOT NULL|-
+end_date|date|NULL|-
+name|varchar(255)|NOT NULL|-
+description|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_employee_skills ===
+id|bigint(20) unsigned|NOT NULL|PRI
+employee_id|bigint(20) unsigned|NULL|MUL
+skill_id|bigint(20) unsigned|NULL|MUL
+skill_level_id|bigint(20) unsigned|NULL|MUL
+skill_type_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== employees_employees ===
+id|bigint(20) unsigned|NOT NULL|PRI
+time_zone|varchar(255)|NULL|-
+work_permit|varchar(255)|NULL|-
+address_id|bigint(20) unsigned|NULL|-
+leave_manager_id|bigint(20) unsigned|NULL|MUL
+bank_account_id|bigint(20) unsigned|NULL|MUL
+private_state_id|bigint(20) unsigned|NULL|MUL
+private_country_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|UNI
+creator_id|bigint(20) unsigned|NULL|MUL
+calendar_id|bigint(20) unsigned|NULL|MUL
+department_id|bigint(20) unsigned|NULL|MUL
+job_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+work_location_id|bigint(20) unsigned|NULL|MUL
+parent_id|bigint(20) unsigned|NULL|MUL
+coach_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+state_id|bigint(20) unsigned|NULL|MUL
+country_of_birth|bigint(20) unsigned|NULL|MUL
+departure_reason_id|bigint(20) unsigned|NULL|MUL
+attendance_manager_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NULL|-
+job_title|varchar(255)|NULL|-
+work_phone|varchar(255)|NULL|-
+mobile_phone|varchar(255)|NULL|-
+color|varchar(255)|NULL|-
+children|int(11)|NULL|-
+distance_home_work|int(11)|NULL|-
+km_home_work|int(11)|NULL|-
+distance_home_work_unit|varchar(255)|NULL|-
+work_email|varchar(255)|NULL|-
+private_phone|varchar(255)|NULL|-
+private_email|varchar(255)|NULL|-
+private_street1|varchar(255)|NULL|-
+private_street2|varchar(255)|NULL|-
+private_city|varchar(255)|NULL|-
+private_zip|varchar(255)|NULL|-
+private_car_plate|varchar(255)|NULL|-
+lang|varchar(255)|NULL|-
+gender|varchar(255)|NULL|-
+birthday|varchar(255)|NULL|-
+marital|varchar(255)|NOT NULL|-
+spouse_complete_name|varchar(255)|NULL|-
+spouse_birthdate|varchar(255)|NULL|-
+place_of_birth|varchar(255)|NULL|-
+ssnid|varchar(255)|NULL|-
+sinid|varchar(255)|NULL|-
+identification_id|varchar(255)|NULL|-
+passport_id|varchar(255)|NULL|-
+permit_no|varchar(255)|NULL|-
+visa_no|varchar(255)|NULL|-
+certificate|varchar(255)|NULL|-
+study_field|varchar(255)|NULL|-
+study_school|varchar(255)|NULL|-
+emergency_contact|varchar(255)|NULL|-
+emergency_phone|varchar(255)|NULL|-
+employee_type|varchar(255)|NOT NULL|-
+barcode|varchar(255)|NULL|-
+pin|varchar(255)|NULL|-
+visa_expire|varchar(255)|NULL|-
+work_permit_expiration_date|varchar(255)|NULL|-
+departure_date|varchar(255)|NULL|-
+departure_description|text|NULL|-
+additional_note|text|NULL|-
+notes|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_flexible|tinyint(1)|NULL|-
+is_fully_flexible|tinyint(1)|NULL|-
+work_permit_scheduled_activity|tinyint(1)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_employment_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+code|varchar(255)|NULL|-
+country_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_job_positions ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+expected_employees|int(11)|NULL|-
+no_of_employee|int(11)|NULL|-
+no_of_recruitment|int(11)|NULL|-
+department_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+address_id|bigint(20) unsigned|NULL|MUL
+manager_id|bigint(20) unsigned|NULL|MUL
+industry_id|bigint(20) unsigned|NULL|MUL
+recruiter_id|bigint(20) unsigned|NULL|MUL
+no_of_hired_employee|int(11)|NULL|-
+date_from|timestamp|NULL|-
+date_to|timestamp|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+employment_type_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+description|text|NULL|-
+requirements|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== employees_skill_levels ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+level|int(11)|NULL|-
+default_level|tinyint(1)|NULL|-
+skill_type_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== employees_skill_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+color|varchar(255)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== employees_skills ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+skill_type_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== employees_work_locations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+location_type|varchar(255)|NOT NULL|-
+location_number|varchar(255)|NULL|-
+latitude|decimal(10,8)|NULL|-
+longitude|decimal(11,8)|NULL|-
+is_active|tinyint(1)|NULL|-
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== failed_jobs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+uuid|varchar(255)|NOT NULL|UNI
+connection|text|NOT NULL|-
+queue|text|NOT NULL|-
+payload|longtext|NOT NULL|-
+exception|longtext|NOT NULL|-
+failed_at|timestamp|NOT NULL|-
+
+=== footer_preferences ===
+id|bigint(20) unsigned|NOT NULL|PRI
+user_id|bigint(20) unsigned|NOT NULL|MUL
+context_type|varchar(255)|NOT NULL|-
+minimized_fields|json|NULL|-
+expanded_fields|json|NULL|-
+field_order|json|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== footer_templates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+slug|varchar(255)|NOT NULL|UNI
+description|text|NULL|-
+icon|varchar(255)|NOT NULL|-
+color|varchar(255)|NOT NULL|-
+contexts|json|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_system|tinyint(1)|NOT NULL|-
+created_by|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== gmail_receipt_imports ===
+id|bigint(20) unsigned|NOT NULL|PRI
+message_id|varchar(255)|NOT NULL|MUL
+thread_id|varchar(255)|NULL|-
+attachment_id|varchar(255)|NULL|-
+attachment_filename|varchar(255)|NULL|-
+received_at|datetime|NULL|MUL
+status|varchar(255)|NOT NULL|MUL
+scan_log_id|bigint(20) unsigned|NULL|MUL
+error_message|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== hardware_requirements ===
+id|bigint(20) unsigned|NOT NULL|PRI
+room_id|bigint(20) unsigned|NULL|MUL
+room_location_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NULL|MUL
+cabinet_run_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+hardware_type|varchar(50)|NOT NULL|-
+manufacturer|varchar(100)|NULL|MUL
+model_number|varchar(100)|NULL|-
+quantity_required|int(11)|NOT NULL|-
+unit_of_measure|varchar(50)|NOT NULL|-
+applied_to|varchar(100)|NULL|-
+door_number|int(11)|NULL|-
+drawer_number|int(11)|NULL|-
+mounting_location|varchar(100)|NULL|-
+hinge_type|varchar(50)|NULL|-
+hinge_opening_angle|int(11)|NULL|-
+overlay_dimension_mm|decimal(5,2)|NULL|-
+slide_type|varchar(50)|NULL|-
+slide_length_inches|decimal(5,1)|NULL|-
+slide_weight_capacity_lbs|int(11)|NULL|-
+shelf_pin_type|varchar(50)|NULL|-
+shelf_pin_diameter_mm|decimal(5,2)|NULL|-
+accessory_width_inches|decimal(8,3)|NULL|-
+accessory_depth_inches|decimal(8,3)|NULL|-
+accessory_height_inches|decimal(8,3)|NULL|-
+accessory_configuration|varchar(100)|NULL|-
+finish|varchar(100)|NULL|-
+color_match|varchar(100)|NULL|-
+unit_cost|decimal(10,2)|NULL|-
+total_hardware_cost|decimal(10,2)|NULL|-
+installation_notes|text|NULL|-
+install_sequence|int(11)|NULL|-
+requires_jig|tinyint(1)|NOT NULL|-
+jig_name|varchar(100)|NULL|-
+hardware_kitted|tinyint(1)|NOT NULL|MUL
+hardware_kitted_at|timestamp|NULL|-
+hardware_installed|tinyint(1)|NOT NULL|-
+hardware_installed_at|timestamp|NULL|-
+installed_by_user_id|bigint(20) unsigned|NULL|MUL
+hardware_allocated|tinyint(1)|NOT NULL|-
+hardware_allocated_at|timestamp|NULL|-
+hardware_issued|tinyint(1)|NOT NULL|-
+hardware_issued_at|timestamp|NULL|-
+material_reservation_id|bigint(20) unsigned|NULL|MUL
+substituted_product_id|bigint(20) unsigned|NULL|MUL
+substitution_reason|text|NULL|-
+has_defect|tinyint(1)|NOT NULL|-
+defect_description|text|NULL|-
+returned_to_supplier|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== inventories_category_routes ===
+category_id|bigint(20) unsigned|NOT NULL|MUL
+route_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_locations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+position_x|int(11)|NULL|-
+position_y|int(11)|NULL|-
+position_z|int(11)|NULL|-
+type|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+full_name|varchar(255)|NULL|-
+description|text|NULL|-
+parent_path|varchar(255)|NULL|-
+barcode|varchar(255)|NULL|-
+removal_strategy|varchar(255)|NULL|-
+cyclic_inventory_frequency|int(11)|NULL|-
+last_inventory_date|date|NULL|-
+next_inventory_date|date|NULL|-
+is_scrap|tinyint(1)|NULL|-
+is_replenish|tinyint(1)|NULL|-
+is_dock|tinyint(1)|NULL|-
+parent_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+storage_category_id|bigint(20) unsigned|NULL|MUL
+warehouse_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_lots ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+description|text|NULL|-
+reference|varchar(255)|NULL|-
+properties|json|NULL|-
+expiry_reminded|tinyint(1)|NULL|-
+expiration_date|datetime|NULL|-
+use_date|datetime|NULL|-
+removal_date|datetime|NULL|-
+alert_date|datetime|NULL|-
+product_id|bigint(20) unsigned|NOT NULL|MUL
+uom_id|bigint(20) unsigned|NULL|MUL
+location_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_move_destinations ===
+origin_move_id|bigint(20) unsigned|NOT NULL|MUL
+destination_move_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_move_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+lot_name|varchar(255)|NULL|-
+state|varchar(255)|NULL|-
+reference|varchar(255)|NULL|-
+picking_description|varchar(255)|NULL|-
+qty|decimal(15,4)|NULL|-
+uom_qty|decimal(15,4)|NULL|-
+is_picked|tinyint(1)|NOT NULL|-
+scheduled_at|datetime|NOT NULL|-
+move_id|bigint(20) unsigned|NULL|MUL
+operation_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+uom_id|bigint(20) unsigned|NOT NULL|MUL
+package_id|bigint(20) unsigned|NULL|MUL
+result_package_id|bigint(20) unsigned|NULL|MUL
+package_level_id|bigint(20) unsigned|NULL|MUL
+lot_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+source_location_id|bigint(20) unsigned|NOT NULL|MUL
+destination_location_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_moves ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+state|varchar(255)|NULL|-
+origin|varchar(255)|NULL|-
+procure_method|varchar(255)|NOT NULL|-
+reference|varchar(255)|NULL|-
+description_picking|text|NULL|-
+next_serial|varchar(255)|NULL|-
+next_serial_count|int(11)|NULL|-
+is_favorite|tinyint(1)|NOT NULL|-
+product_qty|decimal(15,4)|NULL|-
+product_uom_qty|decimal(15,4)|NULL|-
+quantity|decimal(15,4)|NULL|-
+is_picked|tinyint(1)|NOT NULL|-
+is_scraped|tinyint(1)|NOT NULL|-
+is_inventory|tinyint(1)|NOT NULL|-
+reservation_date|date|NULL|-
+scheduled_at|datetime|NOT NULL|-
+deadline|datetime|NULL|-
+alert_Date|datetime|NULL|-
+operation_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+uom_id|bigint(20) unsigned|NOT NULL|MUL
+source_location_id|bigint(20) unsigned|NOT NULL|MUL
+destination_location_id|bigint(20) unsigned|NOT NULL|MUL
+final_location_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+scrap_id|bigint(20) unsigned|NULL|MUL
+rule_id|bigint(20) unsigned|NULL|MUL
+operation_type_id|bigint(20) unsigned|NULL|MUL
+origin_returned_move_id|bigint(20) unsigned|NULL|MUL
+restrict_partner_id|bigint(20) unsigned|NULL|MUL
+warehouse_id|bigint(20) unsigned|NULL|MUL
+package_level_id|bigint(20) unsigned|NULL|MUL
+product_packaging_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+is_refund|tinyint(1)|NOT NULL|-
+sale_order_line_id|bigint(20) unsigned|NULL|MUL
+purchase_order_line_id|bigint(20) unsigned|NULL|MUL
+
+=== inventories_operation_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+type|varchar(255)|NOT NULL|-
+sort|int(11)|NULL|-
+sequence_code|varchar(255)|NOT NULL|-
+reservation_method|varchar(255)|NOT NULL|-
+reservation_days_before|int(11)|NULL|-
+reservation_days_before_priority|int(11)|NULL|-
+product_label_format|varchar(255)|NULL|-
+lot_label_format|varchar(255)|NULL|-
+package_label_to_print|varchar(255)|NULL|-
+barcode|varchar(255)|NULL|-
+create_backorder|varchar(255)|NOT NULL|-
+move_type|varchar(255)|NULL|-
+show_entire_packs|tinyint(1)|NULL|-
+use_create_lots|tinyint(1)|NULL|-
+use_existing_lots|tinyint(1)|NULL|-
+print_label|tinyint(1)|NULL|-
+show_operations|tinyint(1)|NULL|-
+auto_show_reception_report|tinyint(1)|NULL|-
+auto_print_delivery_slip|tinyint(1)|NULL|-
+auto_print_return_slip|tinyint(1)|NULL|-
+auto_print_product_labels|tinyint(1)|NULL|-
+auto_print_lot_labels|tinyint(1)|NULL|-
+auto_print_reception_report|tinyint(1)|NULL|-
+auto_print_reception_report_labels|tinyint(1)|NULL|-
+auto_print_packages|tinyint(1)|NULL|-
+auto_print_package_label|tinyint(1)|NULL|-
+return_operation_type_id|bigint(20) unsigned|NULL|MUL
+source_location_id|bigint(20) unsigned|NOT NULL|MUL
+destination_location_id|bigint(20) unsigned|NOT NULL|MUL
+warehouse_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_operations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NULL|-
+description|text|NULL|-
+origin|varchar(255)|NULL|-
+move_type|varchar(255)|NOT NULL|-
+state|varchar(255)|NULL|-
+is_favorite|tinyint(1)|NOT NULL|-
+has_deadline_issue|tinyint(1)|NOT NULL|-
+is_printed|tinyint(1)|NOT NULL|-
+is_locked|tinyint(1)|NOT NULL|-
+deadline|datetime|NULL|-
+scheduled_at|datetime|NULL|-
+closed_at|datetime|NULL|-
+user_id|bigint(20) unsigned|NULL|MUL
+owner_id|bigint(20) unsigned|NULL|MUL
+operation_type_id|bigint(20) unsigned|NOT NULL|MUL
+source_location_id|bigint(20) unsigned|NOT NULL|MUL
+destination_location_id|bigint(20) unsigned|NOT NULL|MUL
+back_order_id|bigint(20) unsigned|NULL|MUL
+return_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+sale_order_id|bigint(20) unsigned|NULL|MUL
+
+=== inventories_order_points ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+trigger|varchar(255)|NOT NULL|-
+snoozed_until|date|NULL|-
+product_min_qty|decimal(15,4)|NOT NULL|-
+product_max_qty|decimal(15,4)|NOT NULL|-
+qty_multiple|decimal(15,4)|NOT NULL|-
+qty_to_order_manual|decimal(15,4)|NULL|-
+product_id|bigint(20) unsigned|NOT NULL|MUL
+product_category_id|bigint(20) unsigned|NULL|MUL
+warehouse_id|bigint(20) unsigned|NOT NULL|MUL
+location_id|bigint(20) unsigned|NOT NULL|MUL
+route_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_package_destinations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+operation_id|bigint(20) unsigned|NULL|MUL
+destination_location_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_package_levels ===
+id|bigint(20) unsigned|NOT NULL|PRI
+package_id|bigint(20) unsigned|NOT NULL|MUL
+operation_id|bigint(20) unsigned|NULL|MUL
+destination_location_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_package_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+barcode|varchar(255)|NULL|UNI
+height|decimal(15,4)|NULL|-
+width|decimal(15,4)|NULL|-
+length|decimal(15,4)|NULL|-
+base_weight|decimal(15,4)|NULL|-
+max_weight|decimal(15,4)|NULL|-
+shipper_package_code|varchar(255)|NULL|-
+package_carrier_type|varchar(255)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_packages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+package_use|varchar(255)|NOT NULL|-
+pack_date|date|NULL|-
+package_type_id|bigint(20) unsigned|NULL|MUL
+location_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_product_quantities ===
+id|bigint(20) unsigned|NOT NULL|PRI
+quantity|decimal(15,4)|NULL|-
+reserved_quantity|decimal(15,4)|NOT NULL|-
+counted_quantity|decimal(15,4)|NULL|-
+difference_quantity|decimal(15,4)|NULL|-
+inventory_diff_quantity|decimal(15,4)|NULL|-
+inventory_quantity_set|tinyint(1)|NOT NULL|-
+scheduled_at|date|NULL|-
+incoming_at|datetime|NOT NULL|-
+product_id|bigint(20) unsigned|NOT NULL|MUL
+location_id|bigint(20) unsigned|NOT NULL|MUL
+storage_category_id|bigint(20) unsigned|NULL|MUL
+lot_id|bigint(20) unsigned|NULL|MUL
+package_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_product_quantity_relocations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+description|text|NULL|-
+destination_location_id|bigint(20) unsigned|NULL|MUL
+destination_package_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_product_routes ===
+product_id|bigint(20) unsigned|NOT NULL|MUL
+route_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_route_packagings ===
+route_id|bigint(20) unsigned|NOT NULL|MUL
+packaging_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_route_warehouses ===
+warehouse_id|bigint(20) unsigned|NOT NULL|MUL
+route_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_routes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+product_selectable|tinyint(1)|NULL|-
+product_category_selectable|tinyint(1)|NULL|-
+warehouse_selectable|tinyint(1)|NULL|-
+packaging_selectable|tinyint(1)|NULL|-
+supplied_warehouse_id|bigint(20) unsigned|NULL|MUL
+supplier_warehouse_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_rules ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+route_sort|int(11)|NULL|-
+delay|int(11)|NULL|-
+group_propagation_option|varchar(255)|NULL|-
+action|varchar(255)|NOT NULL|MUL
+procure_method|varchar(255)|NOT NULL|-
+auto|varchar(255)|NOT NULL|-
+push_domain|varchar(255)|NULL|-
+location_dest_from_rule|tinyint(1)|NULL|-
+propagate_cancel|tinyint(1)|NULL|-
+propagate_carrier|tinyint(1)|NULL|-
+source_location_id|bigint(20) unsigned|NULL|MUL
+destination_location_id|bigint(20) unsigned|NOT NULL|MUL
+route_id|bigint(20) unsigned|NOT NULL|MUL
+operation_type_id|bigint(20) unsigned|NULL|MUL
+partner_address_id|bigint(20) unsigned|NULL|MUL
+warehouse_id|bigint(20) unsigned|NULL|MUL
+propagate_warehouse_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_scrap_tags ===
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+scrap_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_scraps ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+origin|varchar(255)|NULL|-
+state|varchar(255)|NULL|-
+qty|decimal(15,4)|NOT NULL|-
+should_replenish|tinyint(1)|NOT NULL|-
+closed_at|date|NULL|-
+product_id|bigint(20) unsigned|NOT NULL|MUL
+uom_id|bigint(20) unsigned|NOT NULL|MUL
+lot_id|bigint(20) unsigned|NULL|MUL
+package_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+operation_id|bigint(20) unsigned|NULL|MUL
+source_location_id|bigint(20) unsigned|NOT NULL|MUL
+destination_location_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_storage_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+sort|int(11)|NULL|-
+allow_new_products|varchar(255)|NOT NULL|-
+max_weight|decimal(12,4)|NOT NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_storage_category_capacities ===
+id|bigint(20) unsigned|NOT NULL|PRI
+qty|decimal(15,4)|NOT NULL|-
+product_id|bigint(20) unsigned|NULL|MUL
+storage_category_id|bigint(20) unsigned|NOT NULL|MUL
+package_type_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+color|varchar(255)|NULL|-
+sort|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== inventories_warehouse_resupplies ===
+supplied_warehouse_id|bigint(20) unsigned|NOT NULL|MUL
+supplier_warehouse_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== inventories_warehouses ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+code|varchar(255)|NULL|-
+sort|int(11)|NULL|-
+reception_steps|varchar(255)|NOT NULL|-
+delivery_steps|varchar(255)|NOT NULL|-
+company_id|bigint(20) unsigned|NOT NULL|MUL
+partner_address_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+view_location_id|bigint(20) unsigned|NOT NULL|MUL
+lot_stock_location_id|bigint(20) unsigned|NOT NULL|MUL
+input_stock_location_id|bigint(20) unsigned|NULL|MUL
+qc_stock_location_id|bigint(20) unsigned|NULL|MUL
+output_stock_location_id|bigint(20) unsigned|NULL|MUL
+pack_stock_location_id|bigint(20) unsigned|NULL|MUL
+mto_pull_id|bigint(20) unsigned|NULL|MUL
+buy_pull_id|bigint(20) unsigned|NULL|MUL
+pick_type_id|bigint(20) unsigned|NULL|MUL
+pack_type_id|bigint(20) unsigned|NULL|MUL
+out_type_id|bigint(20) unsigned|NULL|MUL
+in_type_id|bigint(20) unsigned|NULL|MUL
+internal_type_id|bigint(20) unsigned|NULL|MUL
+qc_type_id|bigint(20) unsigned|NULL|MUL
+store_type_id|bigint(20) unsigned|NULL|MUL
+xdock_type_id|bigint(20) unsigned|NULL|MUL
+crossdock_route_id|bigint(20) unsigned|NULL|MUL
+reception_route_id|bigint(20) unsigned|NULL|MUL
+delivery_route_id|bigint(20) unsigned|NULL|MUL
+
+=== job_batches ===
+id|varchar(255)|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+total_jobs|int(11)|NOT NULL|-
+pending_jobs|int(11)|NOT NULL|-
+failed_jobs|int(11)|NOT NULL|-
+failed_job_ids|longtext|NOT NULL|-
+options|mediumtext|NULL|-
+cancelled_at|int(11)|NULL|-
+created_at|int(11)|NOT NULL|-
+finished_at|int(11)|NULL|-
+
+=== job_position_skills ===
+job_position_id|bigint(20) unsigned|NOT NULL|MUL
+skill_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== jobs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+queue|varchar(255)|NOT NULL|MUL
+payload|longtext|NOT NULL|-
+attempts|tinyint(3) unsigned|NOT NULL|-
+reserved_at|int(10) unsigned|NULL|-
+available_at|int(10) unsigned|NOT NULL|-
+created_at|int(10) unsigned|NOT NULL|-
+
+=== leads ===
+id|bigint(20) unsigned|NOT NULL|PRI
+first_name|varchar(255)|NULL|-
+last_name|varchar(255)|NULL|-
+email|varchar(255)|NULL|MUL
+phone|varchar(255)|NULL|-
+company_name|varchar(255)|NULL|-
+status|varchar(255)|NOT NULL|MUL
+source|varchar(255)|NULL|MUL
+utm_source|varchar(255)|NULL|MUL
+utm_medium|varchar(255)|NULL|MUL
+utm_campaign|varchar(255)|NULL|MUL
+utm_content|varchar(255)|NULL|-
+utm_term|varchar(255)|NULL|-
+gclid|varchar(255)|NULL|-
+fbclid|varchar(255)|NULL|-
+msclkid|varchar(255)|NULL|-
+ip_address|varchar(45)|NULL|-
+user_agent|text|NULL|-
+referrer_url|text|NULL|-
+landing_page|varchar(500)|NULL|-
+entry_page|varchar(500)|NULL|-
+device_type|varchar(50)|NULL|MUL
+browser|varchar(100)|NULL|-
+operating_system|varchar(100)|NULL|-
+geo_country|varchar(100)|NULL|MUL
+geo_region|varchar(100)|NULL|MUL
+geo_city|varchar(100)|NULL|-
+geo_timezone|varchar(100)|NULL|-
+session_id|varchar(100)|NULL|-
+visit_count|int(11)|NULL|-
+pages_viewed|int(11)|NULL|-
+time_on_site_seconds|int(11)|NULL|-
+first_visit_at|timestamp|NULL|-
+first_touch_source|varchar(255)|NULL|-
+first_touch_medium|varchar(255)|NULL|-
+first_touch_campaign|varchar(255)|NULL|-
+last_touch_source|varchar(255)|NULL|-
+last_touch_medium|varchar(255)|NULL|-
+last_touch_campaign|varchar(255)|NULL|-
+referral_source_other|varchar(255)|NULL|-
+message|text|NULL|-
+lead_source_detail|varchar(255)|NULL|-
+market_segment|varchar(255)|NULL|-
+primary_interest|varchar(255)|NULL|-
+lead_type|varchar(255)|NULL|-
+preferred_contact_method|varchar(255)|NULL|-
+project_type|varchar(255)|NULL|-
+project_type_other|varchar(255)|NULL|-
+project_phase|varchar(255)|NULL|-
+budget_range|varchar(255)|NULL|-
+timeline|varchar(255)|NULL|-
+timeline_start_date|date|NULL|-
+timeline_completion_date|date|NULL|-
+project_description|text|NULL|-
+additional_information|text|NULL|-
+design_style|varchar(255)|NULL|-
+design_style_other|varchar(255)|NULL|-
+finish_choices|json|NULL|-
+wood_species|varchar(255)|NULL|-
+form_data|json|NULL|-
+questionnaire_data|json|NULL|-
+ai_analysis_results|json|NULL|-
+inspiration_images|json|NULL|-
+technical_drawings|json|NULL|-
+project_documents|json|NULL|-
+hubspot_contact_id|varchar(255)|NULL|MUL
+hubspot_deal_id|varchar(255)|NULL|MUL
+assigned_user_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+project_id|bigint(20) unsigned|NULL|MUL
+converted_at|timestamp|NULL|-
+disqualification_reason|varchar(255)|NULL|-
+street1|varchar(255)|NULL|-
+street2|varchar(255)|NULL|-
+city|varchar(255)|NULL|-
+state|varchar(255)|NULL|-
+zip|varchar(20)|NULL|-
+country|varchar(255)|NULL|-
+project_address_notes|text|NULL|-
+processing_consent|tinyint(1)|NOT NULL|-
+communication_consent|tinyint(1)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== measurements ===
+id|bigint(20) unsigned|NOT NULL|PRI
+unit_code|varchar(20)|NOT NULL|UNI
+unit_name|varchar(50)|NOT NULL|-
+unit_symbol|varchar(10)|NOT NULL|-
+unit_type|varchar(20)|NOT NULL|MUL
+conversion_factor|decimal(15,8)|NOT NULL|-
+is_base_unit|tinyint(1)|NOT NULL|-
+display_order|int(11)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|MUL
+description|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== media ===
+id|bigint(20) unsigned|NOT NULL|PRI
+model_type|varchar(255)|NOT NULL|MUL
+model_id|bigint(20) unsigned|NOT NULL|-
+uuid|char(36)|NULL|UNI
+collection_name|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+file_name|varchar(255)|NOT NULL|-
+mime_type|varchar(255)|NULL|-
+disk|varchar(255)|NOT NULL|-
+conversions_disk|varchar(255)|NULL|-
+size|bigint(20) unsigned|NOT NULL|-
+manipulations|json|NOT NULL|-
+custom_properties|json|NOT NULL|-
+generated_conversions|json|NOT NULL|-
+responsive_images|json|NOT NULL|-
+order_column|int(10) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== meeting_action_items ===
+id|bigint(20) unsigned|NOT NULL|PRI
+meeting_transcript_id|bigint(20) unsigned|NOT NULL|MUL
+assignee|varchar(255)|NULL|MUL
+task|text|NOT NULL|-
+due_date|date|NULL|-
+priority|enum('low','medium','high')|NOT NULL|-
+status|enum('pending','in_progress','completed','cancelled')|NOT NULL|MUL
+mentioned_at_time|varchar(255)|NOT NULL|-
+context|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== meeting_entities ===
+id|bigint(20) unsigned|NOT NULL|PRI
+meeting_transcript_id|bigint(20) unsigned|NOT NULL|MUL
+entity_type|enum('person','project','process','tool','location','other')|NOT NULL|MUL
+entity_name|varchar(255)|NOT NULL|MUL
+mentions_count|int(11)|NOT NULL|-
+context_snippets|json|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== meeting_segments ===
+id|bigint(20) unsigned|NOT NULL|PRI
+meeting_transcript_id|bigint(20) unsigned|NOT NULL|MUL
+start_time|varchar(255)|NOT NULL|-
+end_time|varchar(255)|NOT NULL|-
+topic|varchar(255)|NOT NULL|MUL
+summary|text|NOT NULL|-
+speakers|json|NOT NULL|-
+sentence_count|int(11)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== meeting_sentences ===
+id|bigint(20) unsigned|NOT NULL|PRI
+meeting_transcript_id|bigint(20) unsigned|NOT NULL|MUL
+meeting_segment_id|bigint(20) unsigned|NULL|MUL
+speaker_name|varchar(255)|NOT NULL|MUL
+speaker_id|int(11)|NOT NULL|-
+start_time|varchar(255)|NOT NULL|-
+end_time|varchar(255)|NOT NULL|-
+sentence|text|NOT NULL|MUL
+sequence_number|int(11)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== meeting_topics ===
+id|bigint(20) unsigned|NOT NULL|PRI
+meeting_transcript_id|bigint(20) unsigned|NOT NULL|MUL
+topic_name|varchar(255)|NOT NULL|MUL
+description|text|NULL|-
+first_mention_time|varchar(255)|NOT NULL|-
+keywords|json|NULL|-
+mention_count|int(11)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== meeting_transcripts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+file_path|varchar(255)|NOT NULL|-
+title|varchar(255)|NOT NULL|-
+meeting_date|date|NULL|MUL
+duration_minutes|int(11)|NULL|-
+participants|json|NULL|-
+status|enum('pending','processing','completed','failed')|NOT NULL|MUL
+total_sentences|int(11)|NOT NULL|-
+summary|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== migrations ===
+id|int(10) unsigned|NOT NULL|PRI
+migration|varchar(255)|NOT NULL|-
+batch|int(11)|NOT NULL|-
+
+=== model_has_permissions ===
+permission_id|bigint(20) unsigned|NOT NULL|PRI
+model_type|varchar(255)|NOT NULL|PRI
+model_id|bigint(20) unsigned|NOT NULL|PRI
+
+=== model_has_roles ===
+role_id|bigint(20) unsigned|NOT NULL|PRI
+model_type|varchar(255)|NOT NULL|PRI
+model_id|bigint(20) unsigned|NOT NULL|PRI
+
+=== partners_bank_accounts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+account_number|varchar(255)|NOT NULL|UNI
+account_holder_name|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+can_send_money|tinyint(1)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+bank_id|bigint(20) unsigned|NOT NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== partners_industries ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+description|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== partners_partner_tag ===
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== partners_partners ===
+id|bigint(20) unsigned|NOT NULL|PRI
+account_type|varchar(255)|NOT NULL|-
+sub_type|varchar(255)|NULL|MUL
+name|varchar(255)|NOT NULL|MUL
+avatar|varchar(255)|NULL|-
+email|varchar(255)|NULL|-
+job_title|varchar(255)|NULL|-
+website|varchar(255)|NULL|-
+tax_id|varchar(255)|NULL|MUL
+phone|varchar(255)|NULL|MUL
+mobile|varchar(255)|NULL|MUL
+color|varchar(255)|NULL|-
+company_registry|varchar(255)|NULL|MUL
+reference|varchar(255)|NULL|MUL
+parent_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+title_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+industry_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+street1|varchar(255)|NULL|-
+street2|varchar(255)|NULL|-
+city|varchar(255)|NULL|-
+zip|varchar(255)|NULL|-
+state_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+message_bounce|int(11)|NULL|-
+supplier_rank|int(11)|NULL|-
+customer_rank|int(11)|NULL|-
+invoice_warning|varchar(255)|NULL|-
+autopost_bills|varchar(255)|NULL|-
+credit_limit|varchar(255)|NULL|-
+ignore_abnormal_invoice_date|varchar(255)|NULL|-
+ignore_abnormal_invoice_amount|varchar(255)|NULL|-
+invoice_sending_method|varchar(255)|NULL|-
+invoice_edi_format_store|varchar(255)|NULL|-
+trust|int(11)|NULL|-
+invoice_warn_msg|int(11)|NULL|-
+debit_limit|decimal(16,2)|NULL|-
+peppol_endpoint|varchar(255)|NULL|-
+peppol_eas|varchar(255)|NULL|-
+sale_warn|varchar(255)|NULL|-
+sale_warn_msg|varchar(255)|NULL|-
+comment|text|NULL|-
+property_account_payable_id|bigint(20) unsigned|NULL|MUL
+property_account_receivable_id|bigint(20) unsigned|NULL|MUL
+property_account_position_id|bigint(20) unsigned|NULL|MUL
+property_payment_term_id|bigint(20) unsigned|NULL|MUL
+property_supplier_payment_term_id|bigint(20) unsigned|NULL|MUL
+property_inbound_payment_method_line_id|bigint(20) unsigned|NULL|MUL
+property_outbound_payment_method_line_id|bigint(20) unsigned|NULL|MUL
+email_verified_at|timestamp|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+password|varchar(255)|NULL|-
+remember_token|varchar(100)|NULL|-
+
+=== partners_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+color|varchar(255)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== partners_titles ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+short_name|varchar(255)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== password_reset_tokens ===
+email|varchar(255)|NOT NULL|PRI
+token|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+
+=== payments_payment_methods ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+primary_payment_method_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+code|varchar(255)|NOT NULL|-
+support_refund|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+support_tokenization|tinyint(1)|NULL|-
+support_express_checkout|tinyint(1)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== payments_payment_tokens ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NULL|MUL
+payment_method_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+created_by|bigint(20) unsigned|NULL|MUL
+payment_details|json|NULL|-
+provider_reference_id|varchar(255)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== payments_payment_transactions ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|bigint(20) unsigned|NULL|-
+move_id|bigint(20) unsigned|NOT NULL|MUL
+journal_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+statement_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+foreign_currency_id|bigint(20) unsigned|NULL|MUL
+created_id|bigint(20) unsigned|NULL|MUL
+account_number|varchar(255)|NULL|-
+partner_name|varchar(255)|NULL|-
+transaction_type|varchar(255)|NULL|-
+payment_reference|varchar(255)|NULL|-
+internal_index|varchar(255)|NULL|-
+transaction_details|json|NULL|-
+amount|decimal(15,4)|NOT NULL|-
+amount_currency|decimal(15,4)|NULL|-
+amount_residual|decimal(15,4)|NULL|-
+is_reconciled|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== pdf_annotation_history ===
+id|bigint(20) unsigned|NOT NULL|PRI
+annotation_id|bigint(20) unsigned|NULL|MUL
+pdf_page_id|bigint(20) unsigned|NULL|MUL
+action|enum('created','updated','deleted','moved','resized','selected','copied','pasted')|NOT NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+before_data|json|NULL|-
+after_data|json|NULL|-
+metadata|json|NULL|-
+ip_address|varchar(45)|NULL|-
+user_agent|varchar(500)|NULL|-
+created_at|timestamp|NULL|MUL
+updated_at|timestamp|NULL|-
+
+=== pdf_document_activities ===
+id|bigint(20) unsigned|NOT NULL|PRI
+document_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NOT NULL|MUL
+action_type|varchar(50)|NOT NULL|MUL
+action_details|json|NULL|-
+created_at|timestamp|NULL|-
+
+=== pdf_document_tag ===
+id|bigint(20) unsigned|NOT NULL|PRI
+pdf_document_id|bigint(20) unsigned|NOT NULL|MUL
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== pdf_documents ===
+id|bigint(20) unsigned|NOT NULL|PRI
+module_type|varchar(50)|NOT NULL|MUL
+module_id|bigint(20) unsigned|NOT NULL|MUL
+file_name|varchar(255)|NOT NULL|-
+document_type|varchar(50)|NULL|MUL
+file_path|varchar(500)|NOT NULL|-
+file_size|int(11)|NOT NULL|-
+mime_type|varchar(100)|NOT NULL|-
+page_count|int(11)|NOT NULL|-
+version_number|int(10) unsigned|NOT NULL|-
+previous_version_id|bigint(20) unsigned|NULL|MUL
+is_latest_version|tinyint(1)|NOT NULL|-
+is_primary_reference|tinyint(1)|NOT NULL|-
+version_metadata|json|NULL|-
+processing_status|enum('pending','processing','completed','failed')|NOT NULL|MUL
+processing_error|text|NULL|-
+extracted_metadata|json|NULL|-
+metadata_reviewed|tinyint(1)|NOT NULL|-
+extracted_at|timestamp|NULL|-
+processed_at|timestamp|NULL|-
+uploaded_by|bigint(20) unsigned|NOT NULL|MUL
+tags|json|NULL|-
+metadata|json|NULL|-
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== pdf_page_annotations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+pdf_page_id|bigint(20) unsigned|NOT NULL|MUL
+parent_annotation_id|bigint(20) unsigned|NULL|MUL
+annotation_type|varchar(255)|NOT NULL|MUL
+view_type|enum('plan','elevation','section','detail')|NOT NULL|MUL
+view_orientation|varchar(20)|NULL|-
+view_scale|decimal(8,4)|NULL|-
+inferred_position|varchar(50)|NULL|MUL
+vertical_zone|enum('upper','middle','lower')|NULL|-
+label|varchar(255)|NULL|-
+room_type|varchar(255)|NULL|MUL
+color|varchar(20)|NULL|-
+x|decimal(10,4)|NOT NULL|-
+y|decimal(10,4)|NOT NULL|-
+width|decimal(10,4)|NOT NULL|-
+height|decimal(10,4)|NOT NULL|-
+measurement_width|decimal(10,2)|NULL|-
+measurement_height|decimal(10,2)|NULL|-
+cabinet_run_id|bigint(20) unsigned|NULL|MUL
+room_id|bigint(20) unsigned|NULL|-
+room_location_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NULL|MUL
+visual_properties|json|NULL|-
+nutrient_annotation_id|text|NULL|-
+nutrient_data|json|NULL|-
+notes|text|NULL|-
+metadata|json|NULL|-
+created_by|bigint(20) unsigned|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== pdf_page_metadata ===
+id|bigint(20) unsigned|NOT NULL|PRI
+pdf_document_id|bigint(20) unsigned|NOT NULL|MUL
+page_number|int(11)|NOT NULL|-
+page_type|varchar(255)|NULL|MUL
+room_id|bigint(20) unsigned|NULL|MUL
+room_name|varchar(255)|NULL|-
+room_type|varchar(255)|NULL|-
+detail_number|varchar(255)|NULL|-
+notes|text|NULL|-
+metadata|json|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== pdf_page_rooms ===
+id|bigint(20) unsigned|NOT NULL|PRI
+pdf_page_id|bigint(20) unsigned|NOT NULL|MUL
+room_id|bigint(20) unsigned|NULL|MUL
+room_number|varchar(255)|NULL|-
+room_type|varchar(255)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== pdf_pages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+document_id|bigint(20) unsigned|NOT NULL|MUL
+project_id|bigint(20) unsigned|NULL|MUL
+page_number|int(11)|NOT NULL|-
+page_type|varchar(255)|NULL|-
+primary_purpose|varchar(255)|NULL|-
+page_label|varchar(255)|NULL|-
+drawing_number|varchar(255)|NULL|-
+view_types|json|NULL|-
+section_labels|json|NULL|-
+has_hardware_schedule|tinyint(1)|NOT NULL|-
+has_material_spec|tinyint(1)|NOT NULL|-
+locations_documented|json|NULL|-
+appliances|json|NULL|-
+face_frame_material|varchar(255)|NULL|-
+interior_material|varchar(255)|NULL|-
+is_location_detail|tinyint(1)|NOT NULL|-
+page_notes|text|NULL|-
+thumbnail_path|varchar(500)|NULL|-
+extracted_text|longtext|NULL|-
+ocr_text|longtext|NULL|-
+extraction_time_ms|int(11)|NULL|-
+ocr_time_ms|int(11)|NULL|-
+page_metadata|json|NULL|-
+linked_entity_type|varchar(255)|NULL|MUL
+linked_entity_id|bigint(20) unsigned|NULL|-
+additional_entity_links|json|NULL|-
+processing_status|varchar(255)|NOT NULL|-
+classified_by|bigint(20) unsigned|NULL|MUL
+classified_at|timestamp|NULL|-
+annotation_count|int(10) unsigned|NOT NULL|-
+last_annotated_at|timestamp|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== permissions ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+guard_name|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== plugin_dependencies ===
+plugin_id|bigint(20) unsigned|NOT NULL|PRI
+dependency_id|bigint(20) unsigned|NOT NULL|PRI
+
+=== plugins ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+author|varchar(255)|NULL|-
+summary|text|NULL|-
+description|text|NULL|-
+latest_version|varchar(255)|NULL|-
+license|varchar(255)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_installed|tinyint(1)|NOT NULL|-
+sort|int(11)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_attribute_options ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+description|text|NULL|-
+color|varchar(255)|NULL|-
+extra_price|decimal(15,4)|NULL|-
+sort|int(11)|NULL|-
+attribute_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_attributes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+type|varchar(255)|NOT NULL|-
+category|varchar(50)|NULL|-
+unit_symbol|varchar(10)|NULL|-
+unit_label|varchar(50)|NULL|-
+min_value|decimal(15,4)|NULL|-
+max_value|decimal(15,4)|NULL|-
+decimal_places|tinyint(3) unsigned|NOT NULL|-
+is_constant|tinyint(1)|NOT NULL|-
+default_value|decimal(15,4)|NULL|-
+sort|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+code|varchar(10)|NULL|MUL
+full_name|varchar(255)|NULL|-
+parent_path|varchar(255)|NULL|-
+parent_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+product_properties_definition|json|NULL|-
+
+=== products_packagings ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+barcode|varchar(255)|NULL|-
+qty|decimal(12,4)|NULL|-
+sort|int(11)|NULL|-
+product_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+package_type_id|bigint(20) unsigned|NULL|MUL
+
+=== products_price_rule_items ===
+id|bigint(20) unsigned|NOT NULL|PRI
+apply_to|varchar(255)|NOT NULL|-
+display_apply_to|varchar(255)|NOT NULL|-
+base|varchar(255)|NOT NULL|-
+type|varchar(255)|NOT NULL|-
+min_quantity|decimal(15,4)|NULL|-
+fixed_price|decimal(15,4)|NULL|-
+price_discount|decimal(15,4)|NULL|-
+price_round|decimal(15,4)|NULL|-
+price_surcharge|decimal(15,4)|NULL|-
+price_markup|decimal(15,4)|NULL|-
+price_min_margin|decimal(15,4)|NULL|-
+percent_price|decimal(15,4)|NULL|-
+starts_at|datetime|NULL|-
+ends_at|datetime|NULL|-
+price_rule_id|bigint(20) unsigned|NOT NULL|MUL
+base_price_rule_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+category_id|bigint(20) unsigned|NOT NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_price_rules ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+sort|int(11)|NULL|-
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_product_attribute_values ===
+id|bigint(20) unsigned|NOT NULL|PRI
+extra_price|decimal(15,4)|NULL|-
+numeric_value|decimal(15,4)|NULL|-
+product_id|bigint(20) unsigned|NULL|MUL
+attribute_id|bigint(20) unsigned|NULL|MUL
+product_attribute_id|bigint(20) unsigned|NOT NULL|MUL
+attribute_option_id|bigint(20) unsigned|NULL|MUL
+
+=== products_product_attributes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+product_id|bigint(20) unsigned|NOT NULL|MUL
+attribute_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_product_combinations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+product_id|bigint(20) unsigned|NOT NULL|MUL
+product_attribute_value_id|bigint(20) unsigned|NOT NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_product_price_lists ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_product_suppliers ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+delay|int(11)|NOT NULL|-
+product_name|varchar(255)|NULL|-
+product_code|varchar(255)|NULL|-
+vendor_url|text|NULL|-
+starts_at|date|NULL|-
+ends_at|date|NULL|-
+min_qty|decimal(12,4)|NOT NULL|-
+price|decimal(15,4)|NOT NULL|-
+discount|decimal(15,4)|NOT NULL|-
+product_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+ai_created|tinyint(1)|NOT NULL|-
+ai_source_document|varchar(255)|NULL|-
+ai_created_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_product_tag ===
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== products_products ===
+id|bigint(20) unsigned|NOT NULL|PRI
+type|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+service_tracking|varchar(255)|NOT NULL|-
+reference|varchar(255)|NULL|-
+type_code|varchar(10)|NULL|-
+reference_type_code_id|bigint(20) unsigned|NULL|MUL
+barcode|varchar(255)|NULL|-
+source_url|varchar(500)|NULL|-
+image_source|varchar(50)|NULL|-
+price|decimal(15,4)|NULL|-
+cost|decimal(15,4)|NULL|-
+box_cost|decimal(12,4)|NULL|-
+units_per_box|int(11)|NULL|-
+package_description|varchar(255)|NULL|-
+supplier_sku|varchar(255)|NULL|-
+volume|decimal(15,4)|NULL|-
+weight|decimal(15,4)|NULL|-
+description|text|NULL|-
+description_purchase|text|NULL|-
+description_sale|text|NULL|-
+enable_sales|tinyint(1)|NULL|-
+enable_purchase|tinyint(1)|NULL|-
+is_favorite|tinyint(1)|NOT NULL|-
+is_configurable|tinyint(1)|NULL|-
+sort|int(11)|NULL|-
+images|json|NULL|-
+parent_id|bigint(20) unsigned|NULL|MUL
+uom_id|bigint(20) unsigned|NOT NULL|MUL
+uom_po_id|bigint(20) unsigned|NOT NULL|MUL
+category_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+property_account_income_id|bigint(20) unsigned|NULL|MUL
+property_account_expense_id|bigint(20) unsigned|NULL|MUL
+image|varchar(255)|NULL|-
+service_type|varchar(255)|NULL|-
+sale_line_warn|varchar(255)|NULL|-
+expense_policy|text|NULL|-
+invoice_policy|text|NULL|-
+sales_ok|tinyint(1)|NOT NULL|-
+purchase_ok|tinyint(1)|NOT NULL|-
+sale_line_warn_msg|varchar(255)|NULL|-
+sale_delay|int(11)|NULL|-
+tracking|varchar(255)|NULL|-
+description_picking|text|NULL|-
+description_pickingout|text|NULL|-
+description_pickingin|text|NULL|-
+is_storable|tinyint(1)|NULL|-
+expiration_time|int(11)|NULL|-
+use_time|int(11)|NULL|-
+removal_time|int(11)|NULL|-
+alert_time|int(11)|NULL|-
+use_expiration_date|tinyint(1)|NULL|-
+responsible_id|bigint(20) unsigned|NULL|MUL
+material_category_id|bigint(20) unsigned|NULL|MUL
+material_type|varchar(50)|NULL|-
+wood_species|varchar(100)|NULL|-
+grade|varchar(50)|NULL|-
+thickness_inches|decimal(5,3)|NULL|-
+width_inches|decimal(8,3)|NULL|-
+length_inches|decimal(8,3)|NULL|-
+min_cabinet_depth_inches|decimal(5,3)|NULL|-
+sheet_size|varchar(50)|NULL|-
+woodworking_uom|varchar(50)|NULL|-
+sqft_per_sheet|decimal(8,2)|NULL|-
+bf_per_unit|decimal(8,2)|NULL|-
+lf_per_unit|decimal(8,2)|NULL|-
+cost_per_unit|decimal(10,2)|NULL|-
+price_per_lf_upgrade|decimal(8,2)|NULL|-
+suitable_for_paint|tinyint(1)|NOT NULL|-
+suitable_for_stain|tinyint(1)|NOT NULL|-
+core_type|varchar(50)|NULL|-
+material_notes|text|NULL|-
+minimum_stock_level|decimal(10,2)|NULL|-
+reorder_quantity|decimal(10,2)|NULL|-
+weight_capacity_lbs|int(11)|NULL|-
+extension_type|varchar(20)|NULL|-
+top_clearance_inches|decimal(5,3)|NULL|-
+bottom_clearance_inches|decimal(5,3)|NULL|-
+side_clearance_inches|decimal(5,3)|NULL|-
+rear_clearance_inches|decimal(5,3)|NULL|-
+requires_locking_device|tinyint(1)|NOT NULL|-
+compatible_locking_device_id|bigint(20) unsigned|NULL|MUL
+rear_bracket_product_id|bigint(20) unsigned|NULL|MUL
+
+=== products_reference_type_codes ===
+id|bigint(20) unsigned|NOT NULL|PRI
+code|varchar(10)|NOT NULL|-
+name|varchar(100)|NOT NULL|-
+category_id|bigint(20) unsigned|NOT NULL|MUL
+is_active|tinyint(1)|NOT NULL|-
+sort|int(11)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== products_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+color|varchar(255)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== project_inspiration_images ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+room_id|bigint(20) unsigned|NULL|MUL
+file_name|varchar(255)|NOT NULL|-
+title|varchar(255)|NULL|-
+file_path|varchar(500)|NOT NULL|-
+file_size|int(11)|NOT NULL|-
+mime_type|varchar(100)|NOT NULL|-
+width|int(11)|NULL|-
+height|int(11)|NULL|-
+uploaded_by|bigint(20) unsigned|NOT NULL|MUL
+description|text|NULL|-
+tags|json|NULL|-
+metadata|json|NULL|-
+sort_order|int(11)|NOT NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_bom ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cabinet_id|bigint(20) unsigned|NULL|MUL
+cabinet_run_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+component_name|varchar(100)|NULL|-
+quantity_required|decimal(10,2)|NOT NULL|-
+unit_of_measure|varchar(50)|NOT NULL|-
+waste_factor_percentage|decimal(5,2)|NOT NULL|-
+quantity_with_waste|decimal(10,2)|NOT NULL|-
+component_width_inches|decimal(8,3)|NULL|-
+component_height_inches|decimal(8,3)|NULL|-
+quantity_of_components|int(11)|NOT NULL|-
+sqft_per_component|decimal(8,2)|NULL|-
+total_sqft_required|decimal(8,2)|NULL|-
+linear_feet_per_component|decimal(8,2)|NULL|-
+total_linear_feet|decimal(8,2)|NULL|-
+board_feet_required|decimal(8,2)|NULL|-
+unit_cost|decimal(10,2)|NULL|-
+total_material_cost|decimal(10,2)|NULL|-
+grain_direction|varchar(50)|NULL|-
+requires_edge_banding|tinyint(1)|NOT NULL|-
+edge_banding_sides|varchar(50)|NULL|-
+edge_banding_lf|decimal(8,2)|NULL|-
+cnc_notes|text|NULL|-
+machining_operations|text|NULL|-
+material_allocated|tinyint(1)|NOT NULL|MUL
+material_allocated_at|timestamp|NULL|-
+material_issued|tinyint(1)|NOT NULL|-
+material_issued_at|timestamp|NULL|-
+substituted_product_id|bigint(20) unsigned|NULL|MUL
+substitution_notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_cabinet_runs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+room_location_id|bigint(20) unsigned|NOT NULL|MUL
+name|varchar(255)|NOT NULL|MUL
+run_code|varchar(10)|NULL|-
+cabinet_level|varchar(10)|NULL|-
+material_category|varchar(50)|NULL|-
+finish_option|varchar(50)|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+cabinet_count_cached|int(11)|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+run_type|varchar(255)|NULL|-
+total_linear_feet|decimal(10,2)|NULL|-
+start_wall_measurement|decimal(8,2)|NULL|-
+end_wall_measurement|decimal(8,2)|NULL|-
+notes|text|NULL|-
+sort_order|int(11)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+cabinet_count|int(11)|NOT NULL|-
+material_type|varchar(50)|NULL|-
+wood_species|varchar(100)|NULL|-
+finish_type|varchar(100)|NULL|-
+sheet_goods_required_sqft|decimal(10,2)|NULL|-
+solid_wood_required_bf|decimal(10,2)|NULL|-
+cnc_program_file|varchar(255)|NULL|-
+cnc_program_generated_at|timestamp|NULL|-
+cnc_machine_time_minutes|decimal(8,2)|NULL|-
+cnc_notes|text|NULL|-
+production_status|varchar(50)|NOT NULL|MUL
+material_ordered_at|timestamp|NULL|-
+cnc_started_at|timestamp|NULL|-
+cnc_completed_at|timestamp|NULL|-
+assembly_started_at|timestamp|NULL|-
+assembly_completed_at|timestamp|NULL|-
+finishing_started_at|timestamp|NULL|-
+finishing_completed_at|timestamp|NULL|-
+estimated_labor_hours|decimal(8,2)|NULL|-
+actual_labor_hours|decimal(8,2)|NULL|-
+lead_craftsman_id|bigint(20) unsigned|NULL|MUL
+labor_notes|text|NULL|-
+hardware_kit_json|text|NULL|-
+default_hinge_product_id|bigint(20) unsigned|NULL|MUL
+default_slide_product_id|bigint(20) unsigned|NULL|MUL
+hinges_count|int(11)|NOT NULL|-
+slides_count|int(11)|NOT NULL|-
+shelf_pins_count|int(11)|NOT NULL|-
+pullouts_count|int(11)|NOT NULL|-
+hardware_kitted|tinyint(1)|NOT NULL|-
+hardware_kitted_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|-
+qc_inspected_at|timestamp|NULL|-
+qc_inspector_id|bigint(20) unsigned|NULL|MUL
+qc_notes|text|NULL|-
+primer_type|varchar(100)|NULL|-
+primer_coats|int(11)|NULL|-
+topcoat_type|varchar(100)|NULL|-
+topcoat_coats|int(11)|NULL|-
+sheen_level|varchar(50)|NULL|-
+finishing_notes|text|NULL|-
+ready_for_delivery|tinyint(1)|NOT NULL|MUL
+ready_for_delivery_at|timestamp|NULL|-
+packaging_boxes_needed|int(11)|NULL|-
+delivery_notes|text|NULL|-
+material_cost_actual|decimal(10,2)|NULL|-
+hardware_cost_actual|decimal(10,2)|NULL|-
+labor_cost_actual|decimal(10,2)|NULL|-
+finishing_cost_actual|decimal(10,2)|NULL|-
+total_production_cost|decimal(10,2)|NULL|-
+
+=== projects_cabinet_sections ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cabinet_specification_id|bigint(20) unsigned|NOT NULL|MUL
+section_number|int(11)|NOT NULL|-
+section_code|varchar(5)|NULL|-
+full_code|varchar(100)|NULL|MUL
+name|varchar(255)|NOT NULL|-
+section_type|varchar(50)|NOT NULL|MUL
+product_id|bigint(20) unsigned|NULL|MUL
+hardware_product_id|bigint(20) unsigned|NULL|MUL
+width_inches|decimal(8,3)|NULL|-
+height_inches|decimal(8,3)|NULL|-
+position_from_left_inches|decimal(8,3)|NULL|-
+position_from_bottom_inches|decimal(8,3)|NULL|-
+component_count|int(11)|NOT NULL|-
+opening_width_inches|decimal(8,3)|NULL|-
+opening_height_inches|decimal(8,3)|NULL|-
+total_consumed_height_inches|decimal(8,4)|NULL|-
+total_consumed_width_inches|decimal(8,4)|NULL|-
+remaining_height_inches|decimal(8,4)|NULL|-
+remaining_width_inches|decimal(8,4)|NULL|-
+layout_direction|enum('vertical','horizontal','grid')|NOT NULL|-
+top_reveal_inches|decimal(8,4)|NOT NULL|-
+bottom_reveal_inches|decimal(8,4)|NOT NULL|-
+component_gap_inches|decimal(8,4)|NOT NULL|-
+opening_depth_inches|decimal(8,3)|NULL|-
+notes|text|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+component_count_cached|int(11)|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+sort_order|int(11)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_cabinets ===
+id|bigint(20) unsigned|NOT NULL|PRI
+product_id|bigint(20) unsigned|NULL|MUL
+order_line_id|bigint(20) unsigned|NULL|-
+project_id|bigint(20) unsigned|NULL|MUL
+room_id|bigint(20) unsigned|NULL|MUL
+cabinet_run_id|bigint(20) unsigned|NULL|MUL
+cabinet_number|varchar(255)|NULL|MUL
+full_code|varchar(100)|NULL|MUL
+cabinet_level|varchar(10)|NULL|-
+material_category|varchar(50)|NULL|-
+finish_option|varchar(50)|NULL|-
+position_in_run|int(11)|NULL|-
+wall_position_start_inches|decimal(8,2)|NULL|-
+product_variant_id|bigint(20) unsigned|NULL|-
+length_inches|decimal(8,2)|NULL|-
+width_inches|decimal(8,2)|NULL|-
+depth_inches|decimal(8,2)|NULL|-
+height_inches|decimal(8,2)|NULL|-
+linear_feet|decimal(8,2)|NULL|-
+quantity|int(10) unsigned|NOT NULL|-
+unit_price_per_lf|decimal(10,2)|NULL|-
+total_price|decimal(10,2)|NULL|-
+adjustment_type|varchar(20)|NOT NULL|-
+adjustment_value|decimal(10,2)|NULL|-
+adjustment_reason|varchar(255)|NULL|-
+adjustment_amount|decimal(10,2)|NULL|-
+final_price|decimal(10,2)|NULL|-
+hardware_notes|text|NULL|-
+custom_modifications|text|NULL|-
+shop_notes|text|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+section_count_cached|int(11)|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+creator_id|bigint(20) unsigned|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+toe_kick_height|decimal(8,3)|NULL|-
+toe_kick_depth|decimal(8,3)|NULL|-
+box_material|varchar(100)|NULL|-
+box_thickness|decimal(5,3)|NULL|-
+joinery_method|varchar(50)|NULL|-
+has_back_panel|tinyint(1)|NOT NULL|-
+back_panel_thickness|decimal(5,3)|NULL|-
+has_face_frame|tinyint(1)|NOT NULL|-
+face_frame_stile_width|decimal(5,3)|NULL|-
+face_frame_rail_width|decimal(5,3)|NULL|-
+face_frame_material|varchar(100)|NULL|-
+beaded_face_frame|tinyint(1)|NOT NULL|-
+door_count|int(11)|NOT NULL|-
+door_style|varchar(100)|NULL|-
+door_mounting|varchar(50)|NULL|-
+door_sizes_json|text|NULL|-
+has_glass_doors|tinyint(1)|NOT NULL|-
+glass_type|varchar(100)|NULL|-
+drawer_count|int(11)|NOT NULL|-
+drawer_sizes_json|text|NULL|-
+dovetail_drawers|tinyint(1)|NOT NULL|-
+drawer_box_material|varchar(100)|NULL|-
+drawer_box_thickness|decimal(5,3)|NULL|-
+drawer_soft_close|tinyint(1)|NOT NULL|-
+adjustable_shelf_count|int(11)|NOT NULL|-
+fixed_shelf_count|int(11)|NOT NULL|-
+shelf_thickness|decimal(5,3)|NULL|-
+shelf_material|varchar(100)|NULL|-
+shelf_pin_holes|int(11)|NOT NULL|-
+hinge_model|varchar(100)|NULL|-
+hinge_product_id|bigint(20) unsigned|NULL|MUL
+hinge_quantity|int(11)|NOT NULL|-
+slide_model|varchar(100)|NULL|-
+slide_product_id|bigint(20) unsigned|NULL|MUL
+slide_quantity|int(11)|NOT NULL|-
+specialty_hardware_json|text|NULL|-
+has_pullout|tinyint(1)|NOT NULL|-
+pullout_model|varchar(100)|NULL|-
+pullout_product_id|bigint(20) unsigned|NULL|MUL
+has_lazy_susan|tinyint(1)|NOT NULL|-
+lazy_susan_model|varchar(100)|NULL|-
+lazy_susan_product_id|bigint(20) unsigned|NULL|MUL
+has_tray_dividers|tinyint(1)|NOT NULL|-
+has_spice_rack|tinyint(1)|NOT NULL|-
+interior_accessories_json|text|NULL|-
+appliance_panel|tinyint(1)|NOT NULL|-
+appliance_type|varchar(100)|NULL|-
+has_microwave_shelf|tinyint(1)|NOT NULL|-
+has_trash_pullout|tinyint(1)|NOT NULL|-
+has_hamper|tinyint(1)|NOT NULL|-
+has_wine_rack|tinyint(1)|NOT NULL|-
+special_features_json|text|NULL|-
+has_sink_cutout|tinyint(1)|NOT NULL|-
+sink_dimensions_json|text|NULL|-
+has_cooktop_cutout|tinyint(1)|NOT NULL|-
+has_electrical_cutouts|tinyint(1)|NOT NULL|-
+cutout_notes|text|NULL|-
+complexity_tier|int(11)|NULL|-
+base_price_per_lf|decimal(8,2)|NULL|-
+material_upgrade_per_lf|decimal(8,2)|NULL|-
+cabinet_linear_feet|decimal(8,2)|NULL|-
+estimated_cabinet_price|decimal(10,2)|NULL|-
+assembly_notes|text|NULL|-
+installation_notes|text|NULL|-
+requires_scribing|tinyint(1)|NOT NULL|-
+hardware_installation_notes|text|NULL|-
+plywood_sqft|decimal(8,2)|NULL|-
+solid_wood_bf|decimal(8,2)|NULL|-
+edge_banding_lf|decimal(8,2)|NULL|-
+cnc_cut_at|timestamp|NULL|-
+face_frame_cut_at|timestamp|NULL|-
+door_fronts_cut_at|timestamp|NULL|-
+edge_banded_at|timestamp|NULL|-
+hardware_installed_at|timestamp|NULL|-
+pocket_holes_at|timestamp|NULL|-
+assembled_at|timestamp|NULL|MUL
+sanded_at|timestamp|NULL|-
+finished_at|timestamp|NULL|-
+assembled_by_user_id|bigint(20) unsigned|NULL|MUL
+qc_passed|tinyint(1)|NULL|-
+qc_issues|text|NULL|-
+qc_inspected_at|timestamp|NULL|-
+doweled_at|timestamp|NULL|-
+
+=== projects_change_order_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+change_order_id|bigint(20) unsigned|NOT NULL|MUL
+entity_type|varchar(100)|NOT NULL|MUL
+entity_id|bigint(20) unsigned|NOT NULL|-
+field_name|varchar(100)|NOT NULL|-
+old_value|text|NULL|-
+new_value|text|NULL|-
+price_impact|decimal(10,2)|NOT NULL|-
+bom_impact_json|json|NULL|-
+is_applied|tinyint(1)|NOT NULL|MUL
+applied_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_change_orders ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+change_order_number|varchar(50)|NOT NULL|MUL
+title|varchar(255)|NOT NULL|-
+description|text|NULL|-
+reason|enum('client_request','field_condition','design_error','material_substitution','scope_addition','scope_removal','other')|NOT NULL|-
+status|enum('draft','pending_approval','approved','rejected','applied','cancelled')|NOT NULL|MUL
+requested_by|bigint(20) unsigned|NULL|MUL
+requested_at|timestamp|NULL|-
+approved_by|bigint(20) unsigned|NULL|MUL
+approved_at|timestamp|NULL|-
+approval_notes|text|NULL|-
+rejected_by|bigint(20) unsigned|NULL|MUL
+rejected_at|timestamp|NULL|-
+rejection_reason|text|NULL|-
+applied_by|bigint(20) unsigned|NULL|MUL
+applied_at|timestamp|NULL|-
+price_delta|decimal(12,2)|NOT NULL|-
+labor_hours_delta|decimal(8,2)|NOT NULL|-
+bom_delta_json|json|NULL|-
+affected_stage|varchar(50)|NULL|-
+unlocks_gate|varchar(50)|NULL|-
+sales_order_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_cnc_program_parts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+cnc_program_id|bigint(20) unsigned|NOT NULL|MUL
+file_name|varchar(255)|NOT NULL|-
+file_path|varchar(255)|NULL|-
+sheet_number|int(11)|NULL|MUL
+operation_type|varchar(255)|NULL|-
+tool|varchar(255)|NULL|-
+file_size|int(11)|NULL|-
+status|enum('pending','running','complete','error')|NOT NULL|-
+run_at|timestamp|NULL|-
+completed_at|timestamp|NULL|-
+operator_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_cnc_programs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+name|varchar(255)|NOT NULL|-
+vcarve_file|varchar(255)|NULL|-
+material_code|varchar(255)|NULL|-
+material_type|varchar(255)|NULL|-
+sheet_size|varchar(255)|NOT NULL|-
+sheet_count|int(11)|NOT NULL|-
+created_date|date|NULL|-
+description|text|NULL|-
+status|enum('pending','in_progress','complete','error')|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_doors ===
+id|bigint(20) unsigned|NOT NULL|PRI
+product_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+door_number|int(11)|NOT NULL|-
+door_name|varchar(100)|NULL|-
+full_code|varchar(100)|NULL|MUL
+sort_order|int(11)|NOT NULL|-
+position_in_opening_inches|decimal(8,4)|NULL|-
+consumed_height_inches|decimal(8,4)|NULL|-
+position_from_left_inches|decimal(8,4)|NULL|-
+consumed_width_inches|decimal(8,4)|NULL|-
+width_inches|decimal(8,3)|NOT NULL|-
+height_inches|decimal(8,3)|NOT NULL|-
+rail_width_inches|decimal(5,3)|NULL|-
+style_width_inches|decimal(5,3)|NULL|-
+has_check_rail|tinyint(1)|NOT NULL|-
+check_rail_width_inches|decimal(5,3)|NULL|-
+profile_type|varchar(100)|NULL|-
+fabrication_method|varchar(50)|NULL|-
+thickness_inches|decimal(5,3)|NULL|-
+hinge_type|varchar(100)|NULL|-
+hinge_model|varchar(100)|NULL|-
+hinge_product_id|bigint(20) unsigned|NULL|MUL
+hinge_quantity|int(11)|NULL|-
+hinge_side|varchar(20)|NULL|-
+has_glass|tinyint(1)|NOT NULL|-
+glass_type|varchar(100)|NULL|-
+finish_type|varchar(100)|NULL|-
+paint_color|varchar(100)|NULL|-
+stain_color|varchar(100)|NULL|-
+has_decorative_hardware|tinyint(1)|NOT NULL|-
+decorative_hardware_model|varchar(100)|NULL|-
+decorative_hardware_product_id|bigint(20) unsigned|NULL|MUL
+cnc_cut_at|timestamp|NULL|MUL
+manually_cut_at|timestamp|NULL|-
+edge_banded_at|timestamp|NULL|-
+assembled_at|timestamp|NULL|-
+sanded_at|timestamp|NULL|-
+finished_at|timestamp|NULL|-
+hardware_installed_at|timestamp|NULL|-
+installed_in_cabinet_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|MUL
+qc_notes|text|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+qc_inspected_at|timestamp|NULL|-
+qc_inspector_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_drawers ===
+id|bigint(20) unsigned|NOT NULL|PRI
+product_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+drawer_number|int(11)|NOT NULL|-
+drawer_name|varchar(100)|NULL|-
+full_code|varchar(100)|NULL|MUL
+drawer_position|varchar(50)|NULL|-
+sort_order|int(11)|NOT NULL|-
+position_in_opening_inches|decimal(8,4)|NULL|-
+consumed_height_inches|decimal(8,4)|NULL|-
+position_from_left_inches|decimal(8,4)|NULL|-
+consumed_width_inches|decimal(8,4)|NULL|-
+front_width_inches|decimal(8,3)|NOT NULL|-
+front_height_inches|decimal(8,3)|NOT NULL|-
+top_rail_width_inches|decimal(5,3)|NULL|-
+bottom_rail_width_inches|decimal(5,3)|NULL|-
+style_width_inches|decimal(5,3)|NULL|-
+profile_type|varchar(100)|NULL|-
+fabrication_method|varchar(50)|NULL|-
+front_thickness_inches|decimal(5,3)|NULL|-
+box_width_inches|decimal(8,3)|NULL|-
+box_depth_inches|decimal(8,3)|NULL|-
+box_depth_shop_inches|decimal(8,4)|NULL|-
+box_height_inches|decimal(8,3)|NULL|-
+box_height_shop_inches|decimal(8,4)|NULL|-
+opening_width_inches|decimal(8,4)|NULL|-
+opening_height_inches|decimal(8,4)|NULL|-
+opening_depth_inches|decimal(8,4)|NULL|-
+box_outside_width_inches|decimal(8,4)|NULL|-
+box_inside_width_inches|decimal(8,4)|NULL|-
+box_material|varchar(100)|NULL|-
+side_thickness_inches|decimal(8,4)|NULL|-
+bottom_thickness_inches|decimal(8,4)|NULL|-
+dado_depth_inches|decimal(8,4)|NULL|-
+dado_width_inches|decimal(8,4)|NULL|-
+dado_height_inches|decimal(8,4)|NULL|-
+side_cut_height_inches|decimal(8,4)|NULL|-
+side_cut_height_shop_inches|decimal(8,4)|NULL|-
+side_cut_length_inches|decimal(8,4)|NULL|-
+side_cut_length_shop_inches|decimal(8,4)|NULL|-
+front_cut_height_inches|decimal(8,4)|NULL|-
+front_cut_height_shop_inches|decimal(8,4)|NULL|-
+front_cut_width_inches|decimal(8,4)|NULL|-
+back_cut_height_inches|decimal(8,4)|NULL|-
+back_cut_height_shop_inches|decimal(8,4)|NULL|-
+back_cut_width_inches|decimal(8,4)|NULL|-
+bottom_cut_width_inches|decimal(8,4)|NULL|-
+bottom_cut_depth_inches|decimal(8,4)|NULL|-
+clearance_side_inches|decimal(8,4)|NULL|-
+clearance_top_inches|decimal(8,4)|NULL|-
+clearance_bottom_inches|decimal(8,4)|NULL|-
+slide_spec_source|varchar(50)|NULL|-
+dimensions_calculated_at|timestamp|NULL|-
+box_thickness|decimal(5,3)|NULL|-
+joinery_method|varchar(50)|NULL|-
+slide_type|varchar(100)|NULL|-
+slide_model|varchar(100)|NULL|-
+slide_product_id|bigint(20) unsigned|NULL|MUL
+slide_length_inches|decimal(5,2)|NULL|-
+min_cabinet_depth_blum_inches|decimal(8,4)|NULL|-
+min_cabinet_depth_shop_inches|decimal(8,4)|NULL|-
+slide_quantity|int(11)|NULL|-
+soft_close|tinyint(1)|NOT NULL|-
+finish_type|varchar(100)|NULL|-
+paint_color|varchar(100)|NULL|-
+stain_color|varchar(100)|NULL|-
+has_decorative_hardware|tinyint(1)|NOT NULL|-
+decorative_hardware_model|varchar(100)|NULL|-
+decorative_hardware_product_id|bigint(20) unsigned|NULL|MUL
+cnc_cut_at|timestamp|NULL|MUL
+manually_cut_at|timestamp|NULL|-
+edge_banded_at|timestamp|NULL|-
+box_assembled_at|timestamp|NULL|-
+front_attached_at|timestamp|NULL|-
+sanded_at|timestamp|NULL|-
+finished_at|timestamp|NULL|-
+slides_installed_at|timestamp|NULL|-
+installed_in_cabinet_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|MUL
+qc_notes|text|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+qc_inspected_at|timestamp|NULL|-
+qc_inspector_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_entity_locks ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+entity_type|varchar(100)|NOT NULL|MUL
+entity_id|bigint(20) unsigned|NULL|-
+lock_level|enum('full','dimensions','materials','pricing')|NOT NULL|MUL
+locked_by_gate|varchar(50)|NOT NULL|MUL
+locked_at|timestamp|NOT NULL|-
+locked_by|bigint(20) unsigned|NULL|MUL
+unlock_change_order_id|bigint(20) unsigned|NULL|MUL
+unlocked_at|timestamp|NULL|-
+unlocked_by|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_gate_evaluations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+gate_id|bigint(20) unsigned|NOT NULL|MUL
+passed|tinyint(1)|NOT NULL|MUL
+evaluated_at|timestamp|NOT NULL|MUL
+evaluated_by|bigint(20) unsigned|NULL|MUL
+requirement_results|json|NULL|-
+failure_reasons|json|NULL|-
+context|json|NULL|-
+evaluation_type|enum('manual','automatic','scheduled')|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_gate_requirements ===
+id|bigint(20) unsigned|NOT NULL|PRI
+gate_id|bigint(20) unsigned|NOT NULL|MUL
+requirement_type|enum('field_not_null','field_equals','field_greater_than','relation_exists','relation_count','all_children_pass','document_uploaded','payment_received','task_completed','custom_check')|NOT NULL|MUL
+target_model|varchar(100)|NULL|-
+target_relation|varchar(100)|NULL|-
+target_field|varchar(100)|NULL|-
+target_value|text|NULL|-
+comparison_operator|varchar(20)|NOT NULL|-
+custom_check_class|varchar(255)|NULL|-
+custom_check_method|varchar(100)|NULL|-
+error_message|varchar(255)|NOT NULL|-
+help_text|varchar(500)|NULL|-
+action_label|varchar(100)|NULL|-
+action_route|varchar(255)|NULL|-
+sequence|int(10) unsigned|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_gates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+stage_id|bigint(20) unsigned|NOT NULL|MUL
+name|varchar(100)|NOT NULL|-
+gate_key|varchar(50)|NOT NULL|UNI
+description|text|NULL|-
+sequence|int(10) unsigned|NOT NULL|-
+is_blocking|tinyint(1)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|MUL
+applies_design_lock|tinyint(1)|NOT NULL|-
+applies_procurement_lock|tinyint(1)|NOT NULL|-
+applies_production_lock|tinyint(1)|NOT NULL|-
+creates_tasks_on_pass|tinyint(1)|NOT NULL|-
+task_templates_json|json|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_material_reservations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+bom_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+warehouse_id|bigint(20) unsigned|NOT NULL|MUL
+location_id|bigint(20) unsigned|NULL|MUL
+quantity_reserved|decimal(10,3)|NOT NULL|-
+unit_of_measure|varchar(20)|NOT NULL|-
+status|enum('pending','reserved','issued','cancelled')|NOT NULL|-
+reserved_by|bigint(20) unsigned|NULL|MUL
+reserved_at|timestamp|NULL|-
+issued_at|timestamp|NULL|-
+expires_at|timestamp|NULL|-
+move_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_milestone_templates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+production_stage|enum('discovery','design','sourcing','production','delivery')|NOT NULL|MUL
+is_critical|tinyint(1)|NOT NULL|-
+description|text|NULL|-
+relative_days|int(11)|NOT NULL|-
+sort_order|int(11)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_milestones ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+deadline|datetime|NULL|MUL
+production_stage|enum('discovery','design','sourcing','production','delivery')|NULL|-
+is_critical|tinyint(1)|NOT NULL|-
+description|text|NULL|-
+sort_order|int(11)|NOT NULL|-
+is_completed|tinyint(1)|NOT NULL|-
+completed_at|datetime|NULL|MUL
+project_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_production_estimates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+linear_feet|decimal(10,2)|NOT NULL|-
+estimated_hours|decimal(10,2)|NOT NULL|-
+estimated_days|decimal(10,2)|NOT NULL|-
+estimated_weeks|decimal(10,2)|NOT NULL|-
+estimated_months|decimal(10,2)|NOT NULL|-
+shop_capacity_per_day|decimal(10,2)|NOT NULL|-
+shop_capacity_per_hour|decimal(10,2)|NOT NULL|-
+working_hours_per_day|int(11)|NOT NULL|-
+working_days_per_week|int(11)|NOT NULL|-
+working_days_per_month|int(11)|NOT NULL|-
+company_acronym|varchar(255)|NULL|-
+formatted_estimate|text|NULL|-
+is_current|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_project_addresses ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+type|varchar(255)|NOT NULL|-
+street1|varchar(255)|NULL|-
+street2|varchar(255)|NULL|-
+city|varchar(255)|NULL|-
+zip|varchar(255)|NULL|-
+state_id|bigint(20) unsigned|NULL|MUL
+country_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+is_primary|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_project_dependencies ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+depends_on_id|bigint(20) unsigned|NOT NULL|MUL
+dependency_type|varchar(255)|NOT NULL|-
+lag_days|int(11)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_project_drafts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+user_id|bigint(20) unsigned|NOT NULL|MUL
+session_id|varchar(255)|NOT NULL|MUL
+current_step|int(11)|NOT NULL|-
+form_data|json|NOT NULL|-
+expires_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_project_stages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+stage_key|varchar(50)|NULL|UNI
+color|varchar(255)|NULL|-
+tags|json|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_collapsed|tinyint(1)|NOT NULL|-
+wip_limit|int(10) unsigned|NULL|-
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_project_tag ===
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+project_id|bigint(20) unsigned|NOT NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_projects ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+project_number|varchar(255)|NULL|UNI
+draft_number|varchar(255)|NULL|-
+project_type|varchar(255)|NULL|-
+lead_source|varchar(50)|NULL|MUL
+budget_range|varchar(20)|NULL|MUL
+complexity_score|tinyint(3) unsigned|NULL|-
+complexity_breakdown|json|NULL|-
+room_count_cached|int(11)|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+project_type_other|text|NULL|-
+tasks_label|varchar(255)|NULL|-
+description|text|NULL|-
+visibility|varchar(255)|NULL|-
+color|varchar(255)|NULL|-
+sort|int(11)|NULL|MUL
+start_date|date|NULL|-
+end_date|date|NULL|-
+desired_completion_date|date|NULL|-
+allocated_hours|decimal(8,2)|NULL|-
+estimated_linear_feet|decimal(10,2)|NULL|-
+allow_timesheets|tinyint(1)|NOT NULL|-
+allow_milestones|tinyint(1)|NOT NULL|-
+allow_task_dependencies|tinyint(1)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_converted|tinyint(1)|NOT NULL|-
+google_drive_root_folder_id|varchar(255)|NULL|-
+google_drive_folder_url|varchar(500)|NULL|-
+google_drive_synced_at|timestamp|NULL|-
+google_drive_enabled|tinyint(1)|NOT NULL|-
+converted_at|timestamp|NULL|-
+stage_id|bigint(20) unsigned|NULL|MUL
+current_production_stage|enum('discovery','design','sourcing','production','delivery')|NOT NULL|-
+design_approved_at|timestamp|NULL|-
+redline_approved_at|timestamp|NULL|-
+materials_staged_at|timestamp|NULL|-
+all_materials_received_at|timestamp|NULL|-
+bol_created_at|timestamp|NULL|-
+bol_signed_at|timestamp|NULL|-
+delivered_at|timestamp|NULL|-
+closeout_delivered_at|timestamp|NULL|-
+customer_signoff_at|timestamp|NULL|-
+ferry_booking_date|date|NULL|-
+ferry_confirmation|varchar(100)|NULL|-
+install_support_completed_at|timestamp|NULL|-
+partner_id|bigint(20) unsigned|NULL|MUL
+use_customer_address|tinyint(1)|NOT NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+warehouse_id|bigint(20) unsigned|NULL|MUL
+source_quote_id|bigint(20) unsigned|NULL|MUL
+branch_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+designer_id|bigint(20) unsigned|NULL|MUL
+rhino_file_path|varchar(500)|NULL|-
+purchasing_manager_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+initial_consultation_date|date|NULL|-
+initial_consultation_notes|text|NULL|-
+design_revision_number|int(10) unsigned|NOT NULL|-
+design_notes|text|NULL|-
+design_locked_at|timestamp|NULL|MUL
+design_locked_by|bigint(20) unsigned|NULL|MUL
+procurement_locked_at|timestamp|NULL|-
+procurement_locked_by|bigint(20) unsigned|NULL|MUL
+production_locked_at|timestamp|NULL|-
+production_locked_by|bigint(20) unsigned|NULL|MUL
+bom_snapshot_json|json|NULL|-
+pricing_snapshot_json|json|NULL|-
+
+=== projects_pullouts ===
+id|bigint(20) unsigned|NOT NULL|PRI
+product_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+pullout_number|int(11)|NOT NULL|-
+pullout_name|varchar(100)|NULL|-
+full_code|varchar(100)|NULL|MUL
+sort_order|int(11)|NOT NULL|-
+position_in_opening_inches|decimal(8,4)|NULL|-
+consumed_height_inches|decimal(8,4)|NULL|-
+position_from_left_inches|decimal(8,4)|NULL|-
+consumed_width_inches|decimal(8,4)|NULL|-
+pullout_type|varchar(100)|NOT NULL|MUL
+manufacturer|varchar(100)|NULL|-
+model_number|varchar(100)|NULL|-
+description|text|NULL|-
+width_inches|decimal(8,3)|NULL|-
+height_inches|decimal(8,3)|NULL|-
+depth_inches|decimal(8,3)|NULL|-
+mounting_type|varchar(100)|NULL|-
+slide_type|varchar(100)|NULL|-
+slide_model|varchar(100)|NULL|-
+slide_product_id|bigint(20) unsigned|NULL|MUL
+slide_length_inches|decimal(5,2)|NULL|-
+slide_quantity|int(11)|NULL|-
+soft_close|tinyint(1)|NOT NULL|-
+weight_capacity_lbs|int(11)|NULL|-
+unit_cost|decimal(10,2)|NULL|-
+quantity|int(11)|NOT NULL|-
+ordered_at|timestamp|NULL|MUL
+received_at|timestamp|NULL|-
+hardware_installed_at|timestamp|NULL|-
+installed_in_cabinet_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|MUL
+qc_notes|text|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+qc_inspected_at|timestamp|NULL|-
+qc_inspector_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_room_locations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+room_id|bigint(20) unsigned|NOT NULL|MUL
+name|varchar(255)|NOT NULL|MUL
+location_code|varchar(10)|NULL|-
+cabinet_level|varchar(10)|NULL|-
+material_category|varchar(50)|NULL|-
+finish_option|varchar(50)|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+run_count_cached|int(11)|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+location_type|varchar(255)|NULL|-
+sequence|int(11)|NOT NULL|-
+elevation_reference|varchar(255)|NULL|-
+notes|text|NULL|-
+sort_order|int(11)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+material_type|varchar(50)|NULL|MUL
+wood_species|varchar(100)|NULL|-
+door_style|varchar(100)|NULL|-
+finish_type|varchar(100)|NULL|-
+paint_color|varchar(100)|NULL|-
+stain_color|varchar(100)|NULL|-
+overall_width_inches|decimal(8,3)|NULL|-
+overall_height_inches|decimal(8,3)|NULL|-
+overall_depth_inches|decimal(8,3)|NULL|-
+soffit_height_inches|decimal(8,3)|NULL|-
+toe_kick_height_inches|decimal(8,3)|NULL|-
+cabinet_count|int(11)|NOT NULL|-
+total_linear_feet|decimal(8,2)|NULL|-
+cabinet_type_primary|varchar(50)|NULL|-
+has_face_frame|tinyint(1)|NOT NULL|-
+face_frame_width_inches|decimal(5,3)|NULL|-
+has_beaded_face_frame|tinyint(1)|NOT NULL|-
+inset_doors|tinyint(1)|NOT NULL|-
+overlay_type|varchar(50)|NULL|-
+hinge_type|varchar(100)|NULL|-
+slide_type|varchar(100)|NULL|-
+soft_close_doors|tinyint(1)|NOT NULL|-
+soft_close_drawers|tinyint(1)|NOT NULL|-
+has_crown_molding|tinyint(1)|NOT NULL|-
+has_light_rail|tinyint(1)|NOT NULL|-
+has_decorative_posts|tinyint(1)|NOT NULL|-
+has_appliance_panels|tinyint(1)|NOT NULL|-
+special_features_json|text|NULL|-
+countertop_type|varchar(100)|NULL|-
+countertop_sqft|decimal(8,2)|NULL|-
+backsplash_sqft|decimal(8,2)|NULL|-
+countertop_notes|text|NULL|-
+requires_electrical|tinyint(1)|NOT NULL|-
+requires_plumbing|tinyint(1)|NOT NULL|-
+electrical_notes|text|NULL|-
+plumbing_notes|text|NULL|-
+approval_status|varchar(50)|NOT NULL|MUL
+approved_at|timestamp|NULL|-
+approved_by_user_id|bigint(20) unsigned|NULL|MUL
+design_notes|text|NULL|-
+revision_notes|text|NULL|-
+estimated_value|decimal(10,2)|NULL|-
+complexity_tier|int(11)|NULL|-
+elevation_view|varchar(50)|NULL|-
+pdf_page_reference|varchar(100)|NULL|-
+
+=== projects_rooms ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+name|varchar(255)|NOT NULL|MUL
+room_code|varchar(10)|NULL|-
+cabinet_level|varchar(10)|NULL|-
+material_category|varchar(50)|NULL|-
+finish_option|varchar(50)|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+location_count_cached|int(11)|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+room_type|varchar(255)|NULL|-
+floor_number|varchar(255)|NULL|-
+pdf_page_number|int(11)|NULL|MUL
+pdf_room_label|varchar(255)|NULL|-
+pdf_detail_number|varchar(255)|NULL|-
+pdf_notes|text|NULL|-
+notes|text|NULL|-
+sort_order|int(11)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+total_linear_feet_tier_1|decimal(8,2)|NULL|-
+total_linear_feet_tier_2|decimal(8,2)|NULL|-
+total_linear_feet_tier_3|decimal(8,2)|NULL|-
+total_linear_feet_tier_4|decimal(8,2)|NULL|-
+total_linear_feet_tier_5|decimal(8,2)|NULL|-
+floating_shelves_lf|decimal(8,2)|NULL|-
+countertop_sqft|decimal(8,2)|NULL|-
+trim_millwork_lf|decimal(8,2)|NULL|-
+material_type|varchar(50)|NULL|-
+material_upgrade_rate|decimal(8,2)|NULL|-
+estimated_cabinet_value|decimal(10,2)|NULL|-
+estimated_additional_products|decimal(10,2)|NULL|-
+estimated_finish_value|decimal(10,2)|NULL|-
+estimated_project_value|decimal(10,2)|NULL|MUL
+pricing_tier_override|int(11)|NULL|-
+quoted_price|decimal(10,2)|NULL|-
+margin_percentage|decimal(5,2)|NULL|-
+labor_hours_estimate|decimal(8,2)|NULL|-
+last_pricing_calculation|timestamp|NULL|-
+pricing_notes|text|NULL|-
+
+=== projects_shelves ===
+id|bigint(20) unsigned|NOT NULL|PRI
+product_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NOT NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+shelf_number|int(11)|NOT NULL|-
+shelf_name|varchar(100)|NULL|-
+full_code|varchar(100)|NULL|MUL
+sort_order|int(11)|NOT NULL|-
+position_in_opening_inches|decimal(8,4)|NULL|-
+consumed_height_inches|decimal(8,4)|NULL|-
+position_from_left_inches|decimal(8,4)|NULL|-
+consumed_width_inches|decimal(8,4)|NULL|-
+width_inches|decimal(8,3)|NOT NULL|-
+depth_inches|decimal(8,3)|NOT NULL|-
+thickness_inches|decimal(5,3)|NOT NULL|-
+opening_width_inches|decimal(8,4)|NULL|-
+opening_height_inches|decimal(8,4)|NULL|-
+opening_depth_inches|decimal(8,4)|NULL|-
+cut_width_inches|decimal(8,4)|NULL|-
+cut_depth_inches|decimal(8,4)|NULL|-
+shelf_type|varchar(50)|NOT NULL|MUL
+material|varchar(100)|NULL|-
+edge_treatment|varchar(100)|NULL|-
+pin_hole_spacing|decimal(5,3)|NULL|-
+number_of_positions|int(11)|NULL|-
+pin_setback_front_inches|decimal(8,4)|NULL|-
+pin_setback_back_inches|decimal(8,4)|NULL|-
+pin_vertical_spacing_inches|decimal(8,4)|NULL|-
+pin_hole_diameter_mm|decimal(5,2)|NULL|-
+has_center_support|tinyint(1)|NOT NULL|-
+notch_depth_inches|decimal(8,4)|NULL|-
+notch_count|int(11)|NULL|-
+clearance_side_inches|decimal(8,4)|NULL|-
+clearance_back_inches|decimal(8,4)|NULL|-
+edge_band_front|tinyint(1)|NOT NULL|-
+edge_band_back|tinyint(1)|NOT NULL|-
+edge_band_sides|tinyint(1)|NOT NULL|-
+edge_band_length_inches|decimal(8,4)|NULL|-
+shelf_pin_product_id|bigint(20) unsigned|NULL|MUL
+shelf_pin_quantity|int(11)|NULL|-
+spec_source|varchar(50)|NULL|-
+dimensions_calculated_at|timestamp|NULL|-
+slide_type|varchar(100)|NULL|-
+slide_model|varchar(100)|NULL|-
+slide_product_id|bigint(20) unsigned|NULL|MUL
+slide_length_inches|decimal(5,2)|NULL|-
+soft_close|tinyint(1)|NOT NULL|-
+weight_capacity_lbs|int(11)|NULL|-
+finish_type|varchar(100)|NULL|-
+paint_color|varchar(100)|NULL|-
+stain_color|varchar(100)|NULL|-
+cnc_cut_at|timestamp|NULL|MUL
+manually_cut_at|timestamp|NULL|-
+edge_banded_at|timestamp|NULL|-
+assembled_at|timestamp|NULL|-
+sanded_at|timestamp|NULL|-
+finished_at|timestamp|NULL|-
+hardware_installed_at|timestamp|NULL|-
+installed_in_cabinet_at|timestamp|NULL|-
+qc_passed|tinyint(1)|NULL|MUL
+qc_notes|text|NULL|-
+complexity_score|decimal(6,2)|NULL|-
+complexity_breakdown|json|NULL|-
+complexity_calculated_at|timestamp|NULL|-
+qc_inspected_at|timestamp|NULL|-
+qc_inspector_id|bigint(20) unsigned|NULL|MUL
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== projects_stage_transitions ===
+id|bigint(20) unsigned|NOT NULL|PRI
+project_id|bigint(20) unsigned|NOT NULL|MUL
+from_stage_id|bigint(20) unsigned|NULL|MUL
+to_stage_id|bigint(20) unsigned|NOT NULL|MUL
+gate_id|bigint(20) unsigned|NULL|MUL
+transition_type|enum('advance','rollback','force','system')|NOT NULL|MUL
+transitioned_at|timestamp|NOT NULL|MUL
+transitioned_by|bigint(20) unsigned|NULL|MUL
+reason|text|NULL|-
+gate_evaluation_id|bigint(20) unsigned|NULL|MUL
+metadata|json|NULL|-
+duration_minutes|int(10) unsigned|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|UNI
+type|varchar(255)|NULL|MUL
+color|varchar(255)|NULL|-
+description|text|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_task_stages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_collapsed|tinyint(1)|NOT NULL|-
+sort|int(11)|NULL|-
+project_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_task_tag ===
+tag_id|bigint(20) unsigned|NOT NULL|MUL
+task_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== projects_task_users ===
+id|bigint(20) unsigned|NOT NULL|PRI
+task_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NOT NULL|MUL
+stage_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_tasks ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|MUL
+description|text|NULL|-
+color|varchar(255)|NULL|-
+priority|tinyint(1)|NOT NULL|MUL
+state|varchar(255)|NOT NULL|MUL
+started_at|timestamp|NULL|-
+completed_at|timestamp|NULL|-
+started_by|bigint(20) unsigned|NULL|MUL
+completed_by|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_recurring|tinyint(1)|NOT NULL|-
+deadline|datetime|NULL|MUL
+working_hours_open|decimal(8,2)|NOT NULL|-
+working_hours_close|decimal(8,2)|NOT NULL|-
+allocated_hours|decimal(8,2)|NOT NULL|-
+remaining_hours|decimal(8,2)|NOT NULL|-
+effective_hours|decimal(8,2)|NOT NULL|-
+total_hours_spent|decimal(8,2)|NOT NULL|-
+overtime|decimal(8,2)|NOT NULL|-
+progress|decimal(8,2)|NOT NULL|-
+subtask_effective_hours|decimal(8,2)|NOT NULL|-
+project_id|bigint(20) unsigned|NULL|MUL
+room_id|bigint(20) unsigned|NULL|MUL
+room_location_id|bigint(20) unsigned|NULL|MUL
+cabinet_run_id|bigint(20) unsigned|NULL|MUL
+cabinet_id|bigint(20) unsigned|NULL|MUL
+section_id|bigint(20) unsigned|NULL|MUL
+component_type|varchar(50)|NULL|MUL
+component_id|bigint(20) unsigned|NULL|-
+milestone_id|bigint(20) unsigned|NULL|MUL
+stage_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+parent_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== projects_user_project_favorites ===
+project_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== purchases_order_account_moves ===
+order_id|bigint(20) unsigned|NOT NULL|MUL
+move_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== purchases_order_groups ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== purchases_order_line_taxes ===
+order_line_id|bigint(20) unsigned|NOT NULL|MUL
+tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== purchases_order_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|text|NOT NULL|-
+state|varchar(255)|NULL|-
+sort|int(11)|NULL|-
+qty_received_method|varchar(255)|NULL|-
+display_type|varchar(255)|NULL|-
+product_qty|decimal(15,2)|NOT NULL|-
+product_uom_qty|double|NULL|-
+product_packaging_qty|double|NULL|-
+price_tax|double|NULL|-
+discount|decimal(15,2)|NOT NULL|-
+price_unit|decimal(15,2)|NOT NULL|-
+price_subtotal|decimal(15,2)|NOT NULL|-
+price_total|decimal(15,2)|NOT NULL|-
+qty_invoiced|decimal(15,2)|NOT NULL|-
+qty_received|decimal(15,2)|NOT NULL|-
+qty_received_manual|decimal(15,2)|NOT NULL|-
+qty_to_invoice|decimal(15,2)|NOT NULL|-
+is_downpayment|tinyint(1)|NOT NULL|-
+planned_at|timestamp|NULL|MUL
+product_description_variants|varchar(255)|NULL|-
+propagate_cancel|tinyint(1)|NULL|-
+price_total_cc|decimal(15,2)|NOT NULL|-
+uom_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NULL|MUL
+product_packaging_id|bigint(20) unsigned|NULL|MUL
+order_id|bigint(20) unsigned|NOT NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+final_location_id|bigint(20) unsigned|NULL|MUL
+order_point_id|bigint(20) unsigned|NULL|MUL
+project_id|bigint(20) unsigned|NULL|MUL
+bom_id|bigint(20) unsigned|NULL|MUL
+hardware_requirement_id|bigint(20) unsigned|NULL|MUL
+
+=== purchases_order_operations ===
+purchase_order_id|bigint(20) unsigned|NOT NULL|MUL
+inventory_operation_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== purchases_orders ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|MUL
+description|text|NULL|-
+priority|varchar(255)|NOT NULL|MUL
+origin|varchar(255)|NULL|-
+partner_reference|varchar(255)|NULL|-
+state|varchar(255)|NULL|MUL
+invoice_status|varchar(255)|NOT NULL|-
+receipt_status|varchar(255)|NOT NULL|-
+untaxed_amount|decimal(15,4)|NOT NULL|-
+tax_amount|decimal(15,4)|NOT NULL|-
+total_amount|decimal(15,4)|NOT NULL|-
+total_cc_amount|decimal(15,4)|NOT NULL|-
+currency_rate|decimal(15,6)|NOT NULL|-
+invoice_count|int(11)|NOT NULL|-
+ordered_at|datetime|NOT NULL|MUL
+approved_at|datetime|NULL|MUL
+planned_at|datetime|NULL|MUL
+calendar_start_at|datetime|NULL|-
+effective_date|datetime|NULL|-
+incoterm_location|varchar(255)|NULL|-
+mail_reminder_confirmed|tinyint(1)|NULL|-
+mail_reception_confirmed|tinyint(1)|NULL|-
+mail_reception_declined|tinyint(1)|NULL|-
+report_grids|tinyint(1)|NULL|-
+requisition_id|bigint(20) unsigned|NULL|MUL
+purchases_group_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+fiscal_position_id|bigint(20) unsigned|NULL|MUL
+payment_term_id|bigint(20) unsigned|NULL|MUL
+incoterm_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+operation_type_id|bigint(20) unsigned|NULL|MUL
+
+=== purchases_requisition_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+qty|decimal(15,4)|NULL|-
+price_unit|decimal(15,4)|NULL|-
+requisition_id|bigint(20) unsigned|NOT NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+uom_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== purchases_requisitions ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+type|varchar(255)|NOT NULL|-
+state|varchar(255)|NOT NULL|-
+reference|varchar(255)|NULL|-
+starts_at|date|NULL|-
+ends_at|date|NULL|-
+description|text|NULL|-
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_applicant_applicant_categories ===
+applicant_id|bigint(20) unsigned|NULL|MUL
+category_id|bigint(20) unsigned|NULL|MUL
+
+=== recruitments_applicant_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+color|varchar(255)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_applicant_interviewers ===
+applicant_id|bigint(20) unsigned|NOT NULL|MUL
+interviewer_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== recruitments_applicants ===
+id|bigint(20) unsigned|NOT NULL|PRI
+source_id|bigint(20) unsigned|NULL|MUL
+medium_id|bigint(20) unsigned|NULL|MUL
+candidate_id|bigint(20) unsigned|NOT NULL|MUL
+stage_id|bigint(20) unsigned|NULL|MUL
+last_stage_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+recruiter_id|bigint(20) unsigned|NULL|MUL
+job_id|bigint(20) unsigned|NULL|MUL
+department_id|bigint(20) unsigned|NULL|MUL
+refuse_reason_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+email_cc|varchar(255)|NULL|-
+priority|varchar(255)|NULL|-
+salary_proposed_extra|varchar(255)|NULL|-
+salary_expected_extra|varchar(255)|NULL|-
+applicant_properties|json|NULL|-
+applicant_notes|text|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+state|varchar(255)|NULL|-
+create_date|timestamp|NULL|-
+date_closed|timestamp|NULL|-
+date_opened|timestamp|NULL|-
+date_last_stage_updated|timestamp|NULL|-
+refuse_date|timestamp|NULL|-
+probability|decimal(15,4)|NULL|-
+salary_proposed|decimal(15,4)|NULL|-
+salary_expected|decimal(15,4)|NULL|-
+delay_close|decimal(15,4)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_candidate_applicant_categories ===
+candidate_id|bigint(20) unsigned|NULL|MUL
+category_id|bigint(20) unsigned|NULL|MUL
+
+=== recruitments_candidate_skills ===
+id|bigint(20) unsigned|NOT NULL|PRI
+candidate_id|bigint(20) unsigned|NOT NULL|MUL
+skill_id|bigint(20) unsigned|NOT NULL|MUL
+skill_level_id|bigint(20) unsigned|NOT NULL|MUL
+skill_type_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_candidates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+message_bounced|int(11)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+degree_id|bigint(20) unsigned|NULL|MUL
+manager_id|bigint(20) unsigned|NULL|MUL
+employee_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+email_cc|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+email_from|varchar(255)|NULL|-
+phone|varchar(255)|NULL|-
+linkedin_profile|varchar(255)|NULL|-
+priority|int(11)|NULL|-
+availability_date|date|NULL|-
+candidate_properties|json|NULL|-
+is_active|tinyint(1)|NULL|-
+color|varchar(255)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_degrees ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_job_position_interviewers ===
+job_position_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== recruitments_refuse_reasons ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+sort|int(11)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+template|varchar(255)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_stages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+is_default|tinyint(1)|NOT NULL|-
+sort|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+legend_blocked|varchar(255)|NOT NULL|-
+legend_done|varchar(255)|NOT NULL|-
+legend_normal|varchar(255)|NOT NULL|-
+requirements|text|NULL|-
+hired_stage|varchar(255)|NULL|-
+fold|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== recruitments_stages_jobs ===
+stage_id|bigint(20) unsigned|NULL|MUL
+job_id|bigint(20) unsigned|NULL|MUL
+
+=== role_has_permissions ===
+permission_id|bigint(20) unsigned|NOT NULL|PRI
+role_id|bigint(20) unsigned|NOT NULL|PRI
+
+=== roles ===
+id|bigint(20) unsigned|NOT NULL|PRI
+is_default|tinyint(1)|NOT NULL|-
+name|varchar(255)|NOT NULL|MUL
+guard_name|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sales_advance_payment_invoice_order_sales ===
+advance_payment_invoice_id|bigint(20) unsigned|NOT NULL|MUL
+order_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== sales_advance_payment_invoices ===
+id|bigint(20) unsigned|NOT NULL|PRI
+currency_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+advance_payment_method|varchar(255)|NOT NULL|-
+fixed_amount|decimal(15,4)|NULL|-
+amount|decimal(15,4)|NULL|-
+deduct_down_payments|tinyint(1)|NOT NULL|-
+consolidated_billing|tinyint(1)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sales_order_invoices ===
+order_id|bigint(20) unsigned|NOT NULL|MUL
+move_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== sales_order_line_invoices ===
+order_line_id|bigint(20) unsigned|NOT NULL|MUL
+invoice_line_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== sales_order_line_items ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sales_order_id|bigint(20) unsigned|NOT NULL|MUL
+project_id|bigint(20) unsigned|NULL|MUL
+room_id|bigint(20) unsigned|NULL|-
+room_location_id|bigint(20) unsigned|NULL|-
+cabinet_run_id|bigint(20) unsigned|NULL|-
+cabinet_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NULL|MUL
+sequence|int(11)|NOT NULL|-
+line_item_type|varchar(50)|NULL|MUL
+description|varchar(500)|NOT NULL|-
+detailed_description|text|NULL|-
+quantity|decimal(10,2)|NOT NULL|-
+unit_of_measure|varchar(50)|NOT NULL|-
+unit_price|decimal(10,2)|NOT NULL|-
+subtotal|decimal(10,2)|NOT NULL|-
+discount_percentage|decimal(5,2)|NULL|-
+discount_amount|decimal(10,2)|NULL|-
+line_total|decimal(10,2)|NOT NULL|-
+taxable|tinyint(1)|NOT NULL|-
+tax_rate|decimal(5,2)|NULL|-
+tax_amount|decimal(10,2)|NULL|-
+linear_feet|decimal(8,2)|NULL|-
+complexity_tier|int(11)|NULL|-
+base_rate_per_lf|decimal(8,2)|NULL|-
+material_rate_per_lf|decimal(8,2)|NULL|-
+combined_rate_per_lf|decimal(8,2)|NULL|-
+material_type|varchar(100)|NULL|-
+wood_species|varchar(100)|NULL|-
+finish_type|varchar(100)|NULL|-
+features_list|text|NULL|-
+hardware_list|text|NULL|-
+client_notes|text|NULL|-
+internal_notes|text|NULL|-
+requires_production|tinyint(1)|NOT NULL|-
+production_status|varchar(50)|NULL|-
+production_completed_at|timestamp|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+
+=== sales_order_line_taxes ===
+order_line_id|bigint(20) unsigned|NOT NULL|MUL
+tax_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== sales_order_lines ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+order_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NULL|MUL
+order_partner_id|bigint(20) unsigned|NULL|MUL
+salesman_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NULL|MUL
+attribute_selections|json|NULL|-
+product_uom_id|bigint(20) unsigned|NULL|MUL
+linked_sale_order_sale_id|bigint(20) unsigned|NULL|MUL
+product_packaging_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+state|varchar(255)|NULL|-
+display_type|varchar(255)|NULL|-
+virtual_id|varchar(255)|NULL|-
+linked_virtual_id|varchar(255)|NULL|-
+qty_delivered_method|varchar(255)|NULL|-
+invoice_status|varchar(255)|NULL|-
+analytic_distribution|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+product_uom_qty|decimal(15,4)|NOT NULL|-
+product_qty|decimal(15,4)|NOT NULL|-
+price_unit|decimal(15,4)|NOT NULL|-
+discount|decimal(15,4)|NULL|-
+price_subtotal|decimal(15,4)|NULL|-
+price_total|decimal(15,4)|NULL|-
+price_reduce_taxexcl|decimal(15,4)|NULL|-
+price_reduce_taxinc|decimal(15,4)|NULL|-
+purchase_price|decimal(15,4)|NULL|-
+margin|decimal(15,4)|NULL|-
+margin_percent|decimal(15,4)|NULL|-
+qty_delivered|decimal(15,4)|NULL|-
+qty_invoiced|decimal(15,4)|NULL|-
+qty_to_invoice|decimal(15,4)|NULL|-
+untaxed_amount_invoiced|decimal(15,4)|NULL|-
+untaxed_amount_to_invoice|decimal(15,4)|NULL|-
+is_downpayment|tinyint(1)|NULL|-
+is_expense|tinyint(1)|NULL|-
+create_date|timestamp|NULL|-
+write_date|timestamp|NULL|-
+technical_price_unit|decimal(15,4)|NULL|-
+price_tax|decimal(15,4)|NULL|-
+product_packaging_qty|decimal(15,4)|NULL|-
+customer_lead|decimal(15,4)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+warehouse_id|bigint(20) unsigned|NULL|MUL
+route_id|bigint(20) unsigned|NULL|MUL
+
+=== sales_order_options ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+order_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NOT NULL|MUL
+line_id|bigint(20) unsigned|NULL|MUL
+uom_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+quantity|decimal(15,4)|NULL|-
+price_unit|decimal(15,4)|NULL|-
+discount|decimal(5,2)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sales_order_tags ===
+order_id|bigint(20) unsigned|NULL|MUL
+tag_id|bigint(20) unsigned|NULL|MUL
+
+=== sales_order_template_products ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+order_template_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+product_id|bigint(20) unsigned|NULL|MUL
+product_uom_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+display_type|varchar(255)|NULL|-
+name|varchar(255)|NULL|-
+quantity|decimal(15,4)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sales_order_templates ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+number_of_days|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+note|text|NULL|-
+journal_id|int(11)|NULL|-
+is_active|tinyint(1)|NULL|-
+require_signature|tinyint(1)|NULL|-
+require_payment|tinyint(1)|NULL|-
+prepayment_percentage|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sales_orders ===
+id|bigint(20) unsigned|NOT NULL|PRI
+utm_source_id|bigint(20) unsigned|NULL|MUL
+campaign_id|bigint(20) unsigned|NULL|MUL
+medium_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+partner_id|bigint(20) unsigned|NOT NULL|MUL
+project_id|bigint(20) unsigned|NULL|MUL
+journal_id|bigint(20) unsigned|NULL|MUL
+partner_invoice_id|bigint(20) unsigned|NOT NULL|MUL
+partner_shipping_id|bigint(20) unsigned|NOT NULL|MUL
+fiscal_position_id|bigint(20) unsigned|NULL|MUL
+payment_term_id|bigint(20) unsigned|NULL|MUL
+currency_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+team_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+sale_order_template_id|bigint(20) unsigned|NULL|MUL
+access_token|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+state|varchar(255)|NULL|-
+deposit_paid_at|timestamp|NULL|-
+final_paid_at|timestamp|NULL|-
+client_order_ref|varchar(255)|NULL|-
+origin|varchar(255)|NULL|-
+reference|varchar(255)|NULL|-
+signed_by|varchar(255)|NULL|-
+invoice_status|varchar(255)|NULL|-
+delivery_status|varchar(255)|NULL|-
+validity_date|date|NULL|-
+note|text|NULL|-
+currency_rate|decimal(15,4)|NULL|-
+amount_untaxed|decimal(15,4)|NULL|-
+amount_tax|decimal(15,4)|NULL|-
+amount_total|decimal(15,4)|NULL|-
+locked|tinyint(1)|NOT NULL|-
+require_signature|tinyint(1)|NOT NULL|-
+require_payment|tinyint(1)|NOT NULL|-
+commitment_date|date|NULL|-
+date_order|date|NOT NULL|-
+signed_on|date|NULL|-
+prepayment_percent|decimal(15,4)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+warehouse_id|bigint(20) unsigned|NULL|MUL
+room_id|bigint(20) unsigned|NULL|MUL
+woodworking_order_type|varchar(50)|NULL|-
+deposit_percentage|decimal(5,2)|NULL|-
+deposit_amount|decimal(10,2)|NULL|-
+balance_percentage|decimal(5,2)|NULL|-
+balance_amount|decimal(10,2)|NULL|-
+payment_terms|varchar(100)|NULL|-
+project_estimated_value|decimal(10,2)|NULL|-
+quoted_price_override|decimal(10,2)|NULL|-
+pricing_notes|text|NULL|-
+proposal_status|varchar(50)|NOT NULL|MUL
+proposal_sent_at|timestamp|NULL|-
+proposal_viewed_at|timestamp|NULL|-
+proposal_accepted_at|timestamp|NULL|-
+proposal_sent_by_user_id|bigint(20) unsigned|NULL|MUL
+production_authorized|tinyint(1)|NOT NULL|MUL
+production_authorized_at|timestamp|NULL|-
+invoice_template|varchar(100)|NULL|-
+proposal_template|varchar(100)|NULL|-
+is_change_order|tinyint(1)|NOT NULL|-
+original_order_id|bigint(20) unsigned|NULL|MUL
+source_quote_id|bigint(20) unsigned|NULL|MUL
+converted_from_quote_at|timestamp|NULL|-
+change_order_description|text|NULL|-
+client_notes|text|NULL|-
+internal_notes|text|NULL|-
+
+=== sales_tags ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+color|varchar(255)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sales_team_members ===
+team_id|bigint(20) unsigned|NOT NULL|MUL
+user_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== sales_teams ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+user_id|bigint(20) unsigned|NULL|MUL
+color|varchar(255)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NULL|-
+invoiced_target|decimal(15,4)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== sessions ===
+id|varchar(255)|NOT NULL|PRI
+user_id|bigint(20) unsigned|NULL|MUL
+ip_address|varchar(45)|NULL|-
+user_agent|text|NULL|-
+payload|longtext|NOT NULL|-
+last_activity|int(11)|NOT NULL|MUL
+
+=== settings ===
+id|bigint(20) unsigned|NOT NULL|PRI
+group|varchar(255)|NOT NULL|MUL
+name|varchar(255)|NOT NULL|-
+locked|tinyint(1)|NOT NULL|-
+payload|json|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== states ===
+id|bigint(20) unsigned|NOT NULL|PRI
+country_id|bigint(20) unsigned|NOT NULL|MUL
+name|varchar(255)|NOT NULL|MUL
+code|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== table_view_favorites ===
+id|bigint(20) unsigned|NOT NULL|PRI
+is_favorite|tinyint(1)|NOT NULL|-
+view_type|varchar(255)|NOT NULL|MUL
+view_key|varchar(255)|NOT NULL|-
+filterable_type|varchar(255)|NOT NULL|-
+user_id|bigint(20) unsigned|NOT NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== table_views ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+icon|varchar(255)|NULL|-
+color|varchar(255)|NULL|-
+is_public|tinyint(1)|NOT NULL|-
+filters|json|NULL|-
+filterable_type|varchar(255)|NOT NULL|-
+user_id|bigint(20) unsigned|NOT NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_cms_page_sections ===
+id|bigint(20) unsigned|NOT NULL|PRI
+page_id|bigint(20) unsigned|NOT NULL|MUL
+title|varchar(255)|NULL|-
+subtitle|varchar(255)|NULL|-
+content|longtext|NULL|-
+type|varchar(255)|NOT NULL|-
+image_url|varchar(255)|NULL|-
+background_image|varchar(255)|NULL|-
+cta_text|varchar(255)|NULL|-
+cta_url|varchar(255)|NULL|-
+settings|json|NULL|-
+position|int(11)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_cms_pages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+content|longtext|NULL|-
+featured_image|varchar(255)|NULL|-
+gallery|json|NULL|-
+blocks|json|NULL|-
+layout|varchar(255)|NOT NULL|-
+is_published|tinyint(1)|NOT NULL|-
+status|varchar(255)|NOT NULL|-
+template|varchar(255)|NULL|-
+show_in_navigation|tinyint(1)|NOT NULL|-
+position|int(11)|NOT NULL|-
+meta_title|varchar(255)|NULL|-
+meta_description|text|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_faqs ===
+id|bigint(20) unsigned|NOT NULL|PRI
+question|text|NOT NULL|-
+answer|longtext|NOT NULL|-
+category|varchar(255)|NULL|-
+status|varchar(255)|NOT NULL|-
+is_published|tinyint(1)|NOT NULL|-
+view_count|int(11)|NOT NULL|-
+helpful_count|int(11)|NOT NULL|-
+position|int(11)|NOT NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_home_sections ===
+id|bigint(20) unsigned|NOT NULL|PRI
+section_key|varchar(255)|NOT NULL|UNI
+section_type|varchar(255)|NOT NULL|-
+title|varchar(255)|NOT NULL|-
+subtitle|varchar(255)|NULL|-
+content|longtext|NULL|-
+cta_text|varchar(255)|NULL|-
+cta_link|varchar(255)|NULL|-
+image|varchar(255)|NULL|-
+background_image|varchar(255)|NULL|-
+layout_style|varchar(255)|NOT NULL|-
+additional_images|json|NULL|-
+service_items|json|NULL|-
+testimonial_items|json|NULL|-
+author_info|json|NULL|-
+process_steps|json|NULL|-
+settings|json|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+position|int(11)|NOT NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_journals ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+excerpt|text|NULL|-
+content|longtext|NULL|-
+blocks|json|NULL|-
+featured_image|varchar(255)|NULL|-
+gallery|json|NULL|-
+category|varchar(255)|NULL|-
+tags|json|NULL|-
+is_published|tinyint(1)|NOT NULL|-
+published_at|timestamp|NULL|-
+status|varchar(255)|NOT NULL|-
+read_time|int(11)|NULL|-
+view_count|int(11)|NOT NULL|-
+meta_title|varchar(255)|NULL|-
+meta_description|text|NULL|-
+author_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_material_inventory_mappings ===
+id|bigint(20) unsigned|NOT NULL|PRI
+tcs_material_slug|varchar(50)|NOT NULL|MUL
+wood_species|varchar(100)|NOT NULL|-
+inventory_product_id|bigint(20) unsigned|NULL|MUL
+material_category_id|bigint(20) unsigned|NULL|MUL
+board_feet_per_lf|decimal(8,4)|NOT NULL|-
+sheet_sqft_per_lf|decimal(8,4)|NOT NULL|-
+is_box_material|tinyint(1)|NOT NULL|-
+is_face_frame_material|tinyint(1)|NOT NULL|-
+is_door_material|tinyint(1)|NOT NULL|-
+priority|int(11)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+notes|text|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_materials ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+scientific_name|varchar(255)|NULL|-
+common_names|varchar(255)|NULL|-
+type|varchar(255)|NOT NULL|-
+description|longtext|NULL|-
+content|longtext|NULL|-
+characteristics|longtext|NULL|-
+featured_image|varchar(255)|NULL|-
+gallery|json|NULL|-
+properties|json|NULL|-
+origin|varchar(255)|NULL|-
+hardness|varchar(255)|NULL|-
+density|varchar(255)|NULL|-
+grain_pattern|varchar(255)|NULL|-
+color_range|varchar(255)|NULL|-
+workability|varchar(255)|NULL|-
+durability|varchar(255)|NULL|-
+sustainability_rating|varchar(255)|NULL|-
+sustainability|text|NULL|-
+applications|json|NULL|-
+best_uses|json|NULL|-
+finish_recommendations|json|NULL|-
+is_published|tinyint(1)|NOT NULL|-
+featured|tinyint(1)|NOT NULL|-
+position|int(11)|NOT NULL|-
+meta_title|varchar(255)|NULL|-
+meta_description|text|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_portfolio_projects ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+summary|text|NULL|-
+description|longtext|NULL|-
+category|varchar(255)|NULL|-
+project_type|varchar(255)|NULL|-
+style_classification|varchar(255)|NULL|-
+client_name|varchar(255)|NULL|-
+client_type|varchar(255)|NULL|-
+location|varchar(255)|NULL|-
+materials|json|NULL|-
+techniques|json|NULL|-
+dimensions|json|NULL|-
+timeline|varchar(255)|NULL|-
+hardware_specifications|json|NULL|-
+square_footage|decimal(10,2)|NULL|-
+weight|decimal(10,2)|NULL|-
+overview|longtext|NULL|-
+discovery|longtext|NULL|-
+design|longtext|NULL|-
+production|longtext|NULL|-
+installation|longtext|NULL|-
+client_testimonial|longtext|NULL|-
+featured_image|varchar(255)|NULL|-
+cover_image|varchar(255)|NULL|-
+gallery|json|NULL|-
+process_photos|json|NULL|-
+before_after_images|json|NULL|-
+featured|tinyint(1)|NOT NULL|-
+is_published|tinyint(1)|NOT NULL|-
+published_at|timestamp|NULL|-
+status|varchar(255)|NOT NULL|-
+completion_date|date|NULL|-
+portfolio_order|int(11)|NOT NULL|-
+meta_title|varchar(255)|NULL|-
+meta_description|text|NULL|-
+seo_tags|json|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_services ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+summary|text|NULL|-
+description|longtext|NULL|-
+icon|varchar(255)|NULL|-
+category|varchar(255)|NULL|-
+features|json|NULL|-
+price_range|varchar(255)|NULL|-
+timeline|varchar(255)|NULL|-
+featured_image|varchar(255)|NULL|-
+gallery|json|NULL|-
+process_steps|json|NULL|-
+faq_content|longtext|NULL|-
+is_published|tinyint(1)|NOT NULL|-
+published_at|timestamp|NULL|-
+featured|tinyint(1)|NOT NULL|-
+status|varchar(255)|NOT NULL|-
+position|int(11)|NOT NULL|-
+meta_title|varchar(255)|NULL|-
+meta_description|text|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== tcs_team_members ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+role|varchar(255)|NULL|-
+title|varchar(255)|NULL|-
+bio|text|NULL|-
+full_bio|longtext|NULL|-
+photo|varchar(255)|NULL|-
+skills|json|NULL|-
+certifications|json|NULL|-
+social_links|json|NULL|-
+email|varchar(255)|NULL|-
+phone|varchar(255)|NULL|-
+years_experience|int(11)|NULL|-
+start_date|date|NULL|-
+is_published|tinyint(1)|NOT NULL|-
+featured|tinyint(1)|NOT NULL|-
+position|int(11)|NOT NULL|-
+employee_id|bigint(20) unsigned|NULL|MUL
+zoho_employee_id|varchar(255)|NULL|UNI
+zoho_department|varchar(255)|NULL|-
+zoho_role|varchar(255)|NULL|-
+zoho_status|varchar(255)|NULL|-
+zoho_join_date|timestamp|NULL|-
+zoho_leave_date|timestamp|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== teams ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_leave_accrual_levels ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+accrual_plan_id|bigint(20) unsigned|NOT NULL|MUL
+start_count|int(11)|NULL|-
+first_day|int(11)|NULL|-
+second_day|int(11)|NULL|-
+first_month_day|int(11)|NULL|-
+second_month_day|int(11)|NULL|-
+yearly_day|int(11)|NULL|-
+postpone_max_days|int(11)|NULL|-
+accrual_validity_count|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+start_type|enum('months','days','years')|NOT NULL|-
+added_value_type|enum('days','hours')|NOT NULL|-
+frequency|enum('hourly','daily','weekly','bimonthly','monthly','biyearly','yearly')|NOT NULL|-
+week_day|enum('sunday','monday','tuesday','wednesday','thursday','friday','saturday')|NULL|-
+first_month|varchar(255)|NULL|-
+second_month|varchar(255)|NULL|-
+yearly_month|varchar(255)|NULL|-
+action_with_unused_accruals|enum('lost','all','maximum')|NOT NULL|-
+accrual_validity_type|enum('days','months')|NULL|-
+added_value|int(11)|NOT NULL|-
+maximum_leave|int(11)|NULL|-
+maximum_leave_yearly|int(11)|NULL|-
+cap_accrued_time|tinyint(1)|NULL|-
+cap_accrued_time_yearly|tinyint(1)|NULL|-
+accrual_validity|tinyint(1)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_leave_accrual_plans ===
+id|bigint(20) unsigned|NOT NULL|PRI
+time_off_type_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+carryover_day|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+transition_mode|enum('immediately','end_of_accrual')|NOT NULL|-
+accrued_gain_time|enum('start','end')|NOT NULL|-
+carryover_date|enum('year_start','allocation','other')|NOT NULL|-
+carryover_month|enum('jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec')|NOT NULL|-
+added_value_type|varchar(255)|NULL|-
+is_active|tinyint(1)|NULL|-
+is_based_on_worked_time|tinyint(1)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_leave_allocations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+holiday_status_id|bigint(20) unsigned|NOT NULL|MUL
+employee_id|bigint(20) unsigned|NOT NULL|MUL
+employee_company_id|bigint(20) unsigned|NULL|MUL
+manager_id|bigint(20) unsigned|NULL|MUL
+approver_id|bigint(20) unsigned|NULL|MUL
+second_approver_id|bigint(20) unsigned|NULL|MUL
+department_id|bigint(20) unsigned|NULL|MUL
+accrual_plan_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NULL|-
+state|enum('confirm','refuse','validate_one','validate_two')|NULL|-
+allocation_type|enum('regular','accrual')|NULL|-
+date_from|timestamp|NOT NULL|-
+date_to|timestamp|NULL|-
+last_executed_carryover_date|timestamp|NULL|-
+last_called|timestamp|NULL|-
+actual_last_called|timestamp|NULL|-
+next_call|timestamp|NULL|-
+carried_over_days_expiration_date|timestamp|NULL|-
+notes|text|NULL|-
+already_accrued|tinyint(1)|NULL|-
+number_of_days|decimal(15,4)|NULL|-
+number_of_hours_display|decimal(15,4)|NULL|-
+yearly_accrued_amount|decimal(15,4)|NULL|-
+expiring_carryover_days|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_leave_mandatory_days ===
+id|bigint(20) unsigned|NOT NULL|PRI
+company_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+color|varchar(255)|NULL|-
+name|varchar(255)|NOT NULL|-
+start_date|timestamp|NOT NULL|-
+end_date|timestamp|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_leave_types ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+color|varchar(255)|NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+max_allowed_negative|int(11)|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+leave_validation_type|enum('no_validation','hr','manager','both')|NULL|-
+requires_allocation|enum('yes','no')|NOT NULL|-
+employee_requests|enum('yes','no')|NOT NULL|-
+allocation_validation_type|enum('no_validation','hr','manager','both')|NULL|-
+time_type|enum('leave','other')|NULL|-
+request_unit|enum('day','half_day','hour')|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+create_calendar_meeting|tinyint(1)|NULL|-
+is_active|tinyint(1)|NULL|-
+show_on_dashboard|tinyint(1)|NULL|-
+unpaid|tinyint(1)|NULL|-
+include_public_holidays_in_duration|tinyint(1)|NULL|-
+support_document|tinyint(1)|NULL|-
+allows_negative|tinyint(1)|NULL|-
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_leaves ===
+id|bigint(20) unsigned|NOT NULL|PRI
+user_id|bigint(20) unsigned|NULL|MUL
+manager_id|bigint(20) unsigned|NULL|MUL
+holiday_status_id|bigint(20) unsigned|NULL|MUL
+employee_id|bigint(20) unsigned|NOT NULL|MUL
+employee_company_id|bigint(20) unsigned|NULL|MUL
+company_id|bigint(20) unsigned|NULL|MUL
+department_id|bigint(20) unsigned|NULL|MUL
+calendar_id|bigint(20) unsigned|NULL|MUL
+meeting_id|int(11)|NULL|-
+first_approver_id|bigint(20) unsigned|NULL|MUL
+second_approver_id|bigint(20) unsigned|NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+private_name|text|NULL|-
+state|varchar(255)|NULL|-
+duration_display|varchar(255)|NULL|-
+request_date_from_period|varchar(255)|NULL|-
+request_date_from|timestamp|NULL|-
+request_date_to|timestamp|NULL|-
+notes|text|NULL|-
+attachment|varchar(255)|NULL|-
+request_unit_half|tinyint(1)|NULL|-
+request_unit_hours|tinyint(1)|NULL|-
+date_from|timestamp|NULL|-
+date_to|timestamp|NULL|-
+number_of_days|decimal(15,4)|NULL|-
+number_of_hours|decimal(15,4)|NULL|-
+request_hour_from|decimal(15,4)|NULL|-
+request_hour_to|decimal(15,4)|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== time_off_user_leave_types ===
+user_id|bigint(20) unsigned|NOT NULL|MUL
+leave_type_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== unit_of_measure_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(255)|NOT NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== unit_of_measures ===
+id|bigint(20) unsigned|NOT NULL|PRI
+type|varchar(255)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+factor|decimal(15,4)|NULL|-
+rounding|decimal(15,4)|NULL|-
+category_id|bigint(20) unsigned|NOT NULL|MUL
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== user_allowed_companies ===
+id|bigint(20) unsigned|NOT NULL|PRI
+user_id|bigint(20) unsigned|NOT NULL|MUL
+company_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== user_invitations ===
+id|bigint(20) unsigned|NOT NULL|PRI
+email|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== user_team ===
+user_id|bigint(20) unsigned|NOT NULL|MUL
+team_id|bigint(20) unsigned|NOT NULL|MUL
+
+=== users ===
+id|bigint(20) unsigned|NOT NULL|PRI
+is_default|tinyint(1)|NOT NULL|-
+name|varchar(255)|NOT NULL|-
+email|varchar(255)|NOT NULL|UNI
+email_verified_at|timestamp|NULL|-
+language|varchar(255)|NULL|-
+is_active|tinyint(1)|NOT NULL|-
+password|varchar(255)|NOT NULL|-
+resource_permission|enum('group','individual','global')|NOT NULL|-
+remember_token|varchar(100)|NULL|-
+deleted_at|timestamp|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+default_company_id|bigint(20) unsigned|NULL|MUL
+partner_id|bigint(20) unsigned|NULL|MUL
+
+=== utm_campaigns ===
+id|bigint(20) unsigned|NOT NULL|PRI
+user_id|bigint(20) unsigned|NULL|MUL
+stage_id|bigint(20) unsigned|NOT NULL|MUL
+color|varchar(255)|NULL|-
+created_by|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+title|varchar(255)|NOT NULL|-
+is_active|tinyint(1)|NOT NULL|-
+is_auto_campaign|tinyint(1)|NOT NULL|-
+company_id|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== utm_mediums ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== utm_sources ===
+id|bigint(20) unsigned|NOT NULL|PRI
+creator_id|bigint(20) unsigned|NULL|MUL
+name|varchar(255)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== utm_stages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+sort|int(11)|NULL|-
+name|varchar(255)|NOT NULL|-
+created_by|bigint(20) unsigned|NULL|MUL
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== website_pages ===
+id|bigint(20) unsigned|NOT NULL|PRI
+title|varchar(255)|NOT NULL|-
+content|text|NOT NULL|-
+slug|varchar(255)|NOT NULL|UNI
+is_published|tinyint(1)|NOT NULL|-
+is_header_visible|tinyint(1)|NOT NULL|-
+is_footer_visible|tinyint(1)|NOT NULL|-
+published_at|datetime|NULL|-
+meta_title|varchar(255)|NULL|-
+meta_keywords|varchar(255)|NULL|-
+meta_description|text|NULL|-
+creator_id|bigint(20) unsigned|NULL|MUL
+deleted_at|timestamp|NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-
+
+=== woodworking_material_categories ===
+id|bigint(20) unsigned|NOT NULL|PRI
+name|varchar(100)|NOT NULL|-
+code|varchar(50)|NOT NULL|UNI
+description|text|NULL|-
+sort_order|int(11)|NOT NULL|-
+created_at|timestamp|NULL|-
+updated_at|timestamp|NULL|-

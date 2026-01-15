@@ -1,0 +1,736 @@
+{
+  "_legend": {
+    "✅": "Data exists in database",
+    "⚠️": "Partially populated (some fields missing)",
+    "❌": "Missing/Empty - needs to be entered",
+    "📋": "From CAD/Specs - ready to enter",
+    "🔴": "CRITICAL - Cannot build without this",
+    "🟡": "CORRECTED - Updated from original"
+  },
+
+  "_tcs_material_standards": {
+    "_note": "TCS Woodwork standard material thicknesses (from database)",
+    "cabinet_box_thickness": "3/4\"",
+    "cabinet_back_thickness": "1/4\"",
+    "face_frame_thickness": "3/4\"",
+    "drawer_box_sides": "1/2\" Baltic Birch",
+    "drawer_box_front_back": "1/2\" Baltic Birch",
+    "drawer_bottom": "1/4\" plywood",
+    "door_drawer_front": "3/4\"",
+    "paint_grade_material": "MDF",
+    "stain_grade_material": "Hardwood plywood"
+  },
+
+  "project": {
+    "_status": "⚠️ EXISTS - Basic info only",
+    "_table": "projects_projects",
+    "_id": 10,
+
+    "id": { "value": 10, "status": "✅" },
+    "name": { "value": "9 Austin Farm Road - Residential", "status": "✅" },
+    "project_number": { "value": "TCS-001-9AustinFarmRoad", "status": "✅" },
+    "draft_number": { "value": null, "status": "❌" },
+    "project_type": { "value": "residential", "status": "✅" },
+    "lead_source": { "value": "trott_nantucket", "status": "✅" },
+    "budget_range": { "value": null, "status": "❌" },
+    "complexity_score": { "value": null, "status": "❌" },
+    "complexity_breakdown": { "value": null, "status": "❌" },
+    "description": { "value": "<p></p>", "status": "⚠️ Empty" },
+    "visibility": { "value": "internal", "status": "✅" },
+    "start_date": { "value": null, "status": "❌" },
+    "end_date": { "value": null, "status": "❌" },
+    "desired_completion_date": { "value": null, "status": "❌" },
+    "allocated_hours": { "value": null, "status": "❌" },
+    "estimated_linear_feet": { "value": 3.44, "status": "📋", "note": "Bathroom vanity only" },
+    "stage_id": { "value": 5, "status": "✅" },
+    "current_production_stage": { "value": "discovery", "status": "✅" },
+    "partner_id": { "value": 22, "status": "✅", "note": "Trottier Woodworking" },
+    "company_id": { "value": 1, "status": "✅" },
+    "branch_id": { "value": 2, "status": "✅" },
+    "user_id": { "value": 1, "status": "✅" },
+    "designer_id": { "value": null, "status": "❌" },
+    "rhino_file_path": { "value": null, "status": "❌" },
+    "initial_consultation_date": { "value": null, "status": "❌" },
+    "design_notes": { "value": null, "status": "❌" },
+    "created_at": { "value": "2026-01-12 14:03:32", "status": "✅" }
+  },
+
+  "rooms": {
+    "_status": "⚠️ EXISTS - 2 rooms created, minimal data",
+    "_table": "projects_rooms",
+
+    "bathroom": {
+      "_status": "⚠️ EXISTS - Name only",
+      "_id": 2,
+      "id": { "value": 2, "status": "✅" },
+      "project_id": { "value": 10, "status": "✅" },
+      "name": { "value": "Bathroom", "status": "✅" },
+      "room_code": { "value": "BTH1", "status": "✅" },
+      "room_type": { "value": "bathroom", "status": "✅" },
+      "floor_number": { "value": "1", "status": "✅" },
+      "cabinet_level": { "value": "standard", "status": "📋" },
+      "material_category": { "value": "paint_grade", "status": "📋" },
+      "finish_option": { "value": "paint", "status": "📋" },
+      "material_type": { "value": "MDF (Paint Grade)", "status": "📋" },
+      "total_linear_feet_tier_1": { "value": 3.44, "status": "📋" },
+      "floating_shelves_lf": { "value": 0, "status": "📋" },
+      "countertop_sqft": { "value": null, "status": "🔴", "note": "NEED COUNTERTOP SPECS" },
+      "estimated_cabinet_value": { "value": null, "status": "❌" },
+      "estimated_project_value": { "value": null, "status": "❌" },
+      "notes": { "value": "Guest Bath Vanity - Paint Grade, 2-1/4 Shaker profile, no handles", "status": "📋" }
+    },
+
+    "laundry": {
+      "_status": "⚠️ EXISTS - Name only",
+      "_id": 3,
+      "id": { "value": 3, "status": "✅" },
+      "project_id": { "value": 10, "status": "✅" },
+      "name": { "value": "Laundry", "status": "✅" },
+      "room_code": { "value": "LAU2", "status": "✅" },
+      "room_type": { "value": "laundry", "status": "✅" },
+      "floor_number": { "value": "1", "status": "✅" },
+      "cabinet_level": { "value": null, "status": "❌" },
+      "material_category": { "value": "stain_grade", "status": "📋" },
+      "finish_option": { "value": "natural", "status": "📋" },
+      "material_type": { "value": "Flat Sawn White Oak", "status": "📋" },
+      "total_linear_feet_tier_1": { "value": 16, "status": "📋" },
+      "floating_shelves_lf": { "value": 3.5, "status": "📋", "note": "42\" shelf" },
+      "countertop_sqft": { "value": 17.6, "status": "📋", "note": "78\" x 32.5\" = 17.6 sqft" },
+      "estimated_cabinet_value": { "value": null, "status": "❌" },
+      "notes": { "value": "W/D surround with open shelf cabinet, floating shelf above", "status": "📋" }
+    }
+  },
+
+  "room_locations": {
+    "_status": "❌ MISSING - 0 records",
+    "_table": "projects_room_locations",
+    "_count": 0,
+
+    "bathroom_sink_wall": {
+      "_status": "📋 FROM CAD - Ready to enter",
+      "room_id": { "value": 2, "status": "📋" },
+      "name": { "value": "Sink Wall", "status": "📋" },
+      "location_type": { "value": "wall", "status": "📋" },
+      "material_type": { "value": "paint_grade", "status": "📋" },
+      "finish_type": { "value": "paint", "status": "📋" },
+      "overall_width_inches": { "value": 41.3125, "status": "✅", "note": "41-5/16\" - VERIFIED FROM CAD" },
+      "overall_height_inches": { "value": 32.75, "status": "✅", "note": "32-3/4\" - VERIFIED FROM CAD" },
+      "overall_depth_inches": { "value": 18.75, "status": "🟡", "note": "CORRECTED: 18-3/4\" from CAD side view (was 21\")" },
+      "has_face_frame": { "value": true, "status": "📋" },
+      "face_frame_stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - VERIFIED FROM CAD" },
+      "face_frame_thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
+      "soft_close_drawers": { "value": true, "status": "📋" },
+      "requires_plumbing": { "value": true, "status": "📋" },
+      "toe_kick_height_inches": { "value": 4, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "toe_kick_setback_inches": { "value": 3, "status": "📋", "note": "TCS standard" },
+      "total_wall_height_inches": { "value": 34, "status": "✅", "note": "VERIFIED FROM CAD" }
+    },
+
+    "bathroom_wall_panels": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "room_id": { "value": 2, "status": "📋" },
+      "name": { "value": "Wall Panels", "status": "📋" },
+      "location_type": { "value": "wall_panel", "status": "📋" },
+      "material_type": { "value": "medex", "status": "📋" },
+      "material_thickness_inches": { "value": 0.5, "status": "📋", "note": "1/2\" Medex" },
+      "sheet_size_1": { "value": "4x10", "status": "📋" },
+      "sheet_size_2": { "value": "4x8", "status": "📋" },
+      "shiplap_spacing_inches": { "value": 6, "status": "📋", "note": "APPROX - needs confirmation" },
+      "shiplap_style": { "value": "rabbets_only", "status": "📋", "note": "No lines cut in shop" },
+      "notes": { "value": "2x Wall Panels, 1x 4x10 sheets 1/2 Medex, 1x 4x8 sheet. APPROX 6\" Spacing, Shiplap look no lines cut in shop, Shiplap rabbets only", "status": "📋" }
+    },
+
+    "laundry_wall_a": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "room_id": { "value": 3, "status": "📋" },
+      "name": { "value": "Wall A", "status": "📋" },
+      "location_type": { "value": "wall", "status": "📋" },
+      "material_type": { "value": "white_oak", "status": "📋" },
+      "finish_type": { "value": "natural", "status": "📋" },
+      "total_linear_feet": { "value": 16, "status": "📋" }
+    }
+  },
+
+  "cabinet_runs": {
+    "_status": "❌ MISSING - 0 records",
+    "_table": "projects_cabinet_runs",
+    "_count": 0,
+
+    "bathroom_base_run": {
+      "_status": "📋 FROM CAD - Ready to enter",
+      "room_location_id": { "value": "TBD (bathroom_sink_wall)", "status": "📋" },
+      "name": { "value": "Base Cabinet Run", "status": "📋" },
+      "run_type": { "value": "base", "status": "📋" },
+      "total_linear_feet": { "value": 3.44, "status": "📋", "note": "~41.3125\" = 3.44 LF" },
+      "notes": { "value": "Face Frame Traditional, Full Overlay, Paint Grade MDF, Baltic Birch drawer boxes", "status": "📋" },
+      "default_slide_product_id": { "value": 23528, "status": "📋", "note": "Blum 563H 18\"" },
+      "slides_count": { "value": 4, "status": "📋", "note": "2 drawers x 2 slides" }
+    },
+
+    "laundry_upper_run": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "room_location_id": { "value": "TBD (laundry_wall_a)", "status": "📋" },
+      "name": { "value": "Upper - Floating Shelf", "status": "📋" },
+      "run_type": { "value": "floating_shelf", "status": "📋" },
+      "notes": { "value": "Flat Sawn White Oak Floating Shelf. 1.33\" thick x 42\" L x 12\" Deep", "status": "📋" }
+    },
+
+    "laundry_lower_run": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "room_location_id": { "value": "TBD (laundry_wall_a)", "status": "📋" },
+      "name": { "value": "Lower Counter/Base", "status": "📋" },
+      "run_type": { "value": "base", "status": "📋" },
+      "total_linear_feet": { "value": 6.5, "status": "📋", "note": "78\" = 6.5 LF" },
+      "notes": { "value": "Flat Sawn White Oak. 1\" thick x 78\" L x 32.5\" Deep. 16 LF Face Frame", "status": "📋" }
+    }
+  },
+
+  "cabinets": {
+    "_status": "❌ MISSING - 0 records",
+    "_table": "projects_cabinets",
+    "_count": 0,
+
+    "bathroom_vanity_cabinet": {
+      "_status": "📋 FROM CAD - Ready to enter",
+      "cabinet_run_id": { "value": "TBD (bathroom_base_run)", "status": "📋" },
+      "cabinet_number": { "value": "BTH1-B1-C1", "status": "📋" },
+      "cabinet_style": { "value": "Face Frame Traditional", "status": "📋" },
+      "overlay_type": { "value": "Full Overlay (Modern)", "status": "📋" },
+
+      "width_inches": { "value": 41.3125, "status": "✅", "note": "41-5/16\" - VERIFIED FROM CAD" },
+      "height_inches": { "value": 32.75, "status": "✅", "note": "32-3/4\" - VERIFIED FROM CAD (cabinet only, not including toe kick in this measurement)" },
+      "depth_inches": { "value": 18.75, "status": "🟡", "note": "CORRECTED: 18-3/4\" from CAD side view" },
+      "box_height_inches": { "value": 28.75, "status": "✅", "note": "28-3/4\" - VERIFIED FROM CAD side view" },
+      "linear_feet": { "value": 3.44, "status": "📋" },
+
+      "has_face_frame": { "value": true, "status": "📋" },
+      "face_frame_stile_width": { "value": 1.75, "status": "✅", "note": "1-3/4\" - VERIFIED FROM CAD" },
+      "face_frame_rail_width": { "value": 1.5, "status": "📋", "note": "TCS standard - verify on CAD" },
+
+      "door_count": { "value": 0, "status": "📋" },
+      "drawer_count": { "value": 2, "status": "📋" },
+      "drawer_soft_close": { "value": true, "status": "📋" },
+
+      "slide_model": { "value": "563H4570B", "status": "📋" },
+      "slide_product_id": { "value": 23528, "status": "📋" },
+      "slide_quantity": { "value": 4, "status": "📋" },
+
+      "has_sink_cutout": { "value": true, "status": "📋" },
+
+      "box_material": {
+        "sides": { "material": "MDF (Paint Grade)", "thickness": "3/4\"", "status": "📋" },
+        "top": { "material": "MDF (Paint Grade)", "thickness": "3/4\"", "status": "📋" },
+        "bottom": { "material": "MDF (Paint Grade)", "thickness": "3/4\"", "status": "📋" },
+        "back": { "material": "Plywood", "thickness": "1/4\"", "status": "📋" }
+      },
+
+      "toe_kick": {
+        "height_inches": { "value": 4, "status": "✅", "note": "VERIFIED FROM CAD" },
+        "setback_inches": { "value": 3, "status": "📋", "note": "TCS standard" },
+        "material": { "value": "MDF (Paint Grade)", "status": "📋" }
+      },
+
+      "shop_notes": { "value": "U-Shaped upper drawer wraps around sink plumbing. Profile 2-1/4 Shaker. No handles. Full overlay doors/drawers.", "status": "📋" }
+    },
+
+    "laundry_cab_a": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "cabinet_run_id": { "value": "TBD (laundry_lower_run)", "status": "📋" },
+      "cabinet_number": { "value": "LAU2-A1-CA", "status": "📋" },
+      "width_inches": { "value": 56, "status": "📋", "note": "2x 28\" openings" },
+      "height_inches": { "value": 39.5, "status": "📋" },
+      "door_count": { "value": 0, "status": "📋" },
+      "drawer_count": { "value": 0, "status": "📋" },
+      "shop_notes": { "value": "2 Openings: Washer Opening 28\"W x 39.5\"H, Dryer Opening 28\"W x 39.5\"H", "status": "📋" }
+    },
+
+    "laundry_cab_b": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "cabinet_run_id": { "value": "TBD (laundry_lower_run)", "status": "📋" },
+      "cabinet_number": { "value": "LAU2-A1-CB", "status": "📋" },
+      "width_inches": { "value": 15.125, "status": "📋", "note": "15-1/8\"" },
+      "height_inches": { "value": 39.5, "status": "📋" },
+      "door_count": { "value": 0, "status": "📋" },
+      "drawer_count": { "value": 0, "status": "📋" },
+      "adjustable_shelf_count": { "value": 1, "status": "📋" },
+      "shop_notes": { "value": "Open shelf cabinet", "status": "📋" }
+    }
+  },
+
+  "cabinet_sections": {
+    "_status": "❌ MISSING - 0 records",
+    "_table": "projects_cabinet_sections",
+    "_count": 0,
+
+    "bathroom_vanity_section_1": {
+      "_status": "📋 FROM CAD - Ready to enter",
+      "cabinet_specification_id": { "value": "TBD (bathroom_vanity_cabinet)", "status": "📋" },
+      "section_number": { "value": 1, "status": "📋" },
+      "name": { "value": "Main Drawer Section", "status": "📋" },
+      "section_type": { "value": "drawer_bank", "status": "📋" },
+      "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" opening - VERIFIED FROM CAD" },
+      "height_inches": { "value": 32.75, "status": "📋" },
+      "opening_width_inches": { "value": 37.8125, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "component_count": { "value": 2, "status": "📋", "note": "2 drawers" }
+    }
+  },
+
+  "drawers": {
+    "_status": "❌ MISSING - 0 records",
+    "_table": "projects_drawers",
+    "_count": 0,
+    "_calculated_by": "DrawerConfiguratorService",
+
+    "bathroom_drawer_1_upper": {
+      "_status": "✅ CALCULATED - Ready to enter (PLUMBING CUTOUT TBD)",
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "section_id": { "value": "TBD", "status": "📋" },
+      "drawer_number": { "value": 1, "status": "📋" },
+      "drawer_name": { "value": "U-Shaped Upper Drawer", "status": "📋" },
+      "drawer_position": { "value": "upper", "status": "📋" },
+
+      "opening": {
+        "_note": "Face frame opening dimensions",
+        "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
+        "height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
+        "depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" }
+      },
+
+      "front_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
+      "front_height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "front_thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
+
+      "top_rail_width_inches": { "value": 2.25, "status": "📋", "note": "2-1/4\" Shaker profile" },
+      "bottom_rail_width_inches": { "value": 2.25, "status": "📋" },
+      "stile_width_inches": { "value": 1, "status": "📋", "note": "Options: 1\", 2\", 2-1/4\"" },
+      "profile_type": { "value": "2-1/4 Shaker", "status": "📋" },
+
+      "box_construction": {
+        "material": { "value": "Baltic Birch Plywood", "status": "📋" },
+        "sides_thickness": { "value": "1/2\"", "status": "📋" },
+        "front_back_thickness": { "value": "1/2\"", "status": "📋" },
+        "bottom_thickness": { "value": "1/4\"", "status": "📋" },
+        "joint_type": { "value": "Dovetail", "status": "📋" }
+      },
+
+      "drawer_box_calculated": {
+        "_source": "DrawerConfiguratorService",
+        "outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
+        "inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
+        "height_theoretical_inches": { "value": 6.1875, "status": "✅", "note": "6-3/16\" (opening - 13/16\" clearance)" },
+        "height_shop_inches": { "value": 6, "status": "✅", "note": "6\" SHOP CUT (rounded down to 1/2\")" },
+        "depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
+        "depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" }
+      },
+
+      "cut_list": {
+        "_note": "CNC/Shop cut dimensions",
+        "sides": {
+          "quantity": 2,
+          "material": "1/2\" Baltic Birch",
+          "width_inches": { "value": 6, "status": "✅", "note": "SHOP HEIGHT" },
+          "length_inches": { "value": 18.25, "status": "✅", "note": "SHOP DEPTH" },
+          "notes": "Dovetail tails on front/back edges"
+        },
+        "front": {
+          "quantity": 1,
+          "material": "1/2\" Baltic Birch",
+          "width_inches": { "value": 6, "status": "✅" },
+          "length_inches": { "value": 36.1875, "status": "✅" },
+          "notes": "Dovetail pins on ends, fits between sides"
+        },
+        "back": {
+          "quantity": 1,
+          "material": "1/2\" Baltic Birch",
+          "width_inches": { "value": 6, "status": "✅" },
+          "length_inches": { "value": 36.1875, "status": "✅" },
+          "notes": "Dovetail pins on ends, fits between sides"
+        },
+        "bottom": {
+          "quantity": 1,
+          "material": "1/4\" Baltic Birch",
+          "width_inches": { "value": 36.625, "status": "✅" },
+          "length_inches": { "value": 17.4375, "status": "✅", "note": "17-7/16\"" },
+          "notes": "Sits in 1/4\" dado, 1/2\" up from bottom edge"
+        }
+      },
+
+      "dado_specs": {
+        "depth_inches": 0.25,
+        "width_inches": 0.25,
+        "height_from_bottom_inches": 0.5,
+        "notes": "Cut dado in all 4 pieces before assembly"
+      },
+
+      "clearances_applied": {
+        "side_deduction_inches": 0.625,
+        "inside_width_deduction_inches": 1.65625,
+        "top_clearance_inches": 0.25,
+        "bottom_clearance_inches": 0.5625,
+        "height_deduction_total_inches": 0.8125
+      },
+
+      "u_shaped_cutout": {
+        "_status": "🔴 MISSING DATA - ALERT CARRIES TO INSTALL",
+        "_ALERT": {
+          "type": "INCOMPLETE_SPEC",
+          "severity": "HIGH",
+          "message": "U-SHAPED CUTOUT DIMENSIONS NOT CONFIRMED - SINK SPECS PENDING",
+          "cad_note": "Pls Confirm sink specs",
+          "action_required": "Get sink specs from client/GC, then template P-trap on-site",
+          "carries_to": ["production", "quality_check", "install", "punch_list"]
+        },
+        "build_instruction": "Build drawer box as standard rectangle. U-cutout to be done ON-SITE after plumbing rough-in.",
+        "known_dimensions": {
+          "drawer_opening_width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" - VERIFIED FROM CAD" },
+          "clearance_height_inches": { "value": 13.1875, "status": "✅", "note": "13-3/16\" - VERIFIED FROM CAD" },
+          "sink_centerline_from_left_inches": { "value": 15.125, "status": "📋", "note": "15-1/8\" from plan view - approximate" },
+          "cutout_position": { "value": "offset_left", "status": "📋", "note": "Sink appears offset toward left side" }
+        },
+        "missing_dimensions": {
+          "cutout_width_inches": { "value": null, "status": "🔴", "note": "NEED P-TRAP WIDTH" },
+          "cutout_depth_inches": { "value": null, "status": "🔴", "note": "NEED P-TRAP DEPTH INTO BOX" },
+          "cutout_from_back_inches": { "value": null, "status": "🔴", "note": "NEED DISTANCE FROM BACK OF BOX" }
+        },
+        "site_work_required": true
+      },
+
+      "slide_type": { "value": "Blum Tandem", "status": "📋" },
+      "slide_model": { "value": "563H4570B", "status": "📋" },
+      "slide_product_id": { "value": 23528, "status": "📋" },
+      "slide_length_inches": { "value": 18, "status": "📋" },
+      "slide_quantity": { "value": 2, "status": "📋" },
+      "slide_weight_capacity_lbs": { "value": 90, "status": "📋" },
+      "soft_close": { "value": true, "status": "📋" },
+
+      "hardware_validation": {
+        "min_cabinet_depth_blum": { "value": 18.90625, "note": "Blum official spec" },
+        "min_cabinet_depth_shop": { "value": 18.75, "note": "TCS shop practice" },
+        "actual_cabinet_depth": { "value": 18.75 },
+        "status": "⚠️ AT MINIMUM - Cabinet depth meets shop practice minimum"
+      },
+
+      "finish_type": { "value": "paint", "status": "📋" },
+      "has_decorative_hardware": { "value": false, "status": "📋", "note": "No handles" },
+      "notes": { "value": "⚠️ BUILD AS FULL RECTANGLE - U-cutout to be done ON-SITE after plumbing. CAD note: 'Pls Confirm sink specs'", "status": "📋" }
+    },
+
+    "bathroom_drawer_2_lower": {
+      "_status": "✅ CALCULATED - Ready to enter",
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "section_id": { "value": "TBD", "status": "📋" },
+      "drawer_number": { "value": 2, "status": "📋" },
+      "drawer_name": { "value": "Lower Drawer", "status": "📋" },
+      "drawer_position": { "value": "lower", "status": "📋" },
+
+      "opening": {
+        "_note": "Face frame opening dimensions",
+        "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
+        "height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
+        "depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" }
+      },
+
+      "front_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
+      "front_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
+      "front_thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
+
+      "top_rail_width_inches": { "value": 2.25, "status": "📋" },
+      "bottom_rail_width_inches": { "value": 2.25, "status": "📋" },
+      "stile_width_inches": { "value": 1, "status": "📋" },
+      "profile_type": { "value": "2-1/4 Shaker", "status": "📋" },
+
+      "box_construction": {
+        "material": { "value": "Baltic Birch Plywood", "status": "📋" },
+        "sides_thickness": { "value": "1/2\"", "status": "📋" },
+        "front_back_thickness": { "value": "1/2\"", "status": "📋" },
+        "bottom_thickness": { "value": "1/4\"", "status": "📋" },
+        "joint_type": { "value": "Dovetail", "status": "📋" }
+      },
+
+      "drawer_box_calculated": {
+        "_source": "DrawerConfiguratorService",
+        "outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
+        "inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
+        "height_theoretical_inches": { "value": 16.3125, "status": "✅", "note": "16-5/16\" (opening - 13/16\" clearance)" },
+        "height_shop_inches": { "value": 16, "status": "✅", "note": "16\" SHOP CUT (rounded down to 1/2\")" },
+        "depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
+        "depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" }
+      },
+
+      "cut_list": {
+        "_note": "CNC/Shop cut dimensions",
+        "sides": {
+          "quantity": 2,
+          "material": "1/2\" Baltic Birch",
+          "width_inches": { "value": 16, "status": "✅", "note": "SHOP HEIGHT" },
+          "length_inches": { "value": 18.25, "status": "✅", "note": "SHOP DEPTH" },
+          "notes": "Dovetail tails on front/back edges"
+        },
+        "front": {
+          "quantity": 1,
+          "material": "1/2\" Baltic Birch",
+          "width_inches": { "value": 16, "status": "✅" },
+          "length_inches": { "value": 36.1875, "status": "✅" },
+          "notes": "Dovetail pins on ends, fits between sides"
+        },
+        "back": {
+          "quantity": 1,
+          "material": "1/2\" Baltic Birch",
+          "width_inches": { "value": 16, "status": "✅" },
+          "length_inches": { "value": 36.1875, "status": "✅" },
+          "notes": "Dovetail pins on ends, fits between sides"
+        },
+        "bottom": {
+          "quantity": 1,
+          "material": "1/4\" Baltic Birch",
+          "width_inches": { "value": 36.625, "status": "✅" },
+          "length_inches": { "value": 17.4375, "status": "✅", "note": "17-7/16\"" },
+          "notes": "Sits in 1/4\" dado, 1/2\" up from bottom edge"
+        }
+      },
+
+      "dado_specs": {
+        "depth_inches": 0.25,
+        "width_inches": 0.25,
+        "height_from_bottom_inches": 0.5,
+        "notes": "Cut dado in all 4 pieces before assembly"
+      },
+
+      "clearances_applied": {
+        "side_deduction_inches": 0.625,
+        "inside_width_deduction_inches": 1.65625,
+        "top_clearance_inches": 0.25,
+        "bottom_clearance_inches": 0.5625,
+        "height_deduction_total_inches": 0.8125
+      },
+
+      "slide_type": { "value": "Blum Tandem", "status": "📋" },
+      "slide_model": { "value": "563H4570B", "status": "📋" },
+      "slide_product_id": { "value": 23528, "status": "📋" },
+      "slide_length_inches": { "value": 18, "status": "📋" },
+      "slide_quantity": { "value": 2, "status": "📋" },
+      "slide_weight_capacity_lbs": { "value": 90, "status": "📋" },
+      "soft_close": { "value": true, "status": "📋" },
+
+      "hardware_validation": {
+        "min_cabinet_depth_blum": { "value": 18.90625, "note": "Blum official spec" },
+        "min_cabinet_depth_shop": { "value": 18.75, "note": "TCS shop practice" },
+        "actual_cabinet_depth": { "value": 18.75 },
+        "status": "⚠️ AT MINIMUM - Cabinet depth meets shop practice minimum"
+      },
+
+      "finish_type": { "value": "paint", "status": "📋" },
+      "has_decorative_hardware": { "value": false, "status": "📋" }
+    }
+  },
+
+  "doors": {
+    "_status": "❌ MISSING - 0 records (None needed for bathroom vanity)",
+    "_table": "projects_doors",
+    "_count": 0,
+    "_note": "Bathroom vanity has drawers only, no doors"
+  },
+
+  "hardware_requirements": {
+    "_status": "❌ MISSING - 0 records",
+    "_table": "hardware_requirements",
+    "_count": 0,
+
+    "bathroom_slides": {
+      "_status": "📋 FROM SPECS - Ready to enter",
+      "room_id": { "value": 2, "status": "📋" },
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "product_id": { "value": 23528, "status": "📋" },
+      "hardware_type": { "value": "slide", "status": "📋" },
+      "manufacturer": { "value": "Blum", "status": "📋" },
+      "model_number": { "value": "563H4570B", "status": "📋" },
+      "quantity_required": { "value": 4, "status": "📋", "note": "2 pairs for 2 drawers" },
+      "unit_of_measure": { "value": "EA", "status": "📋" },
+      "applied_to": { "value": "drawers", "status": "📋" },
+      "slide_type": { "value": "Tandem", "status": "📋" },
+      "slide_length_inches": { "value": 18, "status": "📋" },
+      "unit_cost": { "value": 14.23, "status": "📋" },
+      "total_hardware_cost": { "value": 56.92, "status": "📋" }
+    },
+
+    "bathroom_locking_devices": {
+      "_status": "🟡 CORRECTED - Quantity updated",
+      "room_id": { "value": 2, "status": "📋" },
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "product_id": { "value": 23517, "status": "📋" },
+      "hardware_type": { "value": "accessory", "status": "📋" },
+      "manufacturer": { "value": "Blum", "status": "📋" },
+      "model_number": { "value": "T51.1901", "status": "📋" },
+      "quantity_required": { "value": 4, "status": "🟡", "note": "CORRECTED: 2 per drawer x 2 drawers = 4 (was 2)" },
+      "unit_of_measure": { "value": "EA", "status": "📋" },
+      "unit_cost": { "value": 0.73, "status": "📋" },
+      "total_hardware_cost": { "value": 2.92, "status": "🟡", "note": "CORRECTED: 4 x $0.73 = $2.92 (was $1.46)" }
+    },
+
+    "bathroom_rear_brackets": {
+      "_status": "🟡 ADDED - Was missing",
+      "room_id": { "value": 2, "status": "📋" },
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "product_id": { "value": null, "status": "❌", "note": "NEED PRODUCT ID - Blum rear bracket for 563H" },
+      "hardware_type": { "value": "accessory", "status": "📋" },
+      "manufacturer": { "value": "Blum", "status": "📋" },
+      "model_number": { "value": "Z10D5210", "status": "📋", "note": "Standard Tandem rear bracket - verify" },
+      "quantity_required": { "value": 2, "status": "📋", "note": "1 per drawer x 2 drawers" },
+      "unit_of_measure": { "value": "EA", "status": "📋" },
+      "unit_cost": { "value": null, "status": "❌", "note": "NEED COST" },
+      "total_hardware_cost": { "value": null, "status": "❌" }
+    }
+  },
+
+  "countertop": {
+    "_status": "🔴 CRITICAL - ENTIRELY MISSING",
+    "_table": "projects_countertops",
+    "_count": 0,
+
+    "bathroom_vanity_top": {
+      "_status": "🔴 NEED SPECS FROM CLIENT/GC",
+      "cabinet_id": { "value": "TBD", "status": "📋" },
+      "material": { "value": null, "status": "🔴", "note": "Stone? Quartz? Solid surface?" },
+      "thickness_inches": { "value": null, "status": "🔴" },
+      "width_inches": { "value": null, "status": "🔴", "note": "Likely matches or exceeds cabinet width" },
+      "depth_inches": { "value": null, "status": "🔴", "note": "Likely 22-23\" with overhang" },
+      "edge_profile": { "value": null, "status": "🔴" },
+      "sink_cutout": {
+        "type": { "value": null, "status": "🔴", "note": "Undermount? Drop-in? Integrated?" },
+        "width_inches": { "value": null, "status": "🔴" },
+        "depth_inches": { "value": null, "status": "🔴" },
+        "position": { "value": null, "status": "🔴" }
+      },
+      "faucet_holes": { "value": null, "status": "🔴", "note": "Single hole? 3-hole? Wall mount?" },
+      "backsplash": { "value": null, "status": "🔴", "note": "Height? Integrated or separate?" }
+    }
+  },
+
+  "sink": {
+    "_status": "🔴 CRITICAL - ENTIRELY MISSING",
+    "_table": "projects_fixtures",
+    "_count": 0,
+
+    "bathroom_sink": {
+      "_status": "🔴 NEED SPECS FROM CLIENT/GC",
+      "model": { "value": null, "status": "🔴" },
+      "manufacturer": { "value": null, "status": "🔴" },
+      "type": { "value": null, "status": "🔴", "note": "Undermount? Vessel? Drop-in?" },
+      "width_inches": { "value": null, "status": "🔴" },
+      "depth_inches": { "value": null, "status": "🔴" },
+      "bowl_depth_inches": { "value": null, "status": "🔴" },
+      "cutout_template": { "value": null, "status": "🔴", "note": "Template from manufacturer?" }
+    }
+  },
+
+  "mirror_cabinet": {
+    "_status": "📋 VISIBLE IN CAD - Not in original data",
+    "_note": "Medicine cabinet/mirror visible in CAD elevation",
+
+    "bathroom_mirror": {
+      "_status": "📋 FROM CAD - Limited info",
+      "width_inches": { "value": 29.9925, "status": "✅", "note": "~30\" - VERIFIED FROM CAD" },
+      "type": { "value": null, "status": "❌", "note": "Mirror only? Medicine cabinet?" },
+      "height_inches": { "value": null, "status": "❌" },
+      "mounting": { "value": null, "status": "❌", "note": "Recessed? Surface mount?" }
+    }
+  },
+
+  "_summary": {
+    "total_tables_checked": 11,
+    "tables_with_data": {
+      "projects_projects": "✅ 1 record",
+      "projects_rooms": "✅ 2 records (Bathroom, Laundry)"
+    },
+    "tables_missing_data": {
+      "projects_room_locations": "❌ 0 records",
+      "projects_cabinet_runs": "❌ 0 records",
+      "projects_cabinets": "❌ 0 records",
+      "projects_cabinet_sections": "❌ 0 records",
+      "projects_drawers": "❌ 0 records",
+      "projects_doors": "❌ 0 records",
+      "hardware_requirements": "❌ 0 records",
+      "projects_countertops": "❌ 0 records",
+      "projects_fixtures": "❌ 0 records"
+    },
+    "available_products": {
+      "blum_slide_18in": { "id": 23528, "name": "563H4570B Blum slide runner 18\"", "cost": 14.23 },
+      "blum_slide_15in": { "id": 23530, "name": "563H3810B Blum slide runner 15\"", "cost": 17.50 },
+      "blum_slide_21in": { "id": 23529, "name": "563H5330B Blum slide runner 21\"", "cost": 32.61 },
+      "blum_locking_device": { "id": 23517, "name": "Blum Tandem 563/569 Locking Device", "cost": 0.73 }
+    },
+    "estimated_hardware_cost_bathroom": {
+      "slides": 56.92,
+      "locking_devices": 2.92,
+      "rear_brackets": "TBD",
+      "total": "~$60+ (pending bracket cost)"
+    },
+    "data_entry_priority": [
+      "1. room_locations (creates container for cabinet runs)",
+      "2. cabinet_runs (creates container for cabinets)",
+      "3. cabinets (creates container for drawers/doors)",
+      "4. cabinet_sections (optional, for complex cabinets)",
+      "5. drawers (detail specs for each drawer)",
+      "6. hardware_requirements (links products to components)"
+    ],
+    "critical_blockers": [
+      "🔴 Countertop specifications - NEED FROM CLIENT/GC",
+      "🔴 Sink model and cutout dimensions - NEED FROM CLIENT/GC (ties to ALERT-001)",
+      "🔴 Rear bracket product ID and cost - NEED FROM INVENTORY"
+    ],
+    "active_alerts_count": 1,
+    "alerts_requiring_site_work": ["ALERT-001: U-shaped cutout - cut on-site after plumbing"],
+    "corrections_made": [
+      "🟡 Cabinet depth: Changed from 21\" to 18-3/4\" (verified from CAD)",
+      "🟡 Locking devices: Changed from 2 to 4 (2 per drawer)",
+      "🟡 Added rear brackets: Were missing from hardware list",
+      "🟡 Added material thicknesses: TCS standards applied",
+      "🟡 Added toe kick dimensions: 4\" height from CAD",
+      "🟡 Added countertop section: Was entirely missing",
+      "🟡 Added sink section: Was entirely missing",
+      "🟡 Added mirror/medicine cabinet: Visible in CAD but not documented"
+    ],
+    "buildability_status": {
+      "cabinet_box": "✅ READY TO BUILD",
+      "face_frame": "✅ READY TO BUILD",
+      "lower_drawer_box": "✅ READY TO BUILD - Cut list complete",
+      "upper_drawer_box": "✅ READY TO BUILD* - *See ALERT-001: U-cutout missing, build as rectangle",
+      "drawer_fronts": "✅ READY TO BUILD",
+      "countertop": "🔴 HOLD - No specs",
+      "wall_panels": "⚠️ NEED EXACT DIMENSIONS",
+      "laundry_room": "🔴 HOLD - No CAD provided"
+    },
+    "ACTIVE_ALERTS": [
+      {
+        "id": "ALERT-001",
+        "type": "INCOMPLETE_SPEC",
+        "severity": "HIGH",
+        "component": "bathroom_drawer_1_upper",
+        "field": "u_shaped_cutout",
+        "message": "U-SHAPED CUTOUT DIMENSIONS MISSING - SINK SPECS NOT CONFIRMED",
+        "cad_note": "Pls Confirm sink specs",
+        "impact": "Cannot pre-cut U-shape in shop",
+        "workaround": "Build as full rectangle, cut on-site after plumbing",
+        "action_required": "Get sink model and P-trap location from client/GC",
+        "carries_to": ["production", "quality_check", "delivery", "install", "punch_list"],
+        "created": "2026-01-15",
+        "status": "OPEN"
+      }
+    ],
+    "drawer_cut_summary": {
+      "_source": "DrawerConfiguratorService calculations",
+      "upper_drawer": {
+        "_BUILD_NOTE": "⚠️ BUILD AS FULL RECTANGLE - U-CUT ON-SITE",
+        "sides": "2 pcs @ 6\" x 18-1/4\" (1/2\" Baltic Birch)",
+        "front_back": "2 pcs @ 6\" x 36-3/16\" (1/2\" Baltic Birch)",
+        "bottom": "1 pc @ 36-5/8\" x 17-7/16\" (1/4\" Baltic Birch)"
+      },
+      "lower_drawer": {
+        "sides": "2 pcs @ 16\" x 18-1/4\" (1/2\" Baltic Birch)",
+        "front_back": "2 pcs @ 16\" x 36-3/16\" (1/2\" Baltic Birch)",
+        "bottom": "1 pc @ 36-5/8\" x 17-7/16\" (1/4\" Baltic Birch)"
+      },
+      "hardware_note": "⚠️ Cabinet depth 18-3/4\" is AT MINIMUM for 18\" Blum Tandem slides"
+    }
+  }
+}
