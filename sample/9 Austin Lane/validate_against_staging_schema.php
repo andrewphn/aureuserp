@@ -286,7 +286,7 @@ if (isset($dbSchema['projects_drawers'])) {
         'Identity' => ['id', 'product_id', 'cabinet_id', 'section_id', 'drawer_number', 'drawer_name', 'full_code', 'drawer_position', 'sort_order'],
         'Position' => ['position_in_opening_inches', 'consumed_height_inches', 'position_from_left_inches', 'consumed_width_inches'],
         'Front Dimensions' => ['front_width_inches', 'front_height_inches', 'front_thickness_inches'],
-        'Front Construction' => ['top_rail_width_inches', 'bottom_rail_width_inches', 'style_width_inches', 'profile_type', 'fabrication_method'],
+        'Front Construction' => ['top_rail_width_inches', 'bottom_rail_width_inches', 'stile_width_inches', 'profile_type', 'fabrication_method'],
         'Box Dimensions' => ['box_width_inches', 'box_depth_inches', 'box_depth_shop_inches', 'box_height_inches', 'box_height_shop_inches'],
         'Opening' => ['opening_width_inches', 'opening_height_inches', 'opening_depth_inches'],
         'Box Calculated' => ['box_outside_width_inches', 'box_inside_width_inches'],
@@ -344,7 +344,7 @@ $compliantDrawer = [
     'front_thickness_inches' => 0.75,
     'top_rail_width_inches' => 2.25,
     'bottom_rail_width_inches' => 2.25,
-    'style_width_inches' => 1.0,
+    'stile_width_inches' => 1.0,
     'profile_type' => '2-1/4 Shaker',
     'fabrication_method' => 'cnc',
 

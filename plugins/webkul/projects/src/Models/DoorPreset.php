@@ -30,7 +30,7 @@ class DoorPreset extends Model
         'glass_type',
         'has_check_rail',
         'default_rail_width_inches',
-        'default_style_width_inches',
+        'default_stile_width_inches',
         'estimated_complexity_score',
     ];
 
@@ -43,7 +43,7 @@ class DoorPreset extends Model
             'has_glass' => 'boolean',
             'has_check_rail' => 'boolean',
             'default_rail_width_inches' => 'float',
-            'default_style_width_inches' => 'float',
+            'default_stile_width_inches' => 'float',
             'estimated_complexity_score' => 'float',
         ];
     }
@@ -152,7 +152,7 @@ class DoorPreset extends Model
             'glass_type' => $this->glass_type,
             'has_check_rail' => $this->has_check_rail,
             'rail_width_inches' => $this->default_rail_width_inches,
-            'style_width_inches' => $this->default_style_width_inches,
+            'stile_width_inches' => $this->default_stile_width_inches,
         ]);
 
         return $door;

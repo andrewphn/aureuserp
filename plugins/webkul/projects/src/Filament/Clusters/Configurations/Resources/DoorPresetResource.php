@@ -110,8 +110,8 @@ class DoorPresetResource extends Resource
                             ->label('Default Rail Width (inches)')
                             ->numeric()
                             ->step(0.125),
-                        TextInput::make('default_style_width_inches')
-                            ->label('Default Style Width (inches)')
+                        TextInput::make('default_stile_width_inches')
+                            ->label('Default Stile Width (inches)')
                             ->numeric()
                             ->step(0.125),
                         TextInput::make('estimated_complexity_score')

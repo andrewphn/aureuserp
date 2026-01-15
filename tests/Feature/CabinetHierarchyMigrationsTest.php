@@ -67,7 +67,7 @@ class CabinetHierarchyMigrationsTest extends TestCase
         // Assert construction columns
         $constructionColumns = [
             'rail_width_inches',
-            'style_width_inches',
+            'stile_width_inches',
             'has_check_rail',
             'check_rail_width_inches',
             'profile_type',
@@ -149,7 +149,7 @@ class CabinetHierarchyMigrationsTest extends TestCase
             'front_height_inches',
             'top_rail_width_inches',
             'bottom_rail_width_inches',
-            'style_width_inches',
+            'stile_width_inches',
             'front_thickness_inches',
         ];
 

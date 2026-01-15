@@ -54,11 +54,92 @@ class RoomLocation extends Model
         'material_category',
         'finish_option',
         'creator_id',
+        // Dimensional fields from woodworking migration
+        'overall_width_inches',
+        'overall_height_inches',
+        'overall_depth_inches',
+        'soffit_height_inches',
+        'toe_kick_height_inches',
+        'toe_kick_depth_inches',
+        // Material specifications
+        'material_type',
+        'wood_species',
+        'door_style',
+        'finish_type',
+        'paint_color',
+        'stain_color',
+        // Cabinet grouping
+        'cabinet_count',
+        'total_linear_feet',
+        'cabinet_type_primary',
+        // Construction details
+        'has_face_frame',
+        'face_frame_width_inches',
+        'has_beaded_face_frame',
+        'inset_doors',
+        'overlay_type',
+        // Hardware standards
+        'hinge_type',
+        'slide_type',
+        'soft_close_doors',
+        'soft_close_drawers',
+        // Special features
+        'has_crown_molding',
+        'has_light_rail',
+        'has_decorative_posts',
+        'has_appliance_panels',
+        'special_features_json',
+        // Countertop integration
+        'countertop_type',
+        'countertop_sqft',
+        'backsplash_sqft',
+        'countertop_notes',
+        // Electrical/plumbing
+        'requires_electrical',
+        'requires_plumbing',
+        'electrical_notes',
+        'plumbing_notes',
+        // Design and approval
+        'approval_status',
+        'approved_at',
+        'approved_by_user_id',
+        'design_notes',
+        'revision_notes',
+        'estimated_value',
+        'complexity_tier',
+        'elevation_view',
+        'pdf_page_reference',
     ];
 
     protected $casts = [
         'sequence' => 'integer',
         'sort_order' => 'integer',
+        // Dimensional casts
+        'overall_width_inches' => 'float',
+        'overall_height_inches' => 'float',
+        'overall_depth_inches' => 'float',
+        'soffit_height_inches' => 'float',
+        'toe_kick_height_inches' => 'float',
+        'toe_kick_depth_inches' => 'float',
+        'face_frame_width_inches' => 'float',
+        'total_linear_feet' => 'float',
+        'countertop_sqft' => 'float',
+        'backsplash_sqft' => 'float',
+        'estimated_value' => 'float',
+        // Boolean casts
+        'has_face_frame' => 'boolean',
+        'has_beaded_face_frame' => 'boolean',
+        'inset_doors' => 'boolean',
+        'soft_close_doors' => 'boolean',
+        'soft_close_drawers' => 'boolean',
+        'has_crown_molding' => 'boolean',
+        'has_light_rail' => 'boolean',
+        'has_decorative_posts' => 'boolean',
+        'has_appliance_panels' => 'boolean',
+        'requires_electrical' => 'boolean',
+        'requires_plumbing' => 'boolean',
+        // Date/time casts
+        'approved_at' => 'datetime',
     ];
 
     /**

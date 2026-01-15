@@ -302,7 +302,7 @@
 
       "top_rail_width_inches": { "value": 2.25, "status": "📋", "note": "2-1/4\" Shaker profile" },
       "bottom_rail_width_inches": { "value": 2.25, "status": "📋" },
-      "stile_width_inches": { "value": 1, "status": "📋", "note": "Options: 1\", 2\", 2-1/4\"" },
+      "stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - VERIFIED FROM CAD" },
       "profile_type": { "value": "2-1/4 Shaker", "status": "📋" },
 
       "box_construction": {
@@ -436,7 +436,7 @@
 
       "top_rail_width_inches": { "value": 2.25, "status": "📋" },
       "bottom_rail_width_inches": { "value": 2.25, "status": "📋" },
-      "stile_width_inches": { "value": 1, "status": "📋" },
+      "stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - VERIFIED FROM CAD" },
       "profile_type": { "value": "2-1/4 Shaker", "status": "📋" },
 
       "box_construction": {

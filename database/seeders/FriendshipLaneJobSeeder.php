@@ -672,7 +672,7 @@ class FriendshipLaneJobSeeder extends Seeder
                 'width_inches' => $door['width_inches'],
                 'height_inches' => $door['height_inches'],
                 'rail_width_inches' => $door['rail_width_inches'] ?? null,
-                'style_width_inches' => $door['style_width_inches'] ?? null,
+                'stile_width_inches' => $door['stile_width_inches'] ?? null,
                 'profile_type' => $door['profile_type'] ?? null,
                 'fabrication_method' => $door['fabrication_method'] ?? null,
                 'thickness_inches' => $door['thickness_inches'] ?? null,
