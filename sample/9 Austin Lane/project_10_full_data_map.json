@@ -9,16 +9,17 @@
   },
 
   "_tcs_material_standards": {
-    "_note": "TCS Woodwork standard material thicknesses (from database)",
-    "cabinet_box_thickness": "3/4\"",
-    "cabinet_back_thickness": "1/4\"",
-    "face_frame_thickness": "3/4\"",
-    "drawer_box_sides": "1/2\" Baltic Birch",
-    "drawer_box_front_back": "1/2\" Baltic Birch",
-    "drawer_bottom": "1/4\" plywood",
+    "_note": "TCS Woodwork standard material thicknesses",
+    "cabinet_box": "3/4\" prefinished maple plywood",
+    "cabinet_back": "1/4\" plywood",
+    "face_frame": "3/4\" solid wood or MDF",
+    "drawer_box_sides": "1/2\" maple plywood",
+    "drawer_box_front_back": "1/2\" maple plywood",
+    "drawer_box_bottom": "1/4\" plywood",
     "door_drawer_front": "3/4\"",
-    "paint_grade_material": "MDF",
-    "stain_grade_material": "Hardwood plywood"
+    "paint_grade_fronts": "MDF",
+    "stain_grade_box": "Maple plywood",
+    "stain_grade_fronts": "Hardwood"
   },
 
   "project": {
@@ -122,7 +123,7 @@
       "soft_close_drawers": { "value": true, "status": "📋" },
       "requires_plumbing": { "value": true, "status": "📋" },
       "toe_kick_height_inches": { "value": 4, "status": "✅", "note": "VERIFIED FROM CAD" },
-      "toe_kick_setback_inches": { "value": 3, "status": "📋", "note": "TCS standard" },
+      "toe_kick_depth_inches": { "value": 3, "status": "📋", "note": "TCS standard" },
       "total_wall_height_inches": { "value": 34, "status": "✅", "note": "VERIFIED FROM CAD" }
     },
 
@@ -217,18 +218,16 @@
 
       "has_sink_cutout": { "value": true, "status": "📋" },
 
-      "box_material": {
-        "sides": { "material": "MDF (Paint Grade)", "thickness": "3/4\"", "status": "📋" },
-        "top": { "material": "MDF (Paint Grade)", "thickness": "3/4\"", "status": "📋" },
-        "bottom": { "material": "MDF (Paint Grade)", "thickness": "3/4\"", "status": "📋" },
-        "back": { "material": "Plywood", "thickness": "1/4\"", "status": "📋" }
+      "_box_materials": {
+        "_note": "Reference only - actual material is linked via box_material_product_id",
+        "box_material": "MDF (Paint Grade) 3/4\"",
+        "back_material": "Plywood 1/4\""
       },
+      "box_material_product_id": { "value": null, "status": "❌", "note": "NEED: Link to 3/4\" MDF sheet product" },
+      "face_frame_material_product_id": { "value": null, "status": "❌", "note": "NEED: Link to 3/4\" MDF for face frame" },
 
-      "toe_kick": {
-        "height_inches": { "value": 4, "status": "✅", "note": "VERIFIED FROM CAD" },
-        "setback_inches": { "value": 3, "status": "📋", "note": "TCS standard" },
-        "material": { "value": "MDF (Paint Grade)", "status": "📋" }
-      },
+      "toe_kick_height": { "value": 4, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "toe_kick_depth": { "value": 3, "status": "📋", "note": "TCS standard (setback from face)" },
 
       "shop_notes": { "value": "U-Shaped upper drawer wraps around sink plumbing. Profile 2-1/4 Shaker. No handles. Full overlay doors/drawers.", "status": "📋" }
     },
@@ -289,12 +288,9 @@
       "drawer_name": { "value": "U-Shaped Upper Drawer", "status": "📋" },
       "drawer_position": { "value": "upper", "status": "📋" },
 
-      "opening": {
-        "_note": "Face frame opening dimensions",
-        "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
-        "height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
-        "depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" }
-      },
+      "opening_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" face frame opening - VERIFIED FROM CAD" },
+      "opening_height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
+      "opening_depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" },
 
       "front_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
       "front_height_inches": { "value": 7, "status": "✅", "note": "VERIFIED FROM CAD" },
@@ -304,65 +300,61 @@
       "bottom_rail_width_inches": { "value": 2.25, "status": "📋" },
       "stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - VERIFIED FROM CAD" },
       "profile_type": { "value": "2-1/4 Shaker", "status": "📋" },
+      "fabrication_method": { "value": "cnc", "status": "📋" },
 
-      "box_construction": {
-        "material": { "value": "Baltic Birch Plywood", "status": "📋" },
-        "sides_thickness": { "value": "1/2\"", "status": "📋" },
-        "front_back_thickness": { "value": "1/2\"", "status": "📋" },
-        "bottom_thickness": { "value": "1/4\"", "status": "📋" },
-        "joint_type": { "value": "Dovetail", "status": "📋" }
-      },
+      "box_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
+      "box_depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
+      "box_depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" },
+      "box_height_inches": { "value": 6.1875, "status": "✅", "note": "6-3/16\" theoretical (opening - 13/16\" clearance)" },
+      "box_height_shop_inches": { "value": 6, "status": "✅", "note": "6\" SHOP CUT (rounded down to 1/2\")" },
+      "box_outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\"" },
+      "box_inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
+      "box_material": { "value": "maple_plywood", "status": "📋", "note": "3/4\" prefinished maple plywood - TCS standard" },
+      "side_thickness_inches": { "value": 0.5, "status": "📋", "note": "1/2\" maple plywood" },
+      "bottom_thickness_inches": { "value": 0.25, "status": "📋", "note": "1/4\" maple plywood" },
+      "box_thickness": { "value": 0.5, "status": "📋", "note": "1/2\" sides" },
+      "joinery_method": { "value": "dovetail", "status": "📋" },
 
-      "drawer_box_calculated": {
-        "_source": "DrawerConfiguratorService",
-        "outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
-        "inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
-        "height_theoretical_inches": { "value": 6.1875, "status": "✅", "note": "6-3/16\" (opening - 13/16\" clearance)" },
-        "height_shop_inches": { "value": 6, "status": "✅", "note": "6\" SHOP CUT (rounded down to 1/2\")" },
-        "depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
-        "depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" }
-      },
-
-      "cut_list": {
-        "_note": "CNC/Shop cut dimensions",
+      "_cut_list": {
+        "_note": "Reference only - CNC/Shop cut dimensions (not stored in DB)",
         "sides": {
           "quantity": 2,
-          "material": "1/2\" Baltic Birch",
+          "material": "1/2\" maple plywood",
           "width_inches": { "value": 6, "status": "✅", "note": "SHOP HEIGHT" },
           "length_inches": { "value": 18.25, "status": "✅", "note": "SHOP DEPTH" },
           "notes": "Dovetail tails on front/back edges"
         },
         "front": {
           "quantity": 1,
-          "material": "1/2\" Baltic Birch",
+          "material": "1/2\" maple plywood",
           "width_inches": { "value": 6, "status": "✅" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
         "back": {
           "quantity": 1,
-          "material": "1/2\" Baltic Birch",
+          "material": "1/2\" maple plywood",
           "width_inches": { "value": 6, "status": "✅" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
         "bottom": {
           "quantity": 1,
-          "material": "1/4\" Baltic Birch",
+          "material": "1/4\" maple plywood",
           "width_inches": { "value": 36.625, "status": "✅" },
           "length_inches": { "value": 17.4375, "status": "✅", "note": "17-7/16\"" },
           "notes": "Sits in 1/4\" dado, 1/2\" up from bottom edge"
         }
       },
 
-      "dado_specs": {
+      "_dado_specs": {
         "depth_inches": 0.25,
         "width_inches": 0.25,
         "height_from_bottom_inches": 0.5,
         "notes": "Cut dado in all 4 pieces before assembly"
       },
 
-      "clearances_applied": {
+      "_clearances_applied": {
         "side_deduction_inches": 0.625,
         "inside_width_deduction_inches": 1.65625,
         "top_clearance_inches": 0.25,
@@ -370,7 +362,7 @@
         "height_deduction_total_inches": 0.8125
       },
 
-      "u_shaped_cutout": {
+      "_u_shaped_cutout": {
         "_status": "🔴 MISSING DATA - ALERT CARRIES TO INSTALL",
         "_ALERT": {
           "type": "INCOMPLETE_SPEC",
@@ -403,7 +395,7 @@
       "slide_weight_capacity_lbs": { "value": 90, "status": "📋" },
       "soft_close": { "value": true, "status": "📋" },
 
-      "hardware_validation": {
+      "_hardware_validation": {
         "min_cabinet_depth_blum": { "value": 18.90625, "note": "Blum official spec" },
         "min_cabinet_depth_shop": { "value": 18.75, "note": "TCS shop practice" },
         "actual_cabinet_depth": { "value": 18.75 },
@@ -423,12 +415,9 @@
       "drawer_name": { "value": "Lower Drawer", "status": "📋" },
       "drawer_position": { "value": "lower", "status": "📋" },
 
-      "opening": {
-        "_note": "Face frame opening dimensions",
-        "width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
-        "height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
-        "depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" }
-      },
+      "opening_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" face frame opening - VERIFIED FROM CAD" },
+      "opening_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
+      "opening_depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" },
 
       "front_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" - VERIFIED FROM CAD" },
       "front_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD" },
@@ -438,65 +427,61 @@
       "bottom_rail_width_inches": { "value": 2.25, "status": "📋" },
       "stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - VERIFIED FROM CAD" },
       "profile_type": { "value": "2-1/4 Shaker", "status": "📋" },
+      "fabrication_method": { "value": "cnc", "status": "📋" },
 
-      "box_construction": {
-        "material": { "value": "Baltic Birch Plywood", "status": "📋" },
-        "sides_thickness": { "value": "1/2\"", "status": "📋" },
-        "front_back_thickness": { "value": "1/2\"", "status": "📋" },
-        "bottom_thickness": { "value": "1/4\"", "status": "📋" },
-        "joint_type": { "value": "Dovetail", "status": "📋" }
-      },
+      "box_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
+      "box_depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
+      "box_depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" },
+      "box_height_inches": { "value": 16.3125, "status": "✅", "note": "16-5/16\" theoretical (opening - 13/16\" clearance)" },
+      "box_height_shop_inches": { "value": 16, "status": "✅", "note": "16\" SHOP CUT (rounded down to 1/2\")" },
+      "box_outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\"" },
+      "box_inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
+      "box_material": { "value": "maple_plywood", "status": "📋", "note": "3/4\" prefinished maple plywood - TCS standard" },
+      "side_thickness_inches": { "value": 0.5, "status": "📋", "note": "1/2\" maple plywood" },
+      "bottom_thickness_inches": { "value": 0.25, "status": "📋", "note": "1/4\" maple plywood" },
+      "box_thickness": { "value": 0.5, "status": "📋", "note": "1/2\" sides" },
+      "joinery_method": { "value": "dovetail", "status": "📋" },
 
-      "drawer_box_calculated": {
-        "_source": "DrawerConfiguratorService",
-        "outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
-        "inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
-        "height_theoretical_inches": { "value": 16.3125, "status": "✅", "note": "16-5/16\" (opening - 13/16\" clearance)" },
-        "height_shop_inches": { "value": 16, "status": "✅", "note": "16\" SHOP CUT (rounded down to 1/2\")" },
-        "depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
-        "depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" }
-      },
-
-      "cut_list": {
-        "_note": "CNC/Shop cut dimensions",
+      "_cut_list": {
+        "_note": "Reference only - CNC/Shop cut dimensions (not stored in DB)",
         "sides": {
           "quantity": 2,
-          "material": "1/2\" Baltic Birch",
+          "material": "1/2\" maple plywood",
           "width_inches": { "value": 16, "status": "✅", "note": "SHOP HEIGHT" },
           "length_inches": { "value": 18.25, "status": "✅", "note": "SHOP DEPTH" },
           "notes": "Dovetail tails on front/back edges"
         },
         "front": {
           "quantity": 1,
-          "material": "1/2\" Baltic Birch",
+          "material": "1/2\" maple plywood",
           "width_inches": { "value": 16, "status": "✅" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
         "back": {
           "quantity": 1,
-          "material": "1/2\" Baltic Birch",
+          "material": "1/2\" maple plywood",
           "width_inches": { "value": 16, "status": "✅" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
         "bottom": {
           "quantity": 1,
-          "material": "1/4\" Baltic Birch",
+          "material": "1/4\" maple plywood",
           "width_inches": { "value": 36.625, "status": "✅" },
           "length_inches": { "value": 17.4375, "status": "✅", "note": "17-7/16\"" },
           "notes": "Sits in 1/4\" dado, 1/2\" up from bottom edge"
         }
       },
 
-      "dado_specs": {
+      "_dado_specs": {
         "depth_inches": 0.25,
         "width_inches": 0.25,
         "height_from_bottom_inches": 0.5,
         "notes": "Cut dado in all 4 pieces before assembly"
       },
 
-      "clearances_applied": {
+      "_clearances_applied": {
         "side_deduction_inches": 0.625,
         "inside_width_deduction_inches": 1.65625,
         "top_clearance_inches": 0.25,
@@ -512,7 +497,7 @@
       "slide_weight_capacity_lbs": { "value": 90, "status": "📋" },
       "soft_close": { "value": true, "status": "📋" },
 
-      "hardware_validation": {
+      "_hardware_validation": {
         "min_cabinet_depth_blum": { "value": 18.90625, "note": "Blum official spec" },
         "min_cabinet_depth_shop": { "value": 18.75, "note": "TCS shop practice" },
         "actual_cabinet_depth": { "value": 18.75 },
@@ -721,14 +706,14 @@
       "_source": "DrawerConfiguratorService calculations",
       "upper_drawer": {
         "_BUILD_NOTE": "⚠️ BUILD AS FULL RECTANGLE - U-CUT ON-SITE",
-        "sides": "2 pcs @ 6\" x 18-1/4\" (1/2\" Baltic Birch)",
-        "front_back": "2 pcs @ 6\" x 36-3/16\" (1/2\" Baltic Birch)",
-        "bottom": "1 pc @ 36-5/8\" x 17-7/16\" (1/4\" Baltic Birch)"
+        "sides": "2 pcs @ 6\" x 18-1/4\" (1/2\" maple plywood)",
+        "front_back": "2 pcs @ 6\" x 36-3/16\" (1/2\" maple plywood)",
+        "bottom": "1 pc @ 36-5/8\" x 17-7/16\" (1/4\" maple plywood)"
       },
       "lower_drawer": {
-        "sides": "2 pcs @ 16\" x 18-1/4\" (1/2\" Baltic Birch)",
-        "front_back": "2 pcs @ 16\" x 36-3/16\" (1/2\" Baltic Birch)",
-        "bottom": "1 pc @ 36-5/8\" x 17-7/16\" (1/4\" Baltic Birch)"
+        "sides": "2 pcs @ 16\" x 18-1/4\" (1/2\" maple plywood)",
+        "front_back": "2 pcs @ 16\" x 36-3/16\" (1/2\" maple plywood)",
+        "bottom": "1 pc @ 36-5/8\" x 17-7/16\" (1/4\" maple plywood)"
       },
       "hardware_note": "⚠️ Cabinet depth 18-3/4\" is AT MINIMUM for 18\" Blum Tandem slides"
     }
