@@ -14,18 +14,66 @@ use Illuminate\Support\Collection;
  * - Section layout and opening calculations
  * - Bi-directional face frame ↔ opening calculations
  * - Template system for common cabinet configurations
+ * - TCS construction standards (Bryan Patton, Jan 2025)
  *
  * @see docs/OPENING_CONFIGURATOR_SYSTEM.md
  */
 class CabinetConfiguratorService
 {
+    // ===== TCS CONSTRUCTION STANDARDS (Bryan Patton, Jan 2025) =====
+
+    /**
+     * TCS Standard Heights
+     * "Cabinets for kitchens are normally 34, 3 quarter tall,
+     * because countertops are typically an inch of quarter"
+     */
+    public const TCS_BASE_CABINET_HEIGHT = 34.75;    // 34 3/4"
+    public const TCS_COUNTERTOP_HEIGHT = 1.25;       // 1 1/4"
+    public const TCS_FINISHED_COUNTER_HEIGHT = 36.0; // 36" final height
+
+    /**
+     * TCS Standard Toe Kick
+     * "Toe kick standard is 4.5 inches tall"
+     * "3 inches from the face" (recess)
+     */
+    public const TCS_TOE_KICK_HEIGHT = 4.5;  // 4 1/2"
+    public const TCS_TOE_KICK_RECESS = 3.0;  // 3"
+
+    /**
+     * TCS Standard Stretchers
+     * "3 inch stretchers"
+     */
+    public const TCS_STRETCHER_HEIGHT = 3.0; // 3"
+
+    /**
+     * TCS Standard Materials
+     * "Our cabinets are built out of 3 quarter prefinished maple plywood"
+     */
+    public const TCS_BOX_MATERIAL = '3/4 prefinished maple plywood';
+    public const TCS_BOX_THICKNESS = 0.75;      // 3/4"
+    public const TCS_BACK_THICKNESS = 0.75;     // 3/4" (TCS uses full thickness)
+
+    /**
+     * TCS Sink Cabinet Side Extension
+     * "At sink locations... sides will come up an additional 3/4 of an inch"
+     */
+    public const TCS_SINK_SIDE_EXTENSION = 0.75; // 3/4"
+
     // ===== FACE FRAME CONSTANTS =====
 
+    /**
+     * TCS Face Frame Dimensions
+     * "Face frame... typically is an inch and a half or inch of 3 quarter,
+     * then you have an 8th inch gap to your door"
+     */
     /** Default stile width (1.5") */
     public const DEFAULT_STILE_WIDTH_INCHES = 1.5;
 
     /** Default rail width (1.5") */
     public const DEFAULT_RAIL_WIDTH_INCHES = 1.5;
+
+    /** TCS Standard door gap (1/8") */
+    public const TCS_DOOR_GAP = 0.125; // 1/8"
 
     /** Minimum stile/rail width */
     public const MIN_FRAME_MEMBER_WIDTH_INCHES = 1.0;
@@ -37,6 +85,13 @@ class CabinetConfiguratorService
 
     public const CONSTRUCTION_FACE_FRAME = 'face_frame';
     public const CONSTRUCTION_FRAMELESS = 'frameless';
+    public const CONSTRUCTION_HYBRID = 'hybrid';
+
+    // ===== TOP CONSTRUCTION TYPES =====
+
+    public const TOP_STRETCHERS = 'stretchers';  // Base cabinets
+    public const TOP_FULL_TOP = 'full_top';      // Wall cabinets
+    public const TOP_NONE = 'none';              // Open-top cabinets
 
     // ===== SECTION LAYOUT TYPES =====
 
@@ -145,6 +200,10 @@ class CabinetConfiguratorService
     /**
      * Calculate face frame dimensions from cabinet dimensions
      *
+     * TCS Standard (Bryan Patton, Jan 2025):
+     * "Face frame... typically is an inch and a half or inch of 3 quarter,
+     * then you have an 8th inch gap to your door"
+     *
      * @param Cabinet $cabinet The cabinet to calculate for
      * @return array Face frame dimensions
      */
@@ -156,6 +215,7 @@ class CabinetConfiguratorService
         $stileWidth = $cabinet->face_frame_stile_width_inches ?? self::DEFAULT_STILE_WIDTH_INCHES;
         $railWidth = $cabinet->face_frame_rail_width_inches ?? self::DEFAULT_RAIL_WIDTH_INCHES;
         $midStileCount = $cabinet->face_frame_mid_stile_count ?? 0;
+        $doorGap = $cabinet->face_frame_door_gap_inches ?? self::TCS_DOOR_GAP;
 
         // Calculate total frame consumption
         $totalStilesWidth = (2 + $midStileCount) * $stileWidth;
@@ -164,6 +224,10 @@ class CabinetConfiguratorService
         // Available opening dimensions
         $totalOpeningWidth = $cabinetWidth - $totalStilesWidth;
         $totalOpeningHeight = $cabinetHeight - $totalRailsHeight;
+
+        // Door dimensions (opening minus gap on each side)
+        $doorOpeningWidth = $totalOpeningWidth - (2 * $doorGap);
+        $doorOpeningHeight = $totalOpeningHeight - (2 * $doorGap);
 
         return [
             'cabinet_width' => $cabinetWidth,
@@ -179,8 +243,174 @@ class CabinetConfiguratorService
             'total_frame_height_consumed' => $totalRailsHeight,
             'total_opening_width' => $totalOpeningWidth,
             'total_opening_height' => $totalOpeningHeight,
+            'door_gap' => $doorGap,
+            'door_opening_width' => $doorOpeningWidth,
+            'door_opening_height' => $doorOpeningHeight,
             'opening_count' => max(1, $midStileCount + 1),
         ];
+    }
+
+    /**
+     * Calculate available interior height for a cabinet
+     *
+     * TCS Standard (Bryan Patton, Jan 2025):
+     * Interior height = Cabinet height - Toe kick - Stretcher height
+     *
+     * For base cabinets with stretchers:
+     * 34.75" - 4.5" (toe kick) - 3" (stretcher) = 27.25" interior
+     *
+     * @param Cabinet $cabinet The cabinet to calculate for
+     * @return array Interior dimensions and construction breakdown
+     */
+    public function calculateInteriorDimensions(Cabinet $cabinet): array
+    {
+        $cabinetHeight = $cabinet->height_inches ?? self::TCS_BASE_CABINET_HEIGHT;
+        $cabinetDepth = $cabinet->depth_inches ?? 24;
+        $cabinetWidth = $cabinet->length_inches ?? 36;
+
+        // Get toe kick dimensions
+        $toeKickHeight = $cabinet->toe_kick_height ?? self::TCS_TOE_KICK_HEIGHT;
+        $toeKickRecess = $cabinet->toe_kick_depth ?? self::TCS_TOE_KICK_RECESS;
+
+        // Get stretcher height (only for cabinets with stretchers)
+        $topConstructionType = $cabinet->top_construction_type ?? self::TOP_STRETCHERS;
+        $stretcherHeight = 0;
+        if ($topConstructionType === self::TOP_STRETCHERS) {
+            $stretcherHeight = $cabinet->stretcher_height_inches ?? self::TCS_STRETCHER_HEIGHT;
+        }
+
+        // Calculate interior height
+        $interiorHeight = $cabinetHeight - $toeKickHeight - $stretcherHeight;
+
+        // Interior width (minus side panels, typically 3/4" each)
+        $sideThickness = self::TCS_BOX_THICKNESS;
+        $interiorWidth = $cabinetWidth - (2 * $sideThickness);
+
+        // Interior depth (full depth minus back thickness)
+        $backThickness = self::TCS_BACK_THICKNESS;
+        $interiorDepth = $cabinetDepth - $backThickness;
+
+        // Check for sink cabinet side extension
+        $sinkSideExtension = 0;
+        if ($cabinet->sink_requires_extended_sides) {
+            $sinkSideExtension = $cabinet->sink_side_extension_inches ?? self::TCS_SINK_SIDE_EXTENSION;
+        }
+
+        return [
+            'cabinet_height' => $cabinetHeight,
+            'cabinet_width' => $cabinetWidth,
+            'cabinet_depth' => $cabinetDepth,
+            'toe_kick_height' => $toeKickHeight,
+            'toe_kick_recess' => $toeKickRecess,
+            'stretcher_height' => $stretcherHeight,
+            'top_construction_type' => $topConstructionType,
+            'interior_height' => $interiorHeight,
+            'interior_width' => $interiorWidth,
+            'interior_depth' => $interiorDepth,
+            'side_thickness' => $sideThickness,
+            'back_thickness' => $backThickness,
+            'sink_side_extension' => $sinkSideExtension,
+            'effective_side_height' => $cabinetHeight - $toeKickHeight + $sinkSideExtension,
+        ];
+    }
+
+    /**
+     * Set box material from a Product
+     *
+     * Links the cabinet to a specific box material product (sheet goods)
+     * and can auto-populate material details from product attributes.
+     *
+     * @param Cabinet $cabinet The cabinet to update
+     * @param \Webkul\Product\Models\Product $product The box material product
+     * @return Cabinet The updated cabinet
+     */
+    public function setBoxMaterial(Cabinet $cabinet, \Webkul\Product\Models\Product $product): Cabinet
+    {
+        $cabinet->box_material_product_id = $product->id;
+
+        // Optionally update box_material description from product name
+        if (empty($cabinet->box_material)) {
+            $cabinet->box_material = $product->name;
+        }
+
+        $cabinet->save();
+
+        return $cabinet;
+    }
+
+    /**
+     * Set face frame material from a Product
+     *
+     * @param Cabinet $cabinet The cabinet to update
+     * @param \Webkul\Product\Models\Product $product The face frame lumber product
+     * @return Cabinet The updated cabinet
+     */
+    public function setFaceFrameMaterial(Cabinet $cabinet, \Webkul\Product\Models\Product $product): Cabinet
+    {
+        $cabinet->face_frame_material_product_id = $product->id;
+        $cabinet->save();
+
+        return $cabinet;
+    }
+
+    /**
+     * Apply TCS default construction settings to a cabinet
+     *
+     * Sets all construction fields to TCS standards based on cabinet type.
+     *
+     * @param Cabinet $cabinet The cabinet to configure
+     * @param string $cabinetType 'base', 'wall', 'tall', 'sink', etc.
+     * @return Cabinet The configured cabinet
+     */
+    public function applyTcsDefaults(Cabinet $cabinet, string $cabinetType = 'base'): Cabinet
+    {
+        // Common TCS defaults
+        $cabinet->face_frame_stile_width_inches = self::DEFAULT_STILE_WIDTH_INCHES;
+        $cabinet->face_frame_rail_width_inches = self::DEFAULT_RAIL_WIDTH_INCHES;
+        $cabinet->face_frame_door_gap_inches = self::TCS_DOOR_GAP;
+        $cabinet->stretcher_height_inches = self::TCS_STRETCHER_HEIGHT;
+
+        // Type-specific settings
+        switch (strtolower($cabinetType)) {
+            case 'base':
+            case 'sink':
+            case 'sink_base':
+            case 'drawer_base':
+                $cabinet->top_construction_type = self::TOP_STRETCHERS;
+                $cabinet->height_inches = $cabinet->height_inches ?? self::TCS_BASE_CABINET_HEIGHT;
+                break;
+
+            case 'wall':
+            case 'wall_corner':
+                $cabinet->top_construction_type = self::TOP_FULL_TOP;
+                $cabinet->stretcher_height_inches = 0; // Wall cabinets don't have stretchers
+                break;
+
+            case 'tall':
+            case 'tall_pantry':
+            case 'pantry':
+                $cabinet->top_construction_type = self::TOP_STRETCHERS;
+                $cabinet->height_inches = $cabinet->height_inches ?? 84;
+                break;
+        }
+
+        // Sink cabinet side extension
+        if (in_array(strtolower($cabinetType), ['sink', 'sink_base'])) {
+            $cabinet->sink_requires_extended_sides = true;
+            $cabinet->sink_side_extension_inches = self::TCS_SINK_SIDE_EXTENSION;
+        }
+
+        // Set toe kick defaults if not set
+        if (empty($cabinet->toe_kick_height)) {
+            $cabinet->toe_kick_height = self::TCS_TOE_KICK_HEIGHT;
+        }
+        if (empty($cabinet->toe_kick_depth)) {
+            $cabinet->toe_kick_depth = self::TCS_TOE_KICK_RECESS;
+        }
+
+        $cabinet->save();
+
+        return $cabinet;
     }
 
     /**

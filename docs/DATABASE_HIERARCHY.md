@@ -341,6 +341,18 @@ Individual cabinet specifications (formerly `projects_cabinet_specifications`)
 | `joinery_method` | string | dado, dowel, pocket_screw |
 | `has_back_panel` | boolean | Full back panel |
 
+**TCS Construction Details (Bryan Patton, Jan 2025):**
+| Column | Type | Default | Description |
+|--------|------|---------|-------------|
+| `top_construction_type` | string | 'stretchers' | Top: 'stretchers' (base), 'full_top' (wall), 'none' |
+| `stretcher_height_inches` | decimal(5,3) | 3.0 | Stretcher height (TCS: 3") |
+| `sink_requires_extended_sides` | boolean | false | Sink cabinet sides extend for countertop |
+| `sink_side_extension_inches` | decimal(5,3) | 0.75 | Extension height (3/4") |
+| `face_frame_door_gap_inches` | decimal(5,3) | 0.125 | Gap between face frame and door (1/8") |
+| `box_material_product_id` | FK | null | Selected plywood product from inventory |
+| `face_frame_material_product_id` | FK | null | Selected lumber product for face frame |
+| `edge_banding_product_id` | FK | null | Selected edge banding product |
+
 **Face Frame:**
 | Column | Type | Description |
 |--------|------|-------------|
@@ -3172,3 +3184,171 @@ projects_projects.current_production_stage → tracks where project is
 | `sales_order_line_items` | `room_id` | `projects_rooms` | Line item room link |
 | `sales_order_line_items` | `cabinet_run_id` | `projects_cabinet_runs` | Line item run link |
 | `sales_order_line_items` | `cabinet_specification_id` | `projects_cabinets` | Line item cabinet link |
+
+---
+
+## TCS Cabinet Box Construction Standards (Bryan Patton, Jan 2025)
+
+This section documents the actual construction practices used at TCS Woodwork, as captured from conversations with lead craftsman Bryan Patton in January 2025.
+
+### Material Standards
+
+> "Our cabinets are built out of 3 quarter prefinished maple plywood, including the backs"
+
+| Component | Material | Thickness | Notes |
+|-----------|----------|-----------|-------|
+| **Box Sides** | Prefinished maple plywood | 3/4" | Sandwiched between top/bottom |
+| **Box Top** | Prefinished maple plywood | 3/4" | For wall cabinets only (base use stretchers) |
+| **Box Bottom** | Prefinished maple plywood | 3/4" | Standard |
+| **Box Back** | Prefinished maple plywood | 3/4" | Full 3/4" (not 1/4") - used to square cabinet |
+| **Face Frame** | Solid maple or poplar | 3/4" | For face-frame construction |
+
+### Assembly Method
+
+> "The back covers everything... that's how we square up our cabinets"
+
+1. **Sides**: Sandwiched between top and bottom panels
+2. **Back**: Full 3/4" panel covers all edges, used to square the box
+3. **Face Frame** (if applicable): Attached to front after box assembly
+
+### Toe Kick Dimensions
+
+> "Toe kick standard is 4.5 inches tall" ... "3 inches from the face"
+
+| Dimension | Value | Description |
+|-----------|-------|-------------|
+| **Height** | 4.5" | Vertical height of toe kick notch |
+| **Recess** | 3" | Distance from cabinet face (setback) |
+
+### Top Construction
+
+> "Lower cabinet would have 3 inch stretchers because it doesn't need a top"
+
+| Cabinet Type | Top Construction | Details |
+|--------------|-----------------|---------|
+| **Base Cabinet** | Stretchers (3" height) | No full top panel |
+| **Wall Cabinet** | Full Top | Solid 3/4" top panel |
+| **Sink Cabinet** | Stretchers + Extended Sides | Sides extend 3/4" above stretchers |
+
+### Stretcher Specifications
+
+> "3 inch stretchers"
+
+| Attribute | Value | Notes |
+|-----------|-------|-------|
+| **Height** | 3" | Vertical dimension (front-to-back of stretcher) |
+| **Thickness** | 3/4" | Same as box material |
+| **Quantity** | 2 + drawer count | Front stretcher + back stretcher + one per drawer |
+
+**Stretcher Functions:**
+- Hold the cabinet square and stable
+- Provide countertop mounting surface
+- Serve as drawer slide mounting platform
+- Can function as drawer dividers ("stretcher can serve as the divider")
+
+### Sink Cabinet Side Extension
+
+> "At sink locations where you need countertop support, those sides will come up an additional 3/4 of an inch"
+
+| Attribute | Value |
+|-----------|-------|
+| **Extension Height** | 3/4" (0.75") |
+| **Purpose** | Countertop support at sink cutout |
+| **Applied To** | Sink base cabinets only |
+
+### Standard Heights
+
+> "Cabinets for kitchens are normally 34, 3 quarter tall, because countertops are typically an inch of quarter"
+
+| Cabinet Type | Cabinet Height | Countertop | Final Height |
+|--------------|---------------|------------|--------------|
+| **Base** | 34 3/4" | +1 1/4" | 36" |
+| **Wall 30"** | 30" | — | 30" |
+| **Wall 36"** | 36" | — | 36" |
+| **Wall 42"** | 42" | — | 42" |
+| **Tall/Pantry** | 84" or 96" | — | 84" or 96" |
+
+### Face Frame Specifications
+
+> "Face frame... typically is an inch and a half or inch of 3 quarter, then you have an 8th inch gap to your door"
+
+| Attribute | Standard Value | Alternate |
+|-----------|---------------|-----------|
+| **Stile Width** | 1 1/2" (1.5") | 1 3/4" (1.75") |
+| **Rail Width** | 1 1/2" (1.5") | 1 3/4" (1.75") |
+| **Door Gap** | 1/8" (0.125") | — |
+
+### Construction Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| **Face Frame** | Traditional frame attached to cabinet face | Predominant at TCS |
+| **Frameless (European)** | No face frame, doors attach to box sides | Modern/commercial |
+| **Hybrid** | Combination approach | Special applications |
+
+### Fixed Dividers
+
+> "A full depth fixed divider if it needed a division between a drawer section and a hanging section... or if it was a trash cabinet and you didn't want the smells to come through"
+
+**Purposes:**
+- **Section Division**: Separate drawer bank from door opening
+- **Smell Isolation**: Prevent odors in trash cabinets
+- **Structural Support**: Additional cabinet rigidity
+
+| Attribute | Standard Value |
+|-----------|---------------|
+| **Thickness** | 3/4" (same as box) |
+| **Depth** | Full cabinet depth |
+| **Material** | 3/4" maple plywood |
+
+### Interior Height Calculation
+
+For base cabinets with face frame construction:
+
+```
+Interior Height = Cabinet Height - Toe Kick Height - Stretcher Height - Face Frame Rails
+
+Example (36" base cabinet):
+34.75" - 4.5" (toe kick) - 3" (stretcher) = 27.25" interior height
+```
+
+### Related Tables
+
+| Table | Description |
+|-------|-------------|
+| `projects_cabinets` | Main cabinet specifications with TCS construction fields |
+| `projects_faceframes` | Face frame configuration per cabinet run |
+| `projects_fixed_dividers` | Fixed divider components |
+| `projects_stretchers` | Stretcher components |
+
+### Related Models
+
+| Model | Location |
+|-------|----------|
+| `Cabinet` | `plugins/webkul/projects/src/Models/Cabinet.php` |
+| `Faceframe` | `plugins/webkul/projects/src/Models/Faceframe.php` |
+| `FixedDivider` | `plugins/webkul/projects/src/Models/FixedDivider.php` |
+| `Stretcher` | `plugins/webkul/projects/src/Models/Stretcher.php` |
+
+### Related Services
+
+| Service | Location | Purpose |
+|---------|----------|---------|
+| `CabinetConfiguratorService` | `app/Services/CabinetConfiguratorService.php` | Cabinet configuration with TCS defaults |
+| `StretcherCalculator` | `app/Services/StretcherCalculator.php` | Stretcher calculations using TCS standards |
+
+### Material Product Linking
+
+Cabinets can link directly to inventory Products for materials:
+
+| FK Field | Product Type | Description |
+|----------|-------------|-------------|
+| `box_material_product_id` | Sheet Goods | Plywood/panel material for cabinet box |
+| `face_frame_material_product_id` | Lumber | Solid wood for face frames |
+| `edge_banding_product_id` | Edge Banding | Edge treatment material |
+
+**Auto-Inference Flow:**
+1. User selects a Product (e.g., "3/4 Prefinished Maple Plywood")
+2. System auto-populates: thickness, finish type, species from product attributes
+3. BOM calculates: sheets needed based on cabinet dimensions
+4. Inventory checks: availability for production scheduling

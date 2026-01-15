@@ -65,6 +65,69 @@ class Cabinet extends Model
 
     protected $table = 'projects_cabinets';
 
+    /**
+     * TCS Standard Dimensions (Bryan Patton, Jan 2025)
+     *
+     * "Cabinets for kitchens are normally 34, 3 quarter tall,
+     * because countertops are typically an inch of quarter"
+     */
+    public const STANDARD_HEIGHTS = [
+        'base' => 34.75,      // 34 3/4" (countertop makes 36")
+        'wall_30' => 30,
+        'wall_36' => 36,
+        'wall_42' => 42,
+        'tall' => 84,
+        'tall_96' => 96,
+    ];
+
+    public const STANDARD_COUNTERTOP_HEIGHT = 1.25; // 1 1/4"
+
+    /**
+     * TCS Standard Toe Kick (Bryan)
+     * "Toe kick standard is 4.5 inches tall"
+     * "3 inches from the face" (recess)
+     */
+    public const STANDARD_TOE_KICK_HEIGHT = 4.5;
+    public const STANDARD_TOE_KICK_RECESS = 3.0;
+
+    /**
+     * TCS Standard Stretcher (Bryan)
+     * "3 inch stretchers"
+     */
+    public const STANDARD_STRETCHER_HEIGHT = 3.0;
+
+    /**
+     * TCS Standard Materials (Bryan)
+     * "Our cabinets are built out of 3 quarter prefinished
+     * maple plywood, including the backs"
+     */
+    public const DEFAULT_BOX_MATERIAL = '3/4 prefinished maple plywood';
+    public const DEFAULT_BOX_THICKNESS = 0.75;
+    public const DEFAULT_BACK_THICKNESS = 0.75;
+
+    /**
+     * TCS Standard Face Frame (Bryan)
+     * "Face frame... typically is an inch and a half or inch of 3 quarter,
+     * then you have an 8th inch gap to your door"
+     */
+    public const STANDARD_FACE_FRAME_WIDTH = 1.5;
+    public const STANDARD_FACE_FRAME_DOOR_GAP = 0.125;
+
+    /**
+     * TCS Sink Cabinet (Bryan)
+     * "At sink locations... sides will come up an additional 3/4 of an inch"
+     */
+    public const SINK_SIDE_EXTENSION = 0.75;
+
+    /**
+     * Top construction types
+     */
+    public const TOP_CONSTRUCTION_TYPES = [
+        'stretchers' => 'Stretchers (Base Cabinets)',
+        'full_top' => 'Full Top (Wall Cabinets)',
+        'none' => 'No Top',
+    ];
+
     protected $fillable = [
         'order_line_id',
         'project_id',
@@ -125,6 +188,16 @@ class Cabinet extends Model
         'face_frame_stile_width_inches',
         'face_frame_rail_width_inches',
         'face_frame_mid_stile_count',
+        // Construction details (Bryan Patton, Jan 2025)
+        'top_construction_type',
+        'stretcher_height_inches',
+        'sink_requires_extended_sides',
+        'sink_side_extension_inches',
+        'face_frame_door_gap_inches',
+        // Material product links
+        'box_material_product_id',
+        'face_frame_material_product_id',
+        'edge_banding_product_id',
     ];
 
     protected $casts = [
@@ -152,6 +225,11 @@ class Cabinet extends Model
         'face_frame_stile_width_inches' => 'decimal:3',
         'face_frame_rail_width_inches' => 'decimal:3',
         'face_frame_mid_stile_count' => 'integer',
+        // Construction details casts
+        'stretcher_height_inches' => 'decimal:3',
+        'sink_requires_extended_sides' => 'boolean',
+        'sink_side_extension_inches' => 'decimal:3',
+        'face_frame_door_gap_inches' => 'decimal:3',
     ];
 
     /**
@@ -300,6 +378,50 @@ class Cabinet extends Model
     public function lazySusanProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'lazy_susan_product_id');
+    }
+
+    /**
+     * Box material product (sheet goods/plywood)
+     *
+     * @return BelongsTo
+     */
+    public function boxMaterialProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'box_material_product_id');
+    }
+
+    /**
+     * Face frame material product (lumber)
+     *
+     * @return BelongsTo
+     */
+    public function faceFrameMaterialProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'face_frame_material_product_id');
+    }
+
+    /**
+     * Edge banding product
+     *
+     * @return BelongsTo
+     */
+    public function edgeBandingProduct(): BelongsTo
+    {
+        return $this->belongsTo(Product::class, 'edge_banding_product_id');
+    }
+
+    /**
+     * Fixed dividers for this cabinet
+     *
+     * Full-depth dividers used for:
+     * - Section division (drawer vs hanging)
+     * - Smell isolation (trash cabinets)
+     *
+     * @return HasMany
+     */
+    public function fixedDividers(): HasMany
+    {
+        return $this->hasMany(FixedDivider::class, 'cabinet_id');
     }
 
     /**

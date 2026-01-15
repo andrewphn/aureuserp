@@ -76,10 +76,12 @@ class Stretcher extends Model implements CabinetComponentInterface
 
     /**
      * Standard dimensions (in inches)
+     *
+     * TCS Standard (Bryan Patton, Jan 2025): "3 inch stretchers"
      */
-    public const STANDARD_DEPTH_INCHES = 3.5;       // 3-1/2"
+    public const STANDARD_DEPTH_INCHES = 3.0;       // 3" (TCS standard)
     public const STANDARD_THICKNESS_INCHES = 0.75;  // 3/4"
-    public const MINIMUM_DEPTH_INCHES = 3.0;        // 3"
+    public const MINIMUM_DEPTH_INCHES = 2.5;        // 2-1/2"
     public const MAXIMUM_DEPTH_INCHES = 4.0;        // 4"
 
     protected $fillable = [

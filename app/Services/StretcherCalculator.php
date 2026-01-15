@@ -18,16 +18,20 @@ use Illuminate\Support\Collection;
  *
  * Rule: Number of stretchers = 2 (front + back) + drawer_count (one per drawer)
  *
+ * TCS Standard (Bryan Patton, Jan 2025): "3 inch stretchers"
  * Reference: Master Plan (iridescent-wishing-turing.md) lines 1540-1618
  */
 class StretcherCalculator
 {
     /**
      * Standard dimensions (in inches)
+     *
+     * TCS Standard: 3" stretcher height (Bryan Patton, Jan 2025)
+     * Note: "depth" here refers to front-to-back dimension of stretcher
      */
-    public const STANDARD_DEPTH_INCHES = 3.5;       // 3-1/2"
+    public const STANDARD_DEPTH_INCHES = 3.0;       // 3" TCS standard (was 3.5")
     public const STANDARD_THICKNESS_INCHES = 0.75;  // 3/4"
-    public const MINIMUM_DEPTH_INCHES = 3.0;        // 3"
+    public const MINIMUM_DEPTH_INCHES = 2.5;        // 2-1/2"
     public const MAXIMUM_DEPTH_INCHES = 4.0;        // 4"
     public const DEFAULT_SIDE_PANEL_THICKNESS = 0.75; // 3/4"
 
@@ -74,12 +78,15 @@ class StretcherCalculator
         // Calculate inside width (cabinet width minus side panels)
         $stretcherWidth = $this->calculateStretcherWidth($cabinet);
 
+        // Get stretcher depth from cabinet or use default (TCS: 3")
+        $stretcherDepth = $this->getStretcherDepth($cabinet);
+
         // Front stretcher
         $stretchers[] = $this->buildStretcherData(
             position: Stretcher::POSITION_FRONT,
             stretcherNumber: 1,
             width: $stretcherWidth,
-            depth: self::STANDARD_DEPTH_INCHES,
+            depth: $stretcherDepth,
             thickness: self::STANDARD_THICKNESS_INCHES,
             positionFromFront: 0,
             positionFromTop: 0,
@@ -91,9 +98,9 @@ class StretcherCalculator
             position: Stretcher::POSITION_BACK,
             stretcherNumber: 2,
             width: $stretcherWidth,
-            depth: self::STANDARD_DEPTH_INCHES,
+            depth: $stretcherDepth,
             thickness: self::STANDARD_THICKNESS_INCHES,
-            positionFromFront: ($cabinet->depth_inches ?? 24) - self::STANDARD_DEPTH_INCHES,
+            positionFromFront: ($cabinet->depth_inches ?? 24) - $stretcherDepth,
             positionFromTop: 0,
             material: $cabinet->box_material ?? 'plywood',
         );
@@ -120,7 +127,7 @@ class StretcherCalculator
                 position: Stretcher::POSITION_DRAWER_SUPPORT,
                 stretcherNumber: $stretcherNumber,
                 width: $stretcherWidth,
-                depth: self::STANDARD_DEPTH_INCHES,
+                depth: $stretcherDepth,
                 thickness: self::STANDARD_THICKNESS_INCHES,
                 positionFromFront: null, // Calculated based on drawer position
                 positionFromTop: 0,
@@ -131,6 +138,30 @@ class StretcherCalculator
         }
 
         return $stretchers;
+    }
+
+    /**
+     * Get stretcher depth (front-to-back) from cabinet or use default
+     *
+     * Uses cabinet's configurable stretcher_height_inches if set,
+     * otherwise falls back to TCS standard (3").
+     *
+     * @param Cabinet $cabinet The cabinet to get depth for
+     * @return float The stretcher depth in inches
+     */
+    public function getStretcherDepth(Cabinet $cabinet): float
+    {
+        // Use cabinet's configured stretcher height if set
+        if (!empty($cabinet->stretcher_height_inches)) {
+            return (float) $cabinet->stretcher_height_inches;
+        }
+
+        // Check if cabinet has a constant defined
+        if (defined(Cabinet::class . '::STANDARD_STRETCHER_HEIGHT')) {
+            return Cabinet::STANDARD_STRETCHER_HEIGHT;
+        }
+
+        return self::STANDARD_DEPTH_INCHES;
     }
 
     /**
@@ -168,6 +199,11 @@ class StretcherCalculator
     /**
      * Determine if a cabinet needs stretchers
      *
+     * TCS Standard (Bryan Patton, Jan 2025):
+     * - Base cabinets use 3" stretchers (no full top)
+     * - Wall cabinets have full tops
+     * - Sink cabinets have stretchers with extended sides (3/4" extra)
+     *
      * @param Cabinet $cabinet The cabinet to check
      * @return bool
      */
@@ -186,8 +222,17 @@ class StretcherCalculator
             return false;
         }
 
-        // Check construction style if available
-        $constructionStyle = $cabinet->construction_style ?? 'face_frame';
+        // Check explicit top_construction_type field first (new field from Bryan's specs)
+        $topConstructionType = $cabinet->top_construction_type ?? null;
+        if ($topConstructionType === 'full_top' || $topConstructionType === 'none') {
+            return false;
+        }
+        if ($topConstructionType === 'stretchers') {
+            return true;
+        }
+
+        // Fall back to construction_style check for legacy cabinets
+        $constructionStyle = $cabinet->construction_style ?? $cabinet->construction_type ?? 'face_frame';
         $topConstruction = $cabinet->top_construction ?? 'stretchers';
 
         // Frameless cabinets with full top don't need stretchers
