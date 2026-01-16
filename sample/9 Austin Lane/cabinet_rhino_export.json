@@ -1,0 +1,630 @@
+{
+    "metadata": {
+        "source": "CabinetXYZService",
+        "joint_type": "miter",
+        "generated_at": "2026-01-16T13:27:47-05:00"
+    },
+    "positions_3d": {
+        "coordinate_system": {
+            "origin": "Front-Bottom-Left corner of cabinet BOX",
+            "x_axis": "Left \u2192 Right (positive)",
+            "y_axis": "Bottom \u2192 Top (positive) - Y=0 is BOTTOM of box",
+            "z_axis": "Front \u2192 Back (positive)",
+            "units": "inches",
+            "notes": [
+                "Toe kick is in NEGATIVE Y (below the box)",
+                "Position values are for bottom-left-front corner of each part",
+                "Bottom of bottom panel = Y=0 (the reference plane)"
+            ]
+        },
+        "cabinet_envelope": {
+            "width": 41.3125,
+            "height": 32.75,
+            "box_height": 28.75,
+            "depth": 18.75,
+            "toe_kick_height": 4
+        },
+        "parts": {
+            "left_side": {
+                "part_name": "Left Side",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0,
+                    "y": 0.75,
+                    "z": 1
+                },
+                "dimensions": {
+                    "w": 0.75,
+                    "h": 27.25,
+                    "d": 17
+                },
+                "cut_dimensions": {
+                    "width": 17,
+                    "length": 27.25,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": [
+                        "shelf_pin_holes",
+                        "runner_mounting"
+                    ]
+                },
+                "material": "3\/4\" Plywood",
+                "assembly_rule": "sides_on_bottom"
+            },
+            "right_side": {
+                "part_name": "Right Side",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 40.5625,
+                    "y": 0.75,
+                    "z": 1
+                },
+                "dimensions": {
+                    "w": 0.75,
+                    "h": 27.25,
+                    "d": 17
+                },
+                "cut_dimensions": {
+                    "width": 17,
+                    "length": 27.25,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": [
+                        "shelf_pin_holes",
+                        "runner_mounting"
+                    ]
+                },
+                "material": "3\/4\" Plywood",
+                "assembly_rule": "sides_on_bottom"
+            },
+            "bottom": {
+                "part_name": "Bottom",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 1
+                },
+                "dimensions": {
+                    "w": 41.3125,
+                    "h": 0.75,
+                    "d": 17
+                },
+                "cut_dimensions": {
+                    "width": 17,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "assembly_rule": "sides_on_bottom"
+            },
+            "back": {
+                "part_name": "Back",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 18
+                },
+                "dimensions": {
+                    "w": 41.3125,
+                    "h": 28.75,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 41.3125,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "back"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "toe_kick": {
+                "part_name": "Toe Kick",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0.75,
+                    "y": -4,
+                    "z": 3
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 4,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 39.8125,
+                    "length": 4,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "notes": "Recessed 3\" from front face. Top of toe kick touches Y=0."
+            },
+            "left_stile": {
+                "part_name": "Left Stile",
+                "part_type": "face_frame",
+                "position": {
+                    "x": -1,
+                    "y": -4,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 1.75,
+                    "h": 32.75,
+                    "d": 1
+                },
+                "cut_dimensions": {
+                    "width": 1.75,
+                    "length": 32.75,
+                    "thickness": 1
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": [],
+                    "miter": "outside_miter"
+                },
+                "material": "5\/4 Hardwood",
+                "notes": "TCS Rule: Stile extends to outer edge, mitered with end panel",
+                "end_panel_extension": 1,
+                "miter_cut": {
+                    "type": "triangular_prism",
+                    "remove_from": "front_outside",
+                    "vertices_xz": [
+                        {
+                            "x": -1,
+                            "z": 0
+                        },
+                        {
+                            "x": -1,
+                            "z": 1
+                        },
+                        {
+                            "x": 0,
+                            "z": 0
+                        }
+                    ],
+                    "y_range": {
+                        "start": -4,
+                        "end": 28.75
+                    },
+                    "miter_angle": 45
+                }
+            },
+            "right_stile": {
+                "part_name": "Right Stile",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 40.5625,
+                    "y": -4,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 1.75,
+                    "h": 32.75,
+                    "d": 1
+                },
+                "cut_dimensions": {
+                    "width": 1.75,
+                    "length": 32.75,
+                    "thickness": 1
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": [],
+                    "miter": "outside_miter"
+                },
+                "material": "5\/4 Hardwood",
+                "notes": "TCS Rule: Stile extends to outer edge, mitered with end panel",
+                "end_panel_extension": 1,
+                "miter_cut": {
+                    "type": "triangular_prism",
+                    "remove_from": "front_outside",
+                    "vertices_xz": [
+                        {
+                            "x": 42.3125,
+                            "z": 0
+                        },
+                        {
+                            "x": 42.3125,
+                            "z": 1
+                        },
+                        {
+                            "x": 41.3125,
+                            "z": 0
+                        }
+                    ],
+                    "y_range": {
+                        "start": -4,
+                        "end": 28.75
+                    },
+                    "miter_angle": 45
+                }
+            },
+            "top_rail": {
+                "part_name": "Top Rail",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 0.75,
+                    "y": 26.5,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 1.5,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "bottom_rail": {
+                "part_name": "Bottom Rail",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 0.75,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 1.5,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "front_stretcher": {
+                "part_name": "Front Stretcher",
+                "part_type": "stretcher",
+                "position": {
+                    "x": 0,
+                    "y": 28,
+                    "z": 1
+                },
+                "dimensions": {
+                    "w": 41.3125,
+                    "h": 0.75,
+                    "d": 3
+                },
+                "cut_dimensions": {
+                    "width": 3,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "back_stretcher": {
+                "part_name": "Back Stretcher",
+                "part_type": "stretcher",
+                "position": {
+                    "x": 0,
+                    "y": 28,
+                    "z": 14
+                },
+                "dimensions": {
+                    "w": 41.3125,
+                    "h": 0.75,
+                    "d": 3
+                },
+                "cut_dimensions": {
+                    "width": 3,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "left_end_panel": {
+                "part_name": "Left End Panel",
+                "part_type": "finished_end",
+                "position": {
+                    "x": -1,
+                    "y": -4,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 0.75,
+                    "h": 32.75,
+                    "d": 19.25
+                },
+                "cut_dimensions": {
+                    "width": 19.25,
+                    "length": 32.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "outside",
+                    "edgebanding": [
+                        "front",
+                        "bottom"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Finished Plywood",
+                "notes": "Gap: 0.25\", Wall extension: 0.5\" for scribe",
+                "assembly": {
+                    "gap_from_cabinet": 0.25,
+                    "wall_extension": 0.5
+                },
+                "miter_cut": {
+                    "type": "triangular_prism",
+                    "remove_from": "front_inside",
+                    "vertices_xz": [
+                        {
+                            "x": -0.25,
+                            "z": 0
+                        },
+                        {
+                            "x": -0.25,
+                            "z": 1
+                        },
+                        {
+                            "x": -1.25,
+                            "z": 0
+                        }
+                    ],
+                    "y_range": {
+                        "start": -4,
+                        "end": 28.75
+                    },
+                    "miter_angle": 45
+                }
+            },
+            "right_end_panel": {
+                "part_name": "Right End Panel",
+                "part_type": "finished_end",
+                "position": {
+                    "x": 41.5625,
+                    "y": -4,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 0.75,
+                    "h": 32.75,
+                    "d": 19.25
+                },
+                "cut_dimensions": {
+                    "width": 19.25,
+                    "length": 32.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "outside",
+                    "edgebanding": [
+                        "front",
+                        "bottom"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Finished Plywood",
+                "notes": "Gap: 0.25\", Wall extension: 0.5\" for scribe",
+                "assembly": {
+                    "gap_from_cabinet": 0.25,
+                    "wall_extension": 0.5
+                },
+                "miter_cut": {
+                    "type": "triangular_prism",
+                    "remove_from": "front_inside",
+                    "vertices_xz": [
+                        {
+                            "x": 41.5625,
+                            "z": 0
+                        },
+                        {
+                            "x": 41.5625,
+                            "z": 1
+                        },
+                        {
+                            "x": 42.5625,
+                            "z": 0
+                        }
+                    ],
+                    "y_range": {
+                        "start": -4,
+                        "end": 28.75
+                    },
+                    "miter_angle": 45
+                }
+            },
+            "false_front_1_face": {
+                "part_name": "False Front #1 Face",
+                "part_type": "false_front",
+                "position": {
+                    "x": 0.75,
+                    "y": 22.625,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 6,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 6,
+                    "length": 37.5625,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": [],
+                    "profile": "2-1/4 Shaker"
+                },
+                "material": "3\/4\" MDF (Paint Grade)",
+                "notes": "Full overlay - fixed panel below sink, matches drawer front profile"
+            },
+            "false_front_1_backing": {
+                "part_name": "False Front #1 Backing",
+                "part_type": "false_front_backing",
+                "position": {
+                    "x": 0.75,
+                    "y": 22.125,
+                    "z": 0.75
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 7,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 7,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "notes": "Laid FLAT - doubles as stretcher (TCS rule)",
+                "is_stretcher": true
+            }
+        },
+        "part_count": 15
+    }
+}
