@@ -416,11 +416,11 @@
       "drawer_position": { "value": "lower", "status": "📋" },
 
       "opening_width_inches": { "value": 37.8125, "status": "✅", "note": "37-13/16\" face frame opening - VERIFIED FROM CAD" },
-      "opening_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD side view" },
+      "opening_height_inches": { "value": 11.1875, "status": "✅", "note": "11-3/16\" - CORRECTED: Both drawer faces are equal height" },
       "opening_depth_inches": { "value": 18.75, "status": "✅", "note": "18-3/4\" cabinet depth" },
 
       "front_width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" (opening - 1/8\" gap each side) - VERIFIED FROM CAD" },
-      "front_height_inches": { "value": 17.125, "status": "✅", "note": "17-1/8\" - VERIFIED FROM CAD side view" },
+      "front_height_inches": { "value": 11.1875, "status": "✅", "note": "11-3/16\" - CORRECTED: Both drawer faces are equal height" },
       "front_thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
 
       "top_rail_width_inches": { "value": 2.25, "status": "📋" },
@@ -432,8 +432,8 @@
       "box_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\" (opening - 5/8\" slide clearance)" },
       "box_depth_inches": { "value": 18, "status": "✅", "note": "18\" (matches slide length)" },
       "box_depth_shop_inches": { "value": 18.25, "status": "✅", "note": "18-1/4\" SHOP CUT (+1/4\" safety)" },
-      "box_height_inches": { "value": 16.3125, "status": "✅", "note": "16-5/16\" theoretical (opening - 13/16\" clearance)" },
-      "box_height_shop_inches": { "value": 16, "status": "✅", "note": "16\" SHOP CUT (rounded down to 1/2\")" },
+      "box_height_inches": { "value": 10.375, "status": "✅", "note": "10-3/8\" theoretical (11-3/16\" opening - 13/16\" clearance)" },
+      "box_height_shop_inches": { "value": 10, "status": "✅", "note": "10\" SHOP CUT (rounded down to 1/2\") - SAME AS UPPER" },
       "box_outside_width_inches": { "value": 37.1875, "status": "✅", "note": "37-3/16\"" },
       "box_inside_width_inches": { "value": 36.1563, "status": "✅", "note": "36-5/32\"" },
       "box_material": { "value": "maple_plywood", "status": "📋", "note": "3/4\" prefinished maple plywood - TCS standard" },
@@ -447,21 +447,21 @@
         "sides": {
           "quantity": 2,
           "material": "1/2\" maple plywood",
-          "width_inches": { "value": 16, "status": "✅", "note": "SHOP HEIGHT" },
+          "width_inches": { "value": 10, "status": "✅", "note": "SHOP HEIGHT - SAME AS UPPER" },
           "length_inches": { "value": 18.25, "status": "✅", "note": "SHOP DEPTH" },
           "notes": "Dovetail tails on front/back edges"
         },
         "front": {
           "quantity": 1,
           "material": "1/2\" maple plywood",
-          "width_inches": { "value": 16, "status": "✅" },
+          "width_inches": { "value": 10, "status": "✅", "note": "SAME AS UPPER" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
         "back": {
           "quantity": 1,
           "material": "1/2\" maple plywood",
-          "width_inches": { "value": 16, "status": "✅" },
+          "width_inches": { "value": 10, "status": "✅", "note": "SAME AS UPPER" },
           "length_inches": { "value": 36.1875, "status": "✅" },
           "notes": "Dovetail pins on ends, fits between sides"
         },
@@ -532,17 +532,18 @@
       "sort_order": { "value": 1, "status": "📋" },
 
       "width_inches": { "value": 37.5625, "status": "✅", "note": "37-9/16\" (opening - 1/8\" gap each side) - matches drawer fronts" },
-      "height_inches": { "value": 7, "status": "✅", "note": "7\" - VERIFIED FROM CAD side view" },
+      "height_inches": { "value": 6, "status": "✅", "note": "6\" false front face - CORRECTED" },
       "thickness_inches": { "value": 0.75, "status": "📋", "note": "3/4\" TCS standard" },
 
       "profile_type": { "value": "2-1/4 Shaker", "status": "📋", "note": "Match drawer fronts" },
       "rail_width_inches": { "value": 2.25, "status": "📋" },
       "stile_width_inches": { "value": 1.75, "status": "✅", "note": "1-3/4\" - match drawer fronts" },
 
-      "has_backing_rail": { "value": true, "status": "📋" },
-      "backing_rail_width_inches": { "value": 3.5, "status": "📋", "note": "3-1/2\" TCS standard" },
-      "backing_rail_position": { "value": "center", "status": "📋" },
-      "backing_rail_material": { "value": "plywood", "status": "📋" },
+      "has_backing": { "value": true, "status": "✅", "note": "All false fronts have backing" },
+      "backing_height_inches": { "value": 7, "status": "✅", "note": "7\" - backing IS the stretcher (dual purpose)" },
+      "backing_is_stretcher": { "value": true, "status": "✅", "note": "TCS: False front backing doubles as stretcher" },
+      "backing_material": { "value": "plywood", "status": "📋", "note": "3/4\" plywood" },
+      "_tcs_rule": "False front backing serves as both backing AND stretcher - one piece, two functions",
 
       "finish_type": { "value": "paint", "status": "📋" },
       "has_decorative_hardware": { "value": false, "status": "📋", "note": "No handles - matches drawers" },

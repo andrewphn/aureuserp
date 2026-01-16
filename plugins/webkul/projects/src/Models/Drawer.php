@@ -238,4 +238,101 @@ class Drawer extends Model implements CabinetComponentInterface
     {
         return 'drawer';
     }
+
+    /**
+     * Blum TANDEM 563H clearance constants (1/2" drawer sides)
+     */
+    public const BLUM_SIDE_DEDUCTION = 0.625;    // 5/8" total
+    public const BLUM_HEIGHT_DEDUCTION = 0.8125; // 13/16" total
+    public const SIDE_THICKNESS = 0.5;           // 1/2" plywood sides
+    public const BOTTOM_THICKNESS = 0.25;        // 1/4" plywood bottom
+
+    /**
+     * Get cut list data for this drawer box
+     *
+     * Returns all pieces needed to fabricate the drawer box:
+     * - 2x sides (1/2" plywood)
+     * - 2x front/back (1/2" plywood)
+     * - 1x bottom (1/4" plywood, in dado)
+     *
+     * @return array Cut list with all drawer box pieces
+     */
+    public function getCutListDataAttribute(): array
+    {
+        // Get box dimensions from stored values or calculate from front
+        $boxWidth = $this->box_width_inches;
+        $boxHeight = $this->box_height_inches;
+        $boxDepth = $this->box_depth_inches ?? $this->slide_length_inches ?? 18;
+
+        // If box dimensions not stored, calculate from front dimensions
+        if (!$boxWidth && $this->front_width_inches) {
+            // Box width = front width - side deduction (Blum standard)
+            $boxWidth = $this->front_width_inches - self::BLUM_SIDE_DEDUCTION;
+        }
+
+        if (!$boxHeight && $this->front_height_inches) {
+            // Box height = front height - height deduction, rounded down to 1/2"
+            $exactHeight = $this->front_height_inches - self::BLUM_HEIGHT_DEDUCTION;
+            $boxHeight = floor($exactHeight * 2) / 2; // Round down to nearest 1/2"
+        }
+
+        // Shop depth adds 1/4" for bottom dado
+        $shopDepth = $boxDepth + 0.25;
+
+        // Front/back width = box width - 2× side thickness
+        $frontBackWidth = $boxWidth - (2 * self::SIDE_THICKNESS);
+
+        // Bottom dimensions (in dado groove, 3/8" inset on each side)
+        $bottomWidth = $boxWidth - (2 * 0.375);
+        $bottomLength = $boxDepth - (2 * 0.375);
+
+        return [
+            'drawer_number' => $this->drawer_number,
+            'drawer_name' => $this->drawer_name,
+            'box_dimensions' => [
+                'width' => $boxWidth,
+                'height' => $boxHeight,
+                'depth' => $boxDepth,
+                'depth_shop' => $shopDepth,
+            ],
+            'pieces' => [
+                [
+                    'part' => 'Sides',
+                    'qty' => 2,
+                    'width' => $boxHeight,
+                    'length' => $shopDepth,
+                    'thickness' => self::SIDE_THICKNESS,
+                    'material' => '1/2" Plywood',
+                    'notes' => 'Left and right sides',
+                ],
+                [
+                    'part' => 'Front/Back',
+                    'qty' => 2,
+                    'width' => $boxHeight,
+                    'length' => $frontBackWidth,
+                    'thickness' => self::SIDE_THICKNESS,
+                    'material' => '1/2" Plywood',
+                    'notes' => 'Sub-front and back pieces',
+                ],
+                [
+                    'part' => 'Bottom',
+                    'qty' => 1,
+                    'width' => $bottomWidth,
+                    'length' => $bottomLength,
+                    'thickness' => self::BOTTOM_THICKNESS,
+                    'material' => '1/4" Plywood',
+                    'notes' => 'In dado groove',
+                ],
+            ],
+            'hardware' => [
+                'slides' => [
+                    'type' => $this->slide_type ?? 'Blum TANDEM',
+                    'model' => $this->slide_model,
+                    'length' => $this->slide_length_inches ?? 18,
+                    'qty' => $this->slide_quantity ?? 2,
+                    'soft_close' => $this->soft_close ?? true,
+                ],
+            ],
+        ];
+    }
 }

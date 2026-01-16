@@ -93,6 +93,75 @@ class DrawerConfiguratorService
         9  => 10.46875,   // 10-15/32" (266mm)
     ];
 
+    // ========================================
+    // BLUM TANDEM 563H MOUNTING SPECIFICATIONS
+    // From Blum Installation Instructions INST-TDM563H-563.
+    // ========================================
+
+    /**
+     * Runner mounting position from bottom of cabinet opening.
+     * Blum spec: 37mm (1-15/32")
+     */
+    public const RUNNER_MOUNTING_HEIGHT_MM = 37;
+    public const RUNNER_MOUNTING_HEIGHT_INCHES = 1.46875; // 1-15/32"
+
+    /**
+     * Runner setback from cabinet face (frameless).
+     * Blum spec: 3mm (1/8")
+     */
+    public const RUNNER_SETBACK_MM = 3;
+    public const RUNNER_SETBACK_INCHES = 0.125; // 1/8"
+
+    /**
+     * Front mounting hole positions (from front of cabinet).
+     * Blum spec: 7mm (9/32") and 32mm (1-1/4")
+     */
+    public const FRONT_HOLE_1_MM = 7;
+    public const FRONT_HOLE_1_INCHES = 0.28125; // 9/32"
+    public const FRONT_HOLE_2_MM = 32;
+    public const FRONT_HOLE_2_INCHES = 1.25; // 1-1/4"
+
+    /**
+     * Typical hole spacing along runner (from front).
+     * Blum spec: 9mm (11/32") typical spacing
+     */
+    public const HOLE_SPACING_TYPICAL_MM = 9;
+    public const HOLE_SPACING_TYPICAL_INCHES = 0.34375; // 11/32"
+
+    /**
+     * Locking device bore specifications.
+     * For pre-boring holes in drawer box sides.
+     */
+    public const LOCKING_DEVICE_BORE_DIAMETER_MM = 6;
+    public const LOCKING_DEVICE_BORE_DIAMETER_INCHES = 0.25; // 1/4" (use 6mm bit)
+    public const LOCKING_DEVICE_BORE_DEPTH_MM = 10;
+    public const LOCKING_DEVICE_BORE_DEPTH_INCHES = 0.40625; // 13/32"
+
+    /**
+     * Rear hook bore specifications.
+     * For pre-boring holes in drawer box back.
+     */
+    public const REAR_HOOK_BORE_DIAMETER_MM = 6;
+    public const REAR_HOOK_BORE_DIAMETER_INCHES = 0.25; // 1/4" (use 6mm bit)
+    public const REAR_HOOK_POSITION_FROM_BOTTOM_MM = 7;
+    public const REAR_HOOK_POSITION_FROM_BOTTOM_INCHES = 0.28125; // 9/32"
+    public const REAR_HOOK_POSITION_FROM_SIDE_MM = 11;
+    public const REAR_HOOK_POSITION_FROM_SIDE_INCHES = 0.4375; // 7/16"
+
+    /**
+     * Minimum rear notch for drawer back.
+     * Blum spec: 35mm (1-3/8") minimum
+     */
+    public const REAR_NOTCH_MIN_MM = 35;
+    public const REAR_NOTCH_MIN_INCHES = 1.375; // 1-3/8"
+
+    /**
+     * Screw specifications for mounting.
+     * Blum part: 606N or 606P (#6 x 5/8" wood screw)
+     */
+    public const MOUNTING_SCREW_SIZE = '#6 x 5/8"';
+    public const MOUNTING_SCREW_BLUM_PART = '606N or 606P';
+
     /**
      * Calculate drawer box dimensions from cabinet opening dimensions.
      * 
@@ -707,5 +776,118 @@ class DrawerConfiguratorService
         $formatted['slide'] = $cutList['hardware']['slide_name'] ?? 'N/A';
 
         return $formatted;
+    }
+
+    /**
+     * Get complete Blum TANDEM 563H mounting specifications.
+     *
+     * Returns all drilling positions and specifications needed for:
+     * 1. Cabinet side drilling (runner mounting)
+     * 2. Drawer box drilling (locking devices)
+     * 3. Drawer back drilling (rear hooks)
+     *
+     * @param int $slideLength Slide length in inches (9, 12, 15, 18, 21)
+     * @return array Complete mounting specifications
+     */
+    public static function getMountingSpecifications(int $slideLength = 18): array
+    {
+        return [
+            'runner_mounting' => [
+                'description' => 'Cabinet side drilling for runner mounting',
+                'tool' => 'TANDEM template T65.1600.01 + drill',
+                'height_from_bottom' => [
+                    'mm' => self::RUNNER_MOUNTING_HEIGHT_MM,
+                    'inches' => self::RUNNER_MOUNTING_HEIGHT_INCHES,
+                    'fraction' => self::toFraction(self::RUNNER_MOUNTING_HEIGHT_INCHES),
+                ],
+                'setback_from_face' => [
+                    'mm' => self::RUNNER_SETBACK_MM,
+                    'inches' => self::RUNNER_SETBACK_INCHES,
+                    'fraction' => self::toFraction(self::RUNNER_SETBACK_INCHES),
+                ],
+                'front_holes' => [
+                    [
+                        'position_from_front_mm' => self::FRONT_HOLE_1_MM,
+                        'position_from_front_inches' => self::FRONT_HOLE_1_INCHES,
+                        'fraction' => self::toFraction(self::FRONT_HOLE_1_INCHES),
+                    ],
+                    [
+                        'position_from_front_mm' => self::FRONT_HOLE_2_MM,
+                        'position_from_front_inches' => self::FRONT_HOLE_2_INCHES,
+                        'fraction' => self::toFraction(self::FRONT_HOLE_2_INCHES),
+                    ],
+                ],
+                'hole_spacing_typical' => [
+                    'mm' => self::HOLE_SPACING_TYPICAL_MM,
+                    'inches' => self::HOLE_SPACING_TYPICAL_INCHES,
+                    'fraction' => self::toFraction(self::HOLE_SPACING_TYPICAL_INCHES),
+                ],
+                'screw' => [
+                    'size' => self::MOUNTING_SCREW_SIZE,
+                    'blum_part' => self::MOUNTING_SCREW_BLUM_PART,
+                ],
+                'notes' => 'Use at least 2 screws in elongated holes. Check drawer front position before final mounting.',
+            ],
+            'locking_device_holes' => [
+                'description' => 'Drawer box side drilling for locking devices',
+                'tool' => '6mm bit with stop collar (TANDEM template T65.1600.01)',
+                'bore_diameter' => [
+                    'mm' => self::LOCKING_DEVICE_BORE_DIAMETER_MM,
+                    'inches' => self::LOCKING_DEVICE_BORE_DIAMETER_INCHES,
+                    'fraction' => self::toFraction(self::LOCKING_DEVICE_BORE_DIAMETER_INCHES),
+                ],
+                'bore_depth' => [
+                    'mm' => self::LOCKING_DEVICE_BORE_DEPTH_MM,
+                    'inches' => self::LOCKING_DEVICE_BORE_DEPTH_INCHES,
+                    'fraction' => self::toFraction(self::LOCKING_DEVICE_BORE_DEPTH_INCHES),
+                ],
+                'angle' => '75° (use template)',
+                'parts' => [
+                    'T51.1901R' => 'Locking device with side-to-side adjustment (right)',
+                    'T51.1901L' => 'Locking device with side-to-side adjustment (left)',
+                    'T51.1801R' => 'Locking device without adjustment (right)',
+                    'T51.1801L' => 'Locking device without adjustment (left)',
+                ],
+                'notes' => 'Use TANDEM template for accurate location and 75° angle. Bore on OUTSIDE face of drawer sides.',
+            ],
+            'rear_hook_holes' => [
+                'description' => 'Drawer back drilling for rear hooks',
+                'tool' => '2.5mm bit with extension chuck',
+                'position_from_bottom' => [
+                    'mm' => self::REAR_HOOK_POSITION_FROM_BOTTOM_MM,
+                    'inches' => self::REAR_HOOK_POSITION_FROM_BOTTOM_INCHES,
+                    'fraction' => self::toFraction(self::REAR_HOOK_POSITION_FROM_BOTTOM_INCHES),
+                ],
+                'position_from_side' => [
+                    'mm' => self::REAR_HOOK_POSITION_FROM_SIDE_MM,
+                    'inches' => self::REAR_HOOK_POSITION_FROM_SIDE_INCHES,
+                    'fraction' => self::toFraction(self::REAR_HOOK_POSITION_FROM_SIDE_INCHES),
+                ],
+                'minimum_rear_notch' => [
+                    'mm' => self::REAR_NOTCH_MIN_MM,
+                    'inches' => self::REAR_NOTCH_MIN_INCHES,
+                    'fraction' => self::toFraction(self::REAR_NOTCH_MIN_INCHES),
+                ],
+                'notes' => 'Bore on OUTSIDE face of drawer back. Use template for accurate positioning.',
+            ],
+            'dado_for_bottom' => [
+                'description' => 'Dado in all 4 drawer pieces for bottom panel',
+                'tool' => '1/4" dado blade or straight bit',
+                'width' => [
+                    'inches' => self::DADO_DEPTH,
+                    'fraction' => self::toFraction(self::DADO_DEPTH),
+                ],
+                'depth' => [
+                    'inches' => self::DADO_DEPTH,
+                    'fraction' => self::toFraction(self::DADO_DEPTH),
+                ],
+                'position_from_bottom' => [
+                    'inches' => self::BOTTOM_DADO_HEIGHT,
+                    'fraction' => self::toFraction(self::BOTTOM_DADO_HEIGHT),
+                ],
+                'notes' => 'Cut dado in all 4 pieces (2 sides + front + back) BEFORE assembly. Bottom floats in dado.',
+            ],
+            'minimum_cabinet_depth' => self::getMinCabinetDepth($slideLength),
+        ];
     }
 }

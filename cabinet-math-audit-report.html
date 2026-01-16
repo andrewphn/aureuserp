@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabinet Math Audit | 9 Austin Lane - Bathroom Vanity</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+        @media print {
+            @page {
+                size: letter;
+                margin: 0.5in;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .page {
+                width: 100%;
+                max-width: 7.5in;
+                margin: 0;
+                padding: 0;
+                page-break-after: always;
+                box-shadow: none;
+            }
+
+            .page:last-child {
+                page-break-after: auto;
+            }
+
+            .no-print { display: none !important; }
+
+            .gate-section, .piece-grid {
+                page-break-inside: avoid;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.4;
+            color: #1c1917;
+            background: #f5f5f5;
+            font-size: 10pt;
+        }
+
+        .page {
+            width: 8.5in;
+            min-height: 11in;
+            max-width: 100%;
+            margin: 20px auto;
+            padding: 0.5in;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            border-bottom: 3px solid #1c1917;
+        }
+
+        .company-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .company-logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #d4a574 0%, #8b5a2b 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .company-text h1 {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        .company-text .tagline {
+            font-size: 9px;
+            font-weight: 500;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #78716c;
+        }
+
+        .report-info {
+            text-align: right;
+        }
+
+        .report-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            font-size: 10px;
+            color: #78716c;
+        }
+
+        .report-date {
+            font-size: 9px;
+            color: #a8a29e;
+            margin-top: 4px;
+        }
+
+        /* Project Info Bar */
+        .project-bar {
+            background: #1c1917;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .project-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .project-bar-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .project-bar-number {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .project-bar-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .status-pass { background: #d1fae5; color: #065f46; }
+        .status-fail { background: #fee2e2; color: #991b1b; }
+        .status-warning { background: #fef3c7; color: #92400e; }
+
+        /* Opening Box - drawer-spec style */
+        .opening-box {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            border: 1px solid #b3d9e8;
+        }
+
+        .opening-box strong {
+            color: #1a5f7a;
+            font-size: 1.3em;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Input Specs Grid */
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #fafaf9;
+            border-radius: 8px;
+            border: 1px solid #e7e5e4;
+        }
+
+        .spec-item {
+            text-align: center;
+        }
+
+        .spec-value {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: #1c1917;
+        }
+
+        .spec-label {
+            font-size: 9px;
+            color: #78716c;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        /* Gate Sections */
+        .gate-section {
+            margin-bottom: 24px;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .gate-header {
+            background: linear-gradient(135deg, #d4a574 0%, #b8956b 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gate-number {
+            font-size: 10px;
+            font-weight: 700;
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .gate-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .gate-body {
+            padding: 16px;
+        }
+
+        /* Calculation Rows */
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            border-bottom: 1px solid #f5f5f4;
+        }
+
+        .calc-row:last-child {
+            border-bottom: none;
+        }
+
+        .calc-row:nth-child(even) {
+            background: #fafaf9;
+        }
+
+        .calc-name {
+            font-weight: 500;
+            color: #1c1917;
+        }
+
+        .calc-formula {
+            font-size: 9px;
+            color: #78716c;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 2px;
+        }
+
+        .calc-result {
+            font-size: 14px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: #1c1917;
+            background: #f5f5f4;
+            padding: 4px 12px;
+            border-radius: 4px;
+        }
+
+        /* Drawer-spec style: Piece Grid Layout */
+        .piece-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+            align-items: start;
+        }
+
+        .piece-drawing {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .piece-drawing svg {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+        }
+
+        .piece-table {
+            font-size: 0.9em;
+        }
+
+        .piece-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .piece-table th {
+            text-align: left;
+            padding: 10px;
+            color: white;
+        }
+
+        .piece-table td {
+            border: 1px solid #ddd;
+            padding: 8px 10px;
+        }
+
+        .piece-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .piece-header-sides { background: #5c4033; }
+        .piece-header-front { background: #a67c52; }
+        .piece-header-bottom { background: #8b5a2b; }
+        .piece-header-stretcher { background: #34495e; }
+        .piece-header-cabinet { background: #1a5f7a; }
+        .piece-header-faceframe { background: #d4a574; }
+
+        .theoretical { color: #c0392b; }
+        .shop-value { color: #27ae60; background: #e8f5e9; font-weight: bold; }
+        .dimension { font-family: 'JetBrains Mono', monospace; font-weight: bold; color: #c0392b; }
+
+        /* Shop Value Explanation Box */
+        .shop-values-box {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .shop-values-box strong {
+            color: #1565c0;
+        }
+
+        .shop-values-box ul {
+            margin: 10px 0 0 0;
+            padding-left: 20px;
+        }
+
+        /* Material Summary Cards */
+        .material-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .material-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .material-card.green {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        .material-card.amber {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .material-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .material-card .value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .material-card .unit {
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        /* Drawer Cards */
+        .drawer-card {
+            background: #fafaf9;
+            border: 1px solid #e7e5e4;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .drawer-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .drawer-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e7e5e4;
+        }
+
+        .drawer-label {
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .drawer-opening {
+            font-size: 10px;
+            color: #78716c;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .drawer-dims {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .dim-item {
+            text-align: center;
+        }
+
+        .dim-value {
+            font-size: 12px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .dim-label {
+            font-size: 8px;
+            color: #78716c;
+            text-transform: uppercase;
+        }
+
+        /* Gap Assessment Table */
+        .gap-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        .gap-table th {
+            background: #f5f5f4;
+            border: 1px solid #e7e5e4;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            color: #57534e;
+        }
+
+        .gap-table td {
+            border: 1px solid #e7e5e4;
+            padding: 8px 12px;
+            vertical-align: middle;
+        }
+
+        .gap-table tr:nth-child(even) {
+            background: #fafaf9;
+        }
+
+        .gap-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+
+        .gap-status.ok { background: #d1fae5; color: #065f46; }
+        .gap-status.warning { background: #fef3c7; color: #92400e; }
+        .gap-status.error { background: #fee2e2; color: #991b1b; }
+
+        .gap-category {
+            background: #1c1917;
+            color: white;
+            font-weight: 600;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        /* Cut List Table */
+        .cut-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+        }
+
+        .cut-table th {
+            background: #1c1917;
+            color: white;
+            border: 1px solid #1c1917;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .cut-table td {
+            border: 1px solid #e7e5e4;
+            padding: 8px 12px;
+            vertical-align: middle;
+        }
+
+        .cut-table tr:nth-child(even) {
+            background: #fafaf9;
+        }
+
+        .cut-table .text-center {
+            text-align: center;
+        }
+
+        .cut-table .text-right {
+            text-align: right;
+        }
+
+        .cut-table .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .material-header {
+            background: #d4a574 !important;
+            color: white;
+            font-weight: 600;
+        }
+
+        .part-name {
+            font-weight: 500;
+        }
+
+        .part-notes {
+            font-size: 8px;
+            color: #78716c;
+            margin-top: 2px;
+        }
+
+        .qty-badge {
+            display: inline-block;
+            background: #f5f5f4;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 10px;
+        }
+
+        /* Assembly Order */
+        .assembly-step {
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+            margin-bottom: 10px;
+        }
+
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .assembly-step.critical { border-left-color: #e74c3c; }
+        .assembly-step.critical .step-number { background: #e74c3c; }
+        .assembly-step.verify { border-left-color: #27ae60; }
+        .assembly-step.verify .step-number { background: #27ae60; }
+
+        /* Verification Checklist */
+        .check-item {
+            padding: 10px 15px;
+            margin: 8px 0;
+            background: #fafafa;
+            border-left: 4px solid #3498db;
+            display: flex;
+            align-items: center;
+        }
+
+        .check-item input {
+            margin-right: 15px;
+            transform: scale(1.3);
+        }
+
+        .check-item.confirmed {
+            border-left-color: #27ae60;
+            background: #e8f8f0;
+        }
+
+        /* Summary Box */
+        .summary-box {
+            background: #fafaf9;
+            border: 2px solid #e7e5e4;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-top: 20px;
+        }
+
+        .summary-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #78716c;
+            margin-bottom: 12px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1c1917;
+        }
+
+        .summary-value.success {
+            color: #059669;
+        }
+
+        .summary-label {
+            font-size: 9px;
+            color: #78716c;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+        }
+
+        /* Warnings Box */
+        .warnings-box {
+            background: #fef3c7;
+            border: 1px solid #fcd34d;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-top: 16px;
+        }
+
+        .warnings-title {
+            font-size: 10px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 8px;
+        }
+
+        .warning-item {
+            font-size: 10px;
+            color: #78350f;
+            margin-bottom: 4px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .warning-item:before {
+            content: "!";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 30px;
+            padding-top: 12px;
+            border-top: 1px solid #e7e5e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 8px;
+            color: #a8a29e;
+        }
+
+        .footer-notes {
+            max-width: 70%;
+        }
+
+        .footer-notes ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-notes li {
+            margin-bottom: 2px;
+        }
+
+        .footer-notes li:before {
+            content: "* ";
+            color: #d4a574;
+        }
+
+        .page-number {
+            font-weight: 500;
+        }
+
+        /* Print Button */
+        .print-controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 8px;
+        }
+
+        .print-btn {
+            background: #1c1917;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .print-btn:hover {
+            background: #292524;
+        }
+
+        /* Section Headers */
+        .section-header {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #1c1917;
+            margin: 24px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #d4a574;
+        }
+
+        /* Scale Bar */
+        .scale-bar {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .scale-bar svg { margin-right: 10px; }
+
+        /* Notes box */
+        .notes {
+            background: #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+
+        .notes ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="print-controls no-print">
+        <button class="print-btn" onclick="window.print()">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+            </svg>
+            Print Report
+        </button>
+    </div>
+
+    <!-- PAGE 1: Gates of Construction -->
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-info">
+                <div class="company-logo">TCS</div>
+                <div class="company-text">
+                    <h1>The Carpenter's Son</h1>
+                    <div class="tagline">Fine Custom Woodworking</div>
+                </div>
+            </div>
+            <div class="report-info">
+                <div class="report-title">Cabinet Math Audit</div>
+                <div class="report-subtitle">Gates of Construction Verification</div>
+                <div class="report-date">Generated: January 15, 2026 at 3:30 PM</div>
+            </div>
+        </div>
+
+        <!-- Project Bar -->
+        <div class="project-bar">
+            <div class="project-bar-left">
+                <span class="project-bar-name">9 Austin Lane - Bathroom Vanity</span>
+                                <span class="project-bar-number">BTH1-B1-C1</span>
+                            </div>
+            <div class="project-bar-status">
+                <span class="status-badge status-pass">
+                    PASS
+                </span>
+            </div>
+        </div>
+
+        <!-- Opening Box - Cabinet Dimensions -->
+        <div class="opening-box">
+            Cabinet Overall: <strong>41-5/16&quot; W x 32-3/4&quot; H x 18-3/4&quot; D</strong>
+        </div>
+
+        <!-- Input Specifications -->
+        <div class="specs-grid">
+            <div class="spec-item">
+                <div class="spec-value">41-5/16&quot;</div>
+                <div class="spec-label">Width</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">32-3/4&quot;</div>
+                <div class="spec-label">Height</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">18-3/4&quot;</div>
+                <div class="spec-label">Depth</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">2</div>
+                <div class="spec-label">Drawers</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">4&quot;</div>
+                <div class="spec-label">Toe Kick</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">1-3/4&quot;</div>
+                <div class="spec-label">FF Stile</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">1-1/2&quot;</div>
+                <div class="spec-label">FF Rail</div>
+            </div>
+            <div class="spec-item">
+                <div class="spec-value">18&quot;</div>
+                <div class="spec-label">Slide Length</div>
+            </div>
+        </div>
+
+        <!-- Gate 1: Cabinet Box -->
+        <div class="gate-section">
+            <div class="gate-header">
+                <div>
+                    <span class="gate-number">GATE 1</span>
+                    <span class="gate-title">Cabinet Box Dimensions</span>
+                </div>
+            </div>
+            <div class="gate-body">
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Box Height</div>
+                                                <div class="calc-formula">32.75&quot; - 4&quot;</div>
+                                            </div>
+                    <div class="calc-result">28-3/4&quot;</div>
+                </div>
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Inside Width</div>
+                                                <div class="calc-formula">41.3125&quot; - (2 × 0.75&quot;)</div>
+                                            </div>
+                    <div class="calc-result">39-13/16&quot;</div>
+                </div>
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Inside Depth</div>
+                                                <div class="calc-formula">18.75&quot; - 0.75&quot;</div>
+                                            </div>
+                    <div class="calc-result">18&quot;</div>
+                </div>
+                            </div>
+        </div>
+
+        <!-- Gate 2: Face Frame Opening -->
+        <div class="gate-section">
+            <div class="gate-header">
+                <div>
+                    <span class="gate-number">GATE 2</span>
+                    <span class="gate-title">Face Frame Opening</span>
+                </div>
+            </div>
+            <div class="gate-body">
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">FF Opening Width</div>
+                                                <div class="calc-formula">41.3125&quot; - (2 × 1.75&quot;)</div>
+                                            </div>
+                    <div class="calc-result">37-13/16&quot;</div>
+                </div>
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">FF Opening Height</div>
+                                                <div class="calc-formula">28.75&quot; - (2 × 1.5&quot;)</div>
+                                            </div>
+                    <div class="calc-result">25-3/4&quot;</div>
+                </div>
+                            </div>
+        </div>
+
+        <!-- Gate 3: Component Layout -->
+        <div class="gate-section">
+            <div class="gate-header">
+                <div>
+                    <span class="gate-number">GATE 3</span>
+                    <span class="gate-title">Component Layout</span>
+                </div>
+                <span class="status-badge status-pass">
+                    FITS
+                </span>
+            </div>
+            <div class="gate-body">
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Opening Height Available</div>
+                                            </div>
+                    <div class="calc-result">25-3/4&quot;</div>
+                </div>
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Total Consumed Height</div>
+                                            </div>
+                    <div class="calc-result">24-1/2&quot;</div>
+                </div>
+                                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Remaining Space</div>
+                                                <div class="calc-formula">25.75&quot; - 24.5&quot;</div>
+                                            </div>
+                    <div class="calc-result">1-1/4&quot;</div>
+                </div>
+                            </div>
+        </div>
+
+        <!-- Gate 4: Drawer Box Clearances -->
+        <div class="gate-section">
+            <div class="gate-header">
+                <div>
+                    <span class="gate-number">GATE 4</span>
+                    <span class="gate-title">Drawer Box Dimensions (Blum TANDEM 563H)</span>
+                </div>
+            </div>
+            <div class="gate-body">
+                                <div class="drawer-card">
+                    <div class="drawer-card-header">
+                        <span class="drawer-label">Drawer 1</span>
+                        <span class="drawer-opening">Opening: 7&quot;</span>
+                    </div>
+                    <div class="drawer-dims">
+                        <div class="dim-item">
+                            <div class="dim-value">37-3/16&quot;</div>
+                            <div class="dim-label">Width</div>
+                        </div>
+                        <div class="dim-item">
+                            <div class="dim-value">6&quot;</div>
+                            <div class="dim-label">Height (Shop)</div>
+                        </div>
+                        <div class="dim-item">
+                            <div class="dim-value">18-1/4&quot;</div>
+                            <div class="dim-label">Depth (Shop)</div>
+                        </div>
+                    </div>
+                </div>
+                                <div class="drawer-card">
+                    <div class="drawer-card-header">
+                        <span class="drawer-label">Drawer 2</span>
+                        <span class="drawer-opening">Opening: 17-1/8&quot;</span>
+                    </div>
+                    <div class="drawer-dims">
+                        <div class="dim-item">
+                            <div class="dim-value">37-3/16&quot;</div>
+                            <div class="dim-label">Width</div>
+                        </div>
+                        <div class="dim-item">
+                            <div class="dim-value">16&quot;</div>
+                            <div class="dim-label">Height (Shop)</div>
+                        </div>
+                        <div class="dim-item">
+                            <div class="dim-value">18-1/4&quot;</div>
+                            <div class="dim-label">Depth (Shop)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                                                <div class="calc-row" style="margin-top: 12px; background: #fef3c7; border-radius: 6px;">
+                    <div>
+                        <div class="calc-name">Depth Validation</div>
+                        <div class="calc-formula">Min Required: 18-3/4&quot; | Actual: 18-3/4&quot;</div>
+                    </div>
+                    <div class="calc-result" style="background: transparent;">OK !</div>
+                </div>
+                            </div>
+        </div>
+
+        <!-- Gate 5 & 6 Summary -->
+        <div class="gate-section">
+            <div class="gate-header">
+                <div>
+                    <span class="gate-number">GATE 5-6</span>
+                    <span class="gate-title">Stretchers & Face Frame (TCS Standard)</span>
+                </div>
+            </div>
+            <div class="gate-body">
+                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Stretcher Count</div>
+                        <div class="calc-formula">2 (front + back) + 2 drawer supports</div>
+                    </div>
+                    <div class="calc-result">4</div>
+                </div>
+                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Stretcher Width</div>
+                        <div class="calc-formula">Inside Width = 39-13/16&quot;</div>
+                    </div>
+                    <div class="calc-result">39-13/16&quot;</div>
+                </div>
+                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Stretcher Depth</div>
+                        <div class="calc-formula">TCS Standard</div>
+                    </div>
+                    <div class="calc-result">3"</div>
+                </div>
+                <div class="calc-row">
+                    <div>
+                        <div class="calc-name">Face Frame Rails</div>
+                        <div class="calc-formula">Top + Bottom + 1 mid rails</div>
+                    </div>
+                    <div class="calc-result">3</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Warnings -->
+                <div class="warnings-box">
+            <div class="warnings-title">Warnings</div>
+                        <div class="warning-item">Cabinet depth at minimum for slide - OK but tight</div>
+                    </div>
+        
+        <!-- Summary -->
+        <div class="summary-box">
+            <div class="summary-title">Audit Summary</div>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="summary-value success">PASS</div>
+                    <div class="summary-label">Status</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">FITS</div>
+                    <div class="summary-label">Component Fit</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">1-1/4&quot;</div>
+                    <div class="summary-label">Remaining Space</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-value">4</div>
+                    <div class="summary-label">Stretchers</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-notes">
+                <ul>
+                    <li>TCS Standards: Bryan Patton (Jan 2025)</li>
+                    <li>Blum TANDEM 563H clearances for 1/2" drawer sides</li>
+                    <li>Verify all dimensions before cutting</li>
+                </ul>
+            </div>
+            <div class="page-number">Page 1 of 3</div>
+        </div>
+    </div>
+
+    <!-- PAGE 2: CNC Cut Pieces with Drawings -->
+    <div class="page">
+        <!-- Header (repeated) -->
+        <div class="header">
+            <div class="company-info">
+                <div class="company-logo">TCS</div>
+                <div class="company-text">
+                    <h1>The Carpenter's Son</h1>
+                    <div class="tagline">Fine Custom Woodworking</div>
+                </div>
+            </div>
+            <div class="report-info">
+                <div class="report-title">CNC Cut Pieces</div>
+                <div class="report-subtitle">Shop Drawings & Dimensions</div>
+                <div class="report-date">9 Austin Lane - Bathroom Vanity</div>
+            </div>
+        </div>
+
+        <!-- Shop Values Explanation -->
+        <div class="shop-values-box">
+            <strong>Shop Values Explained:</strong>
+            <ul>
+                <li><strong>Heights:</strong> <span class="theoretical">Theoretical</span> -> <span style="color: #27ae60;">Shop</span> (rounded DOWN to nearest 1/2")</li>
+                <li><strong>Depths (Sides):</strong> <span class="theoretical">Slide Length</span> -> <span style="color: #27ae60;">Shop +1/4"</span> (add 1/4" for bottom dado)</li>
+            </ul>
+            <p style="margin: 10px 0 0 0; font-size: 0.9em;"><strong>Scale:</strong> 10px = 1 inch in all drawings</p>
+        </div>
+
+        <!-- Cabinet Box Pieces with SVG -->
+        <div class="section-header">Cabinet Box (3/4" Plywood)</div>
+
+        
+        <!-- Side Panels -->
+        <div class="piece-grid">
+            <div class="piece-drawing">
+                <svg viewBox="0 0 200 232.5" style="width: 100%; height: auto;">
+                    <!-- Side piece -->
+                    <rect x="20" y="15" width="108" height="172.5" fill="#d4a574" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="197.5" x2="128" y2="197.5" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="20" y1="192.5" x2="20" y2="202.5" stroke="#27ae60" stroke-width="1"/>
+                    <line x1="128" y1="192.5" x2="128" y2="202.5" stroke="#27ae60" stroke-width="1"/>
+                    <text x="74" y="217.5" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">18&quot;</text>
+                    <!-- Height dimension -->
+                    <line x1="138" y1="15" x2="138" y2="187.5" stroke="#27ae60" stroke-width="1"/>
+                    <text x="153" y="101.25" font-size="10" fill="#27ae60" text-anchor="start" font-weight="bold">28-3/4&quot;</text>
+                    <!-- Label -->
+                    <text x="74" y="10" font-size="8" fill="#666" text-anchor="middle">SIDE (x2) - 3/4" ply</text>
+                </svg>
+            </div>
+            <div class="piece-table">
+                <table>
+                    <tr class="piece-header-cabinet">
+                        <th colspan="2">SIDES (Qty: 2)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td><strong>Value</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Width (Depth)</td>
+                        <td class="dimension">18&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td class="dimension">28-3/4&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td>3/4" (0.75")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="2" style="font-size: 0.85em;">
+                            <strong>Note:</strong> Cut from cabinet depth x box height
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Bottom Panel -->
+        <div class="piece-grid">
+            <div class="piece-drawing">
+                <svg viewBox="0 0 200 168" style="width: 100%; height: auto;">
+                    <!-- Bottom piece -->
+                    <rect x="20" y="15" width="95.55" height="108" fill="#deb887" stroke="#8b5a2b" stroke-width="2"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="133" x2="115.55" y2="133" stroke="#333" stroke-width="1"/>
+                    <text x="67.775" y="153" font-size="10" fill="#333" text-anchor="middle" font-weight="bold">39-13/16&quot;</text>
+                    <!-- Label -->
+                    <text x="67.775" y="10" font-size="8" fill="#666" text-anchor="middle">BOTTOM (x1) - 3/4" ply</text>
+                </svg>
+            </div>
+            <div class="piece-table">
+                <table>
+                    <tr class="piece-header-bottom">
+                        <th colspan="2">BOTTOM (Qty: 1)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td><strong>Value</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Width</td>
+                        <td class="dimension">39-13/16&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Depth</td>
+                        <td class="dimension">18&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td>3/4" (0.75")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="2" style="font-size: 0.85em;">
+                            <strong>Note:</strong> Inside width x inside depth
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Back Panel -->
+        <div class="piece-grid">
+            <div class="piece-drawing">
+                <svg viewBox="0 0 200 232.5" style="width: 100%; height: auto;">
+                    <!-- Back piece -->
+                    <rect x="20" y="15" width="95.55" height="172.5" fill="#b8956a" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="197.5" x2="115.55" y2="197.5" stroke="#333" stroke-width="1"/>
+                    <text x="67.775" y="217.5" font-size="10" fill="#333" text-anchor="middle" font-weight="bold">39-13/16&quot;</text>
+                    <!-- Label -->
+                    <text x="67.775" y="10" font-size="8" fill="#666" text-anchor="middle">BACK (x1) - 3/4" ply</text>
+                </svg>
+            </div>
+            <div class="piece-table">
+                <table>
+                    <tr class="piece-header-cabinet">
+                        <th colspan="2">BACK (Qty: 1)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td><strong>Value</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Width</td>
+                        <td class="dimension">39-13/16&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td class="dimension">28-3/4&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td>3/4" (0.75")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="2" style="font-size: 0.85em;">
+                            <strong>Note:</strong> Full back (TCS standard)
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Drawer Boxes -->
+                <div class="section-header">Drawer Boxes (1/2" Plywood Sides, 1/4" Bottom)</div>
+
+                
+        <div class="piece-grid">
+            <div class="piece-drawing">
+                <svg viewBox="0 0 200 100" style="width: 100%; height: auto;">
+                    <!-- Side piece -->
+                    <rect x="20" y="15" width="109.5" height="48" fill="#f5e6d3" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dado groove -->
+                    <rect x="20" y="60" width="109.5" height="2" fill="#8b5a2b"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="75" x2="129.5" y2="75" stroke="#27ae60" stroke-width="1"/>
+                    <text x="74.75" y="88" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">18-1/4&quot;</text>
+                    <line x1="139.5" y1="15" x2="139.5" y2="63" stroke="#27ae60" stroke-width="1"/>
+                    <text x="154.5" y="39" font-size="10" fill="#27ae60" text-anchor="start" font-weight="bold">6&quot;</text>
+                    <!-- Label -->
+                    <text x="74.75" y="10" font-size="8" fill="#666" text-anchor="middle">DRAWER 1 SIDES (x2)</text>
+                </svg>
+            </div>
+            <div class="piece-table">
+                <table>
+                    <tr class="piece-header-sides">
+                        <th colspan="3">DRAWER 1 - SIDES (Qty: 2)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td class="theoretical"><strong>Theoretical</strong></td>
+                        <td class="shop-value"><strong>Shop</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td class="theoretical">6-3/16&quot;</td>
+                        <td class="shop-value">6&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td class="theoretical">18&quot;</td>
+                        <td class="shop-value">18-1/4&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td colspan="2">1/2" (0.5")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="3" style="font-size: 0.85em;">
+                            <strong>Dado:</strong> 1/4" x 1/4", 1/2" from bottom
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+                
+        <div class="piece-grid">
+            <div class="piece-drawing">
+                <svg viewBox="0 0 200 100" style="width: 100%; height: auto;">
+                    <!-- Side piece -->
+                    <rect x="20" y="15" width="109.5" height="50" fill="#f5e6d3" stroke="#5c4033" stroke-width="2"/>
+                    <!-- Dado groove -->
+                    <rect x="20" y="62" width="109.5" height="2" fill="#8b5a2b"/>
+                    <!-- Dimension lines -->
+                    <line x1="20" y1="75" x2="129.5" y2="75" stroke="#27ae60" stroke-width="1"/>
+                    <text x="74.75" y="88" font-size="10" fill="#27ae60" text-anchor="middle" font-weight="bold">18-1/4&quot;</text>
+                    <line x1="139.5" y1="15" x2="139.5" y2="65" stroke="#27ae60" stroke-width="1"/>
+                    <text x="154.5" y="40" font-size="10" fill="#27ae60" text-anchor="start" font-weight="bold">16&quot;</text>
+                    <!-- Label -->
+                    <text x="74.75" y="10" font-size="8" fill="#666" text-anchor="middle">DRAWER 2 SIDES (x2)</text>
+                </svg>
+            </div>
+            <div class="piece-table">
+                <table>
+                    <tr class="piece-header-sides">
+                        <th colspan="3">DRAWER 2 - SIDES (Qty: 2)</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Dimension</strong></td>
+                        <td class="theoretical"><strong>Theoretical</strong></td>
+                        <td class="shop-value"><strong>Shop</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Height</td>
+                        <td class="theoretical">16-5/16&quot;</td>
+                        <td class="shop-value">16&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Length</td>
+                        <td class="theoretical">18&quot;</td>
+                        <td class="shop-value">18-1/4&quot;</td>
+                    </tr>
+                    <tr>
+                        <td>Thickness</td>
+                        <td colspan="2">1/2" (0.5")</td>
+                    </tr>
+                    <tr style="background: #fff3cd;">
+                        <td colspan="3" style="font-size: 0.85em;">
+                            <strong>Dado:</strong> 1/4" x 1/4", 1/2" from bottom
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+                
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-notes">
+                <ul>
+                    <li>All dimensions in inches</li>
+                    <li>Shop values rounded for practical cutting</li>
+                    <li>Heights round DOWN to nearest 1/2"</li>
+                </ul>
+            </div>
+            <div class="page-number">Page 2 of 3</div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: Cut List & Verification -->
+    <div class="page">
+        <!-- Header (repeated) -->
+        <div class="header">
+            <div class="company-info">
+                <div class="company-logo">TCS</div>
+                <div class="company-text">
+                    <h1>The Carpenter's Son</h1>
+                    <div class="tagline">Fine Custom Woodworking</div>
+                </div>
+            </div>
+            <div class="report-info">
+                <div class="report-title">Complete Cut List</div>
+                <div class="report-subtitle">& Verification Checklist</div>
+                <div class="report-date">9 Austin Lane - Bathroom Vanity</div>
+            </div>
+        </div>
+
+        <!-- Gap Assessment -->
+        <div class="section-header">Gap Assessment</div>
+        <table class="gap-table">
+            <thead>
+                <tr>
+                    <th>Location</th>
+                    <th>Standard</th>
+                    <th>Actual</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td colspan="4" class="gap-category">opening reveals</td>
+                </tr>
+                                <tr>
+                    <td>Top Reveal</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>Bottom Reveal</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>Between Drawers</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                                <tr>
+                    <td colspan="4" class="gap-category">drawer clearances</td>
+                </tr>
+                                <tr>
+                    <td>Side Clearance (total)</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">5/8&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">5/8&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>Top Clearance</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/4&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/4&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>Bottom Clearance</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">9/16&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">9/16&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                                <tr>
+                    <td colspan="4" class="gap-category">face frame gaps</td>
+                </tr>
+                                <tr>
+                    <td>Door/Drawer to FF</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1/8&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                                <tr>
+                    <td colspan="4" class="gap-category">cabinet depth</td>
+                </tr>
+                                <tr>
+                    <td>Min for Slide</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">18-3/4&quot;</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">18-3/4&quot;</td>
+                    <td>
+                        <span class="gap-status warning">
+                            AT MIN
+                        </span>
+                    </td>
+                </tr>
+                                                <tr>
+                    <td colspan="4" class="gap-category">layout status</td>
+                </tr>
+                                <tr>
+                    <td>Component Fit</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">Components must fit in opening</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 10px;">1-1/4&quot;</td>
+                    <td>
+                        <span class="gap-status ok">
+                            OK
+                        </span>
+                    </td>
+                </tr>
+                                            </tbody>
+        </table>
+
+        <!-- Complete Cut List -->
+        <div class="section-header" style="margin-top: 24px;">Complete Cut List</div>
+
+                <table class="cut-table" style="margin-bottom: 16px;">
+            <thead>
+                <tr class="material-header">
+                    <th colspan="6">CABINET BOX - 3/4&quot; Plywood</th>
+                </tr>
+                <tr>
+                    <th>Part</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Width</th>
+                    <th class="text-center">Length</th>
+                    <th class="text-center">Thick</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td>
+                        <div class="part-name">Left Side</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">18&quot;</td>
+                    <td class="text-center font-mono">28-3/4&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Depth × Box Height</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Right Side</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">18&quot;</td>
+                    <td class="text-center font-mono">28-3/4&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Depth × Box Height</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Bottom</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">18&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Inside Width × Depth</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Back</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">28-3/4&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Inside Width × Box Height (TCS full 3/4&quot; back)</div>
+                    </td>
+                </tr>
+                            </tbody>
+        </table>
+                <table class="cut-table" style="margin-bottom: 16px;">
+            <thead>
+                <tr class="material-header">
+                    <th colspan="6">STRETCHERS - 3/4&quot; Plywood</th>
+                </tr>
+                <tr>
+                    <th>Part</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Width</th>
+                    <th class="text-center">Length</th>
+                    <th class="text-center">Thick</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td>
+                        <div class="part-name">Front Stretcher #1</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">3&quot;</td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">TCS 3&quot; standard</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Back Stretcher #2</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">3&quot;</td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">TCS 3&quot; standard</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer Support Stretcher #3</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">3&quot;</td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">TCS 3&quot; standard</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer Support Stretcher #4</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">3&quot;</td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">TCS 3&quot; standard</div>
+                    </td>
+                </tr>
+                            </tbody>
+        </table>
+                <table class="cut-table" style="margin-bottom: 16px;">
+            <thead>
+                <tr class="material-header">
+                    <th colspan="6">FACE FRAME - 3/4&quot; Hardwood/MDF</th>
+                </tr>
+                <tr>
+                    <th>Part</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Width</th>
+                    <th class="text-center">Length</th>
+                    <th class="text-center">Thick</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td>
+                        <div class="part-name">Stiles</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">2</span>
+                    </td>
+                    <td class="text-center font-mono">1-3/4&quot;</td>
+                    <td class="text-center font-mono">28-3/4&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Left and Right stiles</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Top Rail</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">1-1/2&quot;</td>
+                    <td class="text-center font-mono">37-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Top rail</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Bottom Rail</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">1-1/2&quot;</td>
+                    <td class="text-center font-mono">37-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Bottom rail</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Mid Rails</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">1-1/2&quot;</td>
+                    <td class="text-center font-mono">37-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Mid rails (between drawers)</div>
+                    </td>
+                </tr>
+                            </tbody>
+        </table>
+                <table class="cut-table" style="margin-bottom: 16px;">
+            <thead>
+                <tr class="material-header">
+                    <th colspan="6">TOE KICK - 3/4&quot; Plywood</th>
+                </tr>
+                <tr>
+                    <th>Part</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Width</th>
+                    <th class="text-center">Length</th>
+                    <th class="text-center">Thick</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td>
+                        <div class="part-name">Toe Kick Board</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">4&quot;</td>
+                    <td class="text-center font-mono">39-13/16&quot;</td>
+                    <td class="text-center font-mono">0.75"</td>
+                    <td>
+                        <div class="part-notes">Recessed 3&quot; from face</div>
+                    </td>
+                </tr>
+                            </tbody>
+        </table>
+                <table class="cut-table" style="margin-bottom: 16px;">
+            <thead>
+                <tr class="material-header">
+                    <th colspan="6">DRAWER BOXES - 1/2&quot; Plywood (sides), 1/4&quot; Plywood (bottom)</th>
+                </tr>
+                <tr>
+                    <th>Part</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Width</th>
+                    <th class="text-center">Length</th>
+                    <th class="text-center">Thick</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer 1 Sides</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">2</span>
+                    </td>
+                    <td class="text-center font-mono">6&quot;</td>
+                    <td class="text-center font-mono">18-1/4&quot;</td>
+                    <td class="text-center font-mono">0.5"</td>
+                    <td>
+                        <div class="part-notes">Shop depth (with dado allowance)</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer 1 Front/Back</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">2</span>
+                    </td>
+                    <td class="text-center font-mono">6&quot;</td>
+                    <td class="text-center font-mono">36-3/16&quot;</td>
+                    <td class="text-center font-mono">0.5"</td>
+                    <td>
+                        <div class="part-notes">Box width - 2× side thickness</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer 1 Bottom</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">36-7/16&quot;</td>
+                    <td class="text-center font-mono">17-1/4&quot;</td>
+                    <td class="text-center font-mono">0.25"</td>
+                    <td>
+                        <div class="part-notes">In dado groove</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer 2 Sides</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">2</span>
+                    </td>
+                    <td class="text-center font-mono">16&quot;</td>
+                    <td class="text-center font-mono">18-1/4&quot;</td>
+                    <td class="text-center font-mono">0.5"</td>
+                    <td>
+                        <div class="part-notes">Shop depth (with dado allowance)</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer 2 Front/Back</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">2</span>
+                    </td>
+                    <td class="text-center font-mono">16&quot;</td>
+                    <td class="text-center font-mono">36-3/16&quot;</td>
+                    <td class="text-center font-mono">0.5"</td>
+                    <td>
+                        <div class="part-notes">Box width - 2× side thickness</div>
+                    </td>
+                </tr>
+                                <tr>
+                    <td>
+                        <div class="part-name">Drawer 2 Bottom</div>
+                    </td>
+                    <td class="text-center">
+                        <span class="qty-badge">1</span>
+                    </td>
+                    <td class="text-center font-mono">36-7/16&quot;</td>
+                    <td class="text-center font-mono">17-1/4&quot;</td>
+                    <td class="text-center font-mono">0.25"</td>
+                    <td>
+                        <div class="part-notes">In dado groove</div>
+                    </td>
+                </tr>
+                            </tbody>
+        </table>
+        
+        <!-- Verification Checklist -->
+        <div class="section-header" style="margin-top: 24px;">Verification Checklist</div>
+
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Cabinet Width <strong>41-5/16&quot;</strong> - verified?</span>
+        </div>
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Cabinet Height <strong>32-3/4&quot;</strong> - verified?</span>
+        </div>
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Box Height <strong>28-3/4&quot;</strong> (after 4&quot; toe kick) - calculated correctly?</span>
+        </div>
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Face Frame Opening Width <strong>37-13/16&quot;</strong> - correct?</span>
+        </div>
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Face Frame Opening Height <strong>25-3/4&quot;</strong> - correct?</span>
+        </div>
+                <div class="check-item">
+            <input type="checkbox">
+            <span>Drawer 1 Box: <strong>37-3/16&quot; W x 6&quot; H x 18-1/4&quot; D</strong> - cut?</span>
+        </div>
+                <div class="check-item">
+            <input type="checkbox">
+            <span>Drawer 2 Box: <strong>37-3/16&quot; W x 16&quot; H x 18-1/4&quot; D</strong> - cut?</span>
+        </div>
+                <div class="check-item">
+            <input type="checkbox">
+            <span>All dados cut: <strong>1/4" x 1/4", 1/2" from bottom</strong> - complete?</span>
+        </div>
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Slide mounting height: <strong>37mm (1-7/16")</strong> from cabinet bottom - marked?</span>
+        </div>
+        <div class="check-item">
+            <input type="checkbox">
+            <span>Material ordered: 3/4" plywood, 1/2" plywood, 1/4" plywood - sufficient?</span>
+        </div>
+
+        <!-- Assembly Order Summary -->
+        <div class="section-header" style="margin-top: 24px;">Assembly Order</div>
+
+        <div class="assembly-step">
+            <div class="step-number">1</div>
+            <div>
+                <strong>CNC Cut All Pieces</strong>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Cut all cabinet box and drawer pieces to dimensions on cut list.</p>
+            </div>
+        </div>
+        <div class="assembly-step">
+            <div class="step-number">2</div>
+            <div>
+                <strong>Assemble Cabinet Box</strong>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Sides, bottom, back. Verify square.</p>
+            </div>
+        </div>
+        <div class="assembly-step">
+            <div class="step-number">3</div>
+            <div>
+                <strong>Install Stretchers</strong>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Front, back, and drawer support stretchers (4 total).</p>
+            </div>
+        </div>
+        <div class="assembly-step">
+            <div class="step-number">4</div>
+            <div>
+                <strong>Build Drawer Boxes</strong>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Cut dados, assemble with bottom floating in dado grooves.</p>
+            </div>
+        </div>
+        <div class="assembly-step verify">
+            <div class="step-number">5</div>
+            <div>
+                <strong>Install Slides & Test</strong>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Mount cabinet runners at 37mm. Test drawer operation.</p>
+            </div>
+        </div>
+        <div class="assembly-step">
+            <div class="step-number">6</div>
+            <div>
+                <strong>Attach Face Frame</strong>
+                <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Stiles and rails. Verify opening dimensions match calculations.</p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-notes">
+                <ul>
+                    <li>Blum TANDEM 563H - 1/2" drawer sides</li>
+                    <li>TCS Standards (Bryan Patton, Jan 2025)</li>
+                    <li>Generated by TCS Woodwork ERP</li>
+                </ul>
+            </div>
+            <div class="page-number">Page 3 of 3</div>
+        </div>
+    </div>
+</body>
+</html>

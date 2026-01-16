@@ -1359,3 +1359,191 @@ Material and design choices significantly impact the final cost.
 *   **Sheet Yield:** As discussed above, poor yield directly increases material cost.
 
 // ... (End of Section VIII) ...
+
+---
+
+## IX. TCS Woodwork Construction Standards
+
+**Source:** Bryan Patton (Owner, TCS Woodwork) - Documented January 2025
+
+This section documents the specific construction standards used at TCS Woodwork. These standards represent the shop's established practices for custom cabinet construction and have been implemented in the ERP system as configurable templates.
+
+### 1. Cabinet Heights
+
+| Cabinet Type | TCS Standard | Notes |
+|--------------|--------------|-------|
+| **Base Cabinet** | 34.75" (34 3/4") | Box height only. With 1.25" countertop = 36" finished counter height |
+| **Wall Cabinet 30"** | 30" | Standard wall cabinet |
+| **Wall Cabinet 36"** | 36" | Extended wall cabinet |
+| **Wall Cabinet 42"** | 42" | Tall wall cabinet |
+| **Tall Cabinet 84"** | 84" | Standard tall/pantry |
+| **Tall Cabinet 96"** | 96" | Full-height tall |
+
+**Bryan's Quote:** *"Cabinets for kitchens are normally 34, 3 quarter tall, because countertops are typically an inch of quarter"*
+
+### 2. Toe Kick
+
+| Dimension | TCS Standard | Notes |
+|-----------|--------------|-------|
+| **Height** | 4.5" (4 1/2") | Standard toe kick height |
+| **Recess** | 3" | Distance from face frame to toe kick face |
+
+**Bryan's Quote:** *"Toe kick standard is 4.5 inches tall"* and *"3 inches from the face"*
+
+### 3. Stretchers
+
+| Dimension | TCS Standard | Notes |
+|-----------|--------------|-------|
+| **Depth** | 3" | Front-to-back dimension |
+| **Thickness** | 0.75" (3/4") | Material thickness |
+| **Min Depth** | 2.5" | Minimum allowable |
+| **Max Depth** | 4" | Maximum allowable |
+
+**Bryan's Quote:** *"3 inch stretchers"*
+
+**Stretcher Rules:**
+- Base cabinets use stretchers (not full tops) for countertop attachment
+- Wall cabinets have full tops
+- Number of stretchers = 2 (front + back) + drawer count (one per drawer for slide mounting)
+
+### 4. Face Frame
+
+| Dimension | TCS Standard | Notes |
+|-----------|--------------|-------|
+| **Stile Width** | 1.5" (1 1/2") | Vertical members |
+| **Rail Width** | 1.5" (1 1/2") | Horizontal members |
+| **Door Gap** | 0.125" (1/8") | Gap between frame and door overlay |
+| **Thickness** | 0.75" (3/4") | Material thickness |
+
+**Bryan's Quote:** *"Face frame... typically is an inch and a half or inch of 3 quarter, then you have an 8th inch gap to your door"*
+
+### 5. Materials
+
+| Component | TCS Standard | Notes |
+|-----------|--------------|-------|
+| **Box Material** | 3/4" prefinished maple plywood | All cabinet boxes including backs |
+| **Box Thickness** | 0.75" (3/4") | Side panels |
+| **Back Thickness** | 0.75" (3/4") | Full thickness backs (NOT 1/4" backs) |
+| **Face Frame Material** | Hardwood lumber | Species matches cabinet style |
+
+**Bryan's Quote:** *"Our cabinets are built out of 3 quarter prefinished maple plywood, including the backs"*
+
+**Important:** TCS uses full 3/4" backs, not the thinner 1/4" backs common in production cabinets. This provides:
+- Greater structural rigidity
+- Better screw holding for wall mounting
+- Enhanced moisture resistance
+- Premium quality appearance
+
+### 6. Sink Cabinet
+
+| Feature | TCS Standard | Notes |
+|---------|--------------|-------|
+| **Side Extension** | 0.75" (3/4") | Extra height at sink locations |
+
+**Bryan's Quote:** *"At sink locations... sides will come up an additional 3/4 of an inch"*
+
+This extension provides additional support for heavy sinks and allows the countertop to be properly supported around the sink cutout.
+
+### 7. Section Layout Ratios
+
+| Ratio Type | TCS Default | Notes |
+|------------|-------------|-------|
+| **Drawer Bank** | 40% | Width ratio for drawer banks |
+| **Door Section** | 60% | Width ratio for door sections |
+| **Equal Split** | 50% | For equal-width sections |
+
+### 8. Countertop
+
+| Dimension | TCS Standard | Notes |
+|-----------|--------------|-------|
+| **Thickness** | 1.25" (1 1/4") | Standard countertop thickness |
+| **Finished Height** | 36" | Total height from floor (34.75" cabinet + 1.25" countertop) |
+
+### 9. Construction Type Summary
+
+**TCS Face Frame Construction:**
+- Full 3/4" box construction with prefinished maple plywood
+- Full 3/4" backs (not 1/4" backs)
+- 1.5" face frame stiles and rails
+- 1/8" door gap/reveal
+- 3" stretchers on base cabinets
+- 4.5" toe kicks with 3" recess
+- Pocket hole or dowel joinery for face frames
+
+**Top Construction by Cabinet Type:**
+| Cabinet Type | Top Construction |
+|--------------|------------------|
+| Base | Stretchers |
+| Wall | Full Top |
+| Tall | Stretchers (typically) |
+
+### 10. Implementation in ERP System
+
+These TCS standards are implemented in the AureusERP system as configurable **Construction Templates**. This allows:
+
+1. **Default Template:** "TCS Standard" template with all Bryan Patton values as defaults
+2. **Template Inheritance:** Cabinet → Room → Project → Global Default
+3. **Override Capability:** Individual cabinets can override template values when needed
+4. **Alternative Templates:** Support for "European Frameless" or "Traditional Inset" styles
+
+**Database Location:** `projects_construction_templates` table
+**Admin UI:** Settings → Configurations → Construction Standards → Construction Templates
+
+### 11. Key Differences from Industry Standards
+
+| Aspect | Industry Common | TCS Standard | Benefit |
+|--------|-----------------|--------------|---------|
+| Base Height | 34.5" | 34.75" | Precise countertop alignment |
+| Back Thickness | 0.25" | 0.75" | Structural rigidity, premium quality |
+| Stretcher Depth | 3.5"-4" | 3" | Optimized material usage |
+| Back Material | Hardboard/thin ply | Prefinished maple ply | Consistent box construction |
+
+### 12. Calculation Examples
+
+**Interior Height for Base Cabinet:**
+```
+Cabinet Height:     34.75"
+- Toe Kick:         - 4.50"
+- Stretcher:        - 3.00"
+= Interior Height:  27.25"
+```
+
+**Interior Width for 36" Base Cabinet:**
+```
+Cabinet Width:      36.00"
+- Left Side:        - 0.75"
+- Right Side:       - 0.75"
+= Interior Width:   34.50"
+```
+
+**Interior Depth for 24" Base Cabinet:**
+```
+Cabinet Depth:      24.00"
+- Back Panel:       - 0.75"
+= Interior Depth:   23.25"
+```
+
+### 13. Service Integration
+
+The `ConstructionStandardsService` provides programmatic access to these values:
+
+```php
+use App\Services\ConstructionStandardsService;
+
+$service = app(ConstructionStandardsService::class);
+$cabinet = Cabinet::find(1);
+
+// Get values with template inheritance
+$stretcherDepth = $service->getStretcherDepth($cabinet);     // 3.0
+$toeKickHeight = $service->getToeKickHeight($cabinet);       // 4.5
+$stileWidth = $service->getFaceFrameStileWidth($cabinet);    // 1.5
+$boxThickness = $service->getBoxMaterialThickness($cabinet); // 0.75
+
+// Get all standards as array
+$allStandards = $service->getAllStandards($cabinet);
+```
+
+---
+
+*Last Updated: January 2025*
+*Source: Bryan Patton, TCS Woodwork Owner*

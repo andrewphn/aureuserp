@@ -128,6 +128,8 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2025_12_24_100000_add_google_drive_columns_to_projects_table',
                 '2025_12_31_175144_add_complexity_score_columns',
                 '2026_01_12_182839_create_projects_faceframes_table',
+                '2026_01_16_000001_create_construction_templates_table',
+                '2026_01_16_000002_add_construction_template_to_entities',
             ])
             ->runsMigrations()
             ->hasSettings([

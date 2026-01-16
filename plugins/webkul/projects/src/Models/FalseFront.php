@@ -26,12 +26,17 @@ use Webkul\Project\Traits\HasOpeningPosition;
  * - Appliance openings (decorative panels to match surrounding fronts)
  * - Tilt-out trays (false fronts that hinge at bottom for sponge/brush storage)
  *
- * Key construction element: BACKING RAIL - support strip behind false front
- * that provides mounting surface and structural support.
+ * TCS CONSTRUCTION RULE (Bryan Patton, Jan 2025):
+ * ALL false fronts have a backing. The backing serves DUAL PURPOSE:
+ * 1. Backing for the false front panel (provides mounting surface)
+ * 2. Functions AS the stretcher (eliminates need for separate stretcher piece)
+ *
+ * Example: 6" false front face with 7" backing = backing extends 1" past face
+ * to function as the stretcher for the drawer below.
  *
  * Cut List Note: False fronts generate TWO parts:
  * 1. False Front Panel - the visible decorative front
- * 2. Backing Rail - the support strip (if has_backing_rail = true)
+ * 2. Backing - the support piece that ALSO serves as stretcher
  *
  * @property int $id
  * @property int $cabinet_id
@@ -44,12 +49,11 @@ use Webkul\Project\Traits\HasOpeningPosition;
  * @property float|null $width_inches Panel width
  * @property float|null $height_inches Panel height
  * @property float $thickness_inches Panel thickness (default 3/4")
- * @property bool $has_backing_rail Whether to include backing rail
- * @property float $backing_rail_width_inches Backing rail width (default 3-1/2")
- * @property float|null $backing_rail_height_inches Backing rail height
- * @property float $backing_rail_thickness_inches Backing rail thickness (default 3/4")
- * @property string $backing_rail_material Backing rail material
- * @property string $backing_rail_position Position: top, center, bottom
+ * @property bool $has_backing Whether to include backing (TCS: always true)
+ * @property float $backing_height_inches Backing height (extends past face to serve as stretcher)
+ * @property float $backing_thickness_inches Backing thickness (default 3/4")
+ * @property string $backing_material Backing material
+ * @property bool $backing_is_stretcher Whether backing doubles as stretcher (TCS: always true)
  *
  * @property-read Cabinet $cabinet
  * @property-read CabinetSection|null $section
@@ -76,20 +80,14 @@ class FalseFront extends Model implements CabinetComponentInterface
     ];
 
     /**
-     * Backing rail position options
+     * Standard backing dimensions (in inches)
+     *
+     * TCS Rule: Backing extends past false front face to serve as stretcher.
+     * Backing height = false front height + overhang to reach stretcher position.
      */
-    public const BACKING_RAIL_POSITIONS = [
-        'top' => 'Top of Panel',
-        'center' => 'Center of Panel',
-        'bottom' => 'Bottom of Panel',
-    ];
-
-    /**
-     * Standard backing rail dimensions (in inches)
-     */
-    public const STANDARD_BACKING_RAIL_WIDTH_INCHES = 3.5;      // 3-1/2"
-    public const STANDARD_BACKING_RAIL_THICKNESS_INCHES = 0.75; // 3/4"
-    public const STANDARD_PANEL_THICKNESS_INCHES = 0.75;        // 3/4"
+    public const STANDARD_BACKING_THICKNESS_INCHES = 0.75; // 3/4"
+    public const STANDARD_PANEL_THICKNESS_INCHES = 0.75;   // 3/4"
+    public const DEFAULT_BACKING_OVERHANG_INCHES = 1.0;    // 1" typical overhang
 
     /**
      * Common tilt hardware options
@@ -112,13 +110,12 @@ class FalseFront extends Model implements CabinetComponentInterface
         'width_inches',
         'height_inches',
         'thickness_inches',
-        // Backing rail
-        'has_backing_rail',
-        'backing_rail_width_inches',
-        'backing_rail_height_inches',
-        'backing_rail_thickness_inches',
-        'backing_rail_material',
-        'backing_rail_position',
+        // Backing (TCS: all false fronts have backing that doubles as stretcher)
+        'has_backing',
+        'backing_height_inches',
+        'backing_thickness_inches',
+        'backing_material',
+        'backing_is_stretcher',
         // Style
         'profile_type',
         'rail_width_inches',
@@ -147,8 +144,8 @@ class FalseFront extends Model implements CabinetComponentInterface
         'panel_edge_banded_at',
         'panel_sanded_at',
         'panel_finished_at',
-        'backing_rail_cut_at',
-        'backing_rail_installed_at',
+        'backing_cut_at',
+        'backing_installed_at',
         'installed_at',
         // QC
         'qc_passed',
@@ -167,11 +164,11 @@ class FalseFront extends Model implements CabinetComponentInterface
             'width_inches' => 'float',
             'height_inches' => 'float',
             'thickness_inches' => 'float',
-            // Backing rail
-            'has_backing_rail' => 'boolean',
-            'backing_rail_width_inches' => 'float',
-            'backing_rail_height_inches' => 'float',
-            'backing_rail_thickness_inches' => 'float',
+            // Backing (doubles as stretcher)
+            'has_backing' => 'boolean',
+            'backing_height_inches' => 'float',
+            'backing_thickness_inches' => 'float',
+            'backing_is_stretcher' => 'boolean',
             // Style
             'rail_width_inches' => 'float',
             'stile_width_inches' => 'float',
@@ -190,8 +187,8 @@ class FalseFront extends Model implements CabinetComponentInterface
             'panel_edge_banded_at' => 'datetime',
             'panel_sanded_at' => 'datetime',
             'panel_finished_at' => 'datetime',
-            'backing_rail_cut_at' => 'datetime',
-            'backing_rail_installed_at' => 'datetime',
+            'backing_cut_at' => 'datetime',
+            'backing_installed_at' => 'datetime',
             'installed_at' => 'datetime',
             // QC
             'qc_passed' => 'boolean',
@@ -369,13 +366,15 @@ class FalseFront extends Model implements CabinetComponentInterface
 
     /**
      * Get cut list data for this false front.
-     * Returns array with panel and optionally backing rail.
+     *
+     * TCS Rule: All false fronts have backing that doubles as stretcher.
+     * Returns array with panel and backing (which serves as stretcher).
      */
     public function getCutListDataAttribute(): array
     {
         $parts = [];
 
-        // 1. False Front Panel
+        // 1. False Front Panel (decorative face)
         $parts[] = [
             'part' => 'False Front Panel',
             'code' => $this->full_code ?? $this->getComponentCode(),
@@ -388,30 +387,55 @@ class FalseFront extends Model implements CabinetComponentInterface
             'type' => $this->false_front_type,
         ];
 
-        // 2. Backing Rail (if enabled)
-        if ($this->has_backing_rail) {
-            $parts[] = [
-                'part' => 'Backing Rail',
-                'code' => ($this->full_code ?? $this->getComponentCode()) . '-BR',
-                'qty' => 1,
-                'width' => self::roundToSixteenth($this->width_inches ?? 0), // Same width as panel
-                'height' => self::roundToSixteenth($this->backing_rail_width_inches ?? self::STANDARD_BACKING_RAIL_WIDTH_INCHES),
-                'thickness' => $this->backing_rail_thickness_inches ?? self::STANDARD_BACKING_RAIL_THICKNESS_INCHES,
-                'material' => $this->backing_rail_material ?? 'plywood',
-                'finish' => null, // Usually unfinished
-                'position' => $this->backing_rail_position ?? 'center',
-            ];
-        }
+        // 2. Backing (TCS: always present, doubles as stretcher)
+        // Backing height extends past face to reach stretcher position
+        $backingHeight = $this->backing_height_inches
+            ?? (($this->height_inches ?? 0) + self::DEFAULT_BACKING_OVERHANG_INCHES);
+
+        $parts[] = [
+            'part' => 'Backing/Stretcher',
+            'code' => ($this->full_code ?? $this->getComponentCode()) . '-BK',
+            'qty' => 1,
+            'width' => self::roundToSixteenth($this->width_inches ?? 0), // Same width as panel
+            'height' => self::roundToSixteenth($backingHeight),
+            'thickness' => $this->backing_thickness_inches ?? self::STANDARD_BACKING_THICKNESS_INCHES,
+            'material' => $this->backing_material ?? 'plywood',
+            'finish' => null, // Unfinished - hidden behind panel
+            'is_stretcher' => $this->backing_is_stretcher ?? true,
+            'note' => 'Backing serves dual purpose: false front backing AND stretcher',
+        ];
 
         return $parts;
     }
 
     /**
-     * Get total part count for cut list (panel + optional backing rail).
+     * Get total part count for cut list (panel + backing).
+     * TCS: All false fronts have backing, so always 2 parts.
      */
     public function getCutListPartCountAttribute(): int
     {
-        return $this->has_backing_rail ? 2 : 1;
+        return 2; // Panel + Backing (backing is always present per TCS rule)
+    }
+
+    /**
+     * Calculate backing height based on false front height and stretcher position.
+     *
+     * TCS Rule: Backing extends past false front face to reach stretcher.
+     *
+     * @param float|null $stretcherPositionFromTop Position of stretcher from top of box
+     * @return float Backing height in inches
+     */
+    public function calculateBackingHeight(?float $stretcherPositionFromTop = null): float
+    {
+        $faceHeight = $this->height_inches ?? 6;
+
+        if ($stretcherPositionFromTop !== null) {
+            // Backing height = distance from top to stretcher
+            return $stretcherPositionFromTop;
+        }
+
+        // Default: face height + standard overhang
+        return $faceHeight + self::DEFAULT_BACKING_OVERHANG_INCHES;
     }
 
     // ========================================
@@ -423,9 +447,13 @@ class FalseFront extends Model implements CabinetComponentInterface
         parent::boot();
 
         static::saving(function ($falseFront) {
-            // Set default backing rail height to match panel height if not set
-            if ($falseFront->has_backing_rail && empty($falseFront->backing_rail_height_inches)) {
-                $falseFront->backing_rail_height_inches = $falseFront->height_inches;
+            // TCS Rule: All false fronts have backing that doubles as stretcher
+            $falseFront->has_backing = true;
+            $falseFront->backing_is_stretcher = true;
+
+            // Set default backing height if not set (face height + overhang)
+            if (empty($falseFront->backing_height_inches) && $falseFront->height_inches) {
+                $falseFront->backing_height_inches = $falseFront->height_inches + self::DEFAULT_BACKING_OVERHANG_INCHES;
             }
 
             // Generate full code if not set

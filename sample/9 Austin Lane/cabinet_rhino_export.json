@@ -1,0 +1,1556 @@
+{
+    "metadata": {
+        "export_type": "rhino_mcp",
+        "version": "1.0",
+        "source": "CabinetMathAuditService",
+        "units": "inches",
+        "coordinate_system": {
+            "origin": "Front-Bottom-Left",
+            "x_axis": "Left \u2192 Right",
+            "y_axis": "Front \u2192 Back",
+            "z_axis": "Bottom \u2192 Top"
+        },
+        "cabinet_envelope": {
+            "width": 41.3125,
+            "height": 32.75,
+            "depth": 21
+        },
+        "part_count": 19,
+        "exported_at": "2026-01-15T22:26:27-05:00"
+    },
+    "layers": [
+        {
+            "name": "Cabinet",
+            "color": [
+                128,
+                128,
+                128
+            ],
+            "parent": null
+        },
+        {
+            "name": "Box",
+            "color": [
+                139,
+                90,
+                43
+            ],
+            "parent": "Cabinet"
+        },
+        {
+            "name": "FaceFrame",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "parent": "Cabinet"
+        },
+        {
+            "name": "Drawers",
+            "color": [
+                245,
+                222,
+                179
+            ],
+            "parent": "Cabinet"
+        },
+        {
+            "name": "FalseFronts",
+            "color": [
+                222,
+                184,
+                135
+            ],
+            "parent": "Cabinet"
+        },
+        {
+            "name": "ToeKick",
+            "color": [
+                105,
+                105,
+                105
+            ],
+            "parent": "Cabinet"
+        },
+        {
+            "name": "Stretchers",
+            "color": [
+                160,
+                82,
+                45
+            ],
+            "parent": "Cabinet"
+        }
+    ],
+    "objects": [
+        {
+            "type": "BOX",
+            "name": "Left Side",
+            "color": [
+                139,
+                90,
+                43
+            ],
+            "params": {
+                "width": 0.75,
+                "length": 21,
+                "height": 28.75
+            },
+            "translation": [
+                0,
+                0,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "left_side",
+                "part_type": "cabinet_box",
+                "layer": "Box",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 21,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": [
+                        "shelf_pin_holes",
+                        "runner_mounting"
+                    ]
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Right Side",
+            "color": [
+                139,
+                90,
+                43
+            ],
+            "params": {
+                "width": 0.75,
+                "length": 21,
+                "height": 28.75
+            },
+            "translation": [
+                40.5625,
+                0,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "right_side",
+                "part_type": "cabinet_box",
+                "layer": "Box",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 21,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": [
+                        "shelf_pin_holes",
+                        "runner_mounting"
+                    ]
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Bottom",
+            "color": [
+                139,
+                90,
+                43
+            ],
+            "params": {
+                "width": 39.8125,
+                "length": 20.25,
+                "height": 0.75
+            },
+            "translation": [
+                0.75,
+                0,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "bottom",
+                "part_type": "cabinet_box",
+                "layer": "Box",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 20.25,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Back",
+            "color": [
+                139,
+                90,
+                43
+            ],
+            "params": {
+                "width": 39.8125,
+                "length": 0.75,
+                "height": 28.75
+            },
+            "translation": [
+                0.75,
+                20.25,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "back",
+                "part_type": "cabinet_box",
+                "layer": "Box",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 39.8125,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "back"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Toe Kick",
+            "color": [
+                139,
+                90,
+                43
+            ],
+            "params": {
+                "width": 39.8125,
+                "length": 0.75,
+                "height": 4
+            },
+            "translation": [
+                0.75,
+                3,
+                0
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "toe_kick",
+                "part_type": "cabinet_box",
+                "layer": "Box",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 39.8125,
+                    "length": 4,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "notes": "Recessed 3\" from front face"
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Left Stile",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "params": {
+                "width": 1.75,
+                "length": 0.75,
+                "height": 28.75
+            },
+            "translation": [
+                0,
+                0,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "left_stile",
+                "part_type": "face_frame",
+                "layer": "FaceFrame",
+                "material": "3\/4\" Hardwood",
+                "cut_dimensions": {
+                    "width": 1.75,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Right Stile",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "params": {
+                "width": 1.75,
+                "length": 0.75,
+                "height": 28.75
+            },
+            "translation": [
+                39.5625,
+                0,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "right_stile",
+                "part_type": "face_frame",
+                "layer": "FaceFrame",
+                "material": "3\/4\" Hardwood",
+                "cut_dimensions": {
+                    "width": 1.75,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Top Rail",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 1.5
+            },
+            "translation": [
+                1.75,
+                0,
+                31.25
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "top_rail",
+                "part_type": "face_frame",
+                "layer": "FaceFrame",
+                "material": "3\/4\" Hardwood",
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Bottom Rail",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 1.5
+            },
+            "translation": [
+                1.75,
+                0,
+                4
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "bottom_rail",
+                "part_type": "face_frame",
+                "layer": "FaceFrame",
+                "material": "3\/4\" Hardwood",
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "False Front #1 Face",
+            "color": [
+                222,
+                184,
+                135
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 7
+            },
+            "translation": [
+                1.75,
+                0,
+                25.625
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "false_front_1_face",
+                "part_type": "false_front",
+                "layer": "FalseFronts",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 7,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": []
+                },
+                "notes": "Full overlay - extends past stiles"
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "False Front #1 Backing",
+            "color": [
+                188,
+                143,
+                143
+            ],
+            "params": {
+                "width": 39.8125,
+                "length": 0.75,
+                "height": 7
+            },
+            "translation": [
+                0.75,
+                0.75,
+                25.625
+            ],
+            "rotation": [
+                0,
+                0,
+                1.5707963267948966
+            ],
+            "metadata": {
+                "part_key": "false_front_1_backing",
+                "part_type": "false_front_backing",
+                "layer": "FalseFronts",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 7,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "notes": "Laid FLAT - doubles as stretcher (TCS rule)"
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Mid Rail (after FF#1)",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 1.5
+            },
+            "translation": [
+                1.75,
+                0,
+                23.4375
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "mid_rail_ff_1",
+                "part_type": "face_frame",
+                "layer": "FaceFrame",
+                "material": "3\/4\" Hardwood",
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "U-Shaped Drawer #1 Face",
+            "color": [
+                245,
+                222,
+                179
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 11.1875
+            },
+            "translation": [
+                1.75,
+                0,
+                14.3125
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "drawer_1_face",
+                "part_type": "drawer_face",
+                "layer": "Drawers",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 11.1875,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": [
+                        "u_cutout"
+                    ]
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "U-Shaped Drawer #1 Box",
+            "color": [
+                210,
+                105,
+                30
+            ],
+            "params": {
+                "width": 37.1875,
+                "length": 18.25,
+                "height": 10
+            },
+            "translation": [
+                1.0625,
+                0.125,
+                14.875
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "drawer_1_box",
+                "part_type": "drawer_box",
+                "layer": "Drawers",
+                "material": "1\/2\" Plywood (sides), 1\/4\" (bottom)",
+                "cut_dimensions": null,
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "none",
+                    "face_up": "n\/a"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "top"
+                    ],
+                    "machining": [
+                        "dado_1_4",
+                        "locking_device_holes",
+                        "rear_hook_holes"
+                    ]
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Mid Rail (after Drawer #1)",
+            "color": [
+                210,
+                180,
+                140
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 1.5
+            },
+            "translation": [
+                1.75,
+                0,
+                13.5625
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "mid_rail_drawer_1",
+                "part_type": "face_frame",
+                "layer": "FaceFrame",
+                "material": "3\/4\" Hardwood",
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Drawer #2 Face",
+            "color": [
+                245,
+                222,
+                179
+            ],
+            "params": {
+                "width": 37.8125,
+                "length": 0.75,
+                "height": 11.1875
+            },
+            "translation": [
+                1.75,
+                0,
+                3
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "drawer_2_face",
+                "part_type": "drawer_face",
+                "layer": "Drawers",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 11.1875,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Drawer #2 Box",
+            "color": [
+                210,
+                105,
+                30
+            ],
+            "params": {
+                "width": 37.1875,
+                "length": 18.25,
+                "height": 10
+            },
+            "translation": [
+                1.0625,
+                0.125,
+                3.5625
+            ],
+            "rotation": [
+                0,
+                0,
+                0
+            ],
+            "metadata": {
+                "part_key": "drawer_2_box",
+                "part_type": "drawer_box",
+                "layer": "Drawers",
+                "material": "1\/2\" Plywood (sides), 1\/4\" (bottom)",
+                "cut_dimensions": null,
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "none",
+                    "face_up": "n\/a"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "top"
+                    ],
+                    "machining": [
+                        "dado_1_4",
+                        "locking_device_holes",
+                        "rear_hook_holes"
+                    ]
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Front Stretcher",
+            "color": [
+                160,
+                82,
+                45
+            ],
+            "params": {
+                "width": 39.8125,
+                "length": 3,
+                "height": 0.75
+            },
+            "translation": [
+                0.75,
+                0.75,
+                32
+            ],
+            "rotation": [
+                0,
+                0,
+                1.5707963267948966
+            ],
+            "metadata": {
+                "part_key": "front_stretcher",
+                "part_type": "stretcher",
+                "layer": "Stretchers",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 3,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "notes": null
+            }
+        },
+        {
+            "type": "BOX",
+            "name": "Back Stretcher",
+            "color": [
+                160,
+                82,
+                45
+            ],
+            "params": {
+                "width": 39.8125,
+                "length": 3,
+                "height": 0.75
+            },
+            "translation": [
+                0.75,
+                17.25,
+                32
+            ],
+            "rotation": [
+                0,
+                0,
+                1.5707963267948966
+            ],
+            "metadata": {
+                "part_key": "back_stretcher",
+                "part_type": "stretcher",
+                "layer": "Stretchers",
+                "material": "3\/4\" Plywood",
+                "cut_dimensions": {
+                    "width": 3,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "notes": null
+            }
+        }
+    ],
+    "mcp_commands": [
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "Cabinet",
+                "color": [
+                    128,
+                    128,
+                    128
+                ],
+                "parent": null
+            }
+        },
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "Box",
+                "color": [
+                    139,
+                    90,
+                    43
+                ],
+                "parent": "Cabinet"
+            }
+        },
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "FaceFrame",
+                "color": [
+                    210,
+                    180,
+                    140
+                ],
+                "parent": "Cabinet"
+            }
+        },
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "Drawers",
+                "color": [
+                    245,
+                    222,
+                    179
+                ],
+                "parent": "Cabinet"
+            }
+        },
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "FalseFronts",
+                "color": [
+                    222,
+                    184,
+                    135
+                ],
+                "parent": "Cabinet"
+            }
+        },
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "ToeKick",
+                "color": [
+                    105,
+                    105,
+                    105
+                ],
+                "parent": "Cabinet"
+            }
+        },
+        {
+            "tool": "rhino\/create_layer",
+            "params": {
+                "name": "Stretchers",
+                "color": [
+                    160,
+                    82,
+                    45
+                ],
+                "parent": "Cabinet"
+            }
+        },
+        {
+            "tool": "rhino\/create_objects",
+            "params": {
+                "objects": [
+                    {
+                        "type": "BOX",
+                        "name": "Left Side",
+                        "color": [
+                            139,
+                            90,
+                            43
+                        ],
+                        "params": {
+                            "width": 0.75,
+                            "length": 21,
+                            "height": 28.75
+                        },
+                        "translation": [
+                            0,
+                            0,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Right Side",
+                        "color": [
+                            139,
+                            90,
+                            43
+                        ],
+                        "params": {
+                            "width": 0.75,
+                            "length": 21,
+                            "height": 28.75
+                        },
+                        "translation": [
+                            40.5625,
+                            0,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Bottom",
+                        "color": [
+                            139,
+                            90,
+                            43
+                        ],
+                        "params": {
+                            "width": 39.8125,
+                            "length": 20.25,
+                            "height": 0.75
+                        },
+                        "translation": [
+                            0.75,
+                            0,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Back",
+                        "color": [
+                            139,
+                            90,
+                            43
+                        ],
+                        "params": {
+                            "width": 39.8125,
+                            "length": 0.75,
+                            "height": 28.75
+                        },
+                        "translation": [
+                            0.75,
+                            20.25,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Toe Kick",
+                        "color": [
+                            139,
+                            90,
+                            43
+                        ],
+                        "params": {
+                            "width": 39.8125,
+                            "length": 0.75,
+                            "height": 4
+                        },
+                        "translation": [
+                            0.75,
+                            3,
+                            0
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Left Stile",
+                        "color": [
+                            210,
+                            180,
+                            140
+                        ],
+                        "params": {
+                            "width": 1.75,
+                            "length": 0.75,
+                            "height": 28.75
+                        },
+                        "translation": [
+                            0,
+                            0,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Right Stile",
+                        "color": [
+                            210,
+                            180,
+                            140
+                        ],
+                        "params": {
+                            "width": 1.75,
+                            "length": 0.75,
+                            "height": 28.75
+                        },
+                        "translation": [
+                            39.5625,
+                            0,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Top Rail",
+                        "color": [
+                            210,
+                            180,
+                            140
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 1.5
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            31.25
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Bottom Rail",
+                        "color": [
+                            210,
+                            180,
+                            140
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 1.5
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            4
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "False Front #1 Face",
+                        "color": [
+                            222,
+                            184,
+                            135
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 7
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            25.625
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "False Front #1 Backing",
+                        "color": [
+                            188,
+                            143,
+                            143
+                        ],
+                        "params": {
+                            "width": 39.8125,
+                            "length": 0.75,
+                            "height": 7
+                        },
+                        "translation": [
+                            0.75,
+                            0.75,
+                            25.625
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            1.5707963267948966
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Mid Rail (after FF#1)",
+                        "color": [
+                            210,
+                            180,
+                            140
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 1.5
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            23.4375
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "U-Shaped Drawer #1 Face",
+                        "color": [
+                            245,
+                            222,
+                            179
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 11.1875
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            14.3125
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "U-Shaped Drawer #1 Box",
+                        "color": [
+                            210,
+                            105,
+                            30
+                        ],
+                        "params": {
+                            "width": 37.1875,
+                            "length": 18.25,
+                            "height": 10
+                        },
+                        "translation": [
+                            1.0625,
+                            0.125,
+                            14.875
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Mid Rail (after Drawer #1)",
+                        "color": [
+                            210,
+                            180,
+                            140
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 1.5
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            13.5625
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Drawer #2 Face",
+                        "color": [
+                            245,
+                            222,
+                            179
+                        ],
+                        "params": {
+                            "width": 37.8125,
+                            "length": 0.75,
+                            "height": 11.1875
+                        },
+                        "translation": [
+                            1.75,
+                            0,
+                            3
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Drawer #2 Box",
+                        "color": [
+                            210,
+                            105,
+                            30
+                        ],
+                        "params": {
+                            "width": 37.1875,
+                            "length": 18.25,
+                            "height": 10
+                        },
+                        "translation": [
+                            1.0625,
+                            0.125,
+                            3.5625
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            0
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Front Stretcher",
+                        "color": [
+                            160,
+                            82,
+                            45
+                        ],
+                        "params": {
+                            "width": 39.8125,
+                            "length": 3,
+                            "height": 0.75
+                        },
+                        "translation": [
+                            0.75,
+                            0.75,
+                            32
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            1.5707963267948966
+                        ]
+                    },
+                    {
+                        "type": "BOX",
+                        "name": "Back Stretcher",
+                        "color": [
+                            160,
+                            82,
+                            45
+                        ],
+                        "params": {
+                            "width": 39.8125,
+                            "length": 3,
+                            "height": 0.75
+                        },
+                        "translation": [
+                            0.75,
+                            17.25,
+                            32
+                        ],
+                        "rotation": [
+                            0,
+                            0,
+                            1.5707963267948966
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}

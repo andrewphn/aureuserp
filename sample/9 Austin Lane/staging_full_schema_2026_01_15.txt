@@ -1,0 +1,1010 @@
+=== projects_projects ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+project_number | varchar(255) | NULL
+draft_number | varchar(255) | NULL
+project_type | varchar(255) | NULL
+lead_source | varchar(50) | NULL
+budget_range | varchar(20) | NULL
+complexity_score | tinyint(3) unsigned | NULL
+complexity_breakdown | json | NULL
+room_count_cached | int(11) | NULL
+complexity_calculated_at | timestamp | NULL
+project_type_other | text | NULL
+tasks_label | varchar(255) | NULL
+description | text | NULL
+visibility | varchar(255) | NULL
+color | varchar(255) | NULL
+sort | int(11) | NULL
+start_date | date | NULL
+end_date | date | NULL
+desired_completion_date | date | NULL
+allocated_hours | decimal(8,2) | NULL
+estimated_linear_feet | decimal(10,2) | NULL
+allow_timesheets | tinyint(1) | NOT NULL
+allow_milestones | tinyint(1) | NOT NULL
+allow_task_dependencies | tinyint(1) | NOT NULL
+is_active | tinyint(1) | NOT NULL
+is_converted | tinyint(1) | NOT NULL
+google_drive_root_folder_id | varchar(255) | NULL
+google_drive_folder_url | varchar(500) | NULL
+google_drive_synced_at | timestamp | NULL
+google_drive_enabled | tinyint(1) | NOT NULL
+converted_at | timestamp | NULL
+stage_id | bigint(20) unsigned | NULL
+stage_entered_at | timestamp | NULL
+current_production_stage | enum('discovery','design','sourcing','production','delivery') | NOT NULL
+design_approved_at | timestamp | NULL
+redline_approved_at | timestamp | NULL
+materials_staged_at | timestamp | NULL
+all_materials_received_at | timestamp | NULL
+bol_created_at | timestamp | NULL
+bol_signed_at | timestamp | NULL
+delivered_at | timestamp | NULL
+closeout_delivered_at | timestamp | NULL
+customer_signoff_at | timestamp | NULL
+ferry_booking_date | date | NULL
+ferry_confirmation | varchar(100) | NULL
+install_support_completed_at | timestamp | NULL
+partner_id | bigint(20) unsigned | NULL
+use_customer_address | tinyint(1) | NOT NULL
+company_id | bigint(20) unsigned | NULL
+warehouse_id | bigint(20) unsigned | NULL
+source_quote_id | bigint(20) unsigned | NULL
+branch_id | bigint(20) unsigned | NULL
+user_id | bigint(20) unsigned | NULL
+designer_id | bigint(20) unsigned | NULL
+rhino_file_path | varchar(500) | NULL
+purchasing_manager_id | bigint(20) unsigned | NULL
+creator_id | bigint(20) unsigned | NULL
+deleted_at | timestamp | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+initial_consultation_date | date | NULL
+initial_consultation_notes | text | NULL
+design_revision_number | int(10) unsigned | NOT NULL
+design_notes | text | NULL
+design_locked_at | timestamp | NULL
+design_locked_by | bigint(20) unsigned | NULL
+procurement_locked_at | timestamp | NULL
+procurement_locked_by | bigint(20) unsigned | NULL
+production_locked_at | timestamp | NULL
+production_locked_by | bigint(20) unsigned | NULL
+bom_snapshot_json | json | NULL
+pricing_snapshot_json | json | NULL
+
+=== projects_rooms ===
+id | bigint(20) unsigned | NOT NULL
+project_id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+room_code | varchar(10) | NULL
+cabinet_level | varchar(10) | NULL
+material_category | varchar(50) | NULL
+finish_option | varchar(50) | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+location_count_cached | int(11) | NULL
+complexity_calculated_at | timestamp | NULL
+room_type | varchar(255) | NULL
+floor_number | varchar(255) | NULL
+pdf_page_number | int(11) | NULL
+pdf_room_label | varchar(255) | NULL
+pdf_detail_number | varchar(255) | NULL
+pdf_notes | text | NULL
+notes | text | NULL
+sort_order | int(11) | NOT NULL
+creator_id | bigint(20) unsigned | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+total_linear_feet_tier_1 | decimal(8,2) | NULL
+total_linear_feet_tier_2 | decimal(8,2) | NULL
+total_linear_feet_tier_3 | decimal(8,2) | NULL
+total_linear_feet_tier_4 | decimal(8,2) | NULL
+total_linear_feet_tier_5 | decimal(8,2) | NULL
+floating_shelves_lf | decimal(8,2) | NULL
+countertop_sqft | decimal(8,2) | NULL
+trim_millwork_lf | decimal(8,2) | NULL
+material_type | varchar(50) | NULL
+material_upgrade_rate | decimal(8,2) | NULL
+estimated_cabinet_value | decimal(10,2) | NULL
+estimated_additional_products | decimal(10,2) | NULL
+estimated_finish_value | decimal(10,2) | NULL
+estimated_project_value | decimal(10,2) | NULL
+pricing_tier_override | int(11) | NULL
+quoted_price | decimal(10,2) | NULL
+margin_percentage | decimal(5,2) | NULL
+labor_hours_estimate | decimal(8,2) | NULL
+last_pricing_calculation | timestamp | NULL
+pricing_notes | text | NULL
+
+=== projects_room_locations ===
+id | bigint(20) unsigned | NOT NULL
+room_id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+location_code | varchar(10) | NULL
+cabinet_level | varchar(10) | NULL
+material_category | varchar(50) | NULL
+finish_option | varchar(50) | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+run_count_cached | int(11) | NULL
+complexity_calculated_at | timestamp | NULL
+location_type | varchar(255) | NULL
+sequence | int(11) | NOT NULL
+elevation_reference | varchar(255) | NULL
+notes | text | NULL
+sort_order | int(11) | NOT NULL
+creator_id | bigint(20) unsigned | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+material_type | varchar(50) | NULL
+wood_species | varchar(100) | NULL
+door_style | varchar(100) | NULL
+finish_type | varchar(100) | NULL
+paint_color | varchar(100) | NULL
+stain_color | varchar(100) | NULL
+overall_width_inches | decimal(8,3) | NULL
+overall_height_inches | decimal(8,3) | NULL
+overall_depth_inches | decimal(8,3) | NULL
+soffit_height_inches | decimal(8,3) | NULL
+toe_kick_height_inches | decimal(8,3) | NULL
+toe_kick_depth_inches | decimal(8,3) | NULL
+cabinet_count | int(11) | NOT NULL
+total_linear_feet | decimal(8,2) | NULL
+cabinet_type_primary | varchar(50) | NULL
+has_face_frame | tinyint(1) | NOT NULL
+face_frame_width_inches | decimal(5,3) | NULL
+has_beaded_face_frame | tinyint(1) | NOT NULL
+inset_doors | tinyint(1) | NOT NULL
+overlay_type | varchar(50) | NULL
+hinge_type | varchar(100) | NULL
+slide_type | varchar(100) | NULL
+soft_close_doors | tinyint(1) | NOT NULL
+soft_close_drawers | tinyint(1) | NOT NULL
+has_crown_molding | tinyint(1) | NOT NULL
+has_light_rail | tinyint(1) | NOT NULL
+has_decorative_posts | tinyint(1) | NOT NULL
+has_appliance_panels | tinyint(1) | NOT NULL
+special_features_json | text | NULL
+countertop_type | varchar(100) | NULL
+countertop_sqft | decimal(8,2) | NULL
+backsplash_sqft | decimal(8,2) | NULL
+countertop_notes | text | NULL
+requires_electrical | tinyint(1) | NOT NULL
+requires_plumbing | tinyint(1) | NOT NULL
+electrical_notes | text | NULL
+plumbing_notes | text | NULL
+approval_status | varchar(50) | NOT NULL
+approved_at | timestamp | NULL
+approved_by_user_id | bigint(20) unsigned | NULL
+design_notes | text | NULL
+revision_notes | text | NULL
+estimated_value | decimal(10,2) | NULL
+complexity_tier | int(11) | NULL
+elevation_view | varchar(50) | NULL
+pdf_page_reference | varchar(100) | NULL
+
+=== projects_cabinet_runs ===
+id | bigint(20) unsigned | NOT NULL
+room_location_id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+run_code | varchar(10) | NULL
+cabinet_level | varchar(10) | NULL
+material_category | varchar(50) | NULL
+finish_option | varchar(50) | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+cabinet_count_cached | int(11) | NULL
+complexity_calculated_at | timestamp | NULL
+run_type | varchar(255) | NULL
+total_linear_feet | decimal(10,2) | NULL
+start_wall_measurement | decimal(8,2) | NULL
+end_wall_measurement | decimal(8,2) | NULL
+notes | text | NULL
+sort_order | int(11) | NOT NULL
+creator_id | bigint(20) unsigned | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+cabinet_count | int(11) | NOT NULL
+material_type | varchar(50) | NULL
+wood_species | varchar(100) | NULL
+finish_type | varchar(100) | NULL
+sheet_goods_required_sqft | decimal(10,2) | NULL
+solid_wood_required_bf | decimal(10,2) | NULL
+cnc_program_file | varchar(255) | NULL
+cnc_program_generated_at | timestamp | NULL
+cnc_machine_time_minutes | decimal(8,2) | NULL
+cnc_notes | text | NULL
+production_status | varchar(50) | NOT NULL
+material_ordered_at | timestamp | NULL
+cnc_started_at | timestamp | NULL
+cnc_completed_at | timestamp | NULL
+assembly_started_at | timestamp | NULL
+assembly_completed_at | timestamp | NULL
+finishing_started_at | timestamp | NULL
+finishing_completed_at | timestamp | NULL
+estimated_labor_hours | decimal(8,2) | NULL
+actual_labor_hours | decimal(8,2) | NULL
+lead_craftsman_id | bigint(20) unsigned | NULL
+labor_notes | text | NULL
+hardware_kit_json | text | NULL
+default_hinge_product_id | bigint(20) unsigned | NULL
+default_slide_product_id | bigint(20) unsigned | NULL
+hinges_count | int(11) | NOT NULL
+slides_count | int(11) | NOT NULL
+shelf_pins_count | int(11) | NOT NULL
+pullouts_count | int(11) | NOT NULL
+hardware_kitted | tinyint(1) | NOT NULL
+hardware_kitted_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_inspected_at | timestamp | NULL
+qc_inspector_id | bigint(20) unsigned | NULL
+qc_notes | text | NULL
+primer_type | varchar(100) | NULL
+primer_coats | int(11) | NULL
+topcoat_type | varchar(100) | NULL
+topcoat_coats | int(11) | NULL
+sheen_level | varchar(50) | NULL
+finishing_notes | text | NULL
+ready_for_delivery | tinyint(1) | NOT NULL
+ready_for_delivery_at | timestamp | NULL
+packaging_boxes_needed | int(11) | NULL
+delivery_notes | text | NULL
+material_cost_actual | decimal(10,2) | NULL
+hardware_cost_actual | decimal(10,2) | NULL
+labor_cost_actual | decimal(10,2) | NULL
+finishing_cost_actual | decimal(10,2) | NULL
+total_production_cost | decimal(10,2) | NULL
+
+=== projects_cabinets ===
+id | bigint(20) unsigned | NOT NULL
+product_id | bigint(20) unsigned | NULL
+box_material_product_id | bigint(20) unsigned | NULL
+face_frame_material_product_id | bigint(20) unsigned | NULL
+edge_banding_product_id | bigint(20) unsigned | NULL
+order_line_id | bigint(20) unsigned | NULL
+project_id | bigint(20) unsigned | NULL
+room_id | bigint(20) unsigned | NULL
+cabinet_run_id | bigint(20) unsigned | NULL
+cabinet_number | varchar(255) | NULL
+full_code | varchar(100) | NULL
+cabinet_level | varchar(10) | NULL
+construction_type | varchar(50) | NOT NULL
+top_construction_type | varchar(20) | NOT NULL
+stretcher_height_inches | decimal(5,3) | NOT NULL
+sink_requires_extended_sides | tinyint(1) | NOT NULL
+sink_side_extension_inches | decimal(5,3) | NOT NULL
+section_layout_type | varchar(50) | NOT NULL
+face_frame_stile_width_inches | decimal(5,3) | NOT NULL
+face_frame_rail_width_inches | decimal(5,3) | NOT NULL
+face_frame_mid_stile_count | int(10) unsigned | NOT NULL
+face_frame_door_gap_inches | decimal(5,3) | NOT NULL
+material_category | varchar(50) | NULL
+finish_option | varchar(50) | NULL
+position_in_run | int(11) | NULL
+wall_position_start_inches | decimal(8,2) | NULL
+product_variant_id | bigint(20) unsigned | NULL
+length_inches | decimal(10,4) | NULL
+width_inches | decimal(10,4) | NULL
+depth_inches | decimal(10,4) | NULL
+height_inches | decimal(10,4) | NULL
+linear_feet | decimal(8,2) | NULL
+quantity | int(10) unsigned | NOT NULL
+unit_price_per_lf | decimal(10,2) | NULL
+total_price | decimal(10,2) | NULL
+adjustment_type | varchar(20) | NOT NULL
+adjustment_value | decimal(10,2) | NULL
+adjustment_reason | varchar(255) | NULL
+adjustment_amount | decimal(10,2) | NULL
+final_price | decimal(10,2) | NULL
+hardware_notes | text | NULL
+custom_modifications | text | NULL
+shop_notes | text | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+section_count_cached | int(11) | NULL
+complexity_calculated_at | timestamp | NULL
+creator_id | bigint(20) unsigned | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+toe_kick_height | decimal(8,3) | NULL
+toe_kick_depth | decimal(8,3) | NULL
+box_material | varchar(100) | NULL
+box_thickness | decimal(5,3) | NULL
+joinery_method | varchar(50) | NULL
+has_back_panel | tinyint(1) | NOT NULL
+back_panel_thickness | decimal(5,3) | NULL
+has_face_frame | tinyint(1) | NOT NULL
+face_frame_stile_width | decimal(5,3) | NULL
+face_frame_rail_width | decimal(5,3) | NULL
+face_frame_material | varchar(100) | NULL
+beaded_face_frame | tinyint(1) | NOT NULL
+door_count | int(11) | NOT NULL
+door_style | varchar(100) | NULL
+door_mounting | varchar(50) | NULL
+door_sizes_json | text | NULL
+has_glass_doors | tinyint(1) | NOT NULL
+glass_type | varchar(100) | NULL
+drawer_count | int(11) | NOT NULL
+drawer_sizes_json | text | NULL
+dovetail_drawers | tinyint(1) | NOT NULL
+drawer_box_material | varchar(100) | NULL
+drawer_box_thickness | decimal(5,3) | NULL
+drawer_soft_close | tinyint(1) | NOT NULL
+adjustable_shelf_count | int(11) | NOT NULL
+fixed_shelf_count | int(11) | NOT NULL
+shelf_thickness | decimal(5,3) | NULL
+shelf_material | varchar(100) | NULL
+shelf_pin_holes | int(11) | NOT NULL
+hinge_model | varchar(100) | NULL
+hinge_product_id | bigint(20) unsigned | NULL
+hinge_quantity | int(11) | NOT NULL
+slide_model | varchar(100) | NULL
+slide_product_id | bigint(20) unsigned | NULL
+slide_quantity | int(11) | NOT NULL
+specialty_hardware_json | text | NULL
+has_pullout | tinyint(1) | NOT NULL
+pullout_model | varchar(100) | NULL
+pullout_product_id | bigint(20) unsigned | NULL
+has_lazy_susan | tinyint(1) | NOT NULL
+lazy_susan_model | varchar(100) | NULL
+lazy_susan_product_id | bigint(20) unsigned | NULL
+has_tray_dividers | tinyint(1) | NOT NULL
+has_spice_rack | tinyint(1) | NOT NULL
+interior_accessories_json | text | NULL
+appliance_panel | tinyint(1) | NOT NULL
+appliance_type | varchar(100) | NULL
+has_microwave_shelf | tinyint(1) | NOT NULL
+has_trash_pullout | tinyint(1) | NOT NULL
+has_hamper | tinyint(1) | NOT NULL
+has_wine_rack | tinyint(1) | NOT NULL
+special_features_json | text | NULL
+has_sink_cutout | tinyint(1) | NOT NULL
+sink_dimensions_json | text | NULL
+has_cooktop_cutout | tinyint(1) | NOT NULL
+has_electrical_cutouts | tinyint(1) | NOT NULL
+cutout_notes | text | NULL
+complexity_tier | int(11) | NULL
+base_price_per_lf | decimal(8,2) | NULL
+material_upgrade_per_lf | decimal(8,2) | NULL
+cabinet_linear_feet | decimal(8,2) | NULL
+estimated_cabinet_price | decimal(10,2) | NULL
+assembly_notes | text | NULL
+installation_notes | text | NULL
+requires_scribing | tinyint(1) | NOT NULL
+hardware_installation_notes | text | NULL
+plywood_sqft | decimal(8,2) | NULL
+solid_wood_bf | decimal(8,2) | NULL
+edge_banding_lf | decimal(8,2) | NULL
+cnc_cut_at | timestamp | NULL
+face_frame_cut_at | timestamp | NULL
+door_fronts_cut_at | timestamp | NULL
+edge_banded_at | timestamp | NULL
+hardware_installed_at | timestamp | NULL
+pocket_holes_at | timestamp | NULL
+assembled_at | timestamp | NULL
+sanded_at | timestamp | NULL
+finished_at | timestamp | NULL
+assembled_by_user_id | bigint(20) unsigned | NULL
+qc_passed | tinyint(1) | NULL
+qc_issues | text | NULL
+qc_inspected_at | timestamp | NULL
+doweled_at | timestamp | NULL
+
+=== projects_cabinet_sections ===
+id | bigint(20) unsigned | NOT NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_number | int(11) | NOT NULL
+section_code | varchar(5) | NULL
+full_code | varchar(100) | NULL
+name | varchar(255) | NOT NULL
+section_type | varchar(50) | NOT NULL
+product_id | bigint(20) unsigned | NULL
+hardware_product_id | bigint(20) unsigned | NULL
+width_inches | decimal(8,3) | NULL
+height_inches | decimal(8,3) | NULL
+position_from_left_inches | decimal(8,3) | NULL
+position_from_bottom_inches | decimal(8,3) | NULL
+cabinet_position_from_left_inches | decimal(8,4) | NULL
+cabinet_position_from_top_inches | decimal(8,4) | NULL
+section_width_ratio | decimal(5,3) | NULL
+section_height_ratio | decimal(5,3) | NULL
+component_count | int(11) | NOT NULL
+opening_width_inches | decimal(8,3) | NULL
+opening_height_inches | decimal(8,3) | NULL
+total_consumed_height_inches | decimal(8,4) | NULL
+total_consumed_width_inches | decimal(8,4) | NULL
+remaining_height_inches | decimal(8,4) | NULL
+remaining_width_inches | decimal(8,4) | NULL
+layout_direction | enum('vertical','horizontal','grid') | NOT NULL
+top_reveal_inches | decimal(8,4) | NOT NULL
+bottom_reveal_inches | decimal(8,4) | NOT NULL
+component_gap_inches | decimal(8,4) | NOT NULL
+opening_depth_inches | decimal(8,3) | NULL
+notes | text | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+component_count_cached | int(11) | NULL
+complexity_calculated_at | timestamp | NULL
+sort_order | int(11) | NOT NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_drawers ===
+id | bigint(20) unsigned | NOT NULL
+product_id | bigint(20) unsigned | NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_id | bigint(20) unsigned | NULL
+drawer_number | int(11) | NOT NULL
+drawer_name | varchar(100) | NULL
+full_code | varchar(100) | NULL
+drawer_position | varchar(50) | NULL
+sort_order | int(11) | NOT NULL
+position_in_opening_inches | decimal(8,4) | NULL
+consumed_height_inches | decimal(8,4) | NULL
+position_from_left_inches | decimal(8,4) | NULL
+consumed_width_inches | decimal(8,4) | NULL
+front_width_inches | decimal(8,3) | NOT NULL
+front_height_inches | decimal(8,3) | NOT NULL
+top_rail_width_inches | decimal(5,3) | NULL
+bottom_rail_width_inches | decimal(5,3) | NULL
+stile_width_inches | decimal(5,3) | NULL
+profile_type | varchar(100) | NULL
+fabrication_method | varchar(50) | NULL
+front_thickness_inches | decimal(5,3) | NULL
+box_width_inches | decimal(8,3) | NULL
+box_depth_inches | decimal(8,3) | NULL
+box_depth_shop_inches | decimal(8,4) | NULL
+box_height_inches | decimal(8,3) | NULL
+box_height_shop_inches | decimal(8,4) | NULL
+opening_width_inches | decimal(8,4) | NULL
+opening_height_inches | decimal(8,4) | NULL
+opening_depth_inches | decimal(8,4) | NULL
+box_outside_width_inches | decimal(8,4) | NULL
+box_inside_width_inches | decimal(8,4) | NULL
+box_material | varchar(100) | NULL
+side_thickness_inches | decimal(8,4) | NULL
+bottom_thickness_inches | decimal(8,4) | NULL
+dado_depth_inches | decimal(8,4) | NULL
+dado_width_inches | decimal(8,4) | NULL
+dado_height_inches | decimal(8,4) | NULL
+side_cut_height_inches | decimal(8,4) | NULL
+side_cut_height_shop_inches | decimal(8,4) | NULL
+side_cut_length_inches | decimal(8,4) | NULL
+side_cut_length_shop_inches | decimal(8,4) | NULL
+front_cut_height_inches | decimal(8,4) | NULL
+front_cut_height_shop_inches | decimal(8,4) | NULL
+front_cut_width_inches | decimal(8,4) | NULL
+back_cut_height_inches | decimal(8,4) | NULL
+back_cut_height_shop_inches | decimal(8,4) | NULL
+back_cut_width_inches | decimal(8,4) | NULL
+bottom_cut_width_inches | decimal(8,4) | NULL
+bottom_cut_depth_inches | decimal(8,4) | NULL
+clearance_side_inches | decimal(8,4) | NULL
+clearance_top_inches | decimal(8,4) | NULL
+clearance_bottom_inches | decimal(8,4) | NULL
+slide_spec_source | varchar(50) | NULL
+dimensions_calculated_at | timestamp | NULL
+box_thickness | decimal(5,3) | NULL
+joinery_method | varchar(50) | NULL
+slide_type | varchar(100) | NULL
+slide_model | varchar(100) | NULL
+slide_product_id | bigint(20) unsigned | NULL
+slide_length_inches | decimal(5,2) | NULL
+min_cabinet_depth_blum_inches | decimal(8,4) | NULL
+min_cabinet_depth_shop_inches | decimal(8,4) | NULL
+slide_quantity | int(11) | NULL
+soft_close | tinyint(1) | NOT NULL
+finish_type | varchar(100) | NULL
+paint_color | varchar(100) | NULL
+stain_color | varchar(100) | NULL
+has_decorative_hardware | tinyint(1) | NOT NULL
+decorative_hardware_model | varchar(100) | NULL
+decorative_hardware_product_id | bigint(20) unsigned | NULL
+cnc_cut_at | timestamp | NULL
+manually_cut_at | timestamp | NULL
+edge_banded_at | timestamp | NULL
+box_assembled_at | timestamp | NULL
+front_attached_at | timestamp | NULL
+sanded_at | timestamp | NULL
+finished_at | timestamp | NULL
+slides_installed_at | timestamp | NULL
+installed_in_cabinet_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_notes | text | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+complexity_calculated_at | timestamp | NULL
+qc_inspected_at | timestamp | NULL
+qc_inspector_id | bigint(20) unsigned | NULL
+notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_doors ===
+id | bigint(20) unsigned | NOT NULL
+product_id | bigint(20) unsigned | NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_id | bigint(20) unsigned | NULL
+door_number | int(11) | NOT NULL
+door_name | varchar(100) | NULL
+full_code | varchar(100) | NULL
+sort_order | int(11) | NOT NULL
+position_in_opening_inches | decimal(8,4) | NULL
+consumed_height_inches | decimal(8,4) | NULL
+position_from_left_inches | decimal(8,4) | NULL
+consumed_width_inches | decimal(8,4) | NULL
+width_inches | decimal(8,3) | NOT NULL
+height_inches | decimal(8,3) | NOT NULL
+rail_width_inches | decimal(5,3) | NULL
+stile_width_inches | decimal(5,3) | NULL
+has_check_rail | tinyint(1) | NOT NULL
+check_rail_width_inches | decimal(5,3) | NULL
+profile_type | varchar(100) | NULL
+fabrication_method | varchar(50) | NULL
+thickness_inches | decimal(5,3) | NULL
+hinge_type | varchar(100) | NULL
+hinge_model | varchar(100) | NULL
+hinge_product_id | bigint(20) unsigned | NULL
+hinge_quantity | int(11) | NULL
+hinge_side | varchar(20) | NULL
+has_glass | tinyint(1) | NOT NULL
+glass_type | varchar(100) | NULL
+finish_type | varchar(100) | NULL
+paint_color | varchar(100) | NULL
+stain_color | varchar(100) | NULL
+has_decorative_hardware | tinyint(1) | NOT NULL
+decorative_hardware_model | varchar(100) | NULL
+decorative_hardware_product_id | bigint(20) unsigned | NULL
+cnc_cut_at | timestamp | NULL
+manually_cut_at | timestamp | NULL
+edge_banded_at | timestamp | NULL
+assembled_at | timestamp | NULL
+sanded_at | timestamp | NULL
+finished_at | timestamp | NULL
+hardware_installed_at | timestamp | NULL
+installed_in_cabinet_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_notes | text | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+complexity_calculated_at | timestamp | NULL
+qc_inspected_at | timestamp | NULL
+qc_inspector_id | bigint(20) unsigned | NULL
+notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_false_fronts ===
+id | bigint(20) unsigned | NOT NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_id | bigint(20) unsigned | NULL
+false_front_number | int(11) | NOT NULL
+false_front_name | varchar(100) | NULL
+full_code | varchar(255) | NULL
+sort_order | int(11) | NOT NULL
+false_front_type | enum('fixed','tilt_out') | NOT NULL
+width_inches | decimal(8,4) | NULL
+height_inches | decimal(8,4) | NULL
+thickness_inches | decimal(5,3) | NOT NULL
+has_backing_rail | tinyint(1) | NOT NULL
+backing_rail_width_inches | decimal(5,3) | NOT NULL
+backing_rail_height_inches | decimal(5,3) | NULL
+backing_rail_thickness_inches | decimal(5,3) | NOT NULL
+backing_rail_material | varchar(100) | NOT NULL
+backing_rail_position | varchar(50) | NOT NULL
+profile_type | varchar(100) | NULL
+rail_width_inches | decimal(5,3) | NULL
+stile_width_inches | decimal(5,3) | NULL
+finish_type | varchar(100) | NULL
+paint_color | varchar(100) | NULL
+stain_color | varchar(100) | NULL
+has_tilt_hardware | tinyint(1) | NOT NULL
+tilt_hardware_model | varchar(100) | NULL
+tilt_hardware_product_id | bigint(20) unsigned | NULL
+has_decorative_hardware | tinyint(1) | NOT NULL
+decorative_hardware_model | varchar(100) | NULL
+decorative_hardware_product_id | bigint(20) unsigned | NULL
+mounting_screw_length_inches | decimal(4,2) | NOT NULL
+mounting_screw_count | int(11) | NOT NULL
+position_in_opening_inches | decimal(8,4) | NULL
+consumed_height_inches | decimal(8,4) | NULL
+position_from_left_inches | decimal(8,4) | NULL
+consumed_width_inches | decimal(8,4) | NULL
+panel_cnc_cut_at | timestamp | NULL
+panel_edge_banded_at | timestamp | NULL
+panel_sanded_at | timestamp | NULL
+panel_finished_at | timestamp | NULL
+backing_rail_cut_at | timestamp | NULL
+backing_rail_installed_at | timestamp | NULL
+installed_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_notes | text | NULL
+product_id | bigint(20) unsigned | NULL
+notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_shelves ===
+id | bigint(20) unsigned | NOT NULL
+product_id | bigint(20) unsigned | NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_id | bigint(20) unsigned | NULL
+shelf_number | int(11) | NOT NULL
+shelf_name | varchar(100) | NULL
+full_code | varchar(100) | NULL
+sort_order | int(11) | NOT NULL
+position_in_opening_inches | decimal(8,4) | NULL
+consumed_height_inches | decimal(8,4) | NULL
+position_from_left_inches | decimal(8,4) | NULL
+consumed_width_inches | decimal(8,4) | NULL
+width_inches | decimal(8,3) | NOT NULL
+depth_inches | decimal(8,3) | NOT NULL
+thickness_inches | decimal(5,3) | NOT NULL
+opening_width_inches | decimal(8,4) | NULL
+opening_height_inches | decimal(8,4) | NULL
+opening_depth_inches | decimal(8,4) | NULL
+cut_width_inches | decimal(8,4) | NULL
+cut_depth_inches | decimal(8,4) | NULL
+shelf_type | varchar(50) | NOT NULL
+material | varchar(100) | NULL
+edge_treatment | varchar(100) | NULL
+pin_hole_spacing | decimal(5,3) | NULL
+number_of_positions | int(11) | NULL
+pin_setback_front_inches | decimal(8,4) | NULL
+pin_setback_back_inches | decimal(8,4) | NULL
+pin_vertical_spacing_inches | decimal(8,4) | NULL
+pin_hole_diameter_mm | decimal(5,2) | NULL
+has_center_support | tinyint(1) | NOT NULL
+notch_depth_inches | decimal(8,4) | NULL
+notch_count | int(11) | NULL
+clearance_side_inches | decimal(8,4) | NULL
+clearance_back_inches | decimal(8,4) | NULL
+edge_band_front | tinyint(1) | NOT NULL
+edge_band_back | tinyint(1) | NOT NULL
+edge_band_sides | tinyint(1) | NOT NULL
+edge_band_length_inches | decimal(8,4) | NULL
+shelf_pin_product_id | bigint(20) unsigned | NULL
+shelf_pin_quantity | int(11) | NULL
+spec_source | varchar(50) | NULL
+dimensions_calculated_at | timestamp | NULL
+slide_type | varchar(100) | NULL
+slide_model | varchar(100) | NULL
+slide_product_id | bigint(20) unsigned | NULL
+slide_length_inches | decimal(5,2) | NULL
+soft_close | tinyint(1) | NOT NULL
+weight_capacity_lbs | int(11) | NULL
+finish_type | varchar(100) | NULL
+paint_color | varchar(100) | NULL
+stain_color | varchar(100) | NULL
+cnc_cut_at | timestamp | NULL
+manually_cut_at | timestamp | NULL
+edge_banded_at | timestamp | NULL
+assembled_at | timestamp | NULL
+sanded_at | timestamp | NULL
+finished_at | timestamp | NULL
+hardware_installed_at | timestamp | NULL
+installed_in_cabinet_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_notes | text | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+complexity_calculated_at | timestamp | NULL
+qc_inspected_at | timestamp | NULL
+qc_inspector_id | bigint(20) unsigned | NULL
+notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_pullouts ===
+id | bigint(20) unsigned | NOT NULL
+product_id | bigint(20) unsigned | NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_id | bigint(20) unsigned | NULL
+pullout_number | int(11) | NOT NULL
+pullout_name | varchar(100) | NULL
+full_code | varchar(100) | NULL
+sort_order | int(11) | NOT NULL
+position_in_opening_inches | decimal(8,4) | NULL
+consumed_height_inches | decimal(8,4) | NULL
+position_from_left_inches | decimal(8,4) | NULL
+consumed_width_inches | decimal(8,4) | NULL
+pullout_type | varchar(100) | NOT NULL
+manufacturer | varchar(100) | NULL
+model_number | varchar(100) | NULL
+description | text | NULL
+width_inches | decimal(8,3) | NULL
+height_inches | decimal(8,3) | NULL
+depth_inches | decimal(8,3) | NULL
+mounting_type | varchar(100) | NULL
+slide_type | varchar(100) | NULL
+slide_model | varchar(100) | NULL
+slide_product_id | bigint(20) unsigned | NULL
+slide_length_inches | decimal(5,2) | NULL
+slide_quantity | int(11) | NULL
+soft_close | tinyint(1) | NOT NULL
+weight_capacity_lbs | int(11) | NULL
+unit_cost | decimal(10,2) | NULL
+quantity | int(11) | NOT NULL
+ordered_at | timestamp | NULL
+received_at | timestamp | NULL
+hardware_installed_at | timestamp | NULL
+installed_in_cabinet_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_notes | text | NULL
+complexity_score | decimal(6,2) | NULL
+complexity_breakdown | json | NULL
+complexity_calculated_at | timestamp | NULL
+qc_inspected_at | timestamp | NULL
+qc_inspector_id | bigint(20) unsigned | NULL
+notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_faceframes ===
+id | bigint(20) unsigned | NOT NULL
+cabinet_run_id | bigint(20) unsigned | NOT NULL
+face_frame_type | varchar(50) | NULL
+face_frame_thickness | varchar(50) | NULL
+face_frame_linear_feet | decimal(8,2) | NULL
+stile_width | decimal(5,3) | NULL
+rail_width | decimal(5,3) | NULL
+material_thickness | decimal(5,3) | NULL
+material | varchar(100) | NULL
+finish_option | varchar(100) | NULL
+joinery_type | varchar(50) | NULL
+beaded_face_frame | tinyint(1) | NOT NULL
+overlay_type | varchar(50) | NULL
+flush_with_carcass | tinyint(1) | NOT NULL
+overhang_left | decimal(5,3) | NULL
+overhang_right | decimal(5,3) | NULL
+overhang_top | decimal(5,3) | NULL
+overhang_bottom | decimal(5,3) | NULL
+notes | text | NULL
+creator_id | bigint(20) unsigned | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_stretchers ===
+id | bigint(20) unsigned | NOT NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+section_id | bigint(20) unsigned | NULL
+position | enum('front','back','drawer_support') | NOT NULL
+stretcher_number | int(11) | NOT NULL
+full_code | varchar(100) | NULL
+width_inches | decimal(8,4) | NOT NULL
+depth_inches | decimal(8,4) | NOT NULL
+thickness_inches | decimal(5,3) | NOT NULL
+position_from_front_inches | decimal(8,4) | NULL
+position_from_top_inches | decimal(8,4) | NULL
+material | varchar(100) | NOT NULL
+product_id | bigint(20) unsigned | NULL
+supports_drawer | tinyint(1) | NOT NULL
+drawer_id | bigint(20) unsigned | NULL
+cut_width_inches | decimal(8,4) | NULL
+cut_width_shop_inches | decimal(8,4) | NULL
+cut_depth_inches | decimal(8,4) | NULL
+cut_depth_shop_inches | decimal(8,4) | NULL
+cut_at | timestamp | NULL
+edge_banded_at | timestamp | NULL
+installed_at | timestamp | NULL
+qc_passed | tinyint(1) | NULL
+qc_notes | text | NULL
+notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_fixed_dividers ===
+id | bigint(20) unsigned | NOT NULL
+cabinet_id | bigint(20) unsigned | NOT NULL
+position_from_left_inches | decimal(8,4) | NULL
+position_from_bottom_inches | decimal(8,4) | NULL
+orientation | varchar(20) | NOT NULL
+purpose | varchar(50) | NOT NULL
+width_inches | decimal(5,3) | NULL
+height_inches | decimal(5,3) | NULL
+depth_inches | decimal(5,3) | NULL
+thickness_inches | decimal(5,3) | NOT NULL
+material | varchar(100) | NOT NULL
+material_product_id | bigint(20) unsigned | NULL
+notes | text | NULL
+sort_order | int(11) | NOT NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_door_presets ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+description | text | NULL
+is_active | tinyint(1) | NOT NULL
+sort_order | int(11) | NOT NULL
+profile_type | varchar(255) | NULL
+fabrication_method | varchar(255) | NULL
+hinge_type | varchar(255) | NULL
+default_hinge_quantity | int(11) | NOT NULL
+has_glass | tinyint(1) | NOT NULL
+glass_type | varchar(255) | NULL
+has_check_rail | tinyint(1) | NOT NULL
+default_rail_width_inches | decimal(8,3) | NULL
+default_stile_width_inches | decimal(8,3) | NULL
+estimated_complexity_score | decimal(8,2) | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+
+=== projects_drawer_presets ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+description | text | NULL
+is_active | tinyint(1) | NOT NULL
+sort_order | int(11) | NOT NULL
+profile_type | varchar(255) | NULL
+box_material | varchar(255) | NULL
+joinery_method | varchar(255) | NULL
+slide_type | varchar(255) | NULL
+slide_model | varchar(255) | NULL
+soft_close | tinyint(1) | NOT NULL
+estimated_complexity_score | decimal(8,2) | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+
+=== projects_shelf_presets ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+description | text | NULL
+is_active | tinyint(1) | NOT NULL
+sort_order | int(11) | NOT NULL
+shelf_type | varchar(255) | NULL
+material | varchar(255) | NULL
+edge_treatment | varchar(255) | NULL
+slide_type | varchar(255) | NULL
+slide_model | varchar(255) | NULL
+soft_close | tinyint(1) | NOT NULL
+estimated_complexity_score | decimal(8,2) | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+
+=== projects_pullout_presets ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+description | text | NULL
+is_active | tinyint(1) | NOT NULL
+sort_order | int(11) | NOT NULL
+pullout_type | varchar(255) | NULL
+manufacturer | varchar(255) | NULL
+model_number | varchar(255) | NULL
+mounting_type | varchar(255) | NULL
+slide_type | varchar(255) | NULL
+slide_model | varchar(255) | NULL
+soft_close | tinyint(1) | NOT NULL
+product_id | bigint(20) unsigned | NULL
+estimated_complexity_score | decimal(8,2) | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+
+=== projects_tasks ===
+id | bigint(20) unsigned | NOT NULL
+title | varchar(255) | NOT NULL
+description | text | NULL
+color | varchar(255) | NULL
+priority | tinyint(1) | NOT NULL
+state | varchar(255) | NOT NULL
+started_at | timestamp | NULL
+completed_at | timestamp | NULL
+started_by | bigint(20) unsigned | NULL
+completed_by | bigint(20) unsigned | NULL
+sort | int(11) | NULL
+is_active | tinyint(1) | NOT NULL
+is_recurring | tinyint(1) | NOT NULL
+deadline | datetime | NULL
+working_hours_open | decimal(8,2) | NOT NULL
+working_hours_close | decimal(8,2) | NOT NULL
+allocated_hours | decimal(8,2) | NOT NULL
+remaining_hours | decimal(8,2) | NOT NULL
+effective_hours | decimal(8,2) | NOT NULL
+total_hours_spent | decimal(8,2) | NOT NULL
+overtime | decimal(8,2) | NOT NULL
+progress | decimal(8,2) | NOT NULL
+subtask_effective_hours | decimal(8,2) | NOT NULL
+project_id | bigint(20) unsigned | NULL
+room_id | bigint(20) unsigned | NULL
+room_location_id | bigint(20) unsigned | NULL
+cabinet_run_id | bigint(20) unsigned | NULL
+cabinet_id | bigint(20) unsigned | NULL
+section_id | bigint(20) unsigned | NULL
+component_type | varchar(50) | NULL
+component_id | bigint(20) unsigned | NULL
+milestone_id | bigint(20) unsigned | NULL
+stage_id | bigint(20) unsigned | NULL
+partner_id | bigint(20) unsigned | NULL
+parent_id | bigint(20) unsigned | NULL
+company_id | bigint(20) unsigned | NULL
+creator_id | bigint(20) unsigned | NULL
+deleted_at | timestamp | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+
+=== projects_milestones ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+deadline | datetime | NULL
+production_stage | enum('discovery','design','sourcing','production','delivery') | NULL
+is_critical | tinyint(1) | NOT NULL
+description | text | NULL
+sort_order | int(11) | NOT NULL
+is_completed | tinyint(1) | NOT NULL
+completed_at | datetime | NULL
+project_id | bigint(20) unsigned | NOT NULL
+creator_id | bigint(20) unsigned | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+
+=== projects_bom ===
+id | bigint(20) unsigned | NOT NULL
+cabinet_id | bigint(20) unsigned | NULL
+cabinet_run_id | bigint(20) unsigned | NULL
+product_id | bigint(20) unsigned | NOT NULL
+component_name | varchar(100) | NULL
+quantity_required | decimal(10,2) | NOT NULL
+unit_of_measure | varchar(50) | NOT NULL
+waste_factor_percentage | decimal(5,2) | NOT NULL
+quantity_with_waste | decimal(10,2) | NOT NULL
+component_width_inches | decimal(8,3) | NULL
+component_height_inches | decimal(8,3) | NULL
+quantity_of_components | int(11) | NOT NULL
+sqft_per_component | decimal(8,2) | NULL
+total_sqft_required | decimal(8,2) | NULL
+linear_feet_per_component | decimal(8,2) | NULL
+total_linear_feet | decimal(8,2) | NULL
+board_feet_required | decimal(8,2) | NULL
+unit_cost | decimal(10,2) | NULL
+total_material_cost | decimal(10,2) | NULL
+grain_direction | varchar(50) | NULL
+requires_edge_banding | tinyint(1) | NOT NULL
+edge_banding_sides | varchar(50) | NULL
+edge_banding_lf | decimal(8,2) | NULL
+cnc_notes | text | NULL
+machining_operations | text | NULL
+material_allocated | tinyint(1) | NOT NULL
+material_allocated_at | timestamp | NULL
+material_issued | tinyint(1) | NOT NULL
+material_issued_at | timestamp | NULL
+substituted_product_id | bigint(20) unsigned | NULL
+substitution_notes | text | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL
+deleted_at | timestamp | NULL
+
+=== projects_hardware_packages ===
+id | bigint(20) unsigned | NOT NULL
+name | varchar(255) | NOT NULL
+description | text | NULL
+is_active | tinyint(1) | NOT NULL
+is_default | tinyint(1) | NOT NULL
+sort_order | int(11) | NOT NULL
+pricing_tier | varchar(255) | NULL
+price_multiplier | decimal(5,2) | NOT NULL
+default_hinge_type | varchar(255) | NULL
+default_hinge_model | varchar(255) | NULL
+hinges_per_door | int(11) | NOT NULL
+default_slide_type | varchar(255) | NULL
+default_slide_model | varchar(255) | NULL
+default_soft_close | tinyint(1) | NOT NULL
+default_joinery_method | varchar(255) | NULL
+default_box_material | varchar(255) | NULL
+color | varchar(255) | NULL
+icon | varchar(255) | NULL
+created_at | timestamp | NULL
+updated_at | timestamp | NULL

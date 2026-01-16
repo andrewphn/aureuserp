@@ -120,6 +120,20 @@ class Cabinet extends Model
     public const SINK_SIDE_EXTENSION = 0.75;
 
     /**
+     * TCS Finished End Panel (Bryan, Jan 2026)
+     * "Edge cabinet gets a face, 1/4 gap, extended 1/2 in toward wall"
+     */
+    public const FINISHED_END_GAP = 0.25;           // 1/4" gap between panel and cabinet
+    public const FINISHED_END_WALL_EXTENSION = 0.5; // 1/2" extension toward wall for scribe
+
+    /**
+     * TCS Back Wall Gap (Bryan, Jan 2026)
+     * "We go 1/4 off the back wall for safety"
+     * This is subtracted from available depth when calculating cabinet depth
+     */
+    public const BACK_WALL_GAP = 0.25; // 1/4" gap from back wall
+
+    /**
      * Top construction types
      */
     public const TOP_CONSTRUCTION_TYPES = [
@@ -198,6 +212,8 @@ class Cabinet extends Model
         'box_material_product_id',
         'face_frame_material_product_id',
         'edge_banding_product_id',
+        // Construction template
+        'construction_template_id',
     ];
 
     protected $casts = [
@@ -408,6 +424,18 @@ class Cabinet extends Model
     public function edgeBandingProduct(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'edge_banding_product_id');
+    }
+
+    /**
+     * Construction template for this cabinet.
+     *
+     * If null, inherits from room -> project -> global default.
+     *
+     * @return BelongsTo
+     */
+    public function constructionTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ConstructionTemplate::class, 'construction_template_id');
     }
 
     /**
@@ -940,5 +968,82 @@ class Cabinet extends Model
     public function getEffectiveMaterialCategoryAttribute(): ?string
     {
         return $this->getInheritedMaterialCategory();
+    }
+
+    /**
+     * Get cabinet box cut list data (3/4" plywood pieces)
+     *
+     * Returns all cabinet box pieces needed for fabrication:
+     * - 2x side panels
+     * - 1x bottom panel
+     * - 1x back panel (TCS uses full 3/4" backs)
+     *
+     * @return array Cut list with all cabinet box pieces
+     */
+    public function getBoxCutListAttribute(): array
+    {
+        // Get dimensions
+        $cabinetWidth = $this->length_inches ?? $this->width_inches ?? 24;
+        $cabinetHeight = $this->height_inches ?? 30;
+        $cabinetDepth = $this->depth_inches ?? 24;
+        $toeKickHeight = $this->toe_kick_height_inches ?? self::STANDARD_TOE_KICK_HEIGHT;
+
+        // Calculate box dimensions
+        $sidePanelThickness = self::DEFAULT_BOX_THICKNESS;
+        $backPanelThickness = self::DEFAULT_BACK_THICKNESS;
+
+        // Box height = cabinet height - toe kick
+        $boxHeight = $cabinetHeight - $toeKickHeight;
+
+        // Inside width = cabinet width - (2 × side thickness)
+        $insideWidth = $cabinetWidth - (2 * $sidePanelThickness);
+
+        // Inside depth = cabinet depth - back thickness
+        $insideDepth = $cabinetDepth - $backPanelThickness;
+
+        return [
+            'cabinet_number' => $this->cabinet_number,
+            'cabinet_code' => $this->full_code,
+            'material' => '3/4" Plywood',
+            'calculated_dimensions' => [
+                'box_height' => $boxHeight,
+                'inside_width' => $insideWidth,
+                'inside_depth' => $insideDepth,
+            ],
+            'pieces' => [
+                [
+                    'part' => 'Left Side',
+                    'qty' => 1,
+                    'width' => $insideDepth,
+                    'length' => $boxHeight,
+                    'thickness' => $sidePanelThickness,
+                    'notes' => 'Depth × Box Height',
+                ],
+                [
+                    'part' => 'Right Side',
+                    'qty' => 1,
+                    'width' => $insideDepth,
+                    'length' => $boxHeight,
+                    'thickness' => $sidePanelThickness,
+                    'notes' => 'Depth × Box Height',
+                ],
+                [
+                    'part' => 'Bottom',
+                    'qty' => 1,
+                    'width' => $insideWidth,
+                    'length' => $insideDepth,
+                    'thickness' => $sidePanelThickness,
+                    'notes' => 'Inside Width × Depth',
+                ],
+                [
+                    'part' => 'Back',
+                    'qty' => 1,
+                    'width' => $insideWidth,
+                    'length' => $boxHeight,
+                    'thickness' => $backPanelThickness,
+                    'notes' => 'Inside Width × Box Height (TCS full 3/4" back)',
+                ],
+            ],
+        ];
     }
 }

@@ -132,6 +132,7 @@ class Project extends Model implements HasMedia, Sortable
         'use_customer_address',
         'company_id',
         'warehouse_id',
+        'construction_template_id',
         'source_quote_id',
         'branch_id',
         'user_id',
@@ -586,6 +587,19 @@ class Project extends Model implements HasMedia, Sortable
     public function warehouse(): BelongsTo
     {
         return $this->belongsTo(\Webkul\Inventory\Models\Warehouse::class);
+    }
+
+    /**
+     * Construction template for this project.
+     *
+     * Sets the default construction standards for all cabinets in this project.
+     * Individual rooms or cabinets can override with their own template.
+     *
+     * @return BelongsTo
+     */
+    public function constructionTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ConstructionTemplate::class, 'construction_template_id');
     }
 
     /**

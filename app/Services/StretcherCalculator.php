@@ -20,11 +20,28 @@ use Illuminate\Support\Collection;
  *
  * TCS Standard (Bryan Patton, Jan 2025): "3 inch stretchers"
  * Reference: Master Plan (iridescent-wishing-turing.md) lines 1540-1618
+ *
+ * Construction standards are now configurable via ConstructionTemplate.
+ * The ConstructionStandardsService resolves the effective template with inheritance:
+ * Cabinet -> Room -> Project -> Global Default -> Fallback
  */
 class StretcherCalculator
 {
     /**
-     * Standard dimensions (in inches)
+     * Construction standards service for template resolution.
+     */
+    protected ?ConstructionStandardsService $standards = null;
+
+    /**
+     * Create a new StretcherCalculator instance.
+     */
+    public function __construct(?ConstructionStandardsService $standards = null)
+    {
+        $this->standards = $standards ?? app(ConstructionStandardsService::class);
+    }
+
+    /**
+     * Standard dimensions (in inches) - kept as fallback constants
      *
      * TCS Standard: 3" stretcher height (Bryan Patton, Jan 2025)
      * Note: "depth" here refers to front-to-back dimension of stretcher
@@ -34,6 +51,17 @@ class StretcherCalculator
     public const MINIMUM_DEPTH_INCHES = 2.5;        // 2-1/2"
     public const MAXIMUM_DEPTH_INCHES = 4.0;        // 4"
     public const DEFAULT_SIDE_PANEL_THICKNESS = 0.75; // 3/4"
+
+    /**
+     * Gap constants for drawer face layout
+     *
+     * TCS Standard (Bryan Patton, Jan 2025):
+     * - Gap between drawer faces: 1/8" (0.125")
+     * - Stretcher splits the gap between drawer faces
+     * - Bottom drawer face lines up with bottom of cabinet (above toe kick)
+     */
+    public const STANDARD_GAP_INCHES = 0.125;  // 1/8" gap between drawer faces
+    public const STANDARD_REVEAL_INCHES = 0.125;  // 1/8" reveal at top/bottom
 
     /**
      * Cabinet types that require stretchers
@@ -105,7 +133,8 @@ class StretcherCalculator
             material: $cabinet->box_material ?? 'plywood',
         );
 
-        // Drawer support stretchers (one per drawer)
+        // Drawer support stretchers (one per drawer, except the bottom-most)
+        // Each stretcher supports the drawer ABOVE it (slides mount on top of stretcher)
         $drawers = $cabinet->sections()
             ->with('drawers')
             ->get()
@@ -121,30 +150,124 @@ class StretcherCalculator
             }
         }
 
+        // Get false fronts too (they take up space but don't need stretchers under them)
+        $falseFronts = collect();
+        if (method_exists($cabinet, 'falseFronts')) {
+            try {
+                $falseFronts = $cabinet->falseFronts ?? collect();
+            } catch (\Exception $e) {
+                // No false fronts relationship
+            }
+        }
+
+        // Sort all components by position (top to bottom)
+        // drawer_position: 'upper', 'middle', 'lower' or use sort_order/drawer_number
+        $allComponents = $drawers->merge($falseFronts)
+            ->sortBy(function ($component) {
+                // Priority: explicit sort_order > drawer_number > position string
+                if (isset($component->sort_order)) {
+                    return $component->sort_order;
+                }
+                if (isset($component->drawer_number)) {
+                    return $component->drawer_number;
+                }
+                // Fallback to position string mapping
+                $positionMap = ['upper' => 1, 'middle' => 2, 'lower' => 3, 'bottom' => 4];
+                return $positionMap[$component->drawer_position ?? 'lower'] ?? 5;
+            })
+            ->values();
+
+        // Calculate stretcher positions
+        // Stretchers go BETWEEN drawers (not under the bottom drawer - it mounts on cabinet bottom)
         $stretcherNumber = 3;
-        foreach ($drawers as $drawer) {
-            $stretchers[] = $this->buildStretcherData(
-                position: Stretcher::POSITION_DRAWER_SUPPORT,
-                stretcherNumber: $stretcherNumber,
-                width: $stretcherWidth,
-                depth: $stretcherDepth,
-                thickness: self::STANDARD_THICKNESS_INCHES,
-                positionFromFront: null, // Calculated based on drawer position
-                positionFromTop: 0,
-                material: $cabinet->box_material ?? 'plywood',
-                drawerId: $drawer->id,
-            );
-            $stretcherNumber++;
+        $componentsAbove = [];
+
+        foreach ($allComponents as $index => $component) {
+            $componentsAbove[] = $component;
+
+            // Only create stretcher if there's a drawer below this one
+            // (The bottom drawer's slides mount on the cabinet bottom, not a stretcher)
+            $isLastComponent = ($index === $allComponents->count() - 1);
+
+            if (!$isLastComponent && $this->componentIsDrawer($component)) {
+                // Calculate position from top: sum of faces above + gaps
+                $positionFromTop = $this->calculateStretcherPositionFromTop(
+                    $cabinet,
+                    $componentsAbove,
+                    $component->stretcher_position_override_inches ?? null
+                );
+
+                $stretchers[] = $this->buildStretcherData(
+                    position: Stretcher::POSITION_DRAWER_SUPPORT,
+                    stretcherNumber: $stretcherNumber,
+                    width: $stretcherWidth,
+                    depth: $stretcherDepth,
+                    thickness: self::STANDARD_THICKNESS_INCHES,
+                    positionFromFront: $this->calculateStretcherDepthOffset($cabinet, $stretcherDepth),
+                    positionFromTop: $positionFromTop,
+                    material: $cabinet->box_material ?? 'plywood',
+                    drawerId: $component->id ?? null,
+                );
+                $stretcherNumber++;
+            }
         }
 
         return $stretchers;
     }
 
     /**
+     * Check if a component is a drawer (vs false front, door, etc.)
+     *
+     * @param mixed $component The component to check
+     * @return bool True if it's a drawer
+     */
+    protected function componentIsDrawer($component): bool
+    {
+        // Check class name
+        $className = get_class($component);
+        if (str_contains($className, 'Drawer')) {
+            return true;
+        }
+
+        // Check for drawer-specific attributes
+        if (isset($component->drawer_number) || isset($component->box_width_inches)) {
+            return true;
+        }
+
+        // Check type attribute
+        $type = $component->type ?? $component->component_type ?? null;
+        if ($type === 'drawer') {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Calculate stretcher depth offset from front.
+     *
+     * TCS Rule: Stretcher set back from front so drawer box doesn't hit it.
+     *
+     * @param Cabinet $cabinet The cabinet
+     * @param float $stretcherDepth The stretcher depth
+     * @return float Position from front in inches
+     */
+    protected function calculateStretcherDepthOffset(Cabinet $cabinet, float $stretcherDepth): float
+    {
+        // Default offset: 0.5" from front edge
+        // This can be adjusted based on slide hardware requirements
+        $offset = 0.5;
+
+        return $offset;
+    }
+
+    /**
      * Get stretcher depth (front-to-back) from cabinet or use default
      *
+     * Priority: Cabinet override → Template → Constant fallback
+     *
      * Uses cabinet's configurable stretcher_height_inches if set,
-     * otherwise falls back to TCS standard (3").
+     * otherwise uses construction template, then falls back to TCS standard (3").
      *
      * @param Cabinet $cabinet The cabinet to get depth for
      * @return float The stretcher depth in inches
@@ -156,12 +279,19 @@ class StretcherCalculator
             return (float) $cabinet->stretcher_height_inches;
         }
 
-        // Check if cabinet has a constant defined
-        if (defined(Cabinet::class . '::STANDARD_STRETCHER_HEIGHT')) {
-            return Cabinet::STANDARD_STRETCHER_HEIGHT;
-        }
+        // Get from construction template (inherits from room/project/default)
+        return $this->standards->getStretcherDepth($cabinet);
+    }
 
-        return self::STANDARD_DEPTH_INCHES;
+    /**
+     * Get stretcher thickness from cabinet or template
+     *
+     * @param Cabinet $cabinet The cabinet to get thickness for
+     * @return float The stretcher thickness in inches
+     */
+    public function getStretcherThickness(Cabinet $cabinet): float
+    {
+        return $this->standards->getStretcherThickness($cabinet);
     }
 
     /**
@@ -258,13 +388,15 @@ class StretcherCalculator
     /**
      * Calculate the width of stretchers (inside width of cabinet)
      *
+     * Uses side panel thickness from construction template.
+     *
      * @param Cabinet $cabinet The cabinet to calculate for
      * @return float The stretcher width in inches
      */
     public function calculateStretcherWidth(Cabinet $cabinet): float
     {
         $cabinetWidth = $cabinet->length_inches ?? $cabinet->width_inches ?? 24;
-        $sidePanelThickness = $cabinet->side_panel_thickness ?? self::DEFAULT_SIDE_PANEL_THICKNESS;
+        $sidePanelThickness = $cabinet->side_panel_thickness ?? $this->standards->getSidePanelThickness($cabinet);
 
         // Stretcher width = cabinet width - (2 × side panel thickness)
         return $cabinetWidth - (2 * $sidePanelThickness);
@@ -385,6 +517,122 @@ class StretcherCalculator
         }
 
         return $cutList;
+    }
+
+    /**
+     * Calculate stretcher vertical position from top of box.
+     *
+     * TCS Rule (Bryan Patton, Jan 2025):
+     * - "The stretcher is centered on the drawer faces"
+     * - "The stretcher splits the gap between drawer faces"
+     * - Bottom drawer face lines up with bottom of cabinet (no bottom overlap)
+     *
+     * Position is calculated as the sum of all drawer faces ABOVE this stretcher,
+     * plus the gap between faces (stretcher centered in gap).
+     *
+     * @param Cabinet $cabinet The cabinet
+     * @param array $drawersAbove Collection of drawers/components above this stretcher
+     * @param float|null $override Manual override position (from CAD)
+     * @return float Position from top of box in inches (to TOP of stretcher)
+     */
+    public function calculateStretcherPositionFromTop(
+        Cabinet $cabinet,
+        array $drawersAbove = [],
+        ?float $override = null
+    ): float {
+        // If override provided, use it directly
+        if ($override !== null) {
+            return $override;
+        }
+
+        // Get box height (cabinet height - toe kick)
+        $boxHeight = $this->getBoxHeight($cabinet);
+
+        // Calculate position from faces above
+        $position = 0.0;
+
+        foreach ($drawersAbove as $drawer) {
+            // Get the face height (front_height_inches for drawers, height_inches for false fronts)
+            $faceHeight = $drawer->front_height_inches
+                ?? $drawer->height_inches
+                ?? $drawer->opening_height_inches
+                ?? 0;
+
+            $position += $faceHeight;
+            $position += self::STANDARD_GAP_INCHES; // Add gap after each face
+        }
+
+        // The stretcher is centered in the gap, so we're at the top of the stretcher
+        // Position already accounts for faces + gaps above
+
+        return $position;
+    }
+
+    /**
+     * Calculate stretcher position from bottom of box.
+     *
+     * Alternative calculation method - calculates based on faces BELOW the stretcher.
+     *
+     * TCS Rule: Bottom drawer face lines up with bottom of cabinet (above toe kick).
+     *
+     * @param Cabinet $cabinet The cabinet
+     * @param array $drawersBelow Collection of drawers below this stretcher
+     * @param float|null $override Manual override position
+     * @return float Position from bottom of box in inches (to TOP of stretcher)
+     */
+    public function calculateStretcherPositionFromBottom(
+        Cabinet $cabinet,
+        array $drawersBelow = [],
+        ?float $override = null
+    ): float {
+        // If override provided, use it
+        if ($override !== null) {
+            return $override;
+        }
+
+        // Start from bottom (no reveal - face lines up with bottom)
+        $position = 0.0;
+
+        foreach ($drawersBelow as $drawer) {
+            $faceHeight = $drawer->front_height_inches
+                ?? $drawer->height_inches
+                ?? $drawer->opening_height_inches
+                ?? 0;
+
+            $position += $faceHeight;
+        }
+
+        // Add half the gap (stretcher centered in gap)
+        $position += self::STANDARD_GAP_INCHES / 2;
+
+        return $position;
+    }
+
+    /**
+     * Get box height (cabinet height minus toe kick).
+     *
+     * @param Cabinet $cabinet The cabinet
+     * @return float Box height in inches
+     */
+    public function getBoxHeight(Cabinet $cabinet): float
+    {
+        $cabinetHeight = $cabinet->height_inches ?? 30;
+        $toeKickHeight = $cabinet->toe_kick_height_inches ?? 4;
+
+        return $cabinetHeight - $toeKickHeight;
+    }
+
+    /**
+     * Convert position from top to position from bottom.
+     *
+     * @param float $positionFromTop Position from top in inches
+     * @param Cabinet $cabinet The cabinet (for box height)
+     * @return float Position from bottom in inches
+     */
+    public function convertPositionToFromBottom(float $positionFromTop, Cabinet $cabinet): float
+    {
+        $boxHeight = $this->getBoxHeight($cabinet);
+        return $boxHeight - $positionFromTop;
     }
 
     /**

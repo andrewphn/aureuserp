@@ -73,6 +73,19 @@
 				"rhinomcp"
 			],
 			"description": "Rhino 3D CAD integration for measurements and geometry"
+		},
+		"n8n": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"n8n-mcp"
+			],
+			"env": {
+				"N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTI2N2JmYy0wNThmLTQ5NGItYTQ1NC1hYmJjMjA5MDU5MmUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY4NTA3ODE0LCJleHAiOjE3NzEwNDUyMDB9.kXAZe_j2gSG-roUuisVcKtlOnbCpSm_ahWjLK07LIHA",
+				"N8N_HOST": "https://n8n.tcswoodwork.com"
+			},
+			"description": "n8n workflow automation - manage and trigger workflows"
 		}
 	}
 }

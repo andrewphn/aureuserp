@@ -71,6 +71,8 @@ class Room extends Model
         'total_linear_feet_tier_3',
         'total_linear_feet_tier_4',
         'total_linear_feet_tier_5',
+        // Construction template
+        'construction_template_id',
     ];
 
     protected $casts = [
@@ -234,6 +236,18 @@ class Room extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    /**
+     * Construction template for this room.
+     *
+     * If null, inherits from project -> global default.
+     *
+     * @return BelongsTo
+     */
+    public function constructionTemplate(): BelongsTo
+    {
+        return $this->belongsTo(ConstructionTemplate::class, 'construction_template_id');
     }
 
     /**

@@ -27,6 +27,7 @@
         "jacobtims/inline-date-time-picker": "^2.0",
         "joaopaulolndev/filament-pdf-viewer": "^2.0",
         "laravel/framework": "^11.9",
+        "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.9",
         "leandrocfe/filament-apex-charts": "^4.0",
         "milon/barcode": "^11.0",
