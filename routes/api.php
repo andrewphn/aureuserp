@@ -61,6 +61,21 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     // Nested: Cabinet Runs → Cabinets
     Route::apiResource('cabinet-runs.cabinets', V1\CabinetController::class)->shallow();
 
+    // Standalone listing routes for commonly queried resources
+    Route::get('rooms', [V1\RoomController::class, 'index'])->name('rooms.index');
+    Route::get('locations', [V1\RoomLocationController::class, 'index'])->name('locations.index');
+    Route::get('cabinet-runs', [V1\CabinetRunController::class, 'index'])->name('cabinet-runs.index');
+    Route::get('cabinets', [V1\CabinetController::class, 'index'])->name('cabinets.index');
+    Route::get('sections', [V1\CabinetSectionController::class, 'index'])->name('sections.index');
+    Route::get('drawers', [V1\DrawerController::class, 'index'])->name('drawers.index');
+    Route::get('doors', [V1\DoorController::class, 'index'])->name('doors.index');
+    Route::get('shelves', [V1\ShelfController::class, 'index'])->name('shelves.index');
+    Route::get('pullouts', [V1\PulloutController::class, 'index'])->name('pullouts.index');
+    Route::get('stretchers', [V1\StretcherController::class, 'index'])->name('stretchers.index');
+    Route::get('faceframes', [V1\FaceframeController::class, 'index'])->name('faceframes.index');
+    Route::get('moves', [V1\MoveController::class, 'index'])->name('moves.index');
+    Route::get('locations', [V1\LocationController::class, 'index'])->name('inventory-locations.index');
+
     // Cabinet Components (nested under cabinets)
     Route::apiResource('cabinets.sections', V1\CabinetSectionController::class)->shallow();
     Route::apiResource('cabinets.stretchers', V1\StretcherController::class)->shallow();
@@ -109,6 +124,7 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     Route::prefix('webhooks')->name('webhooks.')->group(function () {
         Route::get('/', [V1\WebhookController::class, 'list'])->name('index');
         Route::post('subscribe', [V1\WebhookController::class, 'subscribe'])->name('subscribe');
+        Route::get('{id}', [V1\WebhookController::class, 'show'])->name('show');
         Route::put('{id}', [V1\WebhookController::class, 'update'])->name('update');
         Route::delete('{id}', [V1\WebhookController::class, 'unsubscribe'])->name('unsubscribe');
         Route::get('events', [V1\WebhookController::class, 'events'])->name('events');

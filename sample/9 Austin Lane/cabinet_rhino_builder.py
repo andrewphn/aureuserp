@@ -100,12 +100,6 @@ DATA = {
             "position": {"x": 0.75, "y": 26.5, "z": 0},
             "dimensions": {"w": 39.8125, "h": 1.5, "d": 0.75}
         },
-        "bottom_rail": {
-            "part_name": "Bottom Rail",
-            "part_type": "face_frame",
-            "position": {"x": 0.75, "y": 0, "z": 0},
-            "dimensions": {"w": 39.8125, "h": 1.5, "d": 0.75}
-        },
         "front_stretcher": {
             "part_name": "Front Stretcher",
             "part_type": "stretcher",
@@ -117,6 +111,12 @@ DATA = {
             "part_type": "stretcher",
             "position": {"x": 0, "y": 28, "z": 14},
             "dimensions": {"w": 41.3125, "h": 0.75, "d": 3}
+        },
+        "drawer_divider_stretcher": {
+            "part_name": "Drawer Divider Stretcher",
+            "part_type": "stretcher",
+            "position": {"x": 0.75, "y": 11.25, "z": 1},
+            "dimensions": {"w": 39.8125, "h": 0.75, "d": 16}
         },
         "left_end_panel": {
             "part_name": "Left End Panel",
@@ -151,6 +151,30 @@ DATA = {
                 "y_range": {"start": -4, "end": 28.75},
                 "miter_angle": 45
             }
+        },
+        "false_front_1_face": {
+            "part_name": "False Front #1 Face",
+            "part_type": "false_front",
+            "position": {"x": 0.75, "y": 22.625, "z": 0},
+            "dimensions": {"w": 39.8125, "h": 6, "d": 0.75}
+        },
+        "false_front_1_backing": {
+            "part_name": "False Front #1 Backing",
+            "part_type": "false_front_backing",
+            "position": {"x": 0.75, "y": 21, "z": 0.75},
+            "dimensions": {"w": 39.8125, "h": 7, "d": 0.75}
+        },
+        "drawer_1_face": {
+            "part_name": "Upper Drawer Face",
+            "part_type": "drawer_face",
+            "position": {"x": 0.875, "y": 11.3125, "z": 0},
+            "dimensions": {"w": 39.5625, "h": 11.1875, "d": 0.75}
+        },
+        "drawer_2_face": {
+            "part_name": "Lower Drawer Face",
+            "part_type": "drawer_face",
+            "position": {"x": 0.875, "y": 0, "z": 0},
+            "dimensions": {"w": 39.5625, "h": 11.1875, "d": 0.75}
         }
     }
 }
@@ -164,7 +188,10 @@ COLORS = {
     "face_frame": (210, 180, 140),
     "stretcher": (160, 82, 45),
     "toe_kick": (105, 105, 105),
-    "finished_end": (205, 133, 63)
+    "finished_end": (205, 133, 63),
+    "false_front": (222, 184, 135),
+    "false_front_backing": (188, 143, 143),
+    "drawer_face": (245, 222, 179)
 }
 
 # ============================================================

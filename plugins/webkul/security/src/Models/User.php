@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
+use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Webkul\Employee\Models\Department;
 use Webkul\Employee\Models\Employee;
@@ -35,7 +36,7 @@ use Webkul\Support\Models\Company;
  */
 class User extends BaseUser implements FilamentUser
 {
-    use HasRoles, SoftDeletes;
+    use HasApiTokens, HasRoles, SoftDeletes;
 
     /**
      * Create a new User instance

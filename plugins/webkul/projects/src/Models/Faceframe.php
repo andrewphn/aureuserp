@@ -74,6 +74,13 @@ class Faceframe extends Model
     public const STANDARD_THICKNESS = 0.75;  // 3/4"
 
     /**
+     * TCS Minimum Gap for Rail
+     * Rails only added when gap between components >= this value
+     * If gap < this, just use reveal gap (no rail)
+     */
+    public const MIN_RAIL_GAP = 0.75; // 3/4"
+
+    /**
      * Face frame types
      */
     public const TYPES = [
@@ -343,6 +350,117 @@ class Faceframe extends Model
         $this->flush_with_carcass = true;
 
         return $this;
+    }
+
+    /**
+     * Check if a rail is needed for a given gap.
+     *
+     * Depends on overlay type:
+     * - Full Overlay: Rails only for gaps >= MIN_RAIL_GAP (3/4")
+     * - Inset: Rails always needed (define each opening)
+     * - Partial Overlay: Rails always needed (frame each opening)
+     *
+     * @param float $gapSize Gap between components in inches
+     * @param string|null $overlayType Overlay type (null uses instance value)
+     * @return bool True if a rail should be added
+     */
+    public function needsRailForGap(float $gapSize, ?string $overlayType = null): bool
+    {
+        $overlay = $overlayType ?? $this->overlay_type ?? 'full_overlay';
+
+        // Inset and partial overlay always need rails to define openings
+        if ($overlay === 'inset' || $overlay === 'partial_overlay') {
+            return true;
+        }
+
+        // Full overlay: rails only for large gaps
+        return $gapSize >= self::MIN_RAIL_GAP;
+    }
+
+    /**
+     * Static version for use without instance.
+     *
+     * @param float $gapSize Gap between components in inches
+     * @param string $overlayType Overlay type
+     * @return bool True if a rail should be added
+     */
+    public static function needsRailForGapStatic(float $gapSize, string $overlayType = 'full_overlay'): bool
+    {
+        if ($overlayType === 'inset' || $overlayType === 'partial_overlay') {
+            return true;
+        }
+        return $gapSize >= self::MIN_RAIL_GAP;
+    }
+
+    /**
+     * Calculate rails needed between components based on gaps.
+     *
+     * TCS Rule: Rails are added to compensate for gaps >= MIN_RAIL_GAP.
+     * Components (doors, drawers, false fronts) determine where rails go.
+     *
+     * @param array $components Array of components with 'y_bottom' and 'y_top' positions
+     * @return array Array of rail positions [['y' => position, 'gap' => gap_size], ...]
+     */
+    public function calculateRailPositions(array $components): array
+    {
+        $rails = [];
+
+        if (count($components) < 2) {
+            return $rails;
+        }
+
+        // Sort by Y position (top to bottom)
+        usort($components, fn($a, $b) => ($b['y_top'] ?? 0) <=> ($a['y_top'] ?? 0));
+
+        $railWidth = $this->rail_width ?? self::STANDARD_RAIL_WIDTH;
+
+        for ($i = 0; $i < count($components) - 1; $i++) {
+            $upper = $components[$i];
+            $lower = $components[$i + 1];
+
+            $upperBottom = $upper['y_bottom'] ?? ($upper['y_top'] - $upper['height']);
+            $lowerTop = $lower['y_top'] ?? ($lower['y_bottom'] + $lower['height']);
+
+            $gap = $upperBottom - $lowerTop;
+
+            if (self::needsRailForGap($gap)) {
+                // Center rail in the gap
+                $railY = $lowerTop + ($gap - $railWidth) / 2;
+                $rails[] = [
+                    'y' => $railY,
+                    'gap' => $gap,
+                    'between' => [
+                        $upper['name'] ?? 'upper_' . $i,
+                        $lower['name'] ?? 'lower_' . ($i + 1),
+                    ],
+                ];
+            }
+        }
+
+        return $rails;
+    }
+
+    /**
+     * Check if bottom rail is needed based on lowest component position.
+     *
+     * @param array $components Array of components
+     * @param float $bottomY Bottom of face frame opening (usually 0)
+     * @return bool True if bottom rail needed
+     */
+    public function needsBottomRail(array $components, float $bottomY = 0): bool
+    {
+        if (empty($components)) {
+            return true; // No components = need rail
+        }
+
+        $lowestY = PHP_FLOAT_MAX;
+        foreach ($components as $component) {
+            $yBottom = $component['y_bottom'] ?? ($component['y_top'] - $component['height']);
+            $lowestY = min($lowestY, $yBottom);
+        }
+
+        $gap = $lowestY - $bottomY;
+        return self::needsRailForGap($gap);
     }
 
     /**

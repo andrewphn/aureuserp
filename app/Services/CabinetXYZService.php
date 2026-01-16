@@ -49,6 +49,165 @@ class CabinetXYZService
     public const COMPONENT_GAP = 0.125;  // 1/8" between components
 
     /**
+     * PART CATEGORIES define which boundary constraints apply.
+     *
+     * EXTERNAL: Parts that can extend beyond cabinet box (face frame, end panels)
+     * INTERNAL: Parts confined within cabinet box boundaries
+     * BOX: Parts that define the cabinet box itself
+     */
+    public const CATEGORY_EXTERNAL = 'external';  // Face frame, end panels - can extend beyond box
+    public const CATEGORY_INTERNAL = 'internal';  // Stretchers, backings, drawer boxes - confined to box
+    public const CATEGORY_BOX = 'box';            // Sides, bottom, back - define the box boundaries
+
+    /**
+     * Map part types to their constraint category.
+     */
+    protected const PART_CATEGORIES = [
+        // BOX parts - define cabinet boundaries
+        'cabinet_box' => self::CATEGORY_BOX,
+
+        // EXTERNAL parts - can extend beyond box
+        'face_frame' => self::CATEGORY_EXTERNAL,
+        'finished_end' => self::CATEGORY_EXTERNAL,
+        'false_front' => self::CATEGORY_EXTERNAL,  // Face extends beyond stiles (full overlay)
+        'drawer_face' => self::CATEGORY_EXTERNAL,  // Face extends beyond stiles (full overlay)
+
+        // INTERNAL parts - must be confined within box
+        'stretcher' => self::CATEGORY_INTERNAL,
+        'false_front_backing' => self::CATEGORY_INTERNAL,
+        'drawer_box' => self::CATEGORY_INTERNAL,
+        'shelf' => self::CATEGORY_INTERNAL,
+        'divider' => self::CATEGORY_INTERNAL,
+    ];
+
+    /**
+     * Calculate internal boundary constraints.
+     *
+     * All INTERNAL parts must fit within these bounds.
+     *
+     * @param array $specs Cabinet specifications
+     * @param array $gate1 Gate 1 outputs (box dimensions)
+     * @return array Internal boundary constraints [x_min, x_max, y_min, y_max, z_min, z_max]
+     */
+    public function calculateInternalBounds(array $specs, array $gate1): array
+    {
+        $sideThickness = $specs['side_panel_thickness'] ?? self::PLYWOOD_3_4;
+        $backThickness = $specs['back_panel_thickness'] ?? self::PLYWOOD_3_4;
+        $bottomThickness = $specs['bottom_panel_thickness'] ?? self::PLYWOOD_3_4;
+        $cabW = $specs['width'];
+        $cabD = $specs['depth'];
+        $boxH = $gate1['outputs']['box_height'];
+
+        return [
+            'x_min' => $sideThickness,                    // Inside left side
+            'x_max' => $cabW - $sideThickness,            // Inside right side
+            'y_min' => $bottomThickness,                  // Top of bottom panel
+            'y_max' => $boxH,                             // Top of box
+            'z_min' => self::PLYWOOD_3_4,                 // Behind face frame (Z=0.75)
+            'z_max' => $cabD - $backThickness,            // Front of back panel
+            'inside_width' => $gate1['outputs']['inside_width'],
+            'inside_depth' => $gate1['outputs']['inside_depth'],
+        ];
+    }
+
+    /**
+     * Validate that a part respects its category constraints.
+     *
+     * @param array $part Part definition with position, dimensions, part_type
+     * @param array $internalBounds Internal boundary constraints
+     * @return array ['valid' => bool, 'violations' => [...]]
+     */
+    public function validatePartConstraints(array $part, array $internalBounds): array
+    {
+        $partType = $part['part_type'] ?? 'cabinet_box';
+        $category = self::PART_CATEGORIES[$partType] ?? self::CATEGORY_BOX;
+
+        // Only INTERNAL parts need constraint validation
+        if ($category !== self::CATEGORY_INTERNAL) {
+            return ['valid' => true, 'violations' => [], 'category' => $category];
+        }
+
+        $pos = $part['position'];
+        $dim = $part['dimensions'];
+        $violations = [];
+
+        // Check X bounds
+        if ($pos['x'] < $internalBounds['x_min']) {
+            $violations[] = "X start ({$pos['x']}) < x_min ({$internalBounds['x_min']})";
+        }
+        if ($pos['x'] + $dim['w'] > $internalBounds['x_max']) {
+            $violations[] = "X end (" . ($pos['x'] + $dim['w']) . ") > x_max ({$internalBounds['x_max']})";
+        }
+
+        // Check Y bounds
+        if ($pos['y'] < $internalBounds['y_min']) {
+            $violations[] = "Y start ({$pos['y']}) < y_min ({$internalBounds['y_min']})";
+        }
+        if ($pos['y'] + $dim['h'] > $internalBounds['y_max']) {
+            $violations[] = "Y end (" . ($pos['y'] + $dim['h']) . ") > y_max ({$internalBounds['y_max']})";
+        }
+
+        // Check Z bounds
+        if ($pos['z'] < $internalBounds['z_min']) {
+            $violations[] = "Z start ({$pos['z']}) < z_min ({$internalBounds['z_min']})";
+        }
+        if ($pos['z'] + $dim['d'] > $internalBounds['z_max']) {
+            $violations[] = "Z end (" . ($pos['z'] + $dim['d']) . ") > z_max ({$internalBounds['z_max']})";
+        }
+
+        return [
+            'valid' => empty($violations),
+            'violations' => $violations,
+            'category' => $category,
+            'part_name' => $part['part_name'] ?? 'unknown',
+        ];
+    }
+
+    /**
+     * Constrain a part to internal boundaries.
+     *
+     * Automatically adjusts position and dimensions to fit within bounds.
+     *
+     * @param array $part Part definition
+     * @param array $internalBounds Internal boundary constraints
+     * @return array Constrained part definition
+     */
+    public function constrainToInternalBounds(array $part, array $internalBounds): array
+    {
+        $partType = $part['part_type'] ?? 'cabinet_box';
+        $category = self::PART_CATEGORIES[$partType] ?? self::CATEGORY_BOX;
+
+        // Only constrain INTERNAL parts
+        if ($category !== self::CATEGORY_INTERNAL) {
+            return $part;
+        }
+
+        $pos = $part['position'];
+        $dim = $part['dimensions'];
+
+        // Constrain X
+        $pos['x'] = max($pos['x'], $internalBounds['x_min']);
+        $maxWidth = $internalBounds['x_max'] - $pos['x'];
+        $dim['w'] = min($dim['w'], $maxWidth);
+
+        // Constrain Y
+        $pos['y'] = max($pos['y'], $internalBounds['y_min']);
+        $maxHeight = $internalBounds['y_max'] - $pos['y'];
+        $dim['h'] = min($dim['h'], $maxHeight);
+
+        // Constrain Z
+        $pos['z'] = max($pos['z'], $internalBounds['z_min']);
+        $maxDepth = $internalBounds['z_max'] - $pos['z'];
+        $dim['d'] = min($dim['d'], $maxDepth);
+
+        $part['position'] = $pos;
+        $part['dimensions'] = $dim;
+        $part['_constrained'] = true;
+
+        return $part;
+    }
+
+    /**
      * Generate 3D positions for all cabinet parts.
      *
      * @param array $specs Input specifications (from CabinetMathAuditService)
@@ -73,6 +232,9 @@ class CabinetXYZService
         $ffStile = $specs['face_frame_stile'];
         $ffRail = $specs['face_frame_rail'];
         $gap = self::COMPONENT_GAP;
+
+        // Calculate internal bounds for INTERNAL parts
+        $internalBounds = $this->calculateInternalBounds($specs, $gate1);
 
         $parts = [];
 
@@ -455,10 +617,32 @@ class CabinetXYZService
             ];
 
             // FALSE FRONT BACKING (horizontal stretcher)
+            // INTERNAL part - must respect internal bounds and stretcher collision
             if ($ff['has_backing'] ?? true) {
                 $backingH = $ff['backing_height'] ?? 3;
-                $backingY = $faceY + ($faceH - $backingH) / 2;
-                $parts["false_front_{$ffNum}_backing"] = [
+
+                // Calculate initial centered position
+                $backingYCentered = $faceY + ($faceH - $backingH) / 2;
+
+                // CONSTRAINT: Top of backing must be at or below stretcher bottom
+                // Stretcher is at Y=28 (bottom) to Y=28.75 (top)
+                // So backing top must be <= 28 (stretcherY)
+                $stretcherY = $stretchersOnTop ? ($boxH - $stretcherThickness) : $boxH;
+                $backingTopMax = $stretcherY;  // Must not exceed this
+
+                // Calculate final Y position respecting constraint
+                $backingYTop = $backingYCentered + $backingH;
+                if ($backingYTop > $backingTopMax) {
+                    // Shift backing down to respect stretcher
+                    $backingY = $backingTopMax - $backingH;
+                } else {
+                    $backingY = $backingYCentered;
+                }
+
+                // Also ensure backing doesn't go below bottom panel
+                $backingY = max($backingY, $internalBounds['y_min']);
+
+                $backingPart = [
                     'part_name' => "False Front #{$ffNum} Backing",
                     'part_type' => 'false_front_backing',
                     'position' => ['x' => $sideThickness, 'y' => $backingY, 'z' => self::PLYWOOD_3_4],
@@ -477,7 +661,14 @@ class CabinetXYZService
                     'material' => '3/4" Plywood',
                     'notes' => 'Laid FLAT - doubles as stretcher (TCS rule)',
                     'is_stretcher' => true,
+                    '_constraint_applied' => $backingYTop > $backingTopMax ? 'shifted_down_for_stretcher' : 'none',
                 ];
+
+                // Validate against internal bounds
+                $validation = $this->validatePartConstraints($backingPart, $internalBounds);
+                $backingPart['_constraint_validation'] = $validation;
+
+                $parts["false_front_{$ffNum}_backing"] = $backingPart;
             }
 
             $currentY = $faceY - $gap; // Move down for next component

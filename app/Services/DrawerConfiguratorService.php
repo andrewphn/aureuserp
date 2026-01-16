@@ -4,12 +4,19 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\DB;
 use Webkul\Product\Models\Product;
+use Webkul\Project\Models\Faceframe;
 
 /**
  * Calculates drawer box dimensions based on cabinet opening dimensions
  * and hardware specifications (drawer slides).
- * 
+ *
  * Uses the EAV product attribute system to fetch slide clearance requirements.
+ *
+ * Also provides face frame style information that determines rail requirements:
+ * - Full Overlay: Rails only needed for gaps >= 3/4" (default TCS style)
+ * - Inset: Rails always needed to define each opening
+ * - Partial Overlay: Rails always needed to frame each opening
+ * - Frameless/European: No face frame at all
  */
 class DrawerConfiguratorService
 {
@@ -71,7 +78,7 @@ class DrawerConfiguratorService
     /**
      * Shop practice: Add 3/4" to slide length for minimum cabinet depth.
      * This is simpler than Blum's ~29/32" spec and works reliably in practice.
-     * 
+     *
      * Blum spec vs Shop practice:
      * - 21" slide: Blum 21-15/16" → Shop 21-3/4"
      * - 18" slide: Blum 18-29/32" → Shop 18-3/4"
@@ -80,6 +87,70 @@ class DrawerConfiguratorService
      * - 9" slide: Blum 10-15/32" → Shop 9-3/4"
      */
     public const SHOP_MIN_DEPTH_ADDITION = 0.75;    // 3/4" added to slide length for min cabinet depth
+
+    /**
+     * Face Frame Style Constants
+     *
+     * These determine how the face frame is constructed and when rails are needed:
+     *
+     * FULL_OVERLAY (TCS default):
+     * - Doors/drawer fronts cover most of the face frame
+     * - Rails only added when gap >= 3/4" between components
+     * - If gap < 3/4", just use reveal gap (no rail needed)
+     *
+     * INSET:
+     * - Doors/drawer fronts fit inside the face frame opening
+     * - Rails ALWAYS needed to define each opening precisely
+     * - Creates a traditional look with visible frame around each component
+     *
+     * PARTIAL_OVERLAY (Traditional):
+     * - Doors/drawer fronts partially cover the face frame
+     * - Rails ALWAYS needed to frame each opening
+     * - Reveals more of the face frame than full overlay
+     *
+     * FRAMELESS (European/32mm):
+     * - No face frame at all
+     * - Cabinet box is finished, doors mount directly to sides
+     * - Full overlay only style
+     */
+    public const FACE_FRAME_STYLE_FULL_OVERLAY = 'full_overlay';
+    public const FACE_FRAME_STYLE_INSET = 'inset';
+    public const FACE_FRAME_STYLE_PARTIAL_OVERLAY = 'partial_overlay';
+    public const FACE_FRAME_STYLE_FRAMELESS = 'frameless';
+
+    /**
+     * Available face frame styles with descriptions.
+     */
+    public const FACE_FRAME_STYLES = [
+        self::FACE_FRAME_STYLE_FULL_OVERLAY => [
+            'name' => 'Full Overlay',
+            'description' => 'Doors/drawers cover most of the face frame. Rails only added for gaps >= 3/4".',
+            'has_face_frame' => true,
+            'rails_required' => 'conditional',
+            'min_rail_gap' => 0.75, // 3/4"
+        ],
+        self::FACE_FRAME_STYLE_INSET => [
+            'name' => 'Inset',
+            'description' => 'Doors/drawers fit inside the face frame opening. Rails always define each opening.',
+            'has_face_frame' => true,
+            'rails_required' => 'always',
+            'min_rail_gap' => 0, // Always add rails
+        ],
+        self::FACE_FRAME_STYLE_PARTIAL_OVERLAY => [
+            'name' => 'Partial Overlay (Traditional)',
+            'description' => 'Doors/drawers partially cover the face frame. Rails frame each opening.',
+            'has_face_frame' => true,
+            'rails_required' => 'always',
+            'min_rail_gap' => 0, // Always add rails
+        ],
+        self::FACE_FRAME_STYLE_FRAMELESS => [
+            'name' => 'Frameless (European/32mm)',
+            'description' => 'No face frame. Cabinet box is finished, doors mount directly to sides.',
+            'has_face_frame' => false,
+            'rails_required' => 'none',
+            'min_rail_gap' => null,
+        ],
+    ];
 
     /**
      * Blum official minimum inside cabinet depths (from spec sheet).
@@ -707,5 +778,298 @@ class DrawerConfiguratorService
         $formatted['slide'] = $cutList['hardware']['slide_name'] ?? 'N/A';
 
         return $formatted;
+    }
+
+    // ========================================
+    // FACE FRAME STYLE METHODS
+    // ========================================
+
+    /**
+     * Get all available face frame styles for user selection.
+     *
+     * Returns array suitable for FilamentPHP Select options:
+     * ['full_overlay' => 'Full Overlay', 'inset' => 'Inset', ...]
+     *
+     * @return array
+     */
+    public static function getFaceFrameStyleOptions(): array
+    {
+        $options = [];
+        foreach (self::FACE_FRAME_STYLES as $key => $style) {
+            $options[$key] = $style['name'];
+        }
+        return $options;
+    }
+
+    /**
+     * Get detailed information about a face frame style.
+     *
+     * @param string $style Style key (full_overlay, inset, etc.)
+     * @return array|null Style details or null if not found
+     */
+    public static function getFaceFrameStyleInfo(string $style): ?array
+    {
+        return self::FACE_FRAME_STYLES[$style] ?? null;
+    }
+
+    /**
+     * Determine if a rail is needed for a given gap based on face frame style.
+     *
+     * This is the main method for face frame collision detection:
+     * - Full Overlay: Rails only for gaps >= 3/4" (components can be close together)
+     * - Inset: Rails ALWAYS (each opening needs to be defined)
+     * - Partial Overlay: Rails ALWAYS (frame each opening)
+     * - Frameless: No rails (no face frame at all)
+     *
+     * @param float $gapSize Gap between components in inches
+     * @param string $style Face frame style
+     * @return bool True if a rail should be added
+     */
+    public static function needsRailForGap(float $gapSize, string $style = self::FACE_FRAME_STYLE_FULL_OVERLAY): bool
+    {
+        // Delegate to Faceframe model for consistency
+        return Faceframe::needsRailForGapStatic($gapSize, $style);
+    }
+
+    /**
+     * Get face frame requirements for a drawer configuration.
+     *
+     * This provides all the face frame information a user needs when
+     * configuring drawers. Should be called when calculating drawer dimensions
+     * to inform the user about rail requirements.
+     *
+     * @param string $style Face frame style
+     * @param array $components Array of components with heights and positions
+     * @param float $openingHeight Total opening height
+     * @return array Face frame requirements and recommendations
+     */
+    public function getFaceFrameRequirements(
+        string $style,
+        array $components = [],
+        float $openingHeight = 0
+    ): array {
+        $styleInfo = self::getFaceFrameStyleInfo($style) ?? self::FACE_FRAME_STYLES[self::FACE_FRAME_STYLE_FULL_OVERLAY];
+
+        $result = [
+            'style' => $style,
+            'style_name' => $styleInfo['name'],
+            'style_description' => $styleInfo['description'],
+            'has_face_frame' => $styleInfo['has_face_frame'],
+            'rails_required' => $styleInfo['rails_required'],
+            'min_rail_gap' => $styleInfo['min_rail_gap'],
+            'rails' => [],
+            'recommendations' => [],
+        ];
+
+        // If frameless, no face frame calculations needed
+        if (!$styleInfo['has_face_frame']) {
+            $result['recommendations'][] = 'Frameless construction: No face frame needed. Doors mount directly to cabinet sides.';
+            return $result;
+        }
+
+        // Analyze gaps between components if provided
+        if (!empty($components) && $openingHeight > 0) {
+            $result['rails'] = $this->analyzeRailRequirements($components, $openingHeight, $style);
+
+            // Generate recommendations based on analysis
+            if (empty($result['rails']['needed'])) {
+                if ($styleInfo['rails_required'] === 'conditional') {
+                    $result['recommendations'][] = 'Full overlay: No mid-rails needed. Drawer faces can be placed close together.';
+                }
+            } else {
+                foreach ($result['rails']['needed'] as $rail) {
+                    $result['recommendations'][] = sprintf(
+                        'Rail needed at Y=%.3f" (gap of %.3f" between %s)',
+                        $rail['position'],
+                        $rail['gap'],
+                        $rail['between']
+                    );
+                }
+            }
+        }
+
+        // Add general recommendations based on style
+        switch ($style) {
+            case self::FACE_FRAME_STYLE_FULL_OVERLAY:
+                $result['recommendations'][] = 'TCS Standard: Use 1/8" reveal gap between drawer faces.';
+                break;
+            case self::FACE_FRAME_STYLE_INSET:
+                $result['recommendations'][] = 'Inset style: Ensure precise fit. Use 1/16" clearance around doors/drawers.';
+                break;
+            case self::FACE_FRAME_STYLE_PARTIAL_OVERLAY:
+                $result['recommendations'][] = 'Partial overlay: Plan for visible frame reveal around each component.';
+                break;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Analyze which rails are needed based on component layout.
+     *
+     * @param array $components Array of components with 'height' and optionally 'y_position'
+     * @param float $openingHeight Total opening height
+     * @param string $style Face frame style
+     * @return array Analysis of rail requirements
+     */
+    protected function analyzeRailRequirements(array $components, float $openingHeight, string $style): array
+    {
+        $result = [
+            'needed' => [],
+            'gaps' => [],
+            'top_rail' => true,  // Always need top rail
+            'bottom_rail' => true, // May not be needed for full overlay
+        ];
+
+        // Calculate positions if not provided
+        $positioned = [];
+        $currentY = 0;
+        $revealGap = 0.125; // 1/8" standard gap
+
+        foreach ($components as $i => $component) {
+            $height = $component['height'] ?? $component['front_height_inches'] ?? 0;
+            $y = $component['y_position'] ?? $currentY;
+
+            $positioned[] = [
+                'index' => $i,
+                'name' => $component['name'] ?? "Component " . ($i + 1),
+                'y_bottom' => $y,
+                'y_top' => $y + $height,
+                'height' => $height,
+            ];
+
+            $currentY = $y + $height + $revealGap;
+        }
+
+        // Sort by Y position (bottom to top)
+        usort($positioned, fn($a, $b) => $a['y_bottom'] <=> $b['y_bottom']);
+
+        // Analyze gaps
+        for ($i = 0; $i < count($positioned) - 1; $i++) {
+            $lower = $positioned[$i];
+            $upper = $positioned[$i + 1];
+
+            $gap = $upper['y_bottom'] - $lower['y_top'];
+
+            $result['gaps'][] = [
+                'between' => $lower['name'] . ' and ' . $upper['name'],
+                'gap' => $gap,
+                'needs_rail' => self::needsRailForGap($gap, $style),
+            ];
+
+            if (self::needsRailForGap($gap, $style)) {
+                $result['needed'][] = [
+                    'position' => $lower['y_top'] + ($gap / 2),
+                    'gap' => $gap,
+                    'between' => $lower['name'] . ' and ' . $upper['name'],
+                ];
+            }
+        }
+
+        // Check bottom gap
+        if (!empty($positioned)) {
+            $lowestComponent = $positioned[0];
+            $bottomGap = $lowestComponent['y_bottom'];
+
+            if (!self::needsRailForGap($bottomGap, $style)) {
+                $result['bottom_rail'] = false;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Calculate drawer dimensions with face frame requirements.
+     *
+     * Enhanced version of calculateDrawerDimensions that includes
+     * face frame style information in the output.
+     *
+     * @param float $openingWidth Cabinet opening width in inches
+     * @param float $openingHeight Cabinet opening height in inches
+     * @param float $openingDepth Cabinet opening depth in inches
+     * @param float $drawerSideThickness Drawer side material thickness
+     * @param string $faceFrameStyle Face frame style
+     * @return array Calculated drawer dimensions with face frame info
+     */
+    public function calculateDrawerDimensionsWithFaceFrame(
+        float $openingWidth,
+        float $openingHeight,
+        float $openingDepth,
+        float $drawerSideThickness = 0.5,
+        string $faceFrameStyle = self::FACE_FRAME_STYLE_FULL_OVERLAY
+    ): array {
+        // Get standard drawer dimensions
+        $dimensions = $this->calculateDrawerDimensions(
+            $openingWidth,
+            $openingHeight,
+            $openingDepth,
+            $drawerSideThickness
+        );
+
+        // Add face frame style information
+        $dimensions['face_frame'] = $this->getFaceFrameRequirements(
+            $faceFrameStyle,
+            [['height' => $openingHeight, 'name' => 'Drawer']],
+            $openingHeight
+        );
+
+        return $dimensions;
+    }
+
+    /**
+     * Calculate drawer stack with face frame requirements.
+     *
+     * Enhanced version of calculateDrawerStack that analyzes
+     * rail requirements between drawers.
+     *
+     * @param float $openingWidth Cabinet opening width
+     * @param float $totalHeight Total height available for drawers
+     * @param float $openingDepth Cabinet opening depth
+     * @param int $drawerCount Number of drawers
+     * @param array|null $heightDistribution Optional array of height percentages
+     * @param string $faceFrameStyle Face frame style
+     * @return array Dimensions for each drawer with face frame info
+     */
+    public function calculateDrawerStackWithFaceFrame(
+        float $openingWidth,
+        float $totalHeight,
+        float $openingDepth,
+        int $drawerCount,
+        ?array $heightDistribution = null,
+        string $faceFrameStyle = self::FACE_FRAME_STYLE_FULL_OVERLAY
+    ): array {
+        // Get standard stack dimensions
+        $stack = $this->calculateDrawerStack(
+            $openingWidth,
+            $totalHeight,
+            $openingDepth,
+            $drawerCount,
+            $heightDistribution
+        );
+
+        // Build components array for face frame analysis
+        $components = [];
+        $revealGap = 0.125;
+        $currentY = $revealGap; // Start with bottom reveal
+
+        foreach ($stack['drawers'] as $i => $drawer) {
+            $height = $drawer['opening']['height'];
+            $components[] = [
+                'name' => 'Drawer ' . ($i + 1),
+                'height' => $height,
+                'y_position' => $currentY,
+            ];
+            $currentY += $height + $revealGap;
+        }
+
+        // Add face frame analysis
+        $stack['face_frame'] = $this->getFaceFrameRequirements(
+            $faceFrameStyle,
+            $components,
+            $totalHeight
+        );
+
+        return $stack;
     }
 }
