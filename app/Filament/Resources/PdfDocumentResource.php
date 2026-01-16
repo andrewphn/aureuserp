@@ -5,11 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PdfDocumentResource\Pages;
 use App\Models\PdfDocument;
 use App\Filament\Forms\Components\PdfViewerField;
+use App\Services\PdfDataExtractor;
 use Filament\Forms;
-use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
@@ -38,8 +39,28 @@ class PdfDocumentResource extends Resource
      */
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
+        return 'heroicon-o-document-text';
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'PDF Documents';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return 'Documents';
+    }
+
+    public static function getNavigationSort(): ?int
+    {
+        return 1;
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
                 Forms\Components\Section::make('Document Information')
                     ->schema([
                         Forms\Components\TextInput::make('title')
@@ -188,6 +209,25 @@ class PdfDocumentResource extends Resource
                     ->formatStateUsing(fn ($state) => number_format($state / 1024, 2) . ' KB')
                     ->sortable(),
 
+                Tables\Columns\TextColumn::make('processing_status')
+                    ->label('Status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'gray',
+                        'processing' => 'warning',
+                        'completed' => 'success',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('metadata_reviewed')
+                    ->label('Reviewed')
+                    ->boolean()
+                    ->sortable()
+                    ->toggleable(),
+
                 Tables\Columns\IconColumn::make('is_public')
                     ->label('Public')
                     ->boolean()
@@ -260,9 +300,69 @@ class PdfDocumentResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                Tables\Actions\Action::make('review')
+                    ->label('Review Data')
+                    ->icon('heroicon-o-clipboard-document-check')
+                    ->color('warning')
+                    ->url(fn (PdfDocument $record) => static::getUrl('review', ['record' => $record]))
+                    ->visible(fn (PdfDocument $record) =>
+                        $record->processing_status === 'completed' &&
+                        !$record->metadata_reviewed &&
+                        !empty($record->extracted_metadata)
+                    ),
+                Tables\Actions\Action::make('reextract')
+                    ->label('Re-extract Metadata')
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('info')
+                    ->requiresConfirmation()
+                    ->modalHeading('Re-extract Metadata')
+                    ->modalDescription('This will re-run the extraction process using the latest extraction logic. Any previous metadata will be overwritten.')
+                    ->modalSubmitActionLabel('Re-extract')
+                    ->visible(fn (PdfDocument $record) =>
+                        !empty($record->file_path) &&
+                        $record->pages()->count() > 0
+                    )
+                    ->action(function (PdfDocument $record) {
+                        try {
+                            $extractor = app(PdfDataExtractor::class);
+
+                            // Re-extract metadata
+                            $metadata = $extractor->extractMetadata($record);
+
+                            // Re-extract room data
+                            $roomData = $extractor->extractRoomData($record);
+
+                            // Update the record
+                            $record->update([
+                                'extracted_metadata' => array_merge($metadata, ['rooms' => $roomData]),
+                                'processing_status' => 'completed',
+                                'metadata_reviewed' => false, // Reset so they can review new data
+                                'extracted_at' => now(),
+                            ]);
+
+                            Notification::make()
+                                ->title('Metadata Re-extracted Successfully')
+                                ->body('The document has been re-processed with the latest extraction logic.')
+                                ->success()
+                                ->send();
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Re-extraction Failed')
+                                ->body('Error: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+
+                            \Log::error('PDF re-extraction failed', [
+                                'pdf_id' => $record->id,
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                        }
+                    }),
+                \Filament\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('download')
                     ->icon('heroicon-o-arrow-down-tray')
                     ->url(fn (PdfDocument $record) => route('pdf.download', $record))
@@ -270,7 +370,63 @@ class PdfDocumentResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\BulkAction::make('reextractBulk')
+                        ->label('Re-extract Metadata')
+                        ->icon('heroicon-o-arrow-path')
+                        ->color('info')
+                        ->requiresConfirmation()
+                        ->modalHeading('Re-extract Metadata for Selected Documents')
+                        ->modalDescription('This will re-run the extraction process for all selected documents using the latest extraction logic.')
+                        ->modalSubmitActionLabel('Re-extract All')
+                        ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
+                            $extractor = app(PdfDataExtractor::class);
+                            $successCount = 0;
+                            $errorCount = 0;
+
+                            foreach ($records as $record) {
+                                try {
+                                    // Re-extract metadata
+                                    $metadata = $extractor->extractMetadata($record);
+
+                                    // Re-extract room data
+                                    $roomData = $extractor->extractRoomData($record);
+
+                                    // Update the record
+                                    $record->update([
+                                        'extracted_metadata' => array_merge($metadata, ['rooms' => $roomData]),
+                                        'processing_status' => 'completed',
+                                        'metadata_reviewed' => false,
+                                        'extracted_at' => now(),
+                                    ]);
+
+                                    $successCount++;
+
+                                } catch (\Exception $e) {
+                                    $errorCount++;
+                                    \Log::error('PDF re-extraction failed', [
+                                        'pdf_id' => $record->id,
+                                        'error' => $e->getMessage(),
+                                    ]);
+                                }
+                            }
+
+                            if ($successCount > 0) {
+                                Notification::make()
+                                    ->title('Bulk Re-extraction Complete')
+                                    ->body("Successfully re-extracted {$successCount} document(s)." . ($errorCount > 0 ? " {$errorCount} failed." : ''))
+                                    ->success()
+                                    ->send();
+                            }
+
+                            if ($errorCount > 0 && $successCount === 0) {
+                                Notification::make()
+                                    ->title('Bulk Re-extraction Failed')
+                                    ->body("Failed to re-extract {$errorCount} document(s).")
+                                    ->danger()
+                                    ->send();
+                            }
+                        }),
+                    \Filament\Actions\DeleteBulkAction::make(),
                 ]),
             ])
             ->defaultSort('created_at', 'desc');
@@ -290,6 +446,7 @@ class PdfDocumentResource extends Resource
             'create' => Pages\CreatePdfDocument::route('/create'),
             'edit' => Pages\EditPdfDocument::route('/{record}/edit'),
             'view' => Pages\ViewPdfDocument::route('/{record}'),
+            'review' => Pages\ReviewExtractedData::route('/{record}/review'),
         ];
     }
 

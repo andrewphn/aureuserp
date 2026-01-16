@@ -5,9 +5,10 @@
 			"command": "npx",
 			"args": [
 				"-y",
-				"@playwright/mcp@latest"
+				"@playwright/mcp@latest",
+				"--isolated"
 			],
-			"description": "Browser automation and testing"
+			"description": "Browser automation and testing with isolated browser contexts"
 		},
 		"context7": {
 			"type": "stdio",

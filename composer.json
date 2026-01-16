@@ -35,6 +35,7 @@
         "njxqlus/filament-lightbox": "^4.0",
         "smalot/pdfparser": "^2.12",
         "spatie/eloquent-sortable": "^4.4",
+        "thiagoalessio/tesseract_ocr": "^2.13",
         "wikimedia/composer-merge-plugin": "^2.1"
     },
     "require-dev": {

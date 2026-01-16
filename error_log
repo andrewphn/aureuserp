@@ -1,0 +1,42 @@
+[06-Oct-2025 18:29:13 America/Chicago] PHP Warning:  file_get_contents(/home/tcswoodw/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource/Pages/ReviewExtractedData.php): Failed to open stream: No such file or directory in /tmp/fix_review_page.php on line 5
+[06-Oct-2025 18:29:13 America/Chicago] PHP Warning:  file_put_contents(/home/tcswoodw/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource/Pages/ReviewExtractedData.php): Failed to open stream: No such file or directory in /tmp/fix_review_page.php on line 102
+[06-Oct-2025 20:23:23 America/Chicago] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Migrations\Migration" not found in /tmp/create_tcs_services_with_attributes.php:6
+Stack trace:
+#0 {main}
+  thrown in /tmp/create_tcs_services_with_attributes.php on line 6
+[06-Oct-2025 20:24:40 America/Chicago] PHP Warning:  require(/tmp/vendor/autoload.php): Failed to open stream: No such file or directory in /tmp/create_tcs_services.php on line 8
+[06-Oct-2025 20:24:40 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/tmp/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /tmp/create_tcs_services.php:8
+Stack trace:
+#0 {main}
+  thrown in /tmp/create_tcs_services.php on line 8
+[06-Oct-2025 20:24:45 America/Chicago] PHP Warning:  require(/tmp/vendor/autoload.php): Failed to open stream: No such file or directory in /tmp/create_tcs_services.php on line 8
+[06-Oct-2025 20:24:45 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/tmp/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /tmp/create_tcs_services.php:8
+Stack trace:
+#0 {main}
+  thrown in /tmp/create_tcs_services.php on line 8
+[06-Oct-2025 20:26:12 America/Chicago] PHP Warning:  require(/home/tcsadmin/staging.tcswoodwork.com/vendor/autoload.php): Failed to open stream: No such file or directory in /tmp/create_tcs_services.php on line 10
+[06-Oct-2025 20:26:12 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home/tcsadmin/staging.tcswoodwork.com/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /tmp/create_tcs_services.php:10
+Stack trace:
+#0 {main}
+  thrown in /tmp/create_tcs_services.php on line 10
+[06-Oct-2025 20:26:18 America/Chicago] PHP Warning:  require(/home/tcsadmin/staging.tcswoodwork.com/vendor/autoload.php): Failed to open stream: No such file or directory in /tmp/create_tcs_services.php on line 10
+[06-Oct-2025 20:26:18 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/home/tcsadmin/staging.tcswoodwork.com/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /tmp/create_tcs_services.php:10
+Stack trace:
+#0 {main}
+  thrown in /tmp/create_tcs_services.php on line 10
+[06-Oct-2025 20:55:23 America/Chicago] PHP Warning:  require(/tmp/vendor/autoload.php): Failed to open stream: No such file or directory in /tmp/check_projects.php on line 2
+[06-Oct-2025 20:55:23 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/tmp/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /tmp/check_projects.php:2
+Stack trace:
+#0 {main}
+  thrown in /tmp/check_projects.php on line 2
+[06-Oct-2025 20:58:34 America/Chicago] PHP Warning:  require(/tmp/vendor/autoload.php): Failed to open stream: No such file or directory in /tmp/check_sales_schema.php on line 2
+[06-Oct-2025 20:58:34 America/Chicago] PHP Fatal error:  Uncaught Error: Failed opening required '/tmp/vendor/autoload.php' (include_path='.:/opt/cpanel/ea-php83/root/usr/share/pear') in /tmp/check_sales_schema.php:2
+Stack trace:
+#0 {main}
+  thrown in /tmp/check_sales_schema.php on line 2
+[07-Oct-2025 02:27:30 UTC] PHP Fatal error:  Type of App\Filament\Resources\PdfDocumentResource::$navigationGroup must be UnitEnum|string|null (as in class Filament\Resources\Resource) in /home1/ibimfste/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource.php on line 18
+[07-Oct-2025 02:29:48 UTC] PHP Fatal error:  Type of App\Filament\Resources\PdfDocumentResource::$navigationGroup must be UnitEnum|string|null (as in class Filament\Resources\Resource) in /home1/ibimfste/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource.php on line 18
+[07-Oct-2025 02:36:06 UTC] PHP Fatal error:  Type of App\Filament\Resources\PdfDocumentResource::$navigationIcon must be BackedEnum|string|null (as in class Filament\Resources\Resource) in /home1/ibimfste/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource.php on line 18
+[07-Oct-2025 02:36:22 UTC] PHP Fatal error:  Type of App\Filament\Resources\PdfDocumentResource::$navigationGroup must be UnitEnum|string|null (as in class Filament\Resources\Resource) in /home1/ibimfste/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource.php on line 18
+[07-Oct-2025 02:37:40 UTC] PHP Fatal error:  Type of App\Filament\Resources\PdfDocumentResource::$navigationGroup must be UnitEnum|string|null (as in class Filament\Resources\Resource) in /home1/ibimfste/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource.php on line 18
+[07-Oct-2025 02:38:21 UTC] PHP Fatal error:  Type of App\Filament\Resources\PdfDocumentResource::$navigationGroup must be UnitEnum|string|null (as in class Filament\Resources\Resource) in /home1/ibimfste/staging.tcswoodwork.com/app/Filament/Resources/PdfDocumentResource.php on line 18

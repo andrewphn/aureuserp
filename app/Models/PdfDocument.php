@@ -86,6 +86,12 @@ class PdfDocument extends Model
         'uploaded_by',
         'tags',
         'metadata',
+        'processing_status',
+        'processing_error',
+        'processed_at',
+        'extracted_metadata',
+        'metadata_reviewed',
+        'extracted_at',
     ];
 
     /**
@@ -116,6 +122,8 @@ class PdfDocument extends Model
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'deleted_at' => 'datetime',
+            'processed_at' => 'datetime',
+            'extracted_at' => 'datetime',
         ];
     }
 
@@ -285,5 +293,99 @@ class PdfDocument extends Model
         }
 
         return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    /**
+     * Check if document is processed
+     *
+     * @return bool
+     */
+    public function isProcessed(): bool
+    {
+        return $this->processing_status === 'completed';
+    }
+
+    /**
+     * Check if document needs reprocessing
+     *
+     * @return bool
+     */
+    public function needsReprocessing(): bool
+    {
+        return in_array($this->processing_status, ['pending', 'failed']);
+    }
+
+    /**
+     * Mark document as processing
+     *
+     * @return void
+     */
+    public function markAsProcessing(): void
+    {
+        $this->update([
+            'processing_status' => 'processing',
+            'processing_error' => null,
+        ]);
+    }
+
+    /**
+     * Mark document as completed
+     *
+     * @return void
+     */
+    public function markAsCompleted(): void
+    {
+        $this->update([
+            'processing_status' => 'completed',
+            'processing_error' => null,
+            'processed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Mark document as failed
+     *
+     * @param string $error
+     * @return void
+     */
+    public function markAsFailed(string $error): void
+    {
+        $this->update([
+            'processing_status' => 'failed',
+            'processing_error' => $error,
+        ]);
+    }
+
+    /**
+     * Scope to get processed documents
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeProcessed($query)
+    {
+        return $query->where('processing_status', 'completed');
+    }
+
+    /**
+     * Scope to get pending documents
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopePending($query)
+    {
+        return $query->where('processing_status', 'pending');
+    }
+
+    /**
+     * Scope to get failed documents
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeFailed($query)
+    {
+        return $query->where('processing_status', 'failed');
     }
 }

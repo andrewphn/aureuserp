@@ -94,6 +94,9 @@ class AdminPanelProvider extends PanelProvider
                     ->label(__('admin.navigation.project'))
                     ->icon('icon-projects'),
                 NavigationGroup::make()
+                    ->label('Documents')
+                    ->icon('heroicon-o-document-text'),
+                NavigationGroup::make()
                     ->label(__('admin.navigation.employee'))
                     ->icon('icon-employees'),
                 NavigationGroup::make()
@@ -108,6 +111,9 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label(__('admin.navigation.setting'))
                     ->icon('icon-settings'),
+            ])
+            ->resources([
+                \App\Filament\Resources\PdfDocumentResource::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make()

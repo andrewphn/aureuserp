@@ -124,6 +124,9 @@ class PdfPage extends Model
         'rotation',
         'thumbnail_path',
         'extracted_text',
+        'ocr_text',
+        'extraction_time_ms',
+        'ocr_time_ms',
         'page_metadata',
         // Entity linking fields
         'linked_entity_type',
