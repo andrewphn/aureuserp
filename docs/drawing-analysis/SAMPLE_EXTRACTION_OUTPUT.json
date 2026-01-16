@@ -1,0 +1,1004 @@
+{
+  "_meta": {
+    "description": "Complete drawing analysis pipeline output mapped to TCS database schema",
+    "source_drawing": "Kitchen Cabinet Elevation - SB36 Sink Base",
+    "analysis_date": "2026-01-16",
+    "pipeline_version": "1.0"
+  },
+
+  "step_1_context": {
+    "_maps_to": "Metadata only - stored in session during analysis",
+    "view_type": {
+      "primary": "elevation",
+      "confidence": 0.95
+    },
+    "orientation": {
+      "primary": "front",
+      "confidence": 0.9,
+      "reasoning": "Face frame members and door openings visible"
+    },
+    "drawing_intent": {
+      "type": "production",
+      "confidence": 0.85,
+      "indicators": ["Detailed dimensions", "Material callouts", "Construction notes"]
+    },
+    "unit_system": {
+      "primary": "inches",
+      "format": "fractional",
+      "confidence": 0.95
+    },
+    "scale": {
+      "indicated": true,
+      "value": "1/2\" = 1'-0\"",
+      "is_to_scale": true
+    },
+    "baselines": {
+      "identified": ["finished_floor", "face_frame_front"],
+      "primary": "finished_floor",
+      "confidence": 0.8
+    }
+  },
+
+  "step_2_dimension_references": {
+    "_maps_to": "Used for validation in Step 6, informs dimension columns",
+    "dimensions": [
+      {
+        "id": "DIM-001",
+        "value": {
+          "as_written": "34-1/2\"",
+          "numeric": 34.5,
+          "unit": "inches"
+        },
+        "orientation": "vertical",
+        "start_reference": {
+          "type": "physical",
+          "point": "finished_floor",
+          "explicit": true
+        },
+        "end_reference": {
+          "type": "physical",
+          "point": "cabinet_box_top",
+          "explicit": false,
+          "notes": "Appears to end at cabinet top, not countertop"
+        },
+        "flags": [],
+        "confidence": 0.9,
+        "_db_target": "projects_cabinets.height_inches"
+      },
+      {
+        "id": "DIM-002",
+        "value": {
+          "as_written": "36\"",
+          "numeric": 36.0,
+          "unit": "inches"
+        },
+        "orientation": "horizontal",
+        "start_reference": {
+          "type": "visual",
+          "point": "stile_edge",
+          "explicit": true
+        },
+        "end_reference": {
+          "type": "visual",
+          "point": "stile_edge",
+          "explicit": true
+        },
+        "flags": [],
+        "confidence": 0.95,
+        "_db_target": "projects_cabinets.length_inches"
+      },
+      {
+        "id": "DIM-003",
+        "value": {
+          "as_written": "4\"",
+          "numeric": 4.0,
+          "unit": "inches"
+        },
+        "orientation": "vertical",
+        "start_reference": {
+          "type": "physical",
+          "point": "finished_floor"
+        },
+        "end_reference": {
+          "type": "physical",
+          "point": "toe_kick_top"
+        },
+        "flags": [],
+        "confidence": 0.9,
+        "_db_target": "projects_cabinets.toe_kick_height"
+      },
+      {
+        "id": "DIM-004",
+        "value": {
+          "as_written": "1-1/2\"",
+          "numeric": 1.5,
+          "unit": "inches"
+        },
+        "orientation": "horizontal",
+        "start_reference": {
+          "type": "visual",
+          "point": "face_frame_edge"
+        },
+        "end_reference": {
+          "type": "visual",
+          "point": "opening_edge"
+        },
+        "flags": [],
+        "confidence": 0.9,
+        "_db_target": "projects_cabinets.face_frame_stile_width"
+      }
+    ],
+    "potential_conflicts": [],
+    "summary": {
+      "total_dimensions": 4,
+      "flagged_dimensions": 0,
+      "primary_reference_plane": "finished_floor"
+    }
+  },
+
+  "step_3_notes_extraction": {
+    "_maps_to": "Multiple tables based on scope",
+    "notes": [
+      {
+        "id": "NOTE-001",
+        "text": {
+          "exact": "ALL FACE FRAMES 1-1/2\" STILES & RAILS UNLESS NOTED",
+          "is_complete": true,
+          "is_clear": true
+        },
+        "scope": "project",
+        "type": "material_spec",
+        "actionability": "production_required",
+        "_db_mapping": {
+          "table": "projects_room_locations",
+          "columns": {
+            "face_frame_stile_width_inches": 1.5,
+            "face_frame_rail_width_inches": 1.5
+          }
+        }
+      },
+      {
+        "id": "NOTE-002",
+        "text": {
+          "exact": "3/4\" MAPLE PLYWOOD",
+          "is_complete": true,
+          "is_clear": true
+        },
+        "scope": "project",
+        "type": "material_spec",
+        "actionability": "production_required",
+        "_db_mapping": {
+          "table": "projects_cabinets",
+          "columns": {
+            "box_material": "3/4_maple_plywood",
+            "box_thickness": 0.75
+          }
+        }
+      },
+      {
+        "id": "NOTE-003",
+        "text": {
+          "exact": "SOFT CLOSE HINGES & SLIDES THROUGHOUT",
+          "is_complete": true,
+          "is_clear": true
+        },
+        "scope": "project",
+        "type": "hardware_spec",
+        "actionability": "production_required",
+        "_db_mapping": {
+          "table": "projects_room_locations",
+          "columns": {
+            "soft_close_doors": true,
+            "soft_close_drawers": true
+          }
+        }
+      },
+      {
+        "id": "NOTE-004",
+        "text": {
+          "exact": "DOVETAIL DRAWER BOXES",
+          "is_complete": true,
+          "is_clear": true
+        },
+        "scope": "project",
+        "type": "material_spec",
+        "actionability": "production_required",
+        "_db_mapping": {
+          "table": "projects_drawers",
+          "columns": {
+            "joinery_method": "dovetail"
+          }
+        }
+      },
+      {
+        "id": "NOTE-005",
+        "text": {
+          "exact": "VERIFY FIELD DIMENSIONS",
+          "is_complete": true,
+          "is_clear": true
+        },
+        "scope": "drawing",
+        "type": "warning",
+        "actionability": "production_required",
+        "_db_mapping": {
+          "table": "projects_projects",
+          "columns": {
+            "notes": "VERIFY FIELD DIMENSIONS"
+          }
+        }
+      }
+    ],
+    "title_block": {
+      "project_name": "Smith Residence - Kitchen",
+      "drawing_title": "Base Cabinet Elevations",
+      "drawing_number": "A-101",
+      "revision": "2",
+      "date": "01/15/2026",
+      "_db_mapping": {
+        "table": "projects_projects",
+        "columns": {
+          "name": "Smith Residence - Kitchen"
+        }
+      }
+    }
+  },
+
+  "step_4_validation_gate": {
+    "_maps_to": "Pass/Fail gate - no direct DB write",
+    "suitability": {
+      "production_modeling": {
+        "suitable": true,
+        "confidence": 0.85,
+        "missing_requirements": []
+      },
+      "cnc_generation": {
+        "suitable": true,
+        "confidence": 0.90,
+        "missing_requirements": []
+      },
+      "material_takeoff": {
+        "suitable": true,
+        "confidence": 0.95,
+        "missing_requirements": []
+      }
+    },
+    "blockers": [],
+    "can_proceed": {
+      "extraction_allowed": true,
+      "reason": "All validation checks passed",
+      "allowed_purposes": ["production_modeling", "cnc_generation", "material_takeoff"]
+    }
+  },
+
+  "step_5_entity_extraction": {
+    "_maps_to": "Hierarchy of database tables",
+    "entities": {
+      "project": {
+        "id": "PRJ-001",
+        "name": "Smith Residence - Kitchen",
+        "drawing_number": "A-101",
+        "revision": "2",
+        "_db_mapping": {
+          "table": "projects_projects",
+          "columns": {
+            "name": "Smith Residence - Kitchen",
+            "description": "Kitchen cabinet project from drawing A-101 Rev 2"
+          }
+        }
+      },
+      "rooms": [
+        {
+          "id": "ROOM-001",
+          "type": "kitchen",
+          "name": "Kitchen",
+          "parent_id": "PRJ-001",
+          "confidence": 0.95,
+          "_db_mapping": {
+            "table": "projects_rooms",
+            "columns": {
+              "project_id": "FK:PRJ-001",
+              "name": "Kitchen",
+              "room_type": "kitchen",
+              "floor_number": "1"
+            }
+          }
+        }
+      ],
+      "locations": [
+        {
+          "id": "LOC-001",
+          "type": "wall",
+          "name": "Sink Wall",
+          "parent_id": "ROOM-001",
+          "associated_notes": ["NOTE-001", "NOTE-002", "NOTE-003"],
+          "confidence": 0.9,
+          "_db_mapping": {
+            "table": "projects_room_locations",
+            "columns": {
+              "room_id": "FK:ROOM-001",
+              "name": "Sink Wall",
+              "location_type": "wall",
+              "sequence": 1,
+              "material_type": "stain_grade",
+              "wood_species": "maple",
+              "soft_close_doors": true,
+              "soft_close_drawers": true
+            }
+          }
+        }
+      ],
+      "cabinet_runs": [
+        {
+          "id": "RUN-001",
+          "type": "base_run",
+          "name": "Base Run",
+          "parent_id": "LOC-001",
+          "associated_dimensions": [
+            {"value": "120\"", "type": "overall_length"}
+          ],
+          "confidence": 0.85,
+          "_db_mapping": {
+            "table": "projects_cabinet_runs",
+            "columns": {
+              "room_location_id": "FK:LOC-001",
+              "name": "Base Run",
+              "run_type": "base",
+              "total_linear_feet": 10.0
+            }
+          }
+        }
+      ],
+      "cabinets": [
+        {
+          "id": "CAB-001",
+          "type": "sink_base",
+          "name": "SB36",
+          "parent_id": "RUN-001",
+          "bounding_geometry": {
+            "width": {"value": "36\"", "numeric": 36.0, "source": "labeled"},
+            "height": {"value": "34-1/2\"", "numeric": 34.5, "source": "labeled"},
+            "depth": {"value": "24\"", "numeric": 24.0, "source": "assumed_standard"}
+          },
+          "position_in_run": 1,
+          "associated_notes": ["NOTE-002"],
+          "associated_dimensions": ["DIM-001", "DIM-002", "DIM-003", "DIM-004"],
+          "confidence": 0.9,
+          "_db_mapping": {
+            "table": "projects_cabinets",
+            "columns": {
+              "cabinet_run_id": "FK:RUN-001",
+              "project_id": "FK:PRJ-001",
+              "name": "SB36",
+              "length_inches": 36.0,
+              "height_inches": 34.5,
+              "depth_inches": 24.0,
+              "linear_feet": 3.0,
+              "toe_kick_height": 4.0,
+              "toe_kick_depth": 3.0,
+              "box_material": "3/4_maple_plywood",
+              "box_thickness": 0.75,
+              "has_face_frame": true,
+              "face_frame_stile_width": 1.5,
+              "face_frame_rail_width": 1.5,
+              "top_construction_type": "stretchers",
+              "stretcher_height_inches": 3.0,
+              "face_frame_door_gap_inches": 0.125,
+              "drawer_count": 2,
+              "dovetail_drawers": true,
+              "drawer_soft_close": true
+            }
+          }
+        }
+      ],
+      "sections": [
+        {
+          "id": "SEC-001",
+          "type": "drawer_stack",
+          "name": "Drawer Stack",
+          "parent_id": "CAB-001",
+          "position": "top",
+          "associated_dimensions": [],
+          "confidence": 0.85,
+          "_db_mapping": {
+            "table": "projects_cabinet_sections",
+            "columns": {
+              "cabinet_specification_id": "FK:CAB-001",
+              "section_number": 1,
+              "name": "Drawer Stack",
+              "section_type": "drawer_bank",
+              "width_inches": 33.0,
+              "height_inches": 28.5,
+              "position_from_left_inches": 1.5,
+              "position_from_bottom_inches": 4.0,
+              "component_count": 2,
+              "opening_width_inches": 33.0,
+              "opening_height_inches": 28.5
+            }
+          }
+        }
+      ],
+      "components": [
+        {
+          "id": "COMP-001",
+          "type": "false_front",
+          "parent_id": "SEC-001",
+          "placeholder": true,
+          "position": "top",
+          "notes": "U-shaped false front around sink",
+          "confidence": 0.8
+        },
+        {
+          "id": "COMP-002",
+          "type": "drawer",
+          "parent_id": "SEC-001",
+          "placeholder": true,
+          "position": "bottom",
+          "notes": "Full-width drawer below false front",
+          "confidence": 0.85
+        }
+      ]
+    }
+  },
+
+  "step_6_verification": {
+    "_maps_to": "Validates dimensions - no direct write, informs Step 9",
+    "cabinet_verifications": [
+      {
+        "cabinet_id": "CAB-001",
+        "cabinet_name": "SB36",
+        "cabinet_type": "sink_base",
+        "total_dimensions": {
+          "height": {
+            "value": 34.5,
+            "unit": "inches",
+            "source": "labeled",
+            "includes_toe_kick": true
+          },
+          "width": {
+            "value": 36,
+            "unit": "inches",
+            "source": "labeled"
+          },
+          "depth": {
+            "value": 24,
+            "unit": "inches",
+            "source": "assumed_standard"
+          }
+        },
+        "fixed_elements": {
+          "vertical": [
+            {"type": "toe_kick", "value": 4.0, "source": "labeled"},
+            {"type": "bottom_rail", "value": null, "source": "not_present_sink_cabinet"},
+            {"type": "drawer_opening_1", "value": 6.0, "source": "labeled", "notes": "False front area"},
+            {"type": "intermediate_rail", "value": 1.5, "source": "labeled"},
+            {"type": "drawer_opening_2", "value": 21.5, "source": "calculated_remainder"},
+            {"type": "top_rail", "value": 1.5, "source": "standard"}
+          ],
+          "horizontal": [
+            {"type": "left_stile", "value": 1.5, "source": "labeled"},
+            {"type": "opening_width", "value": 33.0, "source": "calculated"},
+            {"type": "right_stile", "value": 1.5, "source": "labeled"}
+          ]
+        },
+        "vertical_stackup": {
+          "calculation": "4 (toe) + 6 (drawer 1) + 1.5 (rail) + 21.5 (drawer 2) + 1.5 (top rail) = 34.5",
+          "known_total": 34.5,
+          "known_elements_sum": 13.0,
+          "remainder": 21.5,
+          "remainder_assigned_to": "drawer_opening_2",
+          "status": "reconciled",
+          "discrepancy": null
+        },
+        "horizontal_stackup": {
+          "calculation": "1.5 (L stile) + 33 (opening) + 1.5 (R stile) = 36",
+          "known_total": 36.0,
+          "known_elements_sum": 36.0,
+          "remainder": 0,
+          "status": "reconciled",
+          "discrepancy": null
+        },
+        "implied_gaps": [
+          {
+            "location": "drawer_1_reveal",
+            "calculated_value": 0.125,
+            "unit": "inches",
+            "gap_type": "reveal",
+            "notes": "Standard 1/8\" reveal"
+          },
+          {
+            "location": "drawer_2_reveal",
+            "calculated_value": 0.125,
+            "unit": "inches",
+            "gap_type": "reveal"
+          }
+        ],
+        "gap_consistency": {
+          "are_gaps_consistent": true,
+          "standard_gap_value": 0.125,
+          "notes": "All reveals are 1/8\""
+        },
+        "overall_status": "reconciled",
+        "confidence": 0.9
+      }
+    ],
+    "discrepancies": [],
+    "summary": {
+      "cabinets_verified": 1,
+      "fully_reconciled": 1,
+      "with_discrepancies": 0,
+      "overall_consistency": "good"
+    }
+  },
+
+  "step_7_alignment": {
+    "_maps_to": "Documents standards used - optional logging",
+    "practice_evaluations": [
+      {
+        "category": "drawer_spacing",
+        "status": "standard",
+        "details": {
+          "observed_value": 0.125,
+          "standard_value": 0.125,
+          "deviation": 0,
+          "deviation_percent": 0
+        },
+        "assessment": "Drawer reveals match standard 1/8\" reveal",
+        "is_consistent": true,
+        "affected_cabinets": ["CAB-001"],
+        "confidence": 0.9
+      },
+      {
+        "category": "face_frame_overlap",
+        "status": "standard",
+        "details": {
+          "observed_value": 0.375,
+          "standard_value": 0.375,
+          "deviation": 0,
+          "deviation_percent": 0
+        },
+        "assessment": "Standard 3/8\" face frame overlap on cabinet box",
+        "is_consistent": true,
+        "affected_cabinets": ["CAB-001"],
+        "confidence": 0.85
+      },
+      {
+        "category": "slide_clearance",
+        "status": "standard",
+        "details": {
+          "observed_value": 0.5,
+          "standard_value": 0.5,
+          "deviation": 0,
+          "deviation_percent": 0
+        },
+        "assessment": "Standard 1/2\" clearance per side for drawer slides",
+        "is_consistent": true,
+        "affected_cabinets": ["CAB-001"],
+        "confidence": 0.85
+      }
+    ],
+    "overall_alignment": {
+      "status": "standard",
+      "standard_count": 3,
+      "acceptable_variation_count": 0,
+      "custom_count": 0,
+      "non_standard_count": 0,
+      "summary": "All practices align with TCS standards"
+    },
+    "flags": [],
+    "custom_elements": []
+  },
+
+  "step_8_constraints": {
+    "_maps_to": "Production parameters - informs component dimensions",
+    "constraints": [
+      {
+        "id": "GAP-0125",
+        "type": "gap_standard",
+        "value": 0.125,
+        "unit": "inches",
+        "source": "math_reconciliation",
+        "source_detail": "Calculated from vertical stack-up reconciliation",
+        "scope": "project",
+        "applies_to": ["CAB-001"],
+        "is_inferred": false,
+        "confidence": 0.9,
+        "notes": "1/8\" reveal - standard TCS practice",
+        "_db_mapping": {
+          "table": "projects_cabinets",
+          "column": "face_frame_door_gap_inches",
+          "value": 0.125
+        }
+      },
+      {
+        "id": "MAT-001",
+        "type": "material_thickness",
+        "value": 0.75,
+        "unit": "inches",
+        "source": "explicit_note",
+        "source_detail": "Note: '3/4\" MAPLE PLYWOOD'",
+        "source_note_id": "NOTE-002",
+        "scope": "project",
+        "applies_to": [],
+        "is_inferred": false,
+        "confidence": 0.95,
+        "notes": "3/4\" material for cabinet box",
+        "_db_mapping": {
+          "table": "projects_cabinets",
+          "column": "box_thickness",
+          "value": 0.75
+        }
+      },
+      {
+        "id": "REF-CAB001",
+        "type": "reference_surface",
+        "value": "face_frame_front",
+        "unit": null,
+        "source": "standard_practice",
+        "source_detail": "Standard reference for face frame cabinets",
+        "scope": "cabinet",
+        "applies_to": ["CAB-001"],
+        "is_inferred": false,
+        "confidence": 0.85,
+        "notes": "Primary machining reference: face_frame_front"
+      },
+      {
+        "id": "SLD-001",
+        "type": "clearance_zone",
+        "value": 0.5,
+        "unit": "inches",
+        "source": "standard_practice",
+        "source_detail": "Standard slide clearance per side",
+        "scope": "project",
+        "applies_to": [],
+        "is_inferred": false,
+        "confidence": 0.9,
+        "notes": "Blum Tandem slide clearance requirement",
+        "_db_mapping": {
+          "usage": "Drawer box width = Opening width - (2 × 0.5\") - (2 × box_thickness)"
+        }
+      }
+    ],
+    "summary": {
+      "total_constraints": 4,
+      "by_type": {
+        "gap_standard": 1,
+        "material_thickness": 1,
+        "reference_surface": 1,
+        "clearance_zone": 1
+      },
+      "inferred_count": 0,
+      "explicit_count": 4
+    }
+  },
+
+  "step_9_components": {
+    "_maps_to": "Component tables (drawers, doors, shelves)",
+    "components": [
+      {
+        "id": "COMP-001",
+        "type": "false_front",
+        "parent_id": "CAB-001",
+        "parent_section_id": "SEC-001",
+        "parent_name": "SB36",
+        "position": "top",
+        "reference_plane": "face_frame_front",
+        "dimensions": {
+          "width": {
+            "value": 33.25,
+            "unit": "inches",
+            "derivation_method": "calculated",
+            "derivation_detail": "Opening (33\") + 2x overlay (0.125\") = 33.25\""
+          },
+          "height": {
+            "value": 5.75,
+            "unit": "inches",
+            "derivation_method": "calculated",
+            "derivation_detail": "Opening (6\") - 2x reveal (0.125\") = 5.75\""
+          },
+          "thickness": {
+            "value": 0.75,
+            "unit": "inches",
+            "derivation_method": "constraint_applied",
+            "derivation_detail": "From MAT-001 constraint"
+          }
+        },
+        "governing_constraints": [
+          {
+            "constraint_id": "GAP-0125",
+            "applies_as": "reveal_gap",
+            "effect": "Front undersized by 0.25\" total from opening"
+          },
+          {
+            "constraint_id": "MAT-001",
+            "applies_as": "front_thickness",
+            "effect": "3/4\" thick front panel"
+          }
+        ],
+        "associated_notes": [],
+        "confidence": 0.85,
+        "derivation_summary": "U-shaped false front sized from opening minus reveals",
+        "_db_mapping": {
+          "table": "projects_drawers",
+          "columns": {
+            "cabinet_id": "FK:CAB-001",
+            "section_id": "FK:SEC-001",
+            "drawer_number": 1,
+            "drawer_name": "FF1",
+            "drawer_position": "top",
+            "front_width_inches": 33.25,
+            "front_height_inches": 5.75,
+            "front_thickness_inches": 0.75,
+            "box_width_inches": null,
+            "box_depth_inches": null,
+            "box_height_inches": null,
+            "profile_type": "shaker",
+            "fabrication_method": "cnc"
+          },
+          "notes": "False front - no drawer box (sink cutout behind)"
+        }
+      },
+      {
+        "id": "COMP-002",
+        "type": "drawer",
+        "parent_id": "CAB-001",
+        "parent_section_id": "SEC-001",
+        "parent_name": "SB36",
+        "position": "bottom",
+        "reference_plane": "face_frame_front",
+        "dimensions": {
+          "width": {
+            "value": 33.25,
+            "unit": "inches",
+            "derivation_method": "calculated",
+            "derivation_detail": "Opening (33\") + 2x overlay (0.125\") = 33.25\""
+          },
+          "height": {
+            "value": 21.25,
+            "unit": "inches",
+            "derivation_method": "calculated",
+            "derivation_detail": "Opening (21.5\") - 2x reveal (0.125\") = 21.25\""
+          },
+          "thickness": {
+            "value": 0.75,
+            "unit": "inches",
+            "derivation_method": "constraint_applied"
+          }
+        },
+        "box_dimensions": {
+          "width": {
+            "value": 30.5,
+            "unit": "inches",
+            "derivation_method": "calculated",
+            "derivation_detail": "Opening (33\") - 2x slide clearance (0.5\") - 2x box material (0.75\") = 30.5\""
+          },
+          "depth": {
+            "value": 21.0,
+            "unit": "inches",
+            "derivation_method": "standard_applied",
+            "derivation_detail": "Standard drawer depth for 24\" cabinet"
+          },
+          "height": {
+            "value": 7.0,
+            "unit": "inches",
+            "derivation_method": "standard_applied",
+            "derivation_detail": "Standard deep drawer box height"
+          }
+        },
+        "slide_specs": {
+          "type": "undermount",
+          "model": "Blum Tandem 563H",
+          "length": 21,
+          "soft_close": true,
+          "derivation": "From NOTE-003 and standard for depth"
+        },
+        "governing_constraints": [
+          {
+            "constraint_id": "GAP-0125",
+            "applies_as": "drawer_reveal",
+            "effect": "Front undersized by 0.25\" total from opening"
+          },
+          {
+            "constraint_id": "MAT-001",
+            "applies_as": "box_material_thickness",
+            "effect": "3/4\" box sides reduce interior width"
+          },
+          {
+            "constraint_id": "SLD-001",
+            "applies_as": "slide_clearance",
+            "effect": "1\" total clearance for slides"
+          }
+        ],
+        "associated_notes": ["NOTE-003", "NOTE-004"],
+        "confidence": 0.9,
+        "derivation_summary": "Full drawer with dovetail box, Blum undermount slides",
+        "_db_mapping": {
+          "table": "projects_drawers",
+          "columns": {
+            "cabinet_id": "FK:CAB-001",
+            "section_id": "FK:SEC-001",
+            "drawer_number": 2,
+            "drawer_name": "DR1",
+            "drawer_position": "bottom",
+            "front_width_inches": 33.25,
+            "front_height_inches": 21.25,
+            "front_thickness_inches": 0.75,
+            "box_width_inches": 30.5,
+            "box_depth_inches": 21.0,
+            "box_height_inches": 7.0,
+            "box_material": "maple",
+            "box_thickness": 0.5,
+            "joinery_method": "dovetail",
+            "slide_type": "undermount",
+            "slide_model": "Blum Tandem 563H",
+            "slide_length_inches": 21.0,
+            "soft_close": true,
+            "profile_type": "shaker",
+            "fabrication_method": "cnc"
+          }
+        }
+      },
+      {
+        "id": "STR-001",
+        "type": "stretcher",
+        "parent_id": "CAB-001",
+        "parent_name": "SB36",
+        "reference_plane": "cabinet_box_bottom",
+        "stretcher_details": {
+          "purpose": "drawer_support",
+          "vertical_reference": "above_drawer",
+          "vertical_position": {
+            "value": 11.5,
+            "unit": "inches",
+            "from": "cabinet_box_bottom",
+            "derivation": "Toe kick (4\") + drawer opening 1 (6\") + rail (1.5\") = 11.5\" from FFL, which is 7.5\" from box bottom"
+          },
+          "depth_offset": {
+            "value": 0.5,
+            "unit": "inches",
+            "from": "face_frame_back",
+            "derivation": "Standard setback to clear drawer box travel"
+          },
+          "width_type": "full_width",
+          "width_value": null
+        },
+        "dimensions": {
+          "width": {
+            "value": 34.5,
+            "unit": "inches",
+            "derivation_method": "calculated",
+            "derivation_detail": "Cabinet box interior width (36\" - 2x 0.75\")"
+          },
+          "height": {
+            "value": 3.0,
+            "unit": "inches",
+            "derivation_method": "standard_applied",
+            "derivation_detail": "TCS standard 3\" stretcher height"
+          },
+          "depth": {
+            "value": 3.5,
+            "unit": "inches",
+            "derivation_method": "standard_applied",
+            "derivation_detail": "Standard stretcher depth"
+          }
+        },
+        "governing_constraints": [
+          {
+            "constraint_id": "MAT-001",
+            "applies_as": "stretcher_material",
+            "effect": "3/4\" plywood stretcher"
+          }
+        ],
+        "associated_notes": [],
+        "confidence": 0.85,
+        "derivation_summary": "Full-width stretcher for drawer slide mounting, positioned above lower drawer opening",
+        "_db_mapping": {
+          "table": "projects_cabinets",
+          "columns": {
+            "top_construction_type": "stretchers",
+            "stretcher_height_inches": 3.0
+          },
+          "notes": "Stretcher position stored in JSON or dedicated stretcher table if exists"
+        }
+      }
+    ],
+    "extraction_summary": {
+      "total_components": 3,
+      "by_type": {
+        "false_front": 1,
+        "drawer": 1,
+        "stretcher": 1
+      },
+      "derivation_breakdown": {
+        "explicit_dimension": 2,
+        "calculated": 8,
+        "constraint_applied": 4,
+        "standard_applied": 5
+      },
+      "average_confidence": 0.87
+    },
+    "unresolved_items": []
+  },
+
+  "step_10_audit": {
+    "_maps_to": "Audit log or project metadata",
+    "verification_level": {
+      "level": "VERIFIED_WITH_ASSUMPTIONS",
+      "description": "Data verified but includes documented assumptions",
+      "reason": "1 documented assumption(s)",
+      "assumptions_count": 1
+    },
+    "readiness": {
+      "cnc_ready": {
+        "ready": true,
+        "confidence": 0.85,
+        "notes": "Ready with documented assumptions - verify cabinet depth before machining"
+      },
+      "production_ready": {
+        "ready": true,
+        "confidence": 0.90,
+        "notes": "Ready for production with assumption documentation"
+      },
+      "material_takeoff_ready": {
+        "ready": true,
+        "confidence": 0.95,
+        "notes": "Components extracted - material quantities can be estimated"
+      },
+      "verification_only": {
+        "ready": true,
+        "confidence": 0.95
+      }
+    },
+    "assumptions": [
+      {
+        "id": "ASM-001",
+        "category": "missing_dimension",
+        "description": "Cabinet depth not shown on drawing",
+        "assumed_value": "24\"",
+        "source_step": "Dimension Reference Analysis",
+        "confidence": 0.85,
+        "impact": "Affects drawer box depth calculation"
+      }
+    ],
+    "inferred_standards": [
+      {
+        "id": "STD-GAP",
+        "category": "drawer_reveal",
+        "standard_value": 0.125,
+        "observed_value": 0.125,
+        "status": "standard"
+      }
+    ],
+    "unresolved_conflicts": [],
+    "audit_trail": [
+      {"step_number": 1, "step_name": "Drawing Context Analysis", "status": "passed"},
+      {"step_number": 2, "step_name": "Dimension Reference Analysis", "status": "passed"},
+      {"step_number": 3, "step_name": "Notes Extraction", "status": "passed"},
+      {"step_number": 4, "step_name": "Drawing Intent Validation", "status": "passed"},
+      {"step_number": 5, "step_name": "Hierarchical Entity Extraction", "status": "passed"},
+      {"step_number": 6, "step_name": "Dimension Consistency Verification", "status": "passed"},
+      {"step_number": 7, "step_name": "Standard Practice Alignment", "status": "passed"},
+      {"step_number": 8, "step_name": "Production Constraint Derivation", "status": "passed"},
+      {"step_number": 9, "step_name": "Component Extraction", "status": "passed"}
+    ],
+    "recommendations": [
+      {
+        "priority": "high",
+        "action": "Verify cabinet depth (24\") in field before CNC programming",
+        "affects": "Drawer box depth, slide selection"
+      },
+      {
+        "priority": "medium",
+        "action": "Review assumption documentation with production team",
+        "affects": "Quality control"
+      }
+    ],
+    "summary": {
+      "verification_status": "VERIFIED_WITH_ASSUMPTIONS",
+      "total_assumptions": 1,
+      "total_conflicts": 0,
+      "cnc_ready": true,
+      "production_ready": true,
+      "headline": "⚠ VERIFIED WITH 1 ASSUMPTION(S) - Review before production"
+    }
+  }
+}
