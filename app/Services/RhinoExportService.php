@@ -189,8 +189,11 @@ class RhinoExportService
             'name' => $part['part_name'] ?? $partKey,
             'color' => $color,
             'params' => [
-                'width' => $dimensions['w'],  // X dimension
-                'length' => $dimensions['d'], // Y dimension (depth)
+                // NOTE: Rhino MCP swaps width/length, so we swap them here to compensate
+                // Our width (X) -> MCP 'length' (gets put into X)
+                // Our depth (Y) -> MCP 'width' (gets put into Y)
+                'width' => $dimensions['d'],  // Actually goes into Y (depth)
+                'length' => $dimensions['w'], // Actually goes into X (width)
                 'height' => $dimensions['h'], // Z dimension (height)
             ],
             'translation' => $rhinoTranslation,
@@ -240,8 +243,9 @@ class RhinoExportService
             'name' => $part['part_name'] ?? $partKey,
             'color' => self::LAYER_COLORS['drawer_box'],
             'params' => [
-                'width' => $boxWidth,
-                'length' => $boxDepth,
+                // Swap width/length to compensate for Rhino MCP bug
+                'width' => $boxDepth,   // Goes into Y
+                'length' => $boxWidth,  // Goes into X
                 'height' => $boxHeight,
             ],
             'translation' => $rhinoTranslation,
