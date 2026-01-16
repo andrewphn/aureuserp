@@ -58,7 +58,11 @@ class ConstructionStandardsService
         'finished_end_wall_extension' => 0.5,   // 1/2" extension toward wall for scribe/unevenness
         'finished_end_enabled' => true,          // TCS Standard: End panels on exposed sides
         // Back Wall Gap (cabinet depth calculation)
-        'back_wall_gap' => 0.25,                 // 1/4" gap from back wall for safety
+        'back_wall_gap' => 0.5,                  // 1/2" gap from back wall for safety
+        // Drawer Depth Clearance
+        // Min cabinet depth = slide_length + drawer_rear_clearance
+        // Example: 18" slide needs 18.75" cabinet depth (18 + 0.75)
+        'drawer_rear_clearance' => 0.75,         // 3/4" clearance behind drawer
         // Ratios
         'drawer_bank_ratio' => 0.40,
         'door_section_ratio' => 0.60,
@@ -349,6 +353,35 @@ class ConstructionStandardsService
     public function getDrawerBankRatio(Cabinet $cabinet): float
     {
         return $this->resolveTemplate($cabinet)->drawer_bank_ratio;
+    }
+
+    /**
+     * Get drawer rear clearance (space behind drawer when closed).
+     *
+     * TCS Standard: 3/4" (0.75")
+     *
+     * Used to calculate minimum cabinet depth:
+     *   min_cabinet_depth = slide_length + drawer_rear_clearance
+     *
+     * Example: 18" slide needs 18.75" cabinet depth (18 + 0.75)
+     *
+     * Note: Back panel sits in dado/rabbet, doesn't add to internal depth.
+     */
+    public function getDrawerRearClearance(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->drawer_rear_clearance ?? 0.75;
+    }
+
+    /**
+     * Get drawer rear clearance without cabinet context.
+     * Uses the global default template.
+     *
+     * For use cases where no cabinet is available (e.g., standalone calculations).
+     */
+    public function getDefaultDrawerRearClearance(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->drawer_rear_clearance ?? 0.75;
     }
 
     /**

@@ -46,6 +46,8 @@ use Webkul\Security\Models\User;
  * @property int|null $default_edge_banding_product_id
  * @property float $box_material_thickness
  * @property float $back_panel_thickness
+ * @property float $drawer_rear_clearance
+ * @property float $back_wall_gap
  * @property float $side_panel_thickness
  * @property float $sink_side_extension
  * @property float $drawer_bank_ratio
@@ -101,6 +103,8 @@ class ConstructionTemplate extends Model
         // Material Thickness Overrides
         'box_material_thickness',
         'back_panel_thickness',
+        'drawer_rear_clearance',
+        'back_wall_gap',
         'side_panel_thickness',
         // Sink Cabinet
         'sink_side_extension',
@@ -145,6 +149,8 @@ class ConstructionTemplate extends Model
             // Material Thickness
             'box_material_thickness' => 'float',
             'back_panel_thickness' => 'float',
+            'drawer_rear_clearance' => 'float',
+            'back_wall_gap' => 'float',
             'side_panel_thickness' => 'float',
             // Sink
             'sink_side_extension' => 'float',
@@ -418,6 +424,12 @@ class ConstructionTemplate extends Model
                 'box_thickness' => $this->getEffectiveBoxMaterialThickness(),
                 'back_thickness' => $this->getEffectiveBackPanelThickness(),
                 'side_thickness' => $this->side_panel_thickness,
+            ],
+            'drawer' => [
+                'rear_clearance' => $this->drawer_rear_clearance ?? 0.75,
+            ],
+            'cabinet' => [
+                'back_wall_gap' => $this->back_wall_gap ?? 0.5,
             ],
             'sink' => [
                 'side_extension' => $this->sink_side_extension,

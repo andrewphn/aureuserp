@@ -21,10 +21,14 @@ use Webkul\Project\Models\Faceframe;
 class DrawerConfiguratorService
 {
     protected DrawerHardwareService $hardwareService;
+    protected ConstructionStandardsService $constructionStandards;
 
-    public function __construct(DrawerHardwareService $hardwareService)
-    {
+    public function __construct(
+        DrawerHardwareService $hardwareService,
+        ConstructionStandardsService $constructionStandards
+    ) {
         $this->hardwareService = $hardwareService;
+        $this->constructionStandards = $constructionStandards;
     }
 
     /**
@@ -76,17 +80,35 @@ class DrawerConfiguratorService
     public const SHOP_DEPTH_ADDITION = 0.25;        // 1/4" added to slide length
 
     /**
-     * Shop practice: Add 3/4" to slide length for minimum cabinet depth.
-     * This is simpler than Blum's ~29/32" spec and works reliably in practice.
+     * Shop practice: Minimum clearance behind drawer when closed.
      *
-     * Blum spec vs Shop practice:
-     * - 21" slide: Blum 21-15/16" → Shop 21-3/4"
-     * - 18" slide: Blum 18-29/32" → Shop 18-3/4"
-     * - 15" slide: Blum 15-29/32" → Shop 15-3/4"
-     * - 12" slide: Blum 12-29/32" → Shop 12-3/4"
-     * - 9" slide: Blum 10-15/32" → Shop 9-3/4"
+     * TCS Standard (verified with Bryan Patton):
+     * Total Depth = Face Frame + Drawer + Clearance + Back + Wall Gap
+     * 21"         = 1.5"       + 18"    + 0.75"     + 0.75" + 0.5"
+     *
+     * IMPORTANT: Back panel sits in dado/rabbet cut into sides, so it does NOT
+     * add to the internal depth requirement. The min cabinet depth for shop
+     * practice is: slide_length + 0.75" rear clearance.
+     *
+     * Example: 18" slide needs 18.75" cabinet internal depth (shop minimum).
+     *
+     * @deprecated Use ConstructionStandardsService::getDrawerRearClearance() instead.
+     *             This constant is kept for backwards compatibility with static methods.
      */
-    public const SHOP_MIN_DEPTH_ADDITION = 0.75;    // 3/4" added to slide length for min cabinet depth
+    public const DRAWER_REAR_CLEARANCE = 0.75;      // 3/4" clearance behind drawer
+
+    /**
+     * Cabinet back panel thickness (3/4" standard).
+     * NOTE: Back sits in dado/rabbet, doesn't add to internal depth.
+     *
+     * @deprecated Use ConstructionStandardsService::getBackPanelThickness() instead.
+     */
+    public const CABINET_BACK_THICKNESS = 0.75;     // 3/4" back panel
+
+    /**
+     * @deprecated Use ConstructionStandardsService::getDrawerRearClearance() instead.
+     */
+    public const SHOP_MIN_DEPTH_ADDITION = 0.25;
 
     /**
      * Face Frame Style Constants
@@ -326,7 +348,7 @@ class DrawerConfiguratorService
                 'weight_capacity' => $specs['weight_capacity'],
                 'min_cabinet_depth' => $specs['min_cabinet_depth'],
                 'min_cabinet_depth_blum' => self::BLUM_MIN_CABINET_DEPTHS[(int)$slideLength] ?? ($slideLength + 0.90625),
-                'min_cabinet_depth_shop' => $slideLength + self::SHOP_MIN_DEPTH_ADDITION,
+                'min_cabinet_depth_shop' => $slideLength + $this->constructionStandards->getDefaultDrawerRearClearance(),
             ],
             'validation' => $this->validateDimensions($openingWidth, $openingHeight, $openingDepth, $specs, $drawerSideThickness),
         ];
@@ -532,7 +554,7 @@ class DrawerConfiguratorService
                 'weight_capacity' => $specs['weight_capacity'],
                 'min_cabinet_depth' => $specs['min_cabinet_depth'],
                 'min_cabinet_depth_blum' => self::BLUM_MIN_CABINET_DEPTHS[$slideLength] ?? ($slideLength + 0.90625),
-                'min_cabinet_depth_shop' => $slideLength + self::SHOP_MIN_DEPTH_ADDITION,
+                'min_cabinet_depth_shop' => $slideLength + $this->constructionStandards->getDefaultDrawerRearClearance(),
             ],
             'validation' => $this->validateDimensions($openingWidth, $openingHeight, $openingDepth, $specs, $drawerSideThickness),
             'warning' => 'Using default specifications - no slide product found for this depth',
@@ -756,15 +778,21 @@ class DrawerConfiguratorService
 
     /**
      * Get minimum cabinet depth for a given slide length.
-     * 
+     *
+     * NOTE: This static method uses the DRAWER_REAR_CLEARANCE constant.
+     * For cabinet-specific calculations, use the instance method with a Cabinet object
+     * which reads from ConstructionStandardsService.
+     *
      * @param int $slideLength Slide length in inches
      * @return array ['blum' => float, 'shop' => float, 'blum_fraction' => string, 'shop_fraction' => string]
      */
     public static function getMinCabinetDepth(int $slideLength): array
     {
         $blum = self::BLUM_MIN_CABINET_DEPTHS[$slideLength] ?? ($slideLength + 0.90625);
-        $shop = $slideLength + self::SHOP_MIN_DEPTH_ADDITION;
-        
+        // Shop minimum = slide + rear clearance (back panel sits in dado/rabbet, doesn't add depth)
+        // Uses constant for static method - see ConstructionStandardsService for dynamic values
+        $shop = $slideLength + self::DRAWER_REAR_CLEARANCE;
+
         return [
             'blum' => $blum,
             'shop' => $shop,
@@ -776,14 +804,19 @@ class DrawerConfiguratorService
 
     /**
      * Get all minimum cabinet depths for reference.
-     * 
+     *
+     * NOTE: This static method uses the DRAWER_REAR_CLEARANCE constant.
+     * For cabinet-specific calculations, use ConstructionStandardsService.
+     *
      * @return array Table of slide lengths with Blum and shop minimums
      */
     public static function getAllMinCabinetDepths(): array
     {
         $results = [];
         foreach (self::BLUM_MIN_CABINET_DEPTHS as $slideLength => $blumMin) {
-            $shopMin = $slideLength + self::SHOP_MIN_DEPTH_ADDITION;
+            // Shop minimum = slide + rear clearance (back panel sits in dado/rabbet)
+            // Uses constant for static method - see ConstructionStandardsService for dynamic values
+            $shopMin = $slideLength + self::DRAWER_REAR_CLEARANCE;
             $results[$slideLength] = [
                 'slide_length' => $slideLength,
                 'blum' => $blumMin,
