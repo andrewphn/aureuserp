@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PdfAnnotationController;
 use App\Http\Controllers\Api\ClockController;
+use App\Http\Controllers\Api\V1;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,6 +19,102 @@ use App\Http\Controllers\Api\ClockController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+/*
+|--------------------------------------------------------------------------
+| V1 API Routes - External Integrations (n8n, mobile apps, etc.)
+|--------------------------------------------------------------------------
+|
+| Token-based authentication via Laravel Sanctum.
+| Rate limited to 60 requests per minute by default.
+|
+| Usage:
+|   Authorization: Bearer {api_token}
+|
+| Features:
+|   - Filtering: ?filter[field]=value
+|   - Sorting: ?sort=-created_at,name (- prefix for descending)
+|   - Pagination: ?page=1&per_page=50
+|   - Relations: ?include=rooms,cabinets
+|   - Search: ?search=kitchen
+|
+*/
+Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.')->group(function () {
+
+    // ========================================
+    // Projects Module
+    // ========================================
+
+    // Projects (top-level)
+    Route::apiResource('projects', V1\ProjectController::class);
+
+    // Nested: Projects → Rooms
+    Route::apiResource('projects.rooms', V1\RoomController::class)->shallow();
+
+    // Nested: Rooms → Room Locations
+    Route::apiResource('rooms.locations', V1\RoomLocationController::class)->shallow();
+
+    // Nested: Locations → Cabinet Runs
+    Route::apiResource('locations.cabinet-runs', V1\CabinetRunController::class)->shallow();
+
+    // Nested: Cabinet Runs → Cabinets
+    Route::apiResource('cabinet-runs.cabinets', V1\CabinetController::class)->shallow();
+
+    // Cabinet Components (nested under cabinets)
+    Route::apiResource('cabinets.sections', V1\CabinetSectionController::class)->shallow();
+    Route::apiResource('cabinets.stretchers', V1\StretcherController::class)->shallow();
+    Route::apiResource('cabinets.faceframes', V1\FaceframeController::class)->shallow();
+
+    // Section Components (nested under sections)
+    Route::apiResource('sections.drawers', V1\DrawerController::class)->shallow();
+    Route::apiResource('sections.doors', V1\DoorController::class)->shallow();
+    Route::apiResource('sections.shelves', V1\ShelfController::class)->shallow();
+    Route::apiResource('sections.pullouts', V1\PulloutController::class)->shallow();
+
+    // Tasks & Milestones
+    Route::apiResource('tasks', V1\TaskController::class);
+    Route::apiResource('milestones', V1\MilestoneController::class);
+
+    // ========================================
+    // Employees Module
+    // ========================================
+    Route::apiResource('employees', V1\EmployeeController::class);
+    Route::apiResource('departments', V1\DepartmentController::class);
+    Route::apiResource('calendars', V1\CalendarController::class);
+
+    // ========================================
+    // Inventory Module
+    // ========================================
+    Route::apiResource('products', V1\ProductController::class);
+    Route::apiResource('warehouses', V1\WarehouseController::class);
+    Route::apiResource('warehouses.locations', V1\LocationController::class)->shallow();
+    Route::apiResource('inventory-moves', V1\MoveController::class);
+
+    // ========================================
+    // Partners Module
+    // ========================================
+    Route::apiResource('partners', V1\PartnerController::class);
+
+    // ========================================
+    // Batch Operations
+    // ========================================
+    Route::post('batch/{resource}', [V1\BatchController::class, 'handle'])
+        ->where('resource', '[a-z\-]+')
+        ->name('batch');
+
+    // ========================================
+    // Webhooks
+    // ========================================
+    Route::prefix('webhooks')->name('webhooks.')->group(function () {
+        Route::get('/', [V1\WebhookController::class, 'list'])->name('index');
+        Route::post('subscribe', [V1\WebhookController::class, 'subscribe'])->name('subscribe');
+        Route::put('{id}', [V1\WebhookController::class, 'update'])->name('update');
+        Route::delete('{id}', [V1\WebhookController::class, 'unsubscribe'])->name('unsubscribe');
+        Route::get('events', [V1\WebhookController::class, 'events'])->name('events');
+        Route::post('{id}/test', [V1\WebhookController::class, 'test'])->name('test');
+        Route::get('{id}/deliveries', [V1\WebhookController::class, 'deliveries'])->name('deliveries');
+    });
 });
 
 // PDF Page Annotation API Routes (Unified System)
