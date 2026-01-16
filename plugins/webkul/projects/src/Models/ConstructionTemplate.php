@@ -55,6 +55,25 @@ use Webkul\Security\Models\User;
  * @property float $equal_section_ratio
  * @property float $countertop_thickness
  * @property float $finished_counter_height
+ * @property float $reveal_top
+ * @property float $reveal_bottom
+ * @property float $component_gap
+ * @property float $door_side_reveal
+ * @property float $drawer_material_thickness
+ * @property float $drawer_bottom_thickness
+ * @property float $drawer_dado_depth
+ * @property float $drawer_dado_height
+ * @property float $drawer_dado_clearance
+ * @property float $slide_side_deduction
+ * @property float $slide_top_clearance
+ * @property float $slide_bottom_clearance
+ * @property float $slide_height_deduction
+ * @property float $finished_end_gap
+ * @property float $finished_end_wall_extension
+ * @property float $min_shelf_opening_height
+ * @property float $min_drawer_front_height
+ * @property float $false_front_backing_overhang
+ * @property float $default_slide_length
  * @property int|null $creator_id
  * @property-read Product|null $defaultBoxMaterialProduct
  * @property-read Product|null $defaultBackMaterialProduct
@@ -115,6 +134,31 @@ class ConstructionTemplate extends Model
         // Countertop
         'countertop_thickness',
         'finished_counter_height',
+        // Reveal & Gap
+        'reveal_top',
+        'reveal_bottom',
+        'component_gap',
+        'door_side_reveal',
+        // Drawer Box Construction
+        'drawer_material_thickness',
+        'drawer_bottom_thickness',
+        'drawer_dado_depth',
+        'drawer_dado_height',
+        'drawer_dado_clearance',
+        // Slide Clearances (Blum TANDEM defaults)
+        'slide_side_deduction',
+        'slide_top_clearance',
+        'slide_bottom_clearance',
+        'slide_height_deduction',
+        // Finished End Panel
+        'finished_end_gap',
+        'finished_end_wall_extension',
+        // Minimums
+        'min_shelf_opening_height',
+        'min_drawer_front_height',
+        // Additional
+        'false_front_backing_overhang',
+        'default_slide_length',
         // Metadata
         'creator_id',
     ];
@@ -161,6 +205,31 @@ class ConstructionTemplate extends Model
             // Countertop
             'countertop_thickness' => 'float',
             'finished_counter_height' => 'float',
+            // Reveal & Gap
+            'reveal_top' => 'float',
+            'reveal_bottom' => 'float',
+            'component_gap' => 'float',
+            'door_side_reveal' => 'float',
+            // Drawer Box Construction
+            'drawer_material_thickness' => 'float',
+            'drawer_bottom_thickness' => 'float',
+            'drawer_dado_depth' => 'float',
+            'drawer_dado_height' => 'float',
+            'drawer_dado_clearance' => 'float',
+            // Slide Clearances
+            'slide_side_deduction' => 'float',
+            'slide_top_clearance' => 'float',
+            'slide_bottom_clearance' => 'float',
+            'slide_height_deduction' => 'float',
+            // Finished End Panel
+            'finished_end_gap' => 'float',
+            'finished_end_wall_extension' => 'float',
+            // Minimums
+            'min_shelf_opening_height' => 'float',
+            'min_drawer_front_height' => 'float',
+            // Additional
+            'false_front_backing_overhang' => 'float',
+            'default_slide_length' => 'float',
         ];
     }
 
@@ -425,11 +494,33 @@ class ConstructionTemplate extends Model
                 'back_thickness' => $this->getEffectiveBackPanelThickness(),
                 'side_thickness' => $this->side_panel_thickness,
             ],
-            'drawer' => [
+            'reveals' => [
+                'top' => $this->reveal_top ?? 0.125,
+                'bottom' => $this->reveal_bottom ?? 0.125,
+                'component_gap' => $this->component_gap ?? 0.125,
+                'door_side' => $this->door_side_reveal ?? 0.0625,
+            ],
+            'drawer_box' => [
+                'material_thickness' => $this->drawer_material_thickness ?? 0.5,
+                'bottom_thickness' => $this->drawer_bottom_thickness ?? 0.25,
+                'dado_depth' => $this->drawer_dado_depth ?? 0.25,
+                'dado_height' => $this->drawer_dado_height ?? 0.5,
+                'dado_clearance' => $this->drawer_dado_clearance ?? 0.0625,
                 'rear_clearance' => $this->drawer_rear_clearance ?? 0.75,
+            ],
+            'slide_clearances' => [
+                'side_deduction' => $this->slide_side_deduction ?? 0.625,
+                'top_clearance' => $this->slide_top_clearance ?? 0.25,
+                'bottom_clearance' => $this->slide_bottom_clearance ?? 0.5625,
+                'height_deduction' => $this->slide_height_deduction ?? 0.8125,
+            ],
+            'finished_end' => [
+                'gap' => $this->finished_end_gap ?? 0.25,
+                'wall_extension' => $this->finished_end_wall_extension ?? 0.5,
             ],
             'cabinet' => [
                 'back_wall_gap' => $this->back_wall_gap ?? 0.5,
+                'default_slide_length' => $this->default_slide_length ?? 18.0,
             ],
             'sink' => [
                 'side_extension' => $this->sink_side_extension,
@@ -442,6 +533,13 @@ class ConstructionTemplate extends Model
             'countertop' => [
                 'thickness' => $this->countertop_thickness,
                 'finished_height' => $this->finished_counter_height,
+            ],
+            'minimums' => [
+                'shelf_opening_height' => $this->min_shelf_opening_height ?? 5.5,
+                'drawer_front_height' => $this->min_drawer_front_height ?? 4.0,
+            ],
+            'false_front' => [
+                'backing_overhang' => $this->false_front_backing_overhang ?? 1.0,
             ],
         ];
     }

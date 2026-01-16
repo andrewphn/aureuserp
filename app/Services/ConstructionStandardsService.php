@@ -70,6 +70,28 @@ class ConstructionStandardsService
         // Countertop
         'countertop_thickness' => 1.25,
         'finished_counter_height' => 36.0,
+        // Reveal & Gap
+        'reveal_top' => 0.125,
+        'reveal_bottom' => 0.125,
+        'component_gap' => 0.125,
+        'door_side_reveal' => 0.0625,
+        // Drawer Box Construction
+        'drawer_material_thickness' => 0.5,
+        'drawer_bottom_thickness' => 0.25,
+        'drawer_dado_depth' => 0.25,
+        'drawer_dado_height' => 0.5,
+        'drawer_dado_clearance' => 0.0625,
+        // Slide Clearances (Blum TANDEM)
+        'slide_side_deduction' => 0.625,
+        'slide_top_clearance' => 0.25,
+        'slide_bottom_clearance' => 0.5625,
+        'slide_height_deduction' => 0.8125,
+        // Minimums
+        'min_shelf_opening_height' => 5.5,
+        'min_drawer_front_height' => 4.0,
+        // Additional
+        'false_front_backing_overhang' => 1.0,
+        'default_slide_length' => 18.0,
         // Assembly Rules (how parts connect)
         'sides_on_bottom' => true,           // Sides sit ON TOP of bottom panel (TCS standard)
         'back_inset_from_sides' => false,    // Back goes FULL WIDTH (sides/bottom shortened in depth)
@@ -574,5 +596,237 @@ class ConstructionStandardsService
             return 0.0; // Full width
         }
         return $this->getSidePanelThickness($cabinet); // Inset between sides
+    }
+
+    // ========================================
+    // REVEAL & GAP METHODS
+    // ========================================
+
+    /**
+     * Get top reveal gap.
+     */
+    public function getRevealTop(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->reveal_top ?? 0.125;
+    }
+
+    /**
+     * Get bottom reveal gap.
+     */
+    public function getRevealBottom(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->reveal_bottom ?? 0.125;
+    }
+
+    /**
+     * Get component gap (between drawers/doors).
+     */
+    public function getComponentGap(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->component_gap ?? 0.125;
+    }
+
+    /**
+     * Get door side reveal gap.
+     */
+    public function getDoorSideReveal(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->door_side_reveal ?? 0.0625;
+    }
+
+    // ========================================
+    // DRAWER BOX CONSTRUCTION METHODS
+    // ========================================
+
+    /**
+     * Get drawer material thickness (sides/front/back).
+     */
+    public function getDrawerMaterialThickness(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->drawer_material_thickness ?? 0.5;
+    }
+
+    /**
+     * Get drawer bottom thickness.
+     */
+    public function getDrawerBottomThickness(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->drawer_bottom_thickness ?? 0.25;
+    }
+
+    /**
+     * Get drawer dado depth.
+     */
+    public function getDrawerDadoDepth(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->drawer_dado_depth ?? 0.25;
+    }
+
+    /**
+     * Get drawer dado height from bottom.
+     */
+    public function getDrawerDadoHeight(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->drawer_dado_height ?? 0.5;
+    }
+
+    /**
+     * Get drawer dado clearance.
+     */
+    public function getDrawerDadoClearance(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->drawer_dado_clearance ?? 0.0625;
+    }
+
+    // ========================================
+    // SLIDE CLEARANCE METHODS (Blum TANDEM defaults)
+    // ========================================
+
+    /**
+     * Get slide side deduction (total width reduction).
+     */
+    public function getSlideSideDeduction(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->slide_side_deduction ?? 0.625;
+    }
+
+    /**
+     * Get slide top clearance.
+     */
+    public function getSlideTopClearance(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->slide_top_clearance ?? 0.25;
+    }
+
+    /**
+     * Get slide bottom clearance.
+     */
+    public function getSlideBottomClearance(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->slide_bottom_clearance ?? 0.5625;
+    }
+
+    /**
+     * Get slide height deduction (total).
+     */
+    public function getSlideHeightDeduction(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->slide_height_deduction ?? 0.8125;
+    }
+
+    // ========================================
+    // MINIMUM DIMENSION METHODS
+    // ========================================
+
+    /**
+     * Get minimum shelf opening height.
+     */
+    public function getMinShelfOpeningHeight(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->min_shelf_opening_height ?? 5.5;
+    }
+
+    /**
+     * Get minimum drawer front height.
+     */
+    public function getMinDrawerFrontHeight(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->min_drawer_front_height ?? 4.0;
+    }
+
+    // ========================================
+    // ADDITIONAL METHODS
+    // ========================================
+
+    /**
+     * Get false front backing overhang.
+     */
+    public function getFalseFrontBackingOverhang(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->false_front_backing_overhang ?? 1.0;
+    }
+
+    /**
+     * Get default slide length.
+     */
+    public function getDefaultSlideLength(Cabinet $cabinet): float
+    {
+        return $this->resolveTemplate($cabinet)->default_slide_length ?? 18.0;
+    }
+
+    // ========================================
+    // DEFAULT ACCESSORS (without Cabinet context)
+    // ========================================
+
+    /**
+     * Get default component gap without cabinet context.
+     */
+    public function getDefaultComponentGap(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->component_gap ?? 0.125;
+    }
+
+    /**
+     * Get default slide side deduction without cabinet context.
+     */
+    public function getDefaultSlideSideDeduction(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->slide_side_deduction ?? 0.625;
+    }
+
+    /**
+     * Get default slide height deduction without cabinet context.
+     */
+    public function getDefaultSlideHeightDeduction(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->slide_height_deduction ?? 0.8125;
+    }
+
+    /**
+     * Get default drawer material thickness without cabinet context.
+     */
+    public function getDefaultDrawerMaterialThickness(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->drawer_material_thickness ?? 0.5;
+    }
+
+    /**
+     * Get default drawer bottom thickness without cabinet context.
+     */
+    public function getDefaultDrawerBottomThickness(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->drawer_bottom_thickness ?? 0.25;
+    }
+
+    /**
+     * Get default drawer dado depth without cabinet context.
+     */
+    public function getDefaultDrawerDadoDepth(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->drawer_dado_depth ?? 0.25;
+    }
+
+    /**
+     * Get default drawer dado height without cabinet context.
+     */
+    public function getDefaultDrawerDadoHeight(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->drawer_dado_height ?? 0.5;
+    }
+
+    /**
+     * Get default drawer dado clearance without cabinet context.
+     */
+    public function getDefaultDrawerDadoClearance(): float
+    {
+        $template = ConstructionTemplate::getDefault();
+        return $template?->drawer_dado_clearance ?? 0.0625;
     }
 }
