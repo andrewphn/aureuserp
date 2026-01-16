@@ -49,12 +49,9 @@ class GoogleDocumentAiService
             throw new \Exception('Document AI processor ID not configured. Set GOOGLE_DOCUMENT_AI_PROCESSOR_ID in .env');
         }
 
-        // Set Google Application Credentials path for ADC
-        // This allows PHP SDK to automatically find and use credentials
-        $adcPath = getenv('HOME') . '/.config/gcloud/application_default_credentials.json';
-        if (file_exists($adcPath)) {
-            putenv('GOOGLE_APPLICATION_CREDENTIALS=' . $adcPath);
-        }
+        // Google client library automatically discovers ADC at:
+        // ~/.config/gcloud/application_default_credentials.json
+        // No need to set GOOGLE_APPLICATION_CREDENTIALS for ADC files
     }
 
     /**
