@@ -311,6 +311,222 @@ class ConstructionTemplateResource extends Resource
                             ->suffix('"')
                             ->helperText('Total height from floor'),
                     ]),
+
+                // ========================================
+                // REVEALS & GAPS
+                // ========================================
+                Section::make('Reveals & Gaps')
+                    ->columnSpan(1)
+                    ->description('Standard gaps between components')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('reveal_top')
+                                ->label('Top Reveal')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.125)
+                                ->suffix('"')
+                                ->helperText('1/8"'),
+                            TextInput::make('reveal_bottom')
+                                ->label('Bottom Reveal')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.125)
+                                ->suffix('"')
+                                ->helperText('1/8"'),
+                        ]),
+                        Grid::make(2)->schema([
+                            TextInput::make('component_gap')
+                                ->label('Component Gap')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.125)
+                                ->suffix('"')
+                                ->helperText('Between drawers/doors (1/8")'),
+                            TextInput::make('door_side_reveal')
+                                ->label('Door Side Reveal')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.0625)
+                                ->suffix('"')
+                                ->helperText('1/16"'),
+                        ]),
+                    ]),
+
+                // ========================================
+                // DRAWER BOX CONSTRUCTION
+                // ========================================
+                Section::make('Drawer Box Construction')
+                    ->columnSpan(1)
+                    ->description('Material and dado specifications')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('drawer_material_thickness')
+                                ->label('Side/Front/Back')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.5)
+                                ->suffix('"')
+                                ->helperText('1/2" typical'),
+                            TextInput::make('drawer_bottom_thickness')
+                                ->label('Bottom Panel')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.25)
+                                ->suffix('"')
+                                ->helperText('1/4" typical'),
+                        ]),
+                        Grid::make(3)->schema([
+                            TextInput::make('drawer_dado_depth')
+                                ->label('Dado Depth')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.25)
+                                ->suffix('"')
+                                ->helperText('1/4"'),
+                            TextInput::make('drawer_dado_height')
+                                ->label('Dado Height')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.5)
+                                ->suffix('"')
+                                ->helperText('From bottom edge (1/2")'),
+                            TextInput::make('drawer_dado_clearance')
+                                ->label('Dado Clearance')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.0625)
+                                ->suffix('"')
+                                ->helperText('1/16"'),
+                        ]),
+                        TextInput::make('drawer_rear_clearance')
+                            ->label('Rear Clearance')
+                            ->numeric()
+                            ->step(0.0625)
+                            ->default(0.75)
+                            ->suffix('"')
+                            ->helperText('Behind drawer when closed (TCS: 3/4")'),
+                    ]),
+
+                // ========================================
+                // BLUM TANDEM SLIDE CLEARANCES
+                // ========================================
+                Section::make('Slide Clearances (Blum TANDEM)')
+                    ->columnSpan(1)
+                    ->description('Hardware-specific clearances')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('slide_side_deduction')
+                                ->label('Side Deduction')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.625)
+                                ->suffix('"')
+                                ->helperText('Total width deduction (5/8")'),
+                            TextInput::make('slide_height_deduction')
+                                ->label('Height Deduction')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.8125)
+                                ->suffix('"')
+                                ->helperText('Total height deduction (13/16")'),
+                        ]),
+                        Grid::make(2)->schema([
+                            TextInput::make('slide_top_clearance')
+                                ->label('Top Clearance')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.25)
+                                ->suffix('"')
+                                ->helperText('Above drawer box (1/4")'),
+                            TextInput::make('slide_bottom_clearance')
+                                ->label('Bottom Clearance')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.5625)
+                                ->suffix('"')
+                                ->helperText('Below drawer box (9/16")'),
+                        ]),
+                        TextInput::make('default_slide_length')
+                            ->label('Default Slide Length')
+                            ->numeric()
+                            ->step(0.5)
+                            ->default(18.0)
+                            ->suffix('"')
+                            ->helperText('Standard 18"'),
+                    ]),
+
+                // ========================================
+                // FINISHED END PANEL
+                // ========================================
+                Section::make('Finished End Panel')
+                    ->columnSpan(1)
+                    ->description('Exposed end panel settings')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('finished_end_gap')
+                                ->label('Gap to Cabinet')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.25)
+                                ->suffix('"')
+                                ->helperText('Between side and end panel (1/4")'),
+                            TextInput::make('finished_end_wall_extension')
+                                ->label('Wall Extension')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(0.5)
+                                ->suffix('"')
+                                ->helperText('Extension for scribe (1/2")'),
+                        ]),
+                    ]),
+
+                // ========================================
+                // MINIMUM DIMENSIONS
+                // ========================================
+                Section::make('Minimum Dimensions')
+                    ->columnSpan(1)
+                    ->description('Fabrication constraints')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextInput::make('min_shelf_opening_height')
+                                ->label('Min Shelf Opening')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(5.5)
+                                ->suffix('"')
+                                ->helperText('5 1/2"'),
+                            TextInput::make('min_drawer_front_height')
+                                ->label('Min Drawer Front')
+                                ->numeric()
+                                ->step(0.0625)
+                                ->default(4.0)
+                                ->suffix('"')
+                                ->helperText('4"'),
+                        ]),
+                    ]),
+
+                // ========================================
+                // ADDITIONAL TCS STANDARDS
+                // ========================================
+                Section::make('Additional Standards')
+                    ->columnSpan(1)
+                    ->schema([
+                        TextInput::make('false_front_backing_overhang')
+                            ->label('False Front Overhang')
+                            ->numeric()
+                            ->step(0.0625)
+                            ->default(1.0)
+                            ->suffix('"')
+                            ->helperText('Backing overhang beyond face (1")'),
+                        TextInput::make('back_wall_gap')
+                            ->label('Back Wall Gap')
+                            ->numeric()
+                            ->step(0.0625)
+                            ->default(0.5)
+                            ->suffix('"')
+                            ->helperText('Gap from cabinet to wall (1/2")'),
+                    ]),
             ]);
     }
 
