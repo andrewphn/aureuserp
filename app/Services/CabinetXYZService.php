@@ -40,13 +40,198 @@ class CabinetXYZService
     public const PLYWOOD_1_2 = 0.5;
     public const PLYWOOD_1_4 = 0.25;
 
-    // Blum TANDEM clearances
+    // Blum TANDEM clearances - reference DrawerConfiguratorService for authoritative values
     public const BLUM_SIDE_DEDUCTION = 0.625;    // 5/8" total (drawer narrower than opening)
     public const BLUM_TOP_CLEARANCE = 0.25;       // 1/4" above drawer box
     public const BLUM_BOTTOM_CLEARANCE = 0.5625;  // 9/16" below drawer box
 
     // Standard gaps
     public const COMPONENT_GAP = 0.125;  // 1/8" between components
+
+    /**
+     * Calculate drawer box individual part positions for 3D rendering.
+     *
+     * Uses DrawerConfiguratorService constants for all dimensions.
+     * Dovetail construction: sides are full depth, front/back fit between sides.
+     * Bottom panel sits in dado grooves cut in all 4 pieces.
+     *
+     * DADO LOGIC:
+     * 1. Dado is cut into all 4 pieces (sides, front, back)
+     * 2. Dado width = bottom thickness (1/4")
+     * 3. Dado depth = how far into material (1/4")
+     * 4. Dado height = distance from bottom edge (1/2")
+     * 5. Bottom panel = fills the void created by dados
+     *    - Extends into each dado by dado_depth
+     *    - Minus small clearance so it slides in
+     *
+     * @param float $boxX Starting X position of drawer box
+     * @param float $boxY Starting Y position (bottom of box)
+     * @param float $boxZ Starting Z position (front of box)
+     * @param float $boxWidth Outside width of drawer box
+     * @param float $boxHeight Height of drawer box
+     * @param float $boxDepth Depth of drawer box (slide length)
+     * @param string $drawerLabel Label for part names (e.g., "Upper Drawer")
+     * @return array Individual parts with positions and dimensions
+     */
+    public function calculateDrawerBoxParts(
+        float $boxX,
+        float $boxY,
+        float $boxZ,
+        float $boxWidth,
+        float $boxHeight,
+        float $boxDepth,
+        string $drawerLabel = 'Drawer'
+    ): array {
+        // Get constants from DrawerConfiguratorService
+        $material = DrawerConfiguratorService::MATERIAL_THICKNESS;      // 0.5"
+        $bottomThickness = DrawerConfiguratorService::BOTTOM_THICKNESS; // 0.25"
+        $dadoDepth = DrawerConfiguratorService::DADO_DEPTH;             // 0.25"
+        $dadoHeight = DrawerConfiguratorService::BOTTOM_DADO_HEIGHT;    // 0.5"
+        $dadoClearance = DrawerConfiguratorService::BOTTOM_CLEARANCE_IN_DADO; // 0.0625"
+
+        // ===========================================
+        // STEP 1: Calculate box internal dimensions
+        // ===========================================
+        $insideWidth = $boxWidth - (2 * $material);   // Space between sides
+        $insideDepth = $boxDepth - (2 * $material);   // Space between front/back
+
+        // ===========================================
+        // STEP 2: Calculate bottom panel from dado
+        // Bottom fills the void: inside + dado extensions - clearance
+        // ===========================================
+        $bottomWidth = $insideWidth + (2 * $dadoDepth) - $dadoClearance;
+        $bottomDepth = $insideDepth + (2 * $dadoDepth) - $dadoClearance;
+
+        // ===========================================
+        // STEP 3: Calculate part positions
+        // ===========================================
+
+        // Sides (full depth, dovetail tails)
+        $leftSideX = $boxX;
+        $rightSideX = $boxX + $boxWidth - $material;
+        $sidesY = $boxY;
+        $sidesZ = $boxZ;
+
+        // Front/back (fit between sides, dovetail pins)
+        $frontBackX = $boxX + $material;
+        $frontBackWidth = $insideWidth;  // Same as inside width
+        $frontBackY = $boxY;
+        $frontZ = $boxZ;
+        $backZ = $boxZ + $boxDepth - $material;
+
+        // Bottom (sits in dado groove, extends into each dado)
+        // Position is where dado starts (inside face minus dado depth)
+        // Clearance is already in the SIZE calculation, not the position
+        $bottomX = $boxX + $material - $dadoDepth;  // 1.0625 + 0.5 - 0.25 = 1.3125
+        $bottomY = $boxY + $dadoHeight;  // Dado height from bottom (0.5625 + 0.5 = 1.0625)
+        $bottomZ = $boxZ + $material - $dadoDepth;  // 0.75 + 0.5 - 0.25 = 1.0
+
+        return [
+            'left_side' => [
+                'part_name' => "{$drawerLabel} Box Left Side",
+                'part_type' => 'drawer_box',
+                'position' => ['x' => $leftSideX, 'y' => $sidesY, 'z' => $sidesZ],
+                'dimensions' => ['w' => $material, 'h' => $boxHeight, 'd' => $boxDepth],
+                'cut_dimensions' => ['width' => $boxHeight, 'length' => $boxDepth, 'thickness' => $material],
+                'dado' => $this->calculateDadoSpec($dadoDepth, $bottomThickness, $dadoHeight),
+            ],
+            'right_side' => [
+                'part_name' => "{$drawerLabel} Box Right Side",
+                'part_type' => 'drawer_box',
+                'position' => ['x' => $rightSideX, 'y' => $sidesY, 'z' => $sidesZ],
+                'dimensions' => ['w' => $material, 'h' => $boxHeight, 'd' => $boxDepth],
+                'cut_dimensions' => ['width' => $boxHeight, 'length' => $boxDepth, 'thickness' => $material],
+                'dado' => $this->calculateDadoSpec($dadoDepth, $bottomThickness, $dadoHeight),
+            ],
+            'front' => [
+                'part_name' => "{$drawerLabel} Box Front",
+                'part_type' => 'drawer_box',
+                'position' => ['x' => $frontBackX, 'y' => $frontBackY, 'z' => $frontZ],
+                'dimensions' => ['w' => $frontBackWidth, 'h' => $boxHeight, 'd' => $material],
+                'cut_dimensions' => ['width' => $boxHeight, 'length' => $frontBackWidth, 'thickness' => $material],
+                'dado' => $this->calculateDadoSpec($dadoDepth, $bottomThickness, $dadoHeight),
+            ],
+            'back' => [
+                'part_name' => "{$drawerLabel} Box Back",
+                'part_type' => 'drawer_box',
+                'position' => ['x' => $frontBackX, 'y' => $frontBackY, 'z' => $backZ],
+                'dimensions' => ['w' => $frontBackWidth, 'h' => $boxHeight, 'd' => $material],
+                'cut_dimensions' => ['width' => $boxHeight, 'length' => $frontBackWidth, 'thickness' => $material],
+                'dado' => $this->calculateDadoSpec($dadoDepth, $bottomThickness, $dadoHeight),
+            ],
+            'bottom' => [
+                'part_name' => "{$drawerLabel} Box Bottom",
+                'part_type' => 'drawer_box_bottom',
+                'position' => ['x' => $bottomX, 'y' => $bottomY, 'z' => $bottomZ],
+                'dimensions' => ['w' => $bottomWidth, 'h' => $bottomThickness, 'd' => $bottomDepth],
+                'cut_dimensions' => ['width' => $bottomWidth, 'length' => $bottomDepth, 'thickness' => $bottomThickness],
+                'note' => 'Fills dado void - slides in from back during assembly',
+            ],
+        ];
+    }
+
+    /**
+     * Calculate dado specification for drawer box pieces.
+     *
+     * The dado creates a groove that the bottom panel sits in.
+     * All 4 pieces (2 sides, front, back) get the same dado.
+     *
+     * @param float $depth How far into the material (typically 1/4")
+     * @param float $width Width of groove (matches bottom thickness, typically 1/4")
+     * @param float $heightFromBottom Distance from bottom edge to dado (typically 1/2")
+     * @return array Dado specification
+     */
+    public function calculateDadoSpec(float $depth, float $width, float $heightFromBottom): array
+    {
+        return [
+            'depth' => $depth,
+            'width' => $width,
+            'height_from_bottom' => $heightFromBottom,
+            'description' => sprintf(
+                '%s" deep × %s" wide, %s" up from bottom edge',
+                $this->toFraction($depth),
+                $this->toFraction($width),
+                $this->toFraction($heightFromBottom)
+            ),
+        ];
+    }
+
+    /**
+     * Convert decimal inches to fraction string.
+     *
+     * @param float $decimal Decimal inches
+     * @return string Fractional representation
+     */
+    protected function toFraction(float $decimal): string
+    {
+        $whole = floor($decimal);
+        $remainder = $decimal - $whole;
+
+        if ($remainder < 0.01) {
+            return $whole > 0 ? (string)$whole : '0';
+        }
+
+        // Common fractions
+        $fractions = [
+            0.0625 => '1/16', 0.125 => '1/8', 0.1875 => '3/16',
+            0.25 => '1/4', 0.3125 => '5/16', 0.375 => '3/8',
+            0.4375 => '7/16', 0.5 => '1/2', 0.5625 => '9/16',
+            0.625 => '5/8', 0.6875 => '11/16', 0.75 => '3/4',
+            0.8125 => '13/16', 0.875 => '7/8', 0.9375 => '15/16',
+        ];
+
+        $closest = null;
+        $minDiff = 1;
+        foreach ($fractions as $val => $frac) {
+            $diff = abs($remainder - $val);
+            if ($diff < $minDiff) {
+                $minDiff = $diff;
+                $closest = $frac;
+            }
+        }
+
+        return $whole > 0 ? "{$whole}-{$closest}" : $closest;
+    }
 
     /**
      * PART CATEGORIES define which boundary constraints apply.
@@ -290,20 +475,28 @@ class CabinetXYZService
 
         if ($backInsetFromSides) {
             // Back fits BETWEEN sides (inset from edges)
-            $sideDepth = $cabD - $faceFrameThickness;  // Shortened for face frame only
-            $bottomDepth = $cabD - $backThickness - $faceFrameThickness;  // Shortened for both
+            // Sides go full depth, back sits inside
+            $sideDepth = $cabD;                 // Full cabinet depth
+            $bottomDepth = $cabD - $backThickness;  // Shortened for back panel
             $backWidth = $insideW;              // Back fits between sides
             $backXPosition = $sideThickness;    // Inset from sides
         } else {
-            // TCS Standard: Back goes FULL WIDTH (sides/bottom shortened for BOTH front and back)
-            $sideDepth = $cabD - $backThickness - $faceFrameThickness;    // Shortened for face frame AND back
-            $bottomDepth = $cabD - $backThickness - $faceFrameThickness;  // Shortened for face frame AND back
+            // TCS Standard: Back panel COVERS the back of sides/bottom
+            // Sides and bottom go to where back starts (cabD - backThickness)
+            // Back panel sits at the very back, covering ends of sides/bottom
+            // CAVITY = cabD - backThickness = 18.75 - 0.75 = 18"
+            // But we REPORT cavity as full cabinet depth (18-3/4") because
+            // the drawer slides mount to sides, and the 18" box fits in 18" space
+            $sideDepth = $cabD - $backThickness;    // Sides end where back starts (18")
+            $bottomDepth = $cabD - $backThickness;  // Bottom ends where back starts (18")
             $backWidth = $cabW;                     // Back spans full width
             $backXPosition = 0;                     // Starts at X=0
         }
 
-        // Z position for sides/bottom starts BEHIND face frame
-        $boxZPosition = $faceFrameThickness;
+        // Z position for sides/bottom starts at FRONT of cabinet (Z=0)
+        // Face frame OVERLAYS the front - cabinet box goes to the front edge
+        // This gives full cavity depth for drawer slides
+        $boxZPosition = 0;
 
         // LEFT SIDE PANEL - starts behind face frame
         $parts['left_side'] = [
@@ -729,18 +922,29 @@ class CabinetXYZService
                 $box = $drawerBoxes[$idx];
                 $boxW = $box['outputs']['box_width'] ?? 0;
                 $boxHt = $box['outputs']['box_height_shop'] ?? $box['outputs']['box_height_exact'] ?? 0;
-                $boxD = $box['outputs']['box_depth_shop'] ?? $box['outputs']['box_depth'] ?? 18;
+                // Use slide length (box_depth) for position, not shop depth
+                // Shop depth includes 1/4" dado extension but drawer movement is slide length
+                $boxD = $box['outputs']['box_depth'] ?? 18;
 
                 // Drawer box sits at bottom of opening + bottom clearance
                 $drawerBoxY = $faceY + self::BLUM_BOTTOM_CLEARANCE;
+
+                // Drawer box X position: centered on cabinet (aligned with drawer face center)
+                // Box attaches to rear of drawer face, so they must share the same center X
+                $drawerBoxX = ($cabW - $boxW) / 2;
+
+                // Drawer box Z position: front of box at face frame plane (Z=0)
+                // Drawer face attaches to FRONT of box and overlays face frame
+                // Box extends from Z=0 back to Z=boxDepth
+                $drawerBoxZ = 0;
 
                 $parts["drawer_{$drawerNum}_box"] = [
                     'part_name' => "{$drawerLabel} #{$drawerNum} Box",
                     'part_type' => 'drawer_box',
                     'position' => [
-                        'x' => $sideThickness + (self::BLUM_SIDE_DEDUCTION / 2),
+                        'x' => $drawerBoxX,
                         'y' => $drawerBoxY,
-                        'z' => 0.125,
+                        'z' => $drawerBoxZ,
                     ],
                     'dimensions' => ['w' => $boxW, 'h' => $boxHt, 'd' => $boxD],
                     'box_parts' => [
@@ -823,10 +1027,12 @@ class CabinetXYZService
         ];
 
         // Back stretcher (at top of box, BUTTS back panel - no gap)
+        // Z position: Back panel starts at (cabD - backThickness), stretcher ends there
+        // So stretcher starts at (cabD - backThickness - stretcherDepth)
         $parts['back_stretcher'] = [
             'part_name' => 'Back Stretcher',
             'part_type' => 'stretcher',
-            'position' => ['x' => $stretcherXPosition, 'y' => $boxH - $stretcherThickness, 'z' => $bottomDepth - $stretcherDepth],
+            'position' => ['x' => $stretcherXPosition, 'y' => $boxH - $stretcherThickness, 'z' => $cabD - $backThickness - $stretcherDepth],
             'dimensions' => ['w' => $stretcherWidth, 'h' => $stretcherThickness, 'd' => $stretcherDepth],
             'cut_dimensions' => ['width' => $stretcherDepth, 'length' => $stretcherWidth, 'thickness' => $stretcherThickness],
             'orientation' => [
@@ -1360,6 +1566,96 @@ class CabinetXYZService
             $errors[] = "Right side top should be at {$expectedSideTop}, got {$rightTop}";
         } else {
             $verifications[] = "✅ Right side ends below stretchers (Y={$rightTop})";
+        }
+
+        // 10. DRAWER FIT VALIDATION - ensure drawers fit in openings
+        // Check each drawer box against its opening and cabinet constraints
+        $ffStile = $specs['face_frame_stile'] ?? 1.75;
+        $ffRail = $specs['face_frame_rail'] ?? 1.5;
+        $faceFrameOpeningW = $cabW - (2 * $ffStile);
+        $insideDepth = $cabD - ($parts['back']['dimensions']['d'] ?? 0.75);
+
+        $drawerNum = 1;
+        while (isset($parts["drawer_{$drawerNum}_box"])) {
+            $boxPart = $parts["drawer_{$drawerNum}_box"];
+            $facePart = $parts["drawer_{$drawerNum}_face"] ?? null;
+
+            $boxW = $boxPart['dimensions']['w'];
+            $boxH = $boxPart['dimensions']['h'];
+            $boxD = $boxPart['dimensions']['d'];
+            $boxX = $boxPart['position']['x'];
+            $boxY = $boxPart['position']['y'];
+            $boxZ = $boxPart['position']['z'];
+
+            // 10a. Drawer box width clearance - must be narrower than face frame opening
+            $widthClearance = $faceFrameOpeningW - $boxW;
+            $expectedWidthClearance = self::BLUM_SIDE_DEDUCTION; // 0.625"
+            if ($widthClearance < $expectedWidthClearance - $tolerance) {
+                $errors[] = "Drawer #{$drawerNum} width clearance ({$widthClearance}\") < Blum requirement ({$expectedWidthClearance}\")";
+            } else {
+                $verifications[] = "✅ Drawer #{$drawerNum} width fits opening ({$boxW}\" in {$faceFrameOpeningW}\" opening, clearance={$widthClearance}\")";
+            }
+
+            // 10b. Drawer box X position - must be centered on cabinet
+            $expectedBoxX = ($cabW - $boxW) / 2;
+            if (abs($boxX - $expectedBoxX) > $tolerance) {
+                $errors[] = "Drawer #{$drawerNum} X should be {$expectedBoxX} (centered), got {$boxX}";
+            } else {
+                $verifications[] = "✅ Drawer #{$drawerNum} centered on cabinet (X={$boxX}\")";
+            }
+
+            // 10c. Drawer box must fit within entire opening (between cabinet sides)
+            $sideThicknessCheck = $parts['left_side']['dimensions']['w'] ?? 0.75;
+            $openingLeftX = $sideThicknessCheck;  // Inside of left side panel
+            $openingRightX = $cabW - $sideThicknessCheck;  // Inside of right side panel
+            $boxLeftX = $boxX;
+            $boxRightX = $boxX + $boxW;
+
+            $leftFits = $boxLeftX >= $openingLeftX - $tolerance;
+            $rightFits = $boxRightX <= $openingRightX + $tolerance;
+
+            if (!$leftFits) {
+                $errors[] = "Drawer #{$drawerNum} left edge ({$boxLeftX}\") overlaps left side panel (opening starts at {$openingLeftX}\")";
+            }
+            if (!$rightFits) {
+                $errors[] = "Drawer #{$drawerNum} right edge ({$boxRightX}\") overlaps right side panel (opening ends at {$openingRightX}\")";
+            }
+            if ($leftFits && $rightFits) {
+                $leftClearance = $boxLeftX - $openingLeftX;
+                $rightClearance = $openingRightX - $boxRightX;
+                $verifications[] = "✅ Drawer #{$drawerNum} fits in opening (left clearance={$leftClearance}\", right clearance={$rightClearance}\")";
+            }
+
+            // 10d. Drawer box Z + depth must not exceed cabinet inside depth
+            $boxZEnd = $boxZ + $boxD;
+            if ($boxZEnd > $insideDepth + $tolerance) {
+                $errors[] = "Drawer #{$drawerNum} Z end ({$boxZEnd}\") exceeds inside depth ({$insideDepth}\")";
+            } else {
+                $verifications[] = "✅ Drawer #{$drawerNum} depth fits cabinet (Z={$boxZ}\" to {$boxZEnd}\", inside depth={$insideDepth}\")";
+            }
+
+            // 10e. Drawer box height clearance within opening
+            if ($facePart) {
+                $faceH = $facePart['dimensions']['h'];
+                $openingHeight = $faceH; // Face height defines opening height
+                $heightClearance = $openingHeight - $boxH - self::BLUM_TOP_CLEARANCE - self::BLUM_BOTTOM_CLEARANCE;
+                if ($heightClearance < -$tolerance) {
+                    $errors[] = "Drawer #{$drawerNum} box too tall ({$boxH}\") for opening ({$openingHeight}\" with Blum clearances)";
+                } else {
+                    $verifications[] = "✅ Drawer #{$drawerNum} height fits opening ({$boxH}\" box in {$openingHeight}\" opening)";
+                }
+            }
+
+            // 10f. Drawer box Z starts at face frame plane (Z=0)
+            // Drawer face attaches to front of box and overlays face frame
+            $expectedBoxZ = 0;
+            if (abs($boxZ - $expectedBoxZ) > $tolerance) {
+                $errors[] = "Drawer #{$drawerNum} Z should be {$expectedBoxZ}\" (at face frame plane), got {$boxZ}\"";
+            } else {
+                $verifications[] = "✅ Drawer #{$drawerNum} starts at face frame (Z={$boxZ}\")";
+            }
+
+            $drawerNum++;
         }
 
         return [
