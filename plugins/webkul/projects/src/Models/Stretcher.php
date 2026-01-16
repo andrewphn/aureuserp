@@ -37,7 +37,10 @@ use Webkul\Project\Traits\HasEntityLock;
  * @property float $depth_inches Stretcher depth (typically 3-4")
  * @property float $thickness_inches Stretcher thickness (standard 3/4")
  * @property float|null $position_from_front_inches Distance from cabinet front
- * @property float|null $position_from_top_inches Distance from cabinet top
+ * @property float|null $position_from_top_inches Distance from cabinet top (to top of stretcher)
+ * @property float|null $position_from_bottom_inches Distance from cabinet bottom (to top of stretcher)
+ * @property float|null $position_override_inches Manual override position from CAD
+ * @property string|null $position_source Source of position: calculated, cad_override, manual
  * @property string $material Material type: plywood, solid_wood, mdf
  * @property int|null $product_id Linked inventory product
  * @property bool $supports_drawer Whether this stretcher supports a drawer
@@ -95,6 +98,9 @@ class Stretcher extends Model implements CabinetComponentInterface
         'thickness_inches',
         'position_from_front_inches',
         'position_from_top_inches',
+        'position_from_bottom_inches',
+        'position_override_inches',
+        'position_source',
         'material',
         'product_id',
         'supports_drawer',
@@ -120,6 +126,8 @@ class Stretcher extends Model implements CabinetComponentInterface
             'thickness_inches' => 'float',
             'position_from_front_inches' => 'float',
             'position_from_top_inches' => 'float',
+            'position_from_bottom_inches' => 'float',
+            'position_override_inches' => 'float',
             'supports_drawer' => 'boolean',
             'cut_width_inches' => 'float',
             'cut_width_shop_inches' => 'float',
@@ -292,6 +300,43 @@ class Stretcher extends Model implements CabinetComponentInterface
     public function getIsDrawerSupportAttribute(): bool
     {
         return $this->position === self::POSITION_DRAWER_SUPPORT;
+    }
+
+    /**
+     * Get the effective position from top (uses override if set).
+     *
+     * TCS Rule (Bryan Patton, Jan 2025):
+     * - Stretcher splits the gap between drawer faces
+     * - Override allows CAD-specified positions to take precedence
+     */
+    public function getEffectivePositionFromTopAttribute(): ?float
+    {
+        // Override takes precedence
+        if ($this->position_override_inches !== null) {
+            return $this->position_override_inches;
+        }
+
+        return $this->position_from_top_inches;
+    }
+
+    /**
+     * Get the effective position from bottom.
+     *
+     * Calculated from position_from_top if not directly set.
+     */
+    public function getEffectivePositionFromBottomAttribute(): ?float
+    {
+        if ($this->position_from_bottom_inches !== null) {
+            return $this->position_from_bottom_inches;
+        }
+
+        // Calculate from position_from_top if cabinet available
+        if ($this->position_from_top_inches !== null && $this->cabinet) {
+            $boxHeight = ($this->cabinet->height_inches ?? 30) - ($this->cabinet->toe_kick_height_inches ?? 4);
+            return $boxHeight - $this->position_from_top_inches;
+        }
+
+        return null;
     }
 
     // ========================================

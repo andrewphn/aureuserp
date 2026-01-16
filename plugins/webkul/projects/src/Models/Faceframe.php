@@ -470,4 +470,117 @@ class Faceframe extends Model
     {
         return 'stile_width';
     }
+
+    /**
+     * Get cut list data for this face frame
+     *
+     * Returns all pieces needed to fabricate the face frame:
+     * - 2x stiles (left and right vertical pieces)
+     * - 2x rails (top and bottom horizontal pieces)
+     * - Nx mid rails (horizontal dividers between openings)
+     *
+     * @param float $cabinetWidth Cabinet width in inches
+     * @param float $boxHeight Cabinet box height (without toe kick) in inches
+     * @param int $midRailCount Number of mid rails (dividers)
+     * @return array Cut list with all face frame pieces
+     */
+    public function getCutListData(float $cabinetWidth, float $boxHeight, int $midRailCount = 0): array
+    {
+        $stileWidth = $this->stile_width ?? self::STANDARD_STILE_WIDTH;
+        $railWidth = $this->rail_width ?? self::STANDARD_RAIL_WIDTH;
+        $thickness = $this->material_thickness ?? self::STANDARD_THICKNESS;
+
+        // Stiles run full height of the box
+        $stileLength = $boxHeight;
+
+        // Rails span between stiles
+        $railLength = $cabinetWidth - (2 * $stileWidth);
+
+        $pieces = [
+            [
+                'part' => 'Stiles',
+                'qty' => 2,
+                'width' => $stileWidth,
+                'length' => $stileLength,
+                'thickness' => $thickness,
+                'material' => $this->material ?? '3/4" Hardwood',
+                'notes' => 'Left and Right stiles (full height)',
+            ],
+            [
+                'part' => 'Top Rail',
+                'qty' => 1,
+                'width' => $railWidth,
+                'length' => $railLength,
+                'thickness' => $thickness,
+                'material' => $this->material ?? '3/4" Hardwood',
+                'notes' => 'Top rail (spans between stiles)',
+            ],
+            [
+                'part' => 'Bottom Rail',
+                'qty' => 1,
+                'width' => $railWidth,
+                'length' => $railLength,
+                'thickness' => $thickness,
+                'material' => $this->material ?? '3/4" Hardwood',
+                'notes' => 'Bottom rail (spans between stiles)',
+            ],
+        ];
+
+        if ($midRailCount > 0) {
+            $pieces[] = [
+                'part' => 'Mid Rails',
+                'qty' => $midRailCount,
+                'width' => $railWidth,
+                'length' => $railLength,
+                'thickness' => $thickness,
+                'material' => $this->material ?? '3/4" Hardwood',
+                'notes' => 'Horizontal dividers between openings',
+            ];
+        }
+
+        return [
+            'face_frame_type' => $this->face_frame_type ?? 'standard',
+            'joinery_type' => $this->joinery_type ?? 'pocket_hole',
+            'material' => $this->material ?? '3/4" Hardwood/MDF',
+            'calculated_dimensions' => [
+                'stile_length' => $stileLength,
+                'rail_length' => $railLength,
+                'stile_width' => $stileWidth,
+                'rail_width' => $railWidth,
+            ],
+            'pieces' => $pieces,
+        ];
+    }
+
+    /**
+     * Get cut list data attribute (uses cabinet run dimensions if available)
+     *
+     * @return array|null Cut list data or null if no cabinet run
+     */
+    public function getCutListDataAttribute(): ?array
+    {
+        // Try to get dimensions from cabinet run
+        $cabinetRun = $this->cabinetRun;
+
+        if (!$cabinetRun) {
+            return null;
+        }
+
+        // Get first cabinet dimensions as reference
+        $cabinet = $cabinetRun->cabinets()->first();
+
+        if (!$cabinet) {
+            return null;
+        }
+
+        $cabinetWidth = $cabinet->length_inches ?? $cabinet->width_inches ?? 24;
+        $toeKickHeight = $cabinet->toe_kick_height_inches ?? 4.5;
+        $boxHeight = ($cabinet->height_inches ?? 30) - $toeKickHeight;
+
+        // Count drawers for mid rails (drawer_count - 1 mid rails needed)
+        $drawerCount = $cabinet->drawer_count ?? 0;
+        $midRailCount = max(0, $drawerCount - 1);
+
+        return $this->getCutListData($cabinetWidth, $boxHeight, $midRailCount);
+    }
 }

@@ -1,0 +1,1685 @@
+{
+    "input_specs": {
+        "width": 41.3125,
+        "height": 32.75,
+        "depth": 21,
+        "toe_kick_height": 4,
+        "face_frame_stile": 1.75,
+        "face_frame_rail": 1.5,
+        "face_frame_thickness": 1,
+        "side_panel_thickness": 0.75,
+        "back_panel_thickness": 0.75,
+        "drawer_heights": [
+            11.1875,
+            11.1875
+        ],
+        "drawer_slide_length": 18,
+        "false_fronts": [
+            {
+                "face_height": 7,
+                "backing_height": 7
+            }
+        ],
+        "cabinet_type": "sink_base",
+        "has_end_panels": true,
+        "wall_gap": 0.5,
+        "end_panel_gap": 0.25,
+        "end_panel_locations": [
+            "left",
+            "right"
+        ],
+        "stretcher_position_override": 17.125
+    },
+    "gates": {
+        "gate_1_cabinet_box": {
+            "gate": 1,
+            "title": "Cabinet Box Dimensions",
+            "calculations": [
+                {
+                    "name": "Box Height",
+                    "formula": "Cabinet Height - Toe Kick",
+                    "values": "32.75\" - 4\"",
+                    "result": 28.75,
+                    "result_formatted": "28-3\/4\""
+                },
+                {
+                    "name": "Inside Width",
+                    "formula": "Cabinet Width - (2 \u00d7 Side Thickness)",
+                    "values": "41.3125\" - (2 \u00d7 0.75\")",
+                    "result": 39.8125,
+                    "result_formatted": "39-13\/16\""
+                },
+                {
+                    "name": "Inside Depth",
+                    "formula": "Cabinet Depth - Back Thickness",
+                    "values": "21\" - 0.75\"",
+                    "result": 20.25,
+                    "result_formatted": "20-1\/4\""
+                },
+                {
+                    "name": "Distance From Wall",
+                    "formula": "Back Thickness + Wall Gap",
+                    "values": "0.75\" + 0.5\"",
+                    "result": 1.25,
+                    "result_formatted": "1-1\/4\"",
+                    "note": "Gap for shimming imperfect walls"
+                },
+                {
+                    "name": "Side Panel Height (Sink Base)",
+                    "formula": "Box Height (full height - no stretchers)",
+                    "values": "28.75\"",
+                    "result": 28.75,
+                    "result_formatted": "28-3\/4\"",
+                    "note": "TCS Rule: Sink bases have NO stretchers - sides go full height to compensate"
+                }
+            ],
+            "outputs": {
+                "box_height": 28.75,
+                "side_panel_height": 28.75,
+                "inside_width": 39.8125,
+                "inside_depth": 20.25,
+                "is_sink_base": true,
+                "stretcher_on_top": true,
+                "distance_from_wall": 1.25
+            }
+        },
+        "gate_2_face_frame_opening": {
+            "gate": 2,
+            "title": "Face Frame Opening",
+            "calculations": [
+                {
+                    "name": "FF Opening Width",
+                    "formula": "Cabinet Width - (2 \u00d7 Stile Width)",
+                    "values": "41.3125\" - (2 \u00d7 1.75\")",
+                    "result": 37.8125,
+                    "result_formatted": "37-13\/16\""
+                },
+                {
+                    "name": "FF Opening Height",
+                    "formula": "Box Height - (2 \u00d7 Rail Width)",
+                    "values": "28.75\" - (2 \u00d7 1.5\")",
+                    "result": 25.75,
+                    "result_formatted": "25-3\/4\""
+                }
+            ],
+            "outputs": {
+                "opening_width": 37.8125,
+                "opening_height": 25.75
+            }
+        },
+        "gate_3_component_layout": {
+            "gate": 3,
+            "title": "Component Layout (Vertical Stack)",
+            "constants": {
+                "top_reveal": 0.125,
+                "bottom_reveal": 0.125,
+                "component_gap": 0.125
+            },
+            "calculations": [
+                {
+                    "name": "Opening Height Available",
+                    "result": 25.75,
+                    "result_formatted": "25-3\/4\""
+                },
+                {
+                    "name": "Total Consumed Height",
+                    "breakdown": [
+                        {
+                            "item": "Bottom Reveal",
+                            "value": 0.125
+                        },
+                        {
+                            "item": "Drawer 2",
+                            "value": 11.1875
+                        },
+                        {
+                            "item": "Gap",
+                            "value": 0.125
+                        },
+                        {
+                            "item": "Drawer 1",
+                            "value": 11.1875
+                        },
+                        {
+                            "item": "Top Reveal",
+                            "value": 0.125
+                        }
+                    ],
+                    "result": 22.75,
+                    "result_formatted": "22-3\/4\""
+                },
+                {
+                    "name": "Remaining Space",
+                    "formula": "Opening Height - Consumed Height",
+                    "values": "25.75\" - 22.75\"",
+                    "result": 3,
+                    "result_formatted": "3\""
+                }
+            ],
+            "component_positions": [
+                {
+                    "component": "Drawer 1",
+                    "height": 11.1875,
+                    "position_from_bottom": 11.4375
+                },
+                {
+                    "component": "Drawer 2",
+                    "height": 11.1875,
+                    "position_from_bottom": 0.125
+                }
+            ],
+            "outputs": {
+                "consumed_height": 22.75,
+                "remaining_space": 3,
+                "fit_status": "FITS",
+                "status_ok": true
+            }
+        },
+        "gate_4_drawer_clearances": {
+            "gate": 4,
+            "title": "Drawer Box Dimensions (Blum TANDEM 563H)",
+            "clearance_constants": {
+                "side_deduction_total": 0.625,
+                "top_clearance": 0.25,
+                "bottom_clearance": 0.5625,
+                "height_deduction_total": 0.8125
+            },
+            "drawer_boxes": [
+                {
+                    "drawer_number": 1,
+                    "opening_height": 11.1875,
+                    "calculations": [
+                        {
+                            "name": "Box Width",
+                            "formula": "Opening Width - Side Deduction",
+                            "values": "37.8125\" - 0.625\"",
+                            "result": 37.1875,
+                            "result_formatted": "37-3\/16\""
+                        },
+                        {
+                            "name": "Box Height (exact)",
+                            "formula": "Opening Height - Height Deduction",
+                            "values": "11.1875\" - 0.8125\"",
+                            "result": 10.375,
+                            "result_formatted": "10-3\/8\""
+                        },
+                        {
+                            "name": "Box Height (shop)",
+                            "formula": "Round down to nearest 1\/2\"",
+                            "result": 10,
+                            "result_formatted": "10\""
+                        },
+                        {
+                            "name": "Box Depth",
+                            "formula": "Slide Length",
+                            "result": 18,
+                            "result_formatted": "18\""
+                        },
+                        {
+                            "name": "Box Depth (shop)",
+                            "formula": "Slide Length + 1\/4\" (dado)",
+                            "result": 18.25,
+                            "result_formatted": "18-1\/4\""
+                        }
+                    ],
+                    "outputs": {
+                        "box_width": 37.1875,
+                        "box_height_theoretical": 10.375,
+                        "box_height_exact": 10.375,
+                        "box_height_shop": 10,
+                        "box_depth": 18,
+                        "box_depth_shop": 18.25
+                    }
+                },
+                {
+                    "drawer_number": 2,
+                    "opening_height": 11.1875,
+                    "calculations": [
+                        {
+                            "name": "Box Width",
+                            "formula": "Opening Width - Side Deduction",
+                            "values": "37.8125\" - 0.625\"",
+                            "result": 37.1875,
+                            "result_formatted": "37-3\/16\""
+                        },
+                        {
+                            "name": "Box Height (exact)",
+                            "formula": "Opening Height - Height Deduction",
+                            "values": "11.1875\" - 0.8125\"",
+                            "result": 10.375,
+                            "result_formatted": "10-3\/8\""
+                        },
+                        {
+                            "name": "Box Height (shop)",
+                            "formula": "Round down to nearest 1\/2\"",
+                            "result": 10,
+                            "result_formatted": "10\""
+                        },
+                        {
+                            "name": "Box Depth",
+                            "formula": "Slide Length",
+                            "result": 18,
+                            "result_formatted": "18\""
+                        },
+                        {
+                            "name": "Box Depth (shop)",
+                            "formula": "Slide Length + 1\/4\" (dado)",
+                            "result": 18.25,
+                            "result_formatted": "18-1\/4\""
+                        }
+                    ],
+                    "outputs": {
+                        "box_width": 37.1875,
+                        "box_height_theoretical": 10.375,
+                        "box_height_exact": 10.375,
+                        "box_height_shop": 10,
+                        "box_depth": 18,
+                        "box_depth_shop": 18.25
+                    }
+                }
+            ],
+            "depth_validation": {
+                "drawer_box_depth": 18,
+                "min_cavity_required": 18.25,
+                "actual_cavity": 20.25,
+                "cabinet_depth": 21,
+                "status": "OK",
+                "is_at_minimum": false,
+                "tcs_note": "Drawer box: 18\", Cavity minimum: 18.25\""
+            },
+            "outputs": {
+                "drawer_count": 2,
+                "depth_ok": true
+            }
+        },
+        "gate_5_stretchers": {
+            "gate": 5,
+            "title": "Stretcher Dimensions & Positions",
+            "tcs_standard": {
+                "stretcher_depth": "3\"",
+                "stretcher_thickness": "3\/4\"",
+                "gap_between_faces": "1\/8\"",
+                "rule": "Stretcher splits the gap between drawer faces"
+            },
+            "sink_base_note": "TCS Rule: Sink bases have NO stretchers - sides extend +3\/4\" to compensate",
+            "calculations": [
+                {
+                    "name": "Stretcher Count",
+                    "formula": "Sink Base = No stretchers",
+                    "result": 0,
+                    "note": "Side panels compensate by extending +3\/4\" for countertop support"
+                }
+            ],
+            "position_calculations": [],
+            "stretchers": [],
+            "outputs": {
+                "stretcher_width": 39.8125,
+                "stretcher_depth": 3,
+                "stretcher_thickness": 0.75,
+                "stretcher_count": 0,
+                "box_height": 28.75,
+                "is_sink_base": true
+            }
+        },
+        "gate_6_face_frame_pieces": {
+            "gate": 6,
+            "title": "Face Frame Cut List",
+            "calculations": [
+                {
+                    "name": "Stile Length",
+                    "formula": "Box Height",
+                    "result": 28.75,
+                    "result_formatted": "28-3\/4\""
+                },
+                {
+                    "name": "Rail Length",
+                    "formula": "Cabinet Width - (2 \u00d7 Stile Width)",
+                    "values": "41.3125\" - (2 \u00d7 1.75\")",
+                    "result": 37.8125,
+                    "result_formatted": "37-13\/16\""
+                },
+                {
+                    "name": "Mid Rail Count",
+                    "formula": "Drawer Count - 1",
+                    "values": "2 - 1",
+                    "result": 1
+                }
+            ],
+            "pieces": {
+                "stiles": {
+                    "qty": 2,
+                    "width": 1.75,
+                    "length": 28.75,
+                    "thickness": 1,
+                    "notes": "Left and Right stiles (5\/4 hardwood)"
+                },
+                "top_rail": {
+                    "qty": 1,
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 1,
+                    "notes": "Top rail (5\/4 hardwood)"
+                },
+                "bottom_rail": {
+                    "qty": 1,
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 1,
+                    "notes": "Bottom rail (5\/4 hardwood)"
+                },
+                "mid_rails": {
+                    "qty": 1,
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 1,
+                    "notes": "Mid rails between drawers (5\/4 hardwood)"
+                }
+            },
+            "outputs": {
+                "stile_length": 28.75,
+                "rail_length": 37.8125,
+                "mid_rail_count": 1
+            }
+        }
+    },
+    "gap_assessment": {
+        "opening_reveals": [
+            {
+                "location": "Top Reveal",
+                "standard": "1\/8\"",
+                "standard_value": 0.125,
+                "actual": 0.125,
+                "status": "OK"
+            },
+            {
+                "location": "Bottom Reveal",
+                "standard": "1\/8\"",
+                "standard_value": 0.125,
+                "actual": 0.125,
+                "status": "OK"
+            },
+            {
+                "location": "Between Drawers",
+                "standard": "1\/8\"",
+                "standard_value": 0.125,
+                "actual": 0.125,
+                "status": "OK"
+            }
+        ],
+        "drawer_clearances": [
+            {
+                "location": "Side Clearance (total)",
+                "standard": "5\/8\"",
+                "standard_value": 0.625,
+                "actual": 0.625,
+                "status": "OK"
+            },
+            {
+                "location": "Top Clearance",
+                "standard": "1\/4\"",
+                "standard_value": 0.25,
+                "actual": 0.25,
+                "status": "OK"
+            },
+            {
+                "location": "Bottom Clearance",
+                "standard": "9\/16\"",
+                "standard_value": 0.5625,
+                "actual": 0.5625,
+                "status": "OK"
+            }
+        ],
+        "face_frame_gaps": [
+            {
+                "location": "Door\/Drawer to FF",
+                "standard": "1\/8\"",
+                "standard_value": 0.125,
+                "actual": 0.125,
+                "status": "OK"
+            }
+        ],
+        "cabinet_depth": [
+            {
+                "location": "Min for Slide",
+                "standard": "18-3\/4\"",
+                "standard_value": 18.75,
+                "actual": 21,
+                "status": "OK"
+            }
+        ],
+        "layout_status": [
+            {
+                "location": "Component Fit",
+                "standard": "Components must fit in opening",
+                "actual": 3,
+                "status": "OK"
+            }
+        ]
+    },
+    "cut_list": {
+        "cabinet_box": {
+            "material": "3\/4\" Plywood",
+            "pieces": [
+                {
+                    "part": "Left Side",
+                    "qty": 1,
+                    "width": 20.25,
+                    "width_formatted": "20-1\/4\"",
+                    "length": 28.75,
+                    "length_formatted": "28-3\/4\"",
+                    "thickness": 0.75,
+                    "notes": "Depth \u00d7 Box Height (full - no stretchers)"
+                },
+                {
+                    "part": "Right Side",
+                    "qty": 1,
+                    "width": 20.25,
+                    "width_formatted": "20-1\/4\"",
+                    "length": 28.75,
+                    "length_formatted": "28-3\/4\"",
+                    "thickness": 0.75,
+                    "notes": "Depth \u00d7 Box Height (full - no stretchers)"
+                },
+                {
+                    "part": "Bottom",
+                    "qty": 1,
+                    "width": 39.8125,
+                    "width_formatted": "39-13\/16\"",
+                    "length": 20.25,
+                    "length_formatted": "20-1\/4\"",
+                    "thickness": 0.75,
+                    "notes": "Inside Width \u00d7 Depth"
+                },
+                {
+                    "part": "Back",
+                    "qty": 1,
+                    "width": 39.8125,
+                    "width_formatted": "39-13\/16\"",
+                    "length": 28.75,
+                    "length_formatted": "28-3\/4\"",
+                    "thickness": 0.75,
+                    "notes": "TCS: Back is FULL BOX HEIGHT (toe kick is front only)"
+                }
+            ]
+        },
+        "stretchers": {
+            "material": "3\/4\" Plywood",
+            "pieces": []
+        },
+        "false_fronts": {
+            "material": "3\/4\" Plywood",
+            "pieces": [
+                {
+                    "part": "False Front #1 Face",
+                    "qty": 1,
+                    "width": 7,
+                    "width_formatted": "7\"",
+                    "length": 41.3125,
+                    "length_formatted": "41-5\/16\"",
+                    "thickness": 0.75,
+                    "notes": "Decorative face - full overlay"
+                },
+                {
+                    "part": "False Front #1 Backing",
+                    "qty": 1,
+                    "width": 7,
+                    "width_formatted": "7\"",
+                    "length": 39.8125,
+                    "length_formatted": "39-13\/16\"",
+                    "thickness": 0.75,
+                    "notes": "Laid FLAT - doubles as stretcher (TCS rule)",
+                    "orientation": "horizontal",
+                    "is_stretcher": true
+                }
+            ],
+            "tcs_rule": "All false fronts have backing that doubles as stretcher"
+        },
+        "face_frame": {
+            "material": "5\/4 Hardwood (1\" actual)",
+            "pieces": [
+                {
+                    "part": "Stiles",
+                    "qty": 2,
+                    "width": 1.75,
+                    "width_formatted": "1-3\/4\"",
+                    "length": 28.75,
+                    "length_formatted": "28-3\/4\"",
+                    "thickness": 1,
+                    "notes": "Left and Right stiles (5\/4 hardwood)"
+                },
+                {
+                    "part": "Top Rail",
+                    "qty": 1,
+                    "width": 1.5,
+                    "width_formatted": "1-1\/2\"",
+                    "length": 37.8125,
+                    "length_formatted": "37-13\/16\"",
+                    "thickness": 1,
+                    "notes": "Top rail (5\/4 hardwood)"
+                },
+                {
+                    "part": "Bottom Rail",
+                    "qty": 1,
+                    "width": 1.5,
+                    "width_formatted": "1-1\/2\"",
+                    "length": 37.8125,
+                    "length_formatted": "37-13\/16\"",
+                    "thickness": 1,
+                    "notes": "Bottom rail (5\/4 hardwood)"
+                },
+                {
+                    "part": "Mid Rails",
+                    "qty": 1,
+                    "width": 1.5,
+                    "width_formatted": "1-1\/2\"",
+                    "length": 37.8125,
+                    "length_formatted": "37-13\/16\"",
+                    "thickness": 1,
+                    "notes": "Mid rails between drawers (5\/4 hardwood)"
+                }
+            ]
+        },
+        "toe_kick": {
+            "material": "3\/4\" Plywood",
+            "pieces": [
+                {
+                    "part": "Toe Kick Board",
+                    "qty": 1,
+                    "width": 4,
+                    "width_formatted": "4\"",
+                    "length": 39.8125,
+                    "length_formatted": "39-13\/16\"",
+                    "thickness": 0.75,
+                    "notes": "Recessed 3\" from face"
+                }
+            ]
+        },
+        "end_panels": {
+            "material": "3\/4\" Plywood or Hardwood (match job specs)",
+            "pieces": [
+                {
+                    "part": "Left End Panel",
+                    "qty": 1,
+                    "width": 21.5,
+                    "width_formatted": "21-1\/2\"",
+                    "length": 32.75,
+                    "length_formatted": "32-3\/4\"",
+                    "thickness": 0.75,
+                    "notes": "Depth includes +0.5\" install overage. Miter 45\u00b0 to face frame.",
+                    "miter": "45\u00b0 to face frame stile",
+                    "install_overage": 0.5
+                },
+                {
+                    "part": "Right End Panel",
+                    "qty": 1,
+                    "width": 21.5,
+                    "width_formatted": "21-1\/2\"",
+                    "length": 32.75,
+                    "length_formatted": "32-3\/4\"",
+                    "thickness": 0.75,
+                    "notes": "Depth includes +0.5\" install overage. Miter 45\u00b0 to face frame.",
+                    "miter": "45\u00b0 to face frame stile",
+                    "install_overage": 0.5
+                }
+            ],
+            "tcs_rules": [
+                "Mitered at 45\u00b0 to face frame stiles",
+                "Include +0.5\" overage for install adjustment",
+                "1\/4\" gap between cabinet side and end panel",
+                "Ships attached - shimmed and screwed"
+            ]
+        },
+        "drawer_boxes": {
+            "material": "1\/2\" Plywood (sides), 1\/4\" Plywood (bottom)",
+            "pieces": [
+                {
+                    "part": "Drawer 1 Sides",
+                    "qty": 2,
+                    "width": 10,
+                    "width_formatted": "10\"",
+                    "length": 18.25,
+                    "length_formatted": "18-1\/4\"",
+                    "thickness": 0.5,
+                    "notes": "Shop depth (with dado allowance)"
+                },
+                {
+                    "part": "Drawer 1 Front\/Back",
+                    "qty": 2,
+                    "width": 10,
+                    "width_formatted": "10\"",
+                    "length": 36.1875,
+                    "length_formatted": "36-3\/16\"",
+                    "thickness": 0.5,
+                    "notes": "Box width - 2\u00d7 side thickness"
+                },
+                {
+                    "part": "Drawer 1 Bottom",
+                    "qty": 1,
+                    "width": 36.4375,
+                    "width_formatted": "36-7\/16\"",
+                    "length": 17.25,
+                    "length_formatted": "17-1\/4\"",
+                    "thickness": 0.25,
+                    "notes": "In dado groove"
+                },
+                {
+                    "part": "Drawer 2 Sides",
+                    "qty": 2,
+                    "width": 10,
+                    "width_formatted": "10\"",
+                    "length": 18.25,
+                    "length_formatted": "18-1\/4\"",
+                    "thickness": 0.5,
+                    "notes": "Shop depth (with dado allowance)"
+                },
+                {
+                    "part": "Drawer 2 Front\/Back",
+                    "qty": 2,
+                    "width": 10,
+                    "width_formatted": "10\"",
+                    "length": 36.1875,
+                    "length_formatted": "36-3\/16\"",
+                    "thickness": 0.5,
+                    "notes": "Box width - 2\u00d7 side thickness"
+                },
+                {
+                    "part": "Drawer 2 Bottom",
+                    "qty": 1,
+                    "width": 36.4375,
+                    "width_formatted": "36-7\/16\"",
+                    "length": 17.25,
+                    "length_formatted": "17-1\/4\"",
+                    "thickness": 0.25,
+                    "notes": "In dado groove"
+                }
+            ]
+        },
+        "machining_operations": {
+            "drawer_dados": {
+                "operation": "Dado Cut",
+                "tool": "1\/4\" dado blade or straight bit",
+                "applies_to": "All drawer box pieces (2 drawers \u00d7 4 pieces = 8 pieces)",
+                "specs": {
+                    "width": "1\/4\"",
+                    "width_inches": 0.25,
+                    "depth": "1\/4\"",
+                    "depth_inches": 0.25,
+                    "position": "1\/2\" from bottom edge",
+                    "position_inches": 0.5
+                },
+                "notes": "Cut dado in all 4 pieces (2 sides + front + back) before assembly. Bottom panel floats in dado.",
+                "sequence": 1
+            },
+            "runner_mounting": {
+                "operation": "Blum Runner Mounting Holes",
+                "tool": "TANDEM template T65.1600.01 + drill",
+                "applies_to": "Cabinet sides (Left + Right) - 2 runner pairs",
+                "specs": {
+                    "height_from_bottom": {
+                        "mm": 37,
+                        "inches": 1.46875,
+                        "fraction": "1-15\/32\"",
+                        "note": "Measured from bottom of opening to bottom of runner"
+                    },
+                    "setback_from_face": {
+                        "mm": 3,
+                        "inches": 0.125,
+                        "fraction": "1\/8\"",
+                        "note": "Frameless: runner flush with face; Face-frame: behind frame"
+                    },
+                    "front_hole_positions": [
+                        {
+                            "mm": 7,
+                            "inches": 0.28125,
+                            "fraction": "9\/32\""
+                        },
+                        {
+                            "mm": 32,
+                            "inches": 1.25,
+                            "fraction": "1-1\/4\""
+                        }
+                    ],
+                    "screw": {
+                        "size": "#6 x 5\/8\"",
+                        "blum_part": "606N or 606P"
+                    }
+                },
+                "notes": "Use at least 2 screws in elongated holes. Mark height line across BOTH sides for alignment.",
+                "sequence": 2
+            },
+            "locking_device_holes": {
+                "operation": "Locking Device Bores (Drawer Sides)",
+                "tool": "6mm brad point bit with depth stop",
+                "applies_to": "Drawer box sides (2 drawers \u00d7 2 sides = 4 bores)",
+                "specs": {
+                    "bore_diameter": {
+                        "mm": 6,
+                        "inches": 0.25,
+                        "fraction": "1\/4\" (use 6mm)"
+                    },
+                    "bore_depth": {
+                        "mm": 10,
+                        "inches": 0.40625,
+                        "fraction": "13\/32\""
+                    },
+                    "angle": "75\u00b0 (use TANDEM template T65.1600.01)",
+                    "position": "Per template - front bottom of drawer side",
+                    "locking_device_parts": {
+                        "T51.1901R\/L": "With side-to-side adjustment",
+                        "T51.1801R\/L": "Without adjustment (basic)"
+                    }
+                },
+                "notes": "Bore on OUTSIDE face of drawer sides. Use template for accurate 75\u00b0 angle location.",
+                "sequence": 3
+            },
+            "rear_hook_holes": {
+                "operation": "Rear Hook Bores (Drawer Back)",
+                "tool": "2.5mm bit with extension chuck",
+                "applies_to": "Drawer backs (2 drawers \u00d7 2 holes = 4 bores)",
+                "specs": {
+                    "position_from_bottom": {
+                        "mm": 7,
+                        "inches": 0.28125,
+                        "fraction": "9\/32\""
+                    },
+                    "position_from_side": {
+                        "mm": 11,
+                        "inches": 0.4375,
+                        "fraction": "7\/16\""
+                    },
+                    "minimum_rear_notch": {
+                        "mm": 35,
+                        "inches": 1.375,
+                        "fraction": "1-3\/8\"",
+                        "note": "Drawer back must clear rear bracket"
+                    }
+                },
+                "notes": "Bore on OUTSIDE face of drawer back. One hole each side, measured from bottom corner.",
+                "sequence": 4
+            },
+            "edge_banding": {
+                "operation": "Edge Banding",
+                "tool": "Iron-on edge banding or PVC edge bander",
+                "applies_to": "Exposed plywood edges",
+                "specs": {
+                    "width": "3\/4\" (match plywood thickness)",
+                    "material": "Match cabinet interior finish"
+                },
+                "edges_to_band": {
+                    "Cabinet sides": "Front edge only (visible in opening)",
+                    "Shelves": "Front edge only",
+                    "Face frame": "Not required (solid wood\/MDF)",
+                    "Drawer boxes": "Top edge of sides (optional)"
+                },
+                "notes": "Apply edge banding before assembly. Trim flush with edge trimmer.",
+                "sequence": 6
+            },
+            "pocket_holes": {
+                "operation": "Pocket Hole Drilling",
+                "tool": "Kreg pocket hole jig (3\/4\" material setting)",
+                "applies_to": "Face frame rails",
+                "specs": {
+                    "hole_size": "Standard (3\/4\" material)",
+                    "screw_size": "1-1\/4\" fine thread pocket screws",
+                    "holes_per_rail": 2
+                },
+                "notes": "Drill pocket holes in ends of ALL rails before assembly. Stiles receive the screws.",
+                "sequence": 7
+            }
+        }
+    },
+    "shop_parts_count": {
+        "total_pieces": 24,
+        "by_material": {
+            "3\/4\" Plywood": 9,
+            "1\/2\" Plywood": 8,
+            "1\/4\" Plywood": 2,
+            "5\/4 Hardwood": 5
+        },
+        "details": {
+            "plywood_3_4": {
+                "count": 9,
+                "pieces": [
+                    {
+                        "part": "Left Side",
+                        "qty": 1,
+                        "size": "28-3\/4\" x 20-1\/4\""
+                    },
+                    {
+                        "part": "Right Side",
+                        "qty": 1,
+                        "size": "28-3\/4\" x 20-1\/4\""
+                    },
+                    {
+                        "part": "Bottom",
+                        "qty": 1,
+                        "size": "20-1\/4\" x 39-13\/16\""
+                    },
+                    {
+                        "part": "Back",
+                        "qty": 1,
+                        "size": "28-3\/4\" x 39-13\/16\""
+                    },
+                    {
+                        "part": "False Front #1 Face",
+                        "qty": 1,
+                        "size": "41-5\/16\" x 7\""
+                    },
+                    {
+                        "part": "False Front #1 Backing",
+                        "qty": 1,
+                        "size": "39-13\/16\" x 7\""
+                    },
+                    {
+                        "part": "Toe Kick Board",
+                        "qty": 1,
+                        "size": "39-13\/16\" x 4\""
+                    },
+                    {
+                        "part": "Left End Panel",
+                        "qty": 1,
+                        "size": "32-3\/4\" x 21-1\/2\""
+                    },
+                    {
+                        "part": "Right End Panel",
+                        "qty": 1,
+                        "size": "32-3\/4\" x 21-1\/2\""
+                    }
+                ]
+            },
+            "plywood_1_2": {
+                "count": 8,
+                "pieces": [
+                    {
+                        "part": "Drawer 1 Sides",
+                        "qty": 2,
+                        "size": "18-1\/4\" x 10\""
+                    },
+                    {
+                        "part": "Drawer 1 Front\/Back",
+                        "qty": 2,
+                        "size": "36-3\/16\" x 10\""
+                    },
+                    {
+                        "part": "Drawer 2 Sides",
+                        "qty": 2,
+                        "size": "18-1\/4\" x 10\""
+                    },
+                    {
+                        "part": "Drawer 2 Front\/Back",
+                        "qty": 2,
+                        "size": "36-3\/16\" x 10\""
+                    }
+                ]
+            },
+            "plywood_1_4": {
+                "count": 2,
+                "pieces": [
+                    {
+                        "part": "Drawer 1 Bottom",
+                        "qty": 1,
+                        "size": "17-1\/4\" x 36-7\/16\""
+                    },
+                    {
+                        "part": "Drawer 2 Bottom",
+                        "qty": 1,
+                        "size": "17-1\/4\" x 36-7\/16\""
+                    }
+                ]
+            },
+            "hardwood_5_4": {
+                "count": 5,
+                "pieces": [
+                    {
+                        "part": "Stiles",
+                        "qty": 2,
+                        "size": "28-3\/4\" x 1-3\/4\""
+                    },
+                    {
+                        "part": "Top Rail",
+                        "qty": 1,
+                        "size": "37-13\/16\" x 1-1\/2\""
+                    },
+                    {
+                        "part": "Bottom Rail",
+                        "qty": 1,
+                        "size": "37-13\/16\" x 1-1\/2\""
+                    },
+                    {
+                        "part": "Mid Rails",
+                        "qty": 1,
+                        "size": "37-13\/16\" x 1-1\/2\""
+                    }
+                ]
+            }
+        },
+        "shop_checklist": [
+            {
+                "material": "3\/4\" Plywood",
+                "total_count": 9,
+                "parts": [
+                    "1x Left Side (28-3\/4\" x 20-1\/4\")",
+                    "1x Right Side (28-3\/4\" x 20-1\/4\")",
+                    "1x Bottom (20-1\/4\" x 39-13\/16\")",
+                    "1x Back (28-3\/4\" x 39-13\/16\")",
+                    "1x False Front #1 Face (41-5\/16\" x 7\")",
+                    "1x False Front #1 Backing (39-13\/16\" x 7\")",
+                    "1x Toe Kick Board (39-13\/16\" x 4\")",
+                    "1x Left End Panel (32-3\/4\" x 21-1\/2\")",
+                    "1x Right End Panel (32-3\/4\" x 21-1\/2\")"
+                ]
+            },
+            {
+                "material": "1\/2\" Plywood",
+                "total_count": 8,
+                "parts": [
+                    "2x Drawer 1 Sides (18-1\/4\" x 10\")",
+                    "2x Drawer 1 Front\/Back (36-3\/16\" x 10\")",
+                    "2x Drawer 2 Sides (18-1\/4\" x 10\")",
+                    "2x Drawer 2 Front\/Back (36-3\/16\" x 10\")"
+                ]
+            },
+            {
+                "material": "1\/4\" Plywood",
+                "total_count": 2,
+                "parts": [
+                    "1x Drawer 1 Bottom (17-1\/4\" x 36-7\/16\")",
+                    "1x Drawer 2 Bottom (17-1\/4\" x 36-7\/16\")"
+                ]
+            },
+            {
+                "material": "5\/4 Hardwood",
+                "total_count": 5,
+                "parts": [
+                    "2x Stiles (28-3\/4\" x 1-3\/4\")",
+                    "1x Top Rail (37-13\/16\" x 1-1\/2\")",
+                    "1x Bottom Rail (37-13\/16\" x 1-1\/2\")",
+                    "1x Mid Rails (37-13\/16\" x 1-1\/2\")"
+                ]
+            }
+        ]
+    },
+    "positions_3d": {
+        "coordinate_system": {
+            "origin": "Front-Top-Left corner of cabinet",
+            "x_axis": "Left \u2192 Right (positive)",
+            "y_axis": "Top \u2192 Bottom (positive)",
+            "z_axis": "Front \u2192 Back (positive)",
+            "units": "inches"
+        },
+        "cabinet_envelope": {
+            "width": 41.3125,
+            "height": 32.75,
+            "depth": 21
+        },
+        "parts": {
+            "left_side": {
+                "part_name": "Left Side",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 0.75,
+                    "h": 28.75,
+                    "d": 21
+                },
+                "cut_dimensions": {
+                    "width": 21,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": [
+                        "shelf_pin_holes",
+                        "runner_mounting"
+                    ]
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "right_side": {
+                "part_name": "Right Side",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 40.5625,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 0.75,
+                    "h": 28.75,
+                    "d": 21
+                },
+                "cut_dimensions": {
+                    "width": 21,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "outside"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": [
+                        "shelf_pin_holes",
+                        "runner_mounting"
+                    ]
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "bottom": {
+                "part_name": "Bottom",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0.75,
+                    "y": 28,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 0.75,
+                    "d": 20.25
+                },
+                "cut_dimensions": {
+                    "width": 20.25,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "back": {
+                "part_name": "Back",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0.75,
+                    "y": 0,
+                    "z": 20.25
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 28.75,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 39.8125,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "back"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "toe_kick": {
+                "part_name": "Toe Kick",
+                "part_type": "cabinet_box",
+                "position": {
+                    "x": 0.75,
+                    "y": 28.75,
+                    "z": 3
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 4,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 39.8125,
+                    "length": 4,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "notes": "Recessed 3\" from front face"
+            },
+            "left_stile": {
+                "part_name": "Left Stile",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 0,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 1.75,
+                    "h": 28.75,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.75,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "right_stile": {
+                "part_name": "Right Stile",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 39.5625,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 1.75,
+                    "h": 28.75,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.75,
+                    "length": 28.75,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "vertical",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "top_rail": {
+                "part_name": "Top Rail",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 1.75,
+                    "y": 0,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 1.5,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "bottom_rail": {
+                "part_name": "Bottom Rail",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 1.75,
+                    "y": 27.25,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 1.5,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "false_front_1_face": {
+                "part_name": "False Front #1 Face",
+                "part_type": "false_front",
+                "position": {
+                    "x": 1.75,
+                    "y": 0.125,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 7,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 7,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "notes": "Full overlay - extends past stiles"
+            },
+            "false_front_1_backing": {
+                "part_name": "False Front #1 Backing",
+                "part_type": "false_front_backing",
+                "position": {
+                    "x": 0.75,
+                    "y": 0.125,
+                    "z": 0.75
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 7,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 7,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "notes": "Laid FLAT - doubles as stretcher (TCS rule)",
+                "is_stretcher": true
+            },
+            "mid_rail_ff_1": {
+                "part_name": "Mid Rail (after FF#1)",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 1.75,
+                    "y": 7.8125,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 1.5,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "drawer_1_face": {
+                "part_name": "U-Shaped Drawer #1 Face",
+                "part_type": "drawer_face",
+                "position": {
+                    "x": 1.75,
+                    "y": 7.25,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 11.1875,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 11.1875,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": [
+                        "u_cutout"
+                    ]
+                },
+                "material": "3\/4\" Plywood",
+                "drawer_type": "u_drawer"
+            },
+            "drawer_1_box": {
+                "part_name": "U-Shaped Drawer #1 Box",
+                "part_type": "drawer_box",
+                "position": {
+                    "x": 1.0625,
+                    "y": 7.875,
+                    "z": 0.125
+                },
+                "dimensions": {
+                    "w": 37.1875,
+                    "h": 10,
+                    "d": 18.25
+                },
+                "box_parts": {
+                    "sides": {
+                        "qty": 2,
+                        "width": 10,
+                        "length": 18.25,
+                        "thickness": 0.5
+                    },
+                    "front_back": {
+                        "qty": 2,
+                        "width": 10,
+                        "length": 36.1875,
+                        "thickness": 0.5
+                    },
+                    "bottom": {
+                        "qty": 1,
+                        "width": 37.0625,
+                        "length": 17.75,
+                        "thickness": 0.25
+                    }
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "none",
+                    "face_up": "n\/a"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "top"
+                    ],
+                    "machining": [
+                        "dado_1_4",
+                        "locking_device_holes",
+                        "rear_hook_holes"
+                    ]
+                },
+                "material": "1\/2\" Plywood (sides), 1\/4\" (bottom)"
+            },
+            "mid_rail_drawer_1": {
+                "part_name": "Mid Rail (after Drawer #1)",
+                "part_type": "face_frame",
+                "position": {
+                    "x": 1.75,
+                    "y": 17.6875,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 1.5,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 1.5,
+                    "length": 37.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "front",
+                        "back"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Hardwood"
+            },
+            "drawer_2_face": {
+                "part_name": "Drawer #2 Face",
+                "part_type": "drawer_face",
+                "position": {
+                    "x": 1.75,
+                    "y": 18.5625,
+                    "z": 0
+                },
+                "dimensions": {
+                    "w": 37.8125,
+                    "h": 11.1875,
+                    "d": 0.75
+                },
+                "cut_dimensions": {
+                    "width": 11.1875,
+                    "length": 41.3125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "horizontal",
+                    "face_up": "front"
+                },
+                "cnc": {
+                    "finished_ends": "both",
+                    "edgebanding": [
+                        "top",
+                        "bottom"
+                    ],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood",
+                "drawer_type": "drawer"
+            },
+            "drawer_2_box": {
+                "part_name": "Drawer #2 Box",
+                "part_type": "drawer_box",
+                "position": {
+                    "x": 1.0625,
+                    "y": 19.1875,
+                    "z": 0.125
+                },
+                "dimensions": {
+                    "w": 37.1875,
+                    "h": 10,
+                    "d": 18.25
+                },
+                "box_parts": {
+                    "sides": {
+                        "qty": 2,
+                        "width": 10,
+                        "length": 18.25,
+                        "thickness": 0.5
+                    },
+                    "front_back": {
+                        "qty": 2,
+                        "width": 10,
+                        "length": 36.1875,
+                        "thickness": 0.5
+                    },
+                    "bottom": {
+                        "qty": 1,
+                        "width": 37.0625,
+                        "length": 17.75,
+                        "thickness": 0.25
+                    }
+                },
+                "orientation": {
+                    "rotation": 0,
+                    "grain_direction": "none",
+                    "face_up": "n\/a"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [
+                        "top"
+                    ],
+                    "machining": [
+                        "dado_1_4",
+                        "locking_device_holes",
+                        "rear_hook_holes"
+                    ]
+                },
+                "material": "1\/2\" Plywood (sides), 1\/4\" (bottom)"
+            },
+            "front_stretcher": {
+                "part_name": "Front Stretcher",
+                "part_type": "stretcher",
+                "position": {
+                    "x": 0.75,
+                    "y": 0,
+                    "z": 0.75
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 0.75,
+                    "d": 3
+                },
+                "cut_dimensions": {
+                    "width": 3,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            },
+            "back_stretcher": {
+                "part_name": "Back Stretcher",
+                "part_type": "stretcher",
+                "position": {
+                    "x": 0.75,
+                    "y": 0,
+                    "z": 17.25
+                },
+                "dimensions": {
+                    "w": 39.8125,
+                    "h": 0.75,
+                    "d": 3
+                },
+                "cut_dimensions": {
+                    "width": 3,
+                    "length": 39.8125,
+                    "thickness": 0.75
+                },
+                "orientation": {
+                    "rotation": 90,
+                    "grain_direction": "horizontal",
+                    "face_up": "top"
+                },
+                "cnc": {
+                    "finished_ends": "none",
+                    "edgebanding": [],
+                    "machining": []
+                },
+                "material": "3\/4\" Plywood"
+            }
+        },
+        "part_count": 19
+    },
+    "summary": {
+        "status": "PASS",
+        "issues": [],
+        "warnings": [],
+        "component_fit": "FITS",
+        "remaining_space": 3
+    }
+}

@@ -901,6 +901,349 @@ PROMPT;
     }
 
     /**
+     * Process CAD elevation image specifically for face frame analysis
+     */
+    public function analyzeFaceFrame(
+        string $imageBase64,
+        string $mimeType,
+        string $sessionId
+    ): array {
+        if (empty($this->geminiKey)) {
+            return $this->errorResponse('Gemini API key not configured');
+        }
+
+        $systemPrompt = $this->buildFaceFrameAnalysisPrompt();
+        $history = [['role' => 'user', 'content' => 'Analyze this CAD elevation for face frame configuration.']];
+
+        try {
+            $response = $this->callGeminiApiForFaceFrame($systemPrompt, $history, [
+                'mimeType' => $mimeType,
+                'data' => $imageBase64,
+            ]);
+
+            if (isset($response['error'])) {
+                return $response;
+            }
+
+            // Parse JSON from response
+            $result = $this->parseFaceFrameResponse($response);
+
+            return $result;
+
+        } catch (\Exception $e) {
+            Log::error('GeminiCabinetAssistant face frame analysis error: ' . $e->getMessage());
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Build prompt specifically for face frame analysis from CAD elevation
+     */
+    protected function buildFaceFrameAnalysisPrompt(): string
+    {
+        return <<<'PROMPT'
+You are a cabinet construction expert analyzing a CAD front elevation drawing.
+Analyze this image and extract the FACE FRAME configuration.
+
+## What to Look For
+
+### 1. FACE FRAME PRESENCE
+Look for vertical and horizontal frame members visible around the cabinet opening:
+- **STILES**: Vertical members on left and right edges of the cabinet face
+- **TOP RAIL**: Horizontal member at the top of the face frame
+- **BOTTOM RAIL**: Horizontal member at the bottom (MAY BE ABSENT for sink cabinets)
+- **INTERMEDIATE RAILS**: Horizontal dividers between drawer/door openings
+
+### 2. CABINET TYPE INDICATORS
+Determine the cabinet type by looking for:
+- **SINK BASE**: Plumbing cutout, U-shaped drawer around sink, NO bottom rail
+- **VANITY SINK**: Similar to sink base, bathroom context
+- **NORMAL BASE**: Has bottom rail, standard drawer/door configuration
+- **DRAWER BASE**: Multiple drawer openings stacked vertically
+
+### 3. OPENING CONFIGURATION
+Count and identify:
+- Number of drawer openings (horizontal openings with drawer pulls)
+- Number of door openings (larger rectangular areas, may have hinges indicated)
+- False fronts (drawer-like fronts that don't open, often at top of sink bases)
+- U-shaped openings (indicates sink cutout behind)
+
+### 4. DIMENSIONS TO EXTRACT (if visible)
+- Overall cabinet width
+- Overall cabinet height
+- Individual drawer/door heights
+- Face frame stile width (typically 1.5" - 1.75")
+- Face frame rail width (typically 1.5")
+
+## TCS Woodwork Rules
+
+1. **SINK BASE RULE**: If you see a U-shaped drawer or plumbing cutout:
+   - `has_bottom_rail` = false
+   - `cabinet_type` = "sink_base" or "vanity_sink"
+
+2. **BOTTOM RAIL**: Only true if you clearly see a horizontal frame member at the BOTTOM (above toe kick).
+
+3. **INTERMEDIATE RAILS**: Count horizontal rails BETWEEN openings (not top/bottom rails).
+   - 2 openings = 1 intermediate rail
+   - 3 openings = 2 intermediate rails
+
+## Response Format
+
+Respond ONLY with valid JSON (no markdown, no explanation before/after):
+
+{
+  "has_face_frame": true,
+  "cabinet_type": "vanity_sink",
+  "face_frame_config": {
+    "has_left_stile": true,
+    "has_right_stile": true,
+    "has_top_rail": true,
+    "has_bottom_rail": false,
+    "intermediate_rail_count": 1,
+    "center_stile_count": 0,
+    "stile_width_inches": 1.75,
+    "rail_width_inches": 1.5
+  },
+  "openings": [
+    {
+      "type": "u_shaped_drawer",
+      "position": "top",
+      "height_inches": null,
+      "width_inches": 37.8125,
+      "notes": "U-shaped drawer around sink"
+    },
+    {
+      "type": "drawer",
+      "position": "bottom",
+      "height_inches": null,
+      "width_inches": 37.8125,
+      "notes": "Standard drawer"
+    }
+  ],
+  "dimensions": {
+    "overall_width_inches": 41.3125,
+    "overall_height_inches": 32.75,
+    "toe_kick_height_inches": 4.0
+  },
+  "reasoning": "Brief explanation of why you determined this configuration"
+}
+PROMPT;
+    }
+
+    /**
+     * Call Gemini API for face frame analysis (simpler, no function calling)
+     */
+    protected function callGeminiApiForFaceFrame(string $systemPrompt, array $history, ?array $image): array
+    {
+        $contents = [];
+
+        foreach ($history as $msg) {
+            $parts = [['text' => $msg['content']]];
+            $contents[] = [
+                'role' => $msg['role'] === 'assistant' ? 'model' : 'user',
+                'parts' => $parts,
+            ];
+        }
+
+        // Add image to the last user message
+        if ($image && !empty($contents)) {
+            $lastIdx = count($contents) - 1;
+            if ($contents[$lastIdx]['role'] === 'user') {
+                $contents[$lastIdx]['parts'][] = [
+                    'inlineData' => $image,
+                ];
+            }
+        }
+
+        $payload = [
+            'systemInstruction' => [
+                'parts' => [['text' => $systemPrompt]],
+            ],
+            'contents' => $contents,
+            'generationConfig' => [
+                'temperature' => 0.2, // Lower for more deterministic JSON output
+                'topP' => 0.8,
+                'maxOutputTokens' => 2048,
+            ],
+        ];
+
+        try {
+            $response = Http::timeout(60)->withHeaders([
+                'Content-Type' => 'application/json',
+            ])->post(
+                "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->geminiKey}",
+                $payload
+            );
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $candidate = $data['candidates'][0] ?? null;
+                if (!$candidate) {
+                    return $this->errorResponse('No response generated');
+                }
+
+                $content = $candidate['content'] ?? [];
+                $parts = $content['parts'] ?? [];
+                $textResponse = '';
+                foreach ($parts as $part) {
+                    if (isset($part['text'])) {
+                        $textResponse .= $part['text'];
+                    }
+                }
+
+                return ['text' => $textResponse];
+            }
+
+            return $this->errorResponse('API error: ' . ($response->json('error.message') ?? 'Unknown error'));
+
+        } catch (\Exception $e) {
+            throw $e;
+        }
+    }
+
+    /**
+     * Parse face frame analysis JSON response
+     */
+    protected function parseFaceFrameResponse(array $response): array
+    {
+        $text = $response['text'] ?? '';
+
+        // Try to extract JSON from the response
+        // Remove any markdown code blocks if present
+        $text = preg_replace('/```json\s*/i', '', $text);
+        $text = preg_replace('/```\s*/i', '', $text);
+        $text = trim($text);
+
+        $decoded = json_decode($text, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return [
+                'success' => false,
+                'error' => 'Failed to parse JSON response: ' . json_last_error_msg(),
+                'raw_response' => $text,
+            ];
+        }
+
+        // Validate against TCS rules
+        $validation = $this->validateFaceFrameAnalysis($decoded);
+
+        return [
+            'success' => true,
+            'analysis' => $decoded,
+            'validation' => $validation,
+        ];
+    }
+
+    /**
+     * Validate face frame analysis against TCS construction rules
+     */
+    protected function validateFaceFrameAnalysis(array $analysis): array
+    {
+        $violations = [];
+        $warnings = [];
+
+        $cabinetType = $analysis['cabinet_type'] ?? '';
+        $hasBottomRail = $analysis['face_frame_config']['has_bottom_rail'] ?? true;
+
+        $sinkTypes = ['sink_base', 'vanity_sink', 'kitchen_sink', 'base_sink'];
+
+        // Rule 1: Sink cabinets should NOT have bottom rail
+        if (in_array($cabinetType, $sinkTypes) && $hasBottomRail) {
+            $violations[] = [
+                'rule' => 'SINK_NO_BOTTOM_RAIL',
+                'message' => "Sink cabinet type '{$cabinetType}' should NOT have a bottom rail",
+                'suggestion' => 'Set has_bottom_rail to false for sink cabinets',
+            ];
+        }
+
+        // Rule 2: Non-sink cabinets typically have bottom rail
+        if (!in_array($cabinetType, $sinkTypes) && !$hasBottomRail) {
+            $warnings[] = [
+                'rule' => 'BASE_HAS_BOTTOM_RAIL',
+                'message' => "Non-sink cabinet type '{$cabinetType}' typically has a bottom rail",
+                'suggestion' => 'Verify this is not a sink cabinet',
+            ];
+        }
+
+        // Rule 3: U-shaped drawer = sink cabinet
+        $openings = $analysis['openings'] ?? [];
+        $hasUShapedDrawer = false;
+        foreach ($openings as $opening) {
+            if (($opening['type'] ?? '') === 'u_shaped_drawer') {
+                $hasUShapedDrawer = true;
+                break;
+            }
+        }
+
+        if ($hasUShapedDrawer && !in_array($cabinetType, $sinkTypes)) {
+            $violations[] = [
+                'rule' => 'U_SHAPED_IS_SINK',
+                'message' => 'U-shaped drawer detected but cabinet not marked as sink type',
+                'suggestion' => "Change cabinet_type to 'sink_base' or 'vanity_sink'",
+            ];
+        }
+
+        // Rule 4: Stile width should be 1.25" - 2.5"
+        $stileWidth = $analysis['face_frame_config']['stile_width_inches'] ?? null;
+        if ($stileWidth !== null && ($stileWidth < 1.25 || $stileWidth > 2.5)) {
+            $warnings[] = [
+                'rule' => 'STILE_WIDTH_RANGE',
+                'message' => "Stile width {$stileWidth}\" is outside typical range (1.25\" - 2.5\")",
+                'suggestion' => 'TCS standard is 1.5" or 1.75" stiles',
+            ];
+        }
+
+        // Rule 5: Intermediate rails = openings - 1
+        $intermediateRails = $analysis['face_frame_config']['intermediate_rail_count'] ?? 0;
+        $expectedRails = max(0, count($openings) - 1);
+
+        if ($intermediateRails !== $expectedRails) {
+            $warnings[] = [
+                'rule' => 'INTERMEDIATE_RAIL_COUNT',
+                'message' => "Intermediate rail count ({$intermediateRails}) doesn't match expected ({$expectedRails}) for " . count($openings) . " openings",
+                'suggestion' => 'Intermediate rails = opening count - 1',
+            ];
+        }
+
+        return [
+            'valid' => empty($violations),
+            'violations' => $violations,
+            'warnings' => $warnings,
+        ];
+    }
+
+    /**
+     * Convert face frame analysis to configurator input format
+     */
+    public static function faceFrameAnalysisToConfig(array $analysis): array
+    {
+        $config = $analysis['face_frame_config'] ?? [];
+        $dimensions = $analysis['dimensions'] ?? [];
+
+        return [
+            'has_face_frame' => $analysis['has_face_frame'] ?? true,
+            'cabinet_type' => $analysis['cabinet_type'] ?? 'base',
+            'stile_width' => $config['stile_width_inches'] ?? 1.5,
+            'rail_width' => $config['rail_width_inches'] ?? 1.5,
+            'has_bottom_rail' => $config['has_bottom_rail'] ?? true,
+            'has_top_rail' => $config['has_top_rail'] ?? true,
+            'intermediate_rail_count' => $config['intermediate_rail_count'] ?? 0,
+            'center_stile_count' => $config['center_stile_count'] ?? 0,
+            'openings' => array_map(function ($opening) {
+                return [
+                    'type' => $opening['type'] ?? 'drawer',
+                    'position' => $opening['position'] ?? 'middle',
+                    'height_inches' => $opening['height_inches'],
+                    'width_inches' => $opening['width_inches'],
+                ];
+            }, $analysis['openings'] ?? []),
+            'cabinet_width_inches' => $dimensions['overall_width_inches'],
+            'cabinet_height_inches' => $dimensions['overall_height_inches'],
+            'toe_kick_height_inches' => $dimensions['toe_kick_height_inches'] ?? 4.0,
+        ];
+    }
+
+    /**
      * Summarize current spec data for context
      */
     protected function summarizeSpecData(array $specData): string

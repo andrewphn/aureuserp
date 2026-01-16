@@ -16,10 +16,26 @@ use Illuminate\Support\Collection;
  * - Template system for common cabinet configurations
  * - TCS construction standards (Bryan Patton, Jan 2025)
  *
+ * Construction standards are now configurable via ConstructionTemplate.
+ * The ConstructionStandardsService resolves the effective template with inheritance:
+ * Cabinet -> Room -> Project -> Global Default -> Fallback
+ *
  * @see docs/OPENING_CONFIGURATOR_SYSTEM.md
  */
 class CabinetConfiguratorService
 {
+    /**
+     * Construction standards service for template resolution.
+     */
+    protected ?ConstructionStandardsService $standards = null;
+
+    /**
+     * Create a new CabinetConfiguratorService instance.
+     */
+    public function __construct(?ConstructionStandardsService $standards = null)
+    {
+        $this->standards = $standards ?? app(ConstructionStandardsService::class);
+    }
     // ===== TCS CONSTRUCTION STANDARDS (Bryan Patton, Jan 2025) =====
 
     /**
@@ -212,10 +228,11 @@ class CabinetConfiguratorService
         $cabinetWidth = $cabinet->length_inches ?? 36;
         $cabinetHeight = $cabinet->height_inches ?? 30;
 
-        $stileWidth = $cabinet->face_frame_stile_width_inches ?? self::DEFAULT_STILE_WIDTH_INCHES;
-        $railWidth = $cabinet->face_frame_rail_width_inches ?? self::DEFAULT_RAIL_WIDTH_INCHES;
+        // Get face frame dimensions from template (with cabinet override)
+        $stileWidth = $cabinet->face_frame_stile_width_inches ?? $this->standards->getFaceFrameStileWidth($cabinet);
+        $railWidth = $cabinet->face_frame_rail_width_inches ?? $this->standards->getFaceFrameRailWidth($cabinet);
         $midStileCount = $cabinet->face_frame_mid_stile_count ?? 0;
-        $doorGap = $cabinet->face_frame_door_gap_inches ?? self::TCS_DOOR_GAP;
+        $doorGap = $cabinet->face_frame_door_gap_inches ?? $this->standards->getFaceFrameDoorGap($cabinet);
 
         // Calculate total frame consumption
         $totalStilesWidth = (2 + $midStileCount) * $stileWidth;
@@ -268,32 +285,32 @@ class CabinetConfiguratorService
         $cabinetDepth = $cabinet->depth_inches ?? 24;
         $cabinetWidth = $cabinet->length_inches ?? 36;
 
-        // Get toe kick dimensions
-        $toeKickHeight = $cabinet->toe_kick_height ?? self::TCS_TOE_KICK_HEIGHT;
-        $toeKickRecess = $cabinet->toe_kick_depth ?? self::TCS_TOE_KICK_RECESS;
+        // Get toe kick dimensions from template (with cabinet override)
+        $toeKickHeight = $cabinet->toe_kick_height ?? $this->standards->getToeKickHeight($cabinet);
+        $toeKickRecess = $cabinet->toe_kick_depth ?? $this->standards->getToeKickRecess($cabinet);
 
-        // Get stretcher height (only for cabinets with stretchers)
+        // Get stretcher height (only for cabinets with stretchers) from template
         $topConstructionType = $cabinet->top_construction_type ?? self::TOP_STRETCHERS;
         $stretcherHeight = 0;
         if ($topConstructionType === self::TOP_STRETCHERS) {
-            $stretcherHeight = $cabinet->stretcher_height_inches ?? self::TCS_STRETCHER_HEIGHT;
+            $stretcherHeight = $cabinet->stretcher_height_inches ?? $this->standards->getStretcherDepth($cabinet);
         }
 
         // Calculate interior height
         $interiorHeight = $cabinetHeight - $toeKickHeight - $stretcherHeight;
 
-        // Interior width (minus side panels, typically 3/4" each)
-        $sideThickness = self::TCS_BOX_THICKNESS;
+        // Interior width (minus side panels) - thickness from template
+        $sideThickness = $this->standards->getSidePanelThickness($cabinet);
         $interiorWidth = $cabinetWidth - (2 * $sideThickness);
 
-        // Interior depth (full depth minus back thickness)
-        $backThickness = self::TCS_BACK_THICKNESS;
+        // Interior depth (full depth minus back thickness) - thickness from template
+        $backThickness = $this->standards->getBackPanelThickness($cabinet);
         $interiorDepth = $cabinetDepth - $backThickness;
 
-        // Check for sink cabinet side extension
+        // Check for sink cabinet side extension - from template
         $sinkSideExtension = 0;
         if ($cabinet->sink_requires_extended_sides) {
-            $sinkSideExtension = $cabinet->sink_side_extension_inches ?? self::TCS_SINK_SIDE_EXTENSION;
+            $sinkSideExtension = $cabinet->sink_side_extension_inches ?? $this->standards->getSinkSideExtension($cabinet);
         }
 
         return [

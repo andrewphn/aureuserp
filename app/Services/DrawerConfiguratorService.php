@@ -164,6 +164,75 @@ class DrawerConfiguratorService
         9  => 10.46875,   // 10-15/32" (266mm)
     ];
 
+    // ========================================
+    // BLUM TANDEM 563H MOUNTING SPECIFICATIONS
+    // From Blum Installation Instructions INST-TDM563H-563.
+    // ========================================
+
+    /**
+     * Runner mounting position from bottom of cabinet opening.
+     * Blum spec: 37mm (1-15/32")
+     */
+    public const RUNNER_MOUNTING_HEIGHT_MM = 37;
+    public const RUNNER_MOUNTING_HEIGHT_INCHES = 1.46875; // 1-15/32"
+
+    /**
+     * Runner setback from cabinet face (frameless).
+     * Blum spec: 3mm (1/8")
+     */
+    public const RUNNER_SETBACK_MM = 3;
+    public const RUNNER_SETBACK_INCHES = 0.125; // 1/8"
+
+    /**
+     * Front mounting hole positions (from front of cabinet).
+     * Blum spec: 7mm (9/32") and 32mm (1-1/4")
+     */
+    public const FRONT_HOLE_1_MM = 7;
+    public const FRONT_HOLE_1_INCHES = 0.28125; // 9/32"
+    public const FRONT_HOLE_2_MM = 32;
+    public const FRONT_HOLE_2_INCHES = 1.25; // 1-1/4"
+
+    /**
+     * Typical hole spacing along runner (from front).
+     * Blum spec: 9mm (11/32") typical spacing
+     */
+    public const HOLE_SPACING_TYPICAL_MM = 9;
+    public const HOLE_SPACING_TYPICAL_INCHES = 0.34375; // 11/32"
+
+    /**
+     * Locking device bore specifications.
+     * For pre-boring holes in drawer box sides.
+     */
+    public const LOCKING_DEVICE_BORE_DIAMETER_MM = 6;
+    public const LOCKING_DEVICE_BORE_DIAMETER_INCHES = 0.25; // 1/4" (use 6mm bit)
+    public const LOCKING_DEVICE_BORE_DEPTH_MM = 10;
+    public const LOCKING_DEVICE_BORE_DEPTH_INCHES = 0.40625; // 13/32"
+
+    /**
+     * Rear hook bore specifications.
+     * For pre-boring holes in drawer box back.
+     */
+    public const REAR_HOOK_BORE_DIAMETER_MM = 6;
+    public const REAR_HOOK_BORE_DIAMETER_INCHES = 0.25; // 1/4" (use 6mm bit)
+    public const REAR_HOOK_POSITION_FROM_BOTTOM_MM = 7;
+    public const REAR_HOOK_POSITION_FROM_BOTTOM_INCHES = 0.28125; // 9/32"
+    public const REAR_HOOK_POSITION_FROM_SIDE_MM = 11;
+    public const REAR_HOOK_POSITION_FROM_SIDE_INCHES = 0.4375; // 7/16"
+
+    /**
+     * Minimum rear notch for drawer back.
+     * Blum spec: 35mm (1-3/8") minimum
+     */
+    public const REAR_NOTCH_MIN_MM = 35;
+    public const REAR_NOTCH_MIN_INCHES = 1.375; // 1-3/8"
+
+    /**
+     * Screw specifications for mounting.
+     * Blum part: 606N or 606P (#6 x 5/8" wood screw)
+     */
+    public const MOUNTING_SCREW_SIZE = '#6 x 5/8"';
+    public const MOUNTING_SCREW_BLUM_PART = '606N or 606P';
+
     /**
      * Calculate drawer box dimensions from cabinet opening dimensions.
      * 
