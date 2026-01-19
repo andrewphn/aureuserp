@@ -63,3 +63,6 @@ public/images/*.mp3
 .playwright-mcp/*.png
 .playwright-mcp/
 tests/Browser/auth-state.json
+
+# MCP configuration (contains API tokens)
+.mcp.json
