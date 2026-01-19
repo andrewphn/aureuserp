@@ -65,6 +65,15 @@ export class TcsErpApiClient {
     async deleteProject(id) {
         return this.request('DELETE', `/projects/${id}`);
     }
+    async getProjectTree(id) {
+        return this.request('GET', `/projects/${id}/tree`);
+    }
+    async changeProjectStage(id, stage) {
+        return this.request('POST', `/projects/${id}/change-stage`, { stage });
+    }
+    async calculateProject(id) {
+        return this.request('GET', `/projects/${id}/calculate`);
+    }
     // =========================================================================
     // Rooms
     // =========================================================================

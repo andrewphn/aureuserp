@@ -56,8 +56,13 @@ class RoomController extends BaseResourceController
 
     protected function validateStore(): array
     {
+        // If nested under project route, project_id comes from URL
+        $projectIdRule = request()->route('project')
+            ? 'nullable|integer|exists:projects_projects,id'
+            : 'required|integer|exists:projects_projects,id';
+
         return [
-            'project_id' => 'required|integer|exists:projects_projects,id',
+            'project_id' => $projectIdRule,
             'name' => 'required|string|max:255',
             'room_code' => 'nullable|string|max:50',
             'room_type' => 'nullable|string|max:50',

@@ -37,7 +37,7 @@ import {
 
 // Tool name prefixes for routing
 const TOOL_PREFIXES = {
-  projects: ['list_projects', 'get_project', 'create_project', 'update_project', 'delete_project', 'get_project_tree'],
+  projects: ['list_projects', 'get_project', 'create_project', 'update_project', 'delete_project', 'get_project_tree', 'change_project_stage', 'calculate_project'],
   rooms: ['list_rooms', 'get_room', 'create_room', 'update_room', 'delete_room'],
   locations: ['list_locations', 'get_location', 'create_location', 'update_location', 'delete_location'],
   cabinetRuns: ['list_cabinet_runs', 'get_cabinet_run', 'create_cabinet_run', 'update_cabinet_run', 'delete_cabinet_run'],

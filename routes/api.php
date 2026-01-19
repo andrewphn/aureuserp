@@ -40,6 +40,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 |   - Search: ?search=kitchen
 |
 */
+// API Info (no auth required)
+Route::get('v1', [V1\ApiInfoController::class, 'index'])->name('api.v1.info');
+
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.')->group(function () {
 
     // ========================================
@@ -48,6 +51,11 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
 
     // Projects (top-level)
     Route::apiResource('projects', V1\ProjectController::class);
+
+    // Project special operations
+    Route::get('projects/{id}/tree', [V1\ProjectController::class, 'tree'])->name('projects.tree');
+    Route::post('projects/{id}/change-stage', [V1\ProjectController::class, 'changeStage'])->name('projects.change-stage');
+    Route::get('projects/{id}/calculate', [V1\ProjectController::class, 'calculate'])->name('projects.calculate');
 
     // Nested: Projects → Rooms
     Route::apiResource('projects.rooms', V1\RoomController::class)->shallow();

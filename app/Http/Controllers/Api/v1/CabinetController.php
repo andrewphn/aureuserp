@@ -69,8 +69,13 @@ class CabinetController extends BaseResourceController
 
     protected function validateStore(): array
     {
+        // If nested under cabinet_run route, cabinet_run_id comes from URL
+        $cabinetRunIdRule = request()->route('cabinet_run')
+            ? 'nullable|integer|exists:projects_cabinet_runs,id'
+            : 'required|integer|exists:projects_cabinet_runs,id';
+
         return [
-            'cabinet_run_id' => 'required|integer|exists:projects_cabinet_runs,id',
+            'cabinet_run_id' => $cabinetRunIdRule,
             'project_id' => 'nullable|integer|exists:projects_projects,id',
             'room_id' => 'nullable|integer|exists:projects_rooms,id',
             'cabinet_number' => 'nullable|string|max:50',

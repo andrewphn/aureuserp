@@ -52,8 +52,13 @@ class RoomLocationController extends BaseResourceController
 
     protected function validateStore(): array
     {
+        // If nested under room route, room_id comes from URL
+        $roomIdRule = request()->route('room')
+            ? 'nullable|integer|exists:projects_rooms,id'
+            : 'required|integer|exists:projects_rooms,id';
+
         return [
-            'room_id' => 'required|integer|exists:projects_rooms,id',
+            'room_id' => $roomIdRule,
             'name' => 'required|string|max:255',
             'location_code' => 'nullable|string|max:50',
             'notes' => 'nullable|string',

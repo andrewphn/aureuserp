@@ -90,6 +90,18 @@ export class TcsErpApiClient {
     return this.request('DELETE', `/projects/${id}`);
   }
 
+  async getProjectTree(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/projects/${id}/tree`);
+  }
+
+  async changeProjectStage(id: number, stage: string): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/projects/${id}/change-stage`, { stage });
+  }
+
+  async calculateProject(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/projects/${id}/calculate`);
+  }
+
   // =========================================================================
   // Rooms
   // =========================================================================

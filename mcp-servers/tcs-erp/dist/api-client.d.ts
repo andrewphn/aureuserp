@@ -18,6 +18,9 @@ export declare class TcsErpApiClient {
     createProject(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
     updateProject(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
     deleteProject(id: number): Promise<ApiResponse<unknown>>;
+    getProjectTree(id: number): Promise<ApiResponse<unknown>>;
+    changeProjectStage(id: number, stage: string): Promise<ApiResponse<unknown>>;
+    calculateProject(id: number): Promise<ApiResponse<unknown>>;
     listRooms(projectId?: number): Promise<PaginatedResponse<unknown>>;
     getRoom(id: number): Promise<ApiResponse<unknown>>;
     createRoom(projectId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;

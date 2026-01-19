@@ -53,8 +53,13 @@ class CabinetRunController extends BaseResourceController
 
     protected function validateStore(): array
     {
+        // If nested under location route, room_location_id comes from URL
+        $locationIdRule = request()->route('location')
+            ? 'nullable|integer|exists:projects_room_locations,id'
+            : 'required|integer|exists:projects_room_locations,id';
+
         return [
-            'room_location_id' => 'required|integer|exists:projects_room_locations,id',
+            'room_location_id' => $locationIdRule,
             'name' => 'nullable|string|max:255',
             'run_code' => 'nullable|string|max:50',
             'notes' => 'nullable|string',
