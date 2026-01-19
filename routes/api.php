@@ -186,8 +186,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     // Products Module
     // ========================================
     Route::apiResource('products', V1\ProductController::class);
-    Route::apiResource('product-categories', V1\ProductCategoryController::class);
+    // Tree endpoint must come before apiResource to avoid {id} conflict
     Route::get('product-categories/tree', [V1\ProductCategoryController::class, 'tree'])->name('product-categories.tree');
+    Route::apiResource('product-categories', V1\ProductCategoryController::class);
 
     // ========================================
     // Inventory Module

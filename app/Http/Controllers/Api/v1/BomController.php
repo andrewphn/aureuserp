@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Webkul\Project\Models\Bom;
+use Webkul\Project\Models\CabinetMaterialsBom as Bom;
 
 /**
  * Bill of Materials (BOM) Controller for V1 API

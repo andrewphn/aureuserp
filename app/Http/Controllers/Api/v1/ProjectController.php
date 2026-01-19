@@ -660,8 +660,8 @@ class ProjectController extends BaseResourceController
             // Clone addresses if requested
             if ($validated['include_addresses'] ?? true) {
                 foreach ($project->addresses as $address) {
-                    $newAddress = $address->replicate();
-                    $newAddress->addressable_id = $newProject->id;
+                    $newAddress = $address->replicate(['created_at', 'updated_at']);
+                    $newAddress->project_id = $newProject->id;
                     $newAddress->save();
                 }
             }
