@@ -153,6 +153,56 @@ export const projectTools: Tool[] = [
       required: ['id'],
     },
   },
+  // Project Workflow Actions
+  {
+    name: 'clone_project',
+    description: 'Clone/duplicate a project including all rooms, locations, cabinet runs, and cabinets.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Project ID to clone' },
+        new_name: { type: 'string', description: 'Name for the cloned project' },
+        include_tasks: { type: 'boolean', description: 'Include tasks in clone (default false)' },
+        include_bom: { type: 'boolean', description: 'Include BOM in clone (default false)' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'get_project_gate_status',
+    description: 'Get project gate/milestone status showing completion of requirements for each phase.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Project ID' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'get_project_bom',
+    description: 'Get the bill of materials for a project with all materials, hardware, and components needed.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Project ID' },
+      },
+      required: ['id'],
+    },
+  },
+  {
+    name: 'generate_project_order',
+    description: 'Generate a sales order from a project based on its specifications and pricing.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: { type: 'number', description: 'Project ID' },
+        include_optional_items: { type: 'boolean', description: 'Include optional line items' },
+        pricing_method: { type: 'string', description: 'Pricing method (linear_foot, per_cabinet, itemized)' },
+      },
+      required: ['id'],
+    },
+  },
 ];
 
 export async function handleProjectTool(
@@ -179,6 +229,14 @@ export async function handleProjectTool(
       return client.changeProjectStage(args.id as number, args.stage as string);
     case 'calculate_project':
       return client.calculateProject(args.id as number);
+    case 'clone_project':
+      return client.cloneProject(args.id as number, args);
+    case 'get_project_gate_status':
+      return client.getProjectGateStatus(args.id as number);
+    case 'get_project_bom':
+      return client.getProjectBom(args.id as number);
+    case 'generate_project_order':
+      return client.generateProjectOrder(args.id as number, args);
     default:
       throw new Error(`Unknown project tool: ${toolName}`);
   }

@@ -2,9 +2,9 @@
  * Tool Registry - All MCP tools for TCS ERP
  *
  * Exports tool definitions for the MCP server.
- * Total: 88 tools across all categories.
+ * Total: 150+ tools across all categories.
  */
-// Import tool handlers
+// Import tool handlers - Original
 export { projectTools, handleProjectTool } from './projects.js';
 export { roomTools, handleRoomTool } from './rooms.js';
 export { locationTools, handleLocationTool } from './locations.js';
@@ -21,6 +21,17 @@ export { rhinoTools, handleRhinoTool } from './rhino.js';
 export { reviewTools, handleReviewTool } from './reviews.js';
 export { webhookTools, handleWebhookTool } from './webhooks.js';
 export { batchTools, handleBatchTool } from './batch.js';
+// Import tool handlers - New modules
+export { salesOrderTools, handleSalesOrderTool } from './sales-orders.js';
+export { purchaseOrderTools, handlePurchaseOrderTool } from './purchase-orders.js';
+export { invoiceTools, handleInvoiceTool } from './invoices.js';
+export { paymentTools, handlePaymentTool } from './payments.js';
+export { calculatorTools, handleCalculatorTool } from './calculators.js';
+export { bomTools, handleBomTool } from './bom.js';
+export { stockTools, handleStockTool } from './stock.js';
+export { productCategoryTools, handleProductCategoryTool } from './product-categories.js';
+export { changeOrderTools, handleChangeOrderTool } from './change-orders.js';
+// Import for allTools array - Original
 import { projectTools } from './projects.js';
 import { roomTools } from './rooms.js';
 import { locationTools } from './locations.js';
@@ -37,6 +48,16 @@ import { rhinoTools } from './rhino.js';
 import { reviewTools } from './reviews.js';
 import { webhookTools } from './webhooks.js';
 import { batchTools } from './batch.js';
+// Import for allTools array - New modules
+import { salesOrderTools } from './sales-orders.js';
+import { purchaseOrderTools } from './purchase-orders.js';
+import { invoiceTools } from './invoices.js';
+import { paymentTools } from './payments.js';
+import { calculatorTools } from './calculators.js';
+import { bomTools } from './bom.js';
+import { stockTools } from './stock.js';
+import { productCategoryTools } from './product-categories.js';
+import { changeOrderTools } from './change-orders.js';
 /**
  * All available MCP tools
  */
@@ -57,6 +78,16 @@ export const allTools = [
     ...reviewTools,
     ...webhookTools,
     ...batchTools,
+    // New modules
+    ...salesOrderTools,
+    ...purchaseOrderTools,
+    ...invoiceTools,
+    ...paymentTools,
+    ...calculatorTools,
+    ...bomTools,
+    ...stockTools,
+    ...productCategoryTools,
+    ...changeOrderTools,
 ];
 /**
  * Tool count by category
@@ -78,5 +109,15 @@ export const toolCounts = {
     reviews: reviewTools.length,
     webhooks: webhookTools.length,
     batch: batchTools.length,
+    // New modules
+    salesOrders: salesOrderTools.length,
+    purchaseOrders: purchaseOrderTools.length,
+    invoices: invoiceTools.length,
+    payments: paymentTools.length,
+    calculators: calculatorTools.length,
+    bom: bomTools.length,
+    stock: stockTools.length,
+    productCategories: productCategoryTools.length,
+    changeOrders: changeOrderTools.length,
     total: allTools.length,
 };

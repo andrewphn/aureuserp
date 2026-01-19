@@ -560,7 +560,401 @@ $data = json_decode($response->getBody(), true);
 
 ---
 
+---
+
+## Sales Module
+
+### Sales Orders
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/sales-orders` | List all sales orders |
+| POST | `/sales-orders` | Create a sales order |
+| GET | `/sales-orders/{id}` | Get a sales order |
+| PUT | `/sales-orders/{id}` | Update a sales order |
+| DELETE | `/sales-orders/{id}` | Delete a sales order |
+| POST | `/sales-orders/{id}/confirm` | Confirm quote as sales order |
+| POST | `/sales-orders/{id}/cancel` | Cancel sales order |
+| POST | `/sales-orders/{id}/send` | Send to customer (email) |
+| POST | `/sales-orders/{id}/reset-to-draft` | Reset to draft status |
+
+**Filterable fields:** `id`, `partner_id`, `state`, `user_id`, `project_id`, `company_id`
+
+**Searchable fields:** `name`, `client_order_ref`, `origin`
+
+**Sortable fields:** `id`, `name`, `date_order`, `amount_total`, `created_at`
+
+**Includable relations:** `partner`, `lines`, `user`, `project`, `company`
+
+**States:** `draft`, `sent`, `sale`, `done`, `cancel`
+
+### Sales Order Lines
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/sales-orders/{id}/lines` | List lines for an order |
+| POST | `/sales-orders/{id}/lines` | Create line in an order |
+| GET | `/lines/{id}` | Get a line |
+| PUT | `/lines/{id}` | Update a line |
+| DELETE | `/lines/{id}` | Delete a line |
+
+---
+
+## Purchases Module
+
+### Purchase Orders
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/purchase-orders` | List all purchase orders |
+| POST | `/purchase-orders` | Create a purchase order |
+| GET | `/purchase-orders/{id}` | Get a purchase order |
+| PUT | `/purchase-orders/{id}` | Update a purchase order |
+| DELETE | `/purchase-orders/{id}` | Delete a purchase order |
+| POST | `/purchase-orders/{id}/confirm` | Confirm RFQ as purchase order |
+| POST | `/purchase-orders/{id}/cancel` | Cancel purchase order |
+| POST | `/purchase-orders/{id}/send` | Send to vendor (email) |
+| POST | `/purchase-orders/{id}/done` | Mark as complete |
+| POST | `/purchase-orders/{id}/reset-to-draft` | Reset to draft status |
+
+**Filterable fields:** `id`, `partner_id`, `state`, `user_id`, `project_id`, `company_id`
+
+**Searchable fields:** `name`, `partner_ref`, `origin`
+
+**Sortable fields:** `id`, `name`, `date_order`, `amount_total`, `created_at`
+
+**Includable relations:** `partner`, `lines`, `user`, `company`
+
+**States:** `draft`, `sent`, `purchase`, `done`, `cancel`
+
+### Purchase Order Lines
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/purchase-orders/{id}/lines` | List lines for an order |
+| POST | `/purchase-orders/{id}/lines` | Create line in an order |
+| GET | `/lines/{id}` | Get a line |
+| PUT | `/lines/{id}` | Update a line |
+| DELETE | `/lines/{id}` | Delete a line |
+
+---
+
+## Accounts Module
+
+### Invoices (Customer)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/invoices` | List all customer invoices |
+| POST | `/invoices` | Create an invoice |
+| GET | `/invoices/{id}` | Get an invoice |
+| PUT | `/invoices/{id}` | Update an invoice |
+| DELETE | `/invoices/{id}` | Delete an invoice |
+| POST | `/invoices/{id}/post` | Post invoice (confirm) |
+| POST | `/invoices/{id}/cancel` | Cancel invoice |
+| POST | `/invoices/{id}/reset-to-draft` | Reset to draft |
+| POST | `/invoices/{id}/credit-note` | Create credit note |
+
+**Filterable fields:** `id`, `partner_id`, `state`, `payment_state`, `journal_id`, `company_id`
+
+**Searchable fields:** `name`, `ref`, `narration`
+
+**States:** `draft`, `posted`, `cancel`
+
+**Payment States:** `not_paid`, `in_payment`, `paid`, `partial`, `reversed`
+
+### Bills (Vendor)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/bills` | List all vendor bills |
+| POST | `/bills` | Create a bill |
+| GET | `/bills/{id}` | Get a bill |
+| PUT | `/bills/{id}` | Update a bill |
+| DELETE | `/bills/{id}` | Delete a bill |
+| POST | `/bills/{id}/post` | Post bill (confirm) |
+| POST | `/bills/{id}/cancel` | Cancel bill |
+| POST | `/bills/{id}/reset-to-draft` | Reset to draft |
+| POST | `/bills/{id}/refund` | Create refund |
+| POST | `/bills/from-purchase-order/{purchaseOrderId}` | Create bill from PO |
+
+### Payments
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/payments` | List all payments |
+| POST | `/payments` | Create a payment |
+| GET | `/payments/{id}` | Get a payment |
+| PUT | `/payments/{id}` | Update a payment |
+| DELETE | `/payments/{id}` | Delete a payment |
+| POST | `/payments/register` | Register payment for invoice/bill |
+| POST | `/payments/{id}/post` | Post payment |
+| POST | `/payments/{id}/cancel` | Cancel payment |
+| POST | `/payments/{id}/reset-to-draft` | Reset to draft |
+
+**Register Payment Request:**
+```json
+{
+  "move_id": 123,
+  "amount": 500.00,
+  "journal_id": 1,
+  "payment_date": "2026-01-19",
+  "memo": "Partial payment"
+}
+```
+
+---
+
+## Calculators
+
+Cabinet construction calculation endpoints.
+
+### Cabinet Calculator
+
+```
+POST /api/v1/calculators/cabinet
+```
+
+**Request:**
+```json
+{
+  "exterior": {
+    "width": 36,
+    "height": 30,
+    "depth": 24
+  },
+  "cabinet_type": "base",
+  "toe_kick_height": 4.5
+}
+```
+
+**Response includes:** Box dimensions, face frame calculations, stretcher positions, cut list with materials.
+
+### Drawer Calculator
+
+```
+POST /api/v1/calculators/drawer
+```
+
+**Request:**
+```json
+{
+  "opening_width": 18,
+  "opening_height": 6,
+  "opening_depth": 21
+}
+```
+
+**Response includes:** Drawer box dimensions, slide requirements, validation warnings.
+
+### Other Calculator Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/calculators/drawer-stack` | Calculate multiple drawers |
+| POST | `/calculators/drawer-cut-list` | Get drawer cut list |
+| POST | `/calculators/drawer-quick-quote` | Quick drawer pricing |
+| POST | `/calculators/depth-validation` | Validate cabinet depth for slides |
+| POST | `/calculators/max-slide` | Get max slide for cabinet depth |
+| POST | `/calculators/required-depth` | Get required depth for slide |
+| POST | `/calculators/stretcher` | Calculate stretcher requirements |
+| GET | `/calculators/blum-specs` | Get Blum TANDEM 563H specs |
+| GET | `/calculators/min-cabinet-depths` | Get minimum depths by slide |
+| GET | `/calculators/face-frame-styles` | Get face frame style options |
+
+---
+
+## Project Workflows
+
+### Project Special Operations
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/projects/{id}/tree` | Get full project hierarchy |
+| POST | `/projects/{id}/change-stage` | Change project stage |
+| GET | `/projects/{id}/calculate` | Calculate project metrics |
+| POST | `/projects/{id}/clone` | Clone entire project |
+| GET | `/projects/{id}/gate-status` | Get workflow gate status |
+| GET | `/projects/{id}/bom` | Get bill of materials summary |
+| POST | `/projects/{id}/generate-order` | Generate sales order from project |
+
+**Clone Request:**
+```json
+{
+  "name": "Project Copy",
+  "partner_id": 5,
+  "include_addresses": true,
+  "include_tags": true
+}
+```
+
+**Gate Status Response:**
+```json
+{
+  "project_id": 1,
+  "current_stage": "design",
+  "gates": {
+    "design": {
+      "name": "Design Gate",
+      "requirements": {
+        "has_rooms": {"status": true, "message": "..."},
+        "has_cabinets": {"status": false, "message": "..."}
+      },
+      "passed": false,
+      "progress": "1/3"
+    }
+  }
+}
+```
+
+---
+
+## Product Categories
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/product-categories` | List all categories |
+| POST | `/product-categories` | Create a category |
+| GET | `/product-categories/{id}` | Get a category |
+| PUT | `/product-categories/{id}` | Update a category |
+| DELETE | `/product-categories/{id}` | Delete a category |
+| GET | `/product-categories/tree` | Get category tree hierarchy |
+
+**Filterable fields:** `id`, `parent_id`, `company_id`
+
+**Searchable fields:** `name`, `complete_name`
+
+---
+
+## Stock (Inventory Quantities)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/stock` | List all stock records |
+| POST | `/stock` | Create a stock record |
+| GET | `/stock/{id}` | Get a stock record |
+| PUT | `/stock/{id}` | Update a stock record |
+| DELETE | `/stock/{id}` | Delete a stock record |
+| GET | `/stock/by-product/{productId}` | Get stock by product |
+| GET | `/stock/by-location/{locationId}` | Get stock by location |
+| GET | `/stock/by-warehouse/{warehouseId}` | Get stock by warehouse |
+| POST | `/stock/adjust` | Adjust stock quantity |
+| POST | `/stock/availability` | Check availability |
+
+**Adjust Stock Request:**
+```json
+{
+  "product_id": 123,
+  "location_id": 12,
+  "quantity": 50,
+  "reason": "Inventory count adjustment"
+}
+```
+
+**Check Availability Request:**
+```json
+{
+  "products": [
+    {"product_id": 1, "quantity_needed": 10},
+    {"product_id": 2, "quantity_needed": 5}
+  ],
+  "warehouse_id": 1
+}
+```
+
+---
+
+## Bill of Materials (BOM)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/bom` | List all BOM items |
+| POST | `/bom` | Create a BOM item |
+| GET | `/bom/{id}` | Get a BOM item |
+| PUT | `/bom/{id}` | Update a BOM item |
+| DELETE | `/bom/{id}` | Delete a BOM item |
+| GET | `/bom/by-project/{projectId}` | Get BOM for project |
+| GET | `/bom/by-cabinet/{cabinetId}` | Get BOM for cabinet |
+| POST | `/bom/generate/{projectId}` | Generate BOM from cabinets |
+| POST | `/bom/bulk-update-status` | Bulk update BOM status |
+
+**Material Types:** `sheet_good`, `hardware`, `edge_banding`, `finish`, `other`
+
+**Status Values:** `pending`, `ordered`, `received`, `issued`
+
+**Generate BOM Request:**
+```json
+{
+  "overwrite": true
+}
+```
+
+---
+
+## Change Orders
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/change-orders` | List all change orders |
+| POST | `/change-orders` | Create a change order |
+| GET | `/change-orders/{id}` | Get a change order |
+| PUT | `/change-orders/{id}` | Update a change order |
+| DELETE | `/change-orders/{id}` | Delete a change order |
+| POST | `/change-orders/{id}/submit` | Submit for approval |
+| POST | `/change-orders/{id}/approve` | Approve change order |
+| POST | `/change-orders/{id}/reject` | Reject change order |
+| POST | `/change-orders/{id}/cancel` | Cancel change order |
+| GET | `/change-orders/by-project/{projectId}` | Get change orders for project |
+
+**Change Types:** `scope`, `pricing`, `schedule`, `design`, `materials`, `other`
+
+**Priority:** `low`, `medium`, `high`, `critical`
+
+**Status:** `draft`, `pending`, `approved`, `rejected`, `cancelled`
+
+**Create Request:**
+```json
+{
+  "project_id": 1,
+  "title": "Add extra drawer",
+  "description": "Customer requested additional drawer in cabinet B24-1",
+  "change_type": "scope",
+  "priority": "medium",
+  "amount": 150.00,
+  "days_impact": 1
+}
+```
+
+**Approve Request:**
+```json
+{
+  "notes": "Approved per customer call on 1/19"
+}
+```
+
+**Reject Request:**
+```json
+{
+  "reason": "Budget constraints"
+}
+```
+
+---
+
 ## Changelog
+
+### v1.1.0 (2026-01-19)
+- Added Sales Orders with workflow actions (confirm, cancel, send)
+- Added Purchase Orders with workflow actions
+- Added Invoices with post, cancel, credit note actions
+- Added Bills with post, cancel, refund actions
+- Added Payments with registration and reconciliation
+- Added Calculator APIs for cabinet/drawer design
+- Added Project workflow endpoints (clone, gate-status, bom)
+- Added Product Categories with tree hierarchy
+- Added Stock/Inventory quantities with adjustment
+- Added Bill of Materials (BOM) management
+- Added Change Orders with approval workflow
 
 ### v1.0.0 (2026-01-19)
 - Initial release

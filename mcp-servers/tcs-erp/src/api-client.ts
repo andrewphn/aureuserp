@@ -3,6 +3,12 @@
  *
  * HTTP client for communicating with the TCS ERP Laravel API.
  * Handles authentication, pagination, and error handling.
+ *
+ * Environment variables:
+ * - TCS_ERP_BASE_URL: Base URL for the ERP API
+ *   - Local: http://aureuserp.test (default)
+ *   - Production: https://staging.tcswoodwork.com
+ * - TCS_ERP_API_TOKEN: API token for authentication
  */
 
 import { ApiResponse, PaginatedResponse } from './types.js';
@@ -12,8 +18,11 @@ export class TcsErpApiClient {
   private apiToken: string;
 
   constructor() {
-    this.baseUrl = process.env.TCS_ERP_BASE_URL || 'https://staging.tcswoodwork.com';
+    // Default to local development URL, use env var for production
+    this.baseUrl = process.env.TCS_ERP_BASE_URL || 'http://aureuserp.test';
     this.apiToken = process.env.TCS_ERP_API_TOKEN || '';
+
+    console.error(`API Client initialized: ${this.baseUrl}`);
 
     if (!this.apiToken) {
       console.warn('TCS_ERP_API_TOKEN not set - API calls will fail');
@@ -538,5 +547,407 @@ export class TcsErpApiClient {
 
   async batchDelete(entityType: string, ids: number[]): Promise<ApiResponse<unknown>> {
     return this.request('POST', `/batch/${entityType}`, { operation: 'delete', ids });
+  }
+
+  // =========================================================================
+  // Sales Orders
+  // =========================================================================
+
+  async listSalesOrders(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/sales-orders', undefined, filters as Record<string, string>);
+  }
+
+  async getSalesOrder(id: number, include?: string[]): Promise<ApiResponse<unknown>> {
+    const params = include ? { include: include.join(',') } : undefined;
+    return this.request('GET', `/sales-orders/${id}`, undefined, params);
+  }
+
+  async createSalesOrder(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/sales-orders', data);
+  }
+
+  async updateSalesOrder(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/sales-orders/${id}`, data);
+  }
+
+  async deleteSalesOrder(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/sales-orders/${id}`);
+  }
+
+  async confirmSalesOrder(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/sales-orders/${id}/confirm`);
+  }
+
+  async cancelSalesOrder(id: number, reason?: string): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/sales-orders/${id}/cancel`, { reason });
+  }
+
+  async createSalesOrderInvoice(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/sales-orders/${id}/invoice`, data);
+  }
+
+  async sendSalesOrderEmail(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/sales-orders/${id}/send-email`, data);
+  }
+
+  // Sales Order Lines
+  async listSalesOrderLines(orderId: number): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', `/sales-orders/${orderId}/lines`);
+  }
+
+  async createSalesOrderLine(orderId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/sales-orders/${orderId}/lines`, data);
+  }
+
+  async updateSalesOrderLine(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/sales-order-lines/${id}`, data);
+  }
+
+  async deleteSalesOrderLine(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/sales-order-lines/${id}`);
+  }
+
+  // =========================================================================
+  // Purchase Orders
+  // =========================================================================
+
+  async listPurchaseOrders(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/purchase-orders', undefined, filters as Record<string, string>);
+  }
+
+  async getPurchaseOrder(id: number, include?: string[]): Promise<ApiResponse<unknown>> {
+    const params = include ? { include: include.join(',') } : undefined;
+    return this.request('GET', `/purchase-orders/${id}`, undefined, params);
+  }
+
+  async createPurchaseOrder(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/purchase-orders', data);
+  }
+
+  async updatePurchaseOrder(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/purchase-orders/${id}`, data);
+  }
+
+  async deletePurchaseOrder(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/purchase-orders/${id}`);
+  }
+
+  async confirmPurchaseOrder(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/purchase-orders/${id}/confirm`);
+  }
+
+  async cancelPurchaseOrder(id: number, reason?: string): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/purchase-orders/${id}/cancel`, { reason });
+  }
+
+  async createPurchaseOrderBill(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/purchase-orders/${id}/create-bill`, data);
+  }
+
+  async sendPurchaseOrderEmail(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/purchase-orders/${id}/send-email`, data);
+  }
+
+  // Purchase Order Lines
+  async listPurchaseOrderLines(orderId: number): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', `/purchase-orders/${orderId}/lines`);
+  }
+
+  async createPurchaseOrderLine(orderId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/purchase-orders/${orderId}/lines`, data);
+  }
+
+  async updatePurchaseOrderLine(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/purchase-order-lines/${id}`, data);
+  }
+
+  async deletePurchaseOrderLine(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/purchase-order-lines/${id}`);
+  }
+
+  // =========================================================================
+  // Invoices
+  // =========================================================================
+
+  async listInvoices(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/invoices', undefined, filters as Record<string, string>);
+  }
+
+  async getInvoice(id: number, include?: string[]): Promise<ApiResponse<unknown>> {
+    const params = include ? { include: include.join(',') } : undefined;
+    return this.request('GET', `/invoices/${id}`, undefined, params);
+  }
+
+  async createInvoice(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/invoices', data);
+  }
+
+  async updateInvoice(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/invoices/${id}`, data);
+  }
+
+  async deleteInvoice(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/invoices/${id}`);
+  }
+
+  async postInvoice(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/invoices/${id}/post`);
+  }
+
+  async payInvoice(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/invoices/${id}/pay`, data);
+  }
+
+  async createInvoiceCreditNote(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/invoices/${id}/credit-note`, data);
+  }
+
+  async resetInvoiceToDraft(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/invoices/${id}/reset-draft`);
+  }
+
+  async sendInvoiceEmail(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/invoices/${id}/send-email`, data);
+  }
+
+  // =========================================================================
+  // Bills
+  // =========================================================================
+
+  async listBills(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/bills', undefined, filters as Record<string, string>);
+  }
+
+  async getBill(id: number, include?: string[]): Promise<ApiResponse<unknown>> {
+    const params = include ? { include: include.join(',') } : undefined;
+    return this.request('GET', `/bills/${id}`, undefined, params);
+  }
+
+  async createBill(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/bills', data);
+  }
+
+  async updateBill(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/bills/${id}`, data);
+  }
+
+  async deleteBill(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/bills/${id}`);
+  }
+
+  async postBill(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/bills/${id}/post`);
+  }
+
+  async payBill(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/bills/${id}/pay`, data);
+  }
+
+  async resetBillToDraft(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/bills/${id}/reset-draft`);
+  }
+
+  // =========================================================================
+  // Payments
+  // =========================================================================
+
+  async listPayments(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/payments', undefined, filters as Record<string, string>);
+  }
+
+  async getPayment(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/payments/${id}`);
+  }
+
+  async createPayment(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/payments', data);
+  }
+
+  async updatePayment(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/payments/${id}`, data);
+  }
+
+  async deletePayment(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/payments/${id}`);
+  }
+
+  async postPayment(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/payments/${id}/post`);
+  }
+
+  async cancelPayment(id: number, reason?: string): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/payments/${id}/cancel`, { reason });
+  }
+
+  async registerPayment(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/payments/register', data);
+  }
+
+  // =========================================================================
+  // Calculators
+  // =========================================================================
+
+  async calculateCabinetDimensions(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/calculators/cabinet', data);
+  }
+
+  async calculateDrawerDimensions(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/calculators/drawer', data);
+  }
+
+  async calculateStretcherDimensions(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/calculators/stretcher', data);
+  }
+
+  // =========================================================================
+  // Bill of Materials (BOM)
+  // =========================================================================
+
+  async listBom(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/bom', undefined, filters as Record<string, string>);
+  }
+
+  async getBom(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/bom/${id}`);
+  }
+
+  async createBom(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/bom', data);
+  }
+
+  async updateBom(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/bom/${id}`, data);
+  }
+
+  async deleteBom(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/bom/${id}`);
+  }
+
+  async getBomByProject(projectId: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/bom/by-project/${projectId}`);
+  }
+
+  async getBomByCabinet(cabinetId: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/bom/by-cabinet/${cabinetId}`);
+  }
+
+  async generateBom(projectId: number, overwrite?: boolean): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/bom/generate/${projectId}`, { overwrite });
+  }
+
+  async bulkUpdateBomStatus(ids: number[], status: string): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/bom/bulk-update-status', { ids, status });
+  }
+
+  // =========================================================================
+  // Stock (Product Quantities)
+  // =========================================================================
+
+  async listStock(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/stock', undefined, filters as Record<string, string>);
+  }
+
+  async getStock(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/stock/${id}`);
+  }
+
+  async getStockByProduct(productId: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/stock/by-product/${productId}`);
+  }
+
+  async getStockByLocation(locationId: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/stock/by-location/${locationId}`);
+  }
+
+  async adjustStock(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/stock/adjust', data);
+  }
+
+  async transferStock(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/stock/transfer', data);
+  }
+
+  // =========================================================================
+  // Product Categories
+  // =========================================================================
+
+  async listProductCategories(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/product-categories', undefined, filters as Record<string, string>);
+  }
+
+  async getProductCategoriesTree(): Promise<ApiResponse<unknown>> {
+    return this.request('GET', '/product-categories/tree');
+  }
+
+  async getProductCategory(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/product-categories/${id}`);
+  }
+
+  async createProductCategory(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/product-categories', data);
+  }
+
+  async updateProductCategory(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/product-categories/${id}`, data);
+  }
+
+  async deleteProductCategory(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/product-categories/${id}`);
+  }
+
+  // =========================================================================
+  // Change Orders
+  // =========================================================================
+
+  async listChangeOrders(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/change-orders', undefined, filters as Record<string, string>);
+  }
+
+  async getChangeOrder(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/change-orders/${id}`);
+  }
+
+  async createChangeOrder(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/change-orders', data);
+  }
+
+  async updateChangeOrder(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/change-orders/${id}`, data);
+  }
+
+  async deleteChangeOrder(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/change-orders/${id}`);
+  }
+
+  async approveChangeOrder(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/change-orders/${id}/approve`, data);
+  }
+
+  async rejectChangeOrder(id: number, reason: string): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/change-orders/${id}/reject`, { reason });
+  }
+
+  async getChangeOrdersByProject(projectId: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/change-orders/by-project/${projectId}`);
+  }
+
+  // =========================================================================
+  // Project Workflow Actions
+  // =========================================================================
+
+  async cloneProject(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/projects/${id}/clone`, data);
+  }
+
+  async getProjectGateStatus(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/projects/${id}/gate-status`);
+  }
+
+  async getProjectBom(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/projects/${id}/bom`);
+  }
+
+  async generateProjectOrder(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/projects/${id}/generate-order`, data);
   }
 }

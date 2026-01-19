@@ -2,7 +2,7 @@
  * Tool Registry - All MCP tools for TCS ERP
  *
  * Exports tool definitions for the MCP server.
- * Total: 88 tools across all categories.
+ * Total: 150+ tools across all categories.
  */
 import { Tool } from '@modelcontextprotocol/sdk/types.js';
 export { projectTools, handleProjectTool } from './projects.js';
@@ -21,6 +21,15 @@ export { rhinoTools, handleRhinoTool } from './rhino.js';
 export { reviewTools, handleReviewTool } from './reviews.js';
 export { webhookTools, handleWebhookTool } from './webhooks.js';
 export { batchTools, handleBatchTool } from './batch.js';
+export { salesOrderTools, handleSalesOrderTool } from './sales-orders.js';
+export { purchaseOrderTools, handlePurchaseOrderTool } from './purchase-orders.js';
+export { invoiceTools, handleInvoiceTool } from './invoices.js';
+export { paymentTools, handlePaymentTool } from './payments.js';
+export { calculatorTools, handleCalculatorTool } from './calculators.js';
+export { bomTools, handleBomTool } from './bom.js';
+export { stockTools, handleStockTool } from './stock.js';
+export { productCategoryTools, handleProductCategoryTool } from './product-categories.js';
+export { changeOrderTools, handleChangeOrderTool } from './change-orders.js';
 /**
  * All available MCP tools
  */
@@ -45,5 +54,14 @@ export declare const toolCounts: {
     reviews: number;
     webhooks: number;
     batch: number;
+    salesOrders: number;
+    purchaseOrders: number;
+    invoices: number;
+    payments: number;
+    calculators: number;
+    bom: number;
+    stock: number;
+    productCategories: number;
+    changeOrders: number;
     total: number;
 };

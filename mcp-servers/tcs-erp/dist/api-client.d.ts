@@ -3,6 +3,12 @@
  *
  * HTTP client for communicating with the TCS ERP Laravel API.
  * Handles authentication, pagination, and error handling.
+ *
+ * Environment variables:
+ * - TCS_ERP_BASE_URL: Base URL for the ERP API
+ *   - Local: http://aureuserp.test (default)
+ *   - Production: https://staging.tcswoodwork.com
+ * - TCS_ERP_API_TOKEN: API token for authentication
  */
 import { ApiResponse, PaginatedResponse } from './types.js';
 export declare class TcsErpApiClient {
@@ -106,4 +112,92 @@ export declare class TcsErpApiClient {
         data: Record<string, unknown>;
     }>): Promise<ApiResponse<unknown>>;
     batchDelete(entityType: string, ids: number[]): Promise<ApiResponse<unknown>>;
+    listSalesOrders(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getSalesOrder(id: number, include?: string[]): Promise<ApiResponse<unknown>>;
+    createSalesOrder(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateSalesOrder(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteSalesOrder(id: number): Promise<ApiResponse<unknown>>;
+    confirmSalesOrder(id: number): Promise<ApiResponse<unknown>>;
+    cancelSalesOrder(id: number, reason?: string): Promise<ApiResponse<unknown>>;
+    createSalesOrderInvoice(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    sendSalesOrderEmail(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    listSalesOrderLines(orderId: number): Promise<PaginatedResponse<unknown>>;
+    createSalesOrderLine(orderId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateSalesOrderLine(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteSalesOrderLine(id: number): Promise<ApiResponse<unknown>>;
+    listPurchaseOrders(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getPurchaseOrder(id: number, include?: string[]): Promise<ApiResponse<unknown>>;
+    createPurchaseOrder(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updatePurchaseOrder(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deletePurchaseOrder(id: number): Promise<ApiResponse<unknown>>;
+    confirmPurchaseOrder(id: number): Promise<ApiResponse<unknown>>;
+    cancelPurchaseOrder(id: number, reason?: string): Promise<ApiResponse<unknown>>;
+    createPurchaseOrderBill(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    sendPurchaseOrderEmail(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    listPurchaseOrderLines(orderId: number): Promise<PaginatedResponse<unknown>>;
+    createPurchaseOrderLine(orderId: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updatePurchaseOrderLine(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deletePurchaseOrderLine(id: number): Promise<ApiResponse<unknown>>;
+    listInvoices(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getInvoice(id: number, include?: string[]): Promise<ApiResponse<unknown>>;
+    createInvoice(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateInvoice(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteInvoice(id: number): Promise<ApiResponse<unknown>>;
+    postInvoice(id: number): Promise<ApiResponse<unknown>>;
+    payInvoice(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    createInvoiceCreditNote(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    resetInvoiceToDraft(id: number): Promise<ApiResponse<unknown>>;
+    sendInvoiceEmail(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    listBills(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getBill(id: number, include?: string[]): Promise<ApiResponse<unknown>>;
+    createBill(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateBill(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteBill(id: number): Promise<ApiResponse<unknown>>;
+    postBill(id: number): Promise<ApiResponse<unknown>>;
+    payBill(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    resetBillToDraft(id: number): Promise<ApiResponse<unknown>>;
+    listPayments(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getPayment(id: number): Promise<ApiResponse<unknown>>;
+    createPayment(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updatePayment(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deletePayment(id: number): Promise<ApiResponse<unknown>>;
+    postPayment(id: number): Promise<ApiResponse<unknown>>;
+    cancelPayment(id: number, reason?: string): Promise<ApiResponse<unknown>>;
+    registerPayment(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    calculateCabinetDimensions(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    calculateDrawerDimensions(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    calculateStretcherDimensions(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    listBom(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getBom(id: number): Promise<ApiResponse<unknown>>;
+    createBom(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateBom(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteBom(id: number): Promise<ApiResponse<unknown>>;
+    getBomByProject(projectId: number): Promise<ApiResponse<unknown>>;
+    getBomByCabinet(cabinetId: number): Promise<ApiResponse<unknown>>;
+    generateBom(projectId: number, overwrite?: boolean): Promise<ApiResponse<unknown>>;
+    bulkUpdateBomStatus(ids: number[], status: string): Promise<ApiResponse<unknown>>;
+    listStock(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getStock(id: number): Promise<ApiResponse<unknown>>;
+    getStockByProduct(productId: number): Promise<ApiResponse<unknown>>;
+    getStockByLocation(locationId: number): Promise<ApiResponse<unknown>>;
+    adjustStock(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    transferStock(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    listProductCategories(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getProductCategoriesTree(): Promise<ApiResponse<unknown>>;
+    getProductCategory(id: number): Promise<ApiResponse<unknown>>;
+    createProductCategory(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateProductCategory(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteProductCategory(id: number): Promise<ApiResponse<unknown>>;
+    listChangeOrders(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getChangeOrder(id: number): Promise<ApiResponse<unknown>>;
+    createChangeOrder(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateChangeOrder(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteChangeOrder(id: number): Promise<ApiResponse<unknown>>;
+    approveChangeOrder(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    rejectChangeOrder(id: number, reason: string): Promise<ApiResponse<unknown>>;
+    getChangeOrdersByProject(projectId: number): Promise<ApiResponse<unknown>>;
+    cloneProject(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    getProjectGateStatus(id: number): Promise<ApiResponse<unknown>>;
+    getProjectBom(id: number): Promise<ApiResponse<unknown>>;
+    generateProjectOrder(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
 }

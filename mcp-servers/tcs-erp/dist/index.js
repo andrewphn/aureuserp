@@ -3,16 +3,23 @@
  * TCS ERP MCP Server
  *
  * Model Context Protocol server for TCS Woodwork ERP system.
- * Provides 88 tools for managing projects, cabinets, Rhino integration, and more.
+ * Provides 150+ tools for managing projects, cabinets, orders, invoices, and more.
+ *
+ * Environment variables:
+ * - TCS_ERP_BASE_URL: Base URL for the ERP API (default: http://aureuserp.test)
+ * - TCS_ERP_API_TOKEN: API token for authentication
  */
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema, } from '@modelcontextprotocol/sdk/types.js';
 import { TcsErpApiClient } from './api-client.js';
-import { allTools, toolCounts, handleProjectTool, handleRoomTool, handleLocationTool, handleCabinetRunTool, handleCabinetTool, handleSectionTool, handleDrawerTool, handleDoorTool, handleProductTool, handlePartnerTool, handleEmployeeTool, handleTaskTool, handleRhinoTool, handleReviewTool, handleWebhookTool, handleBatchTool, } from './tools/index.js';
+import { allTools, toolCounts, handleProjectTool, handleRoomTool, handleLocationTool, handleCabinetRunTool, handleCabinetTool, handleSectionTool, handleDrawerTool, handleDoorTool, handleProductTool, handlePartnerTool, handleEmployeeTool, handleTaskTool, handleRhinoTool, handleReviewTool, handleWebhookTool, handleBatchTool, 
+// New handlers
+handleSalesOrderTool, handlePurchaseOrderTool, handleInvoiceTool, handlePaymentTool, handleCalculatorTool, handleBomTool, handleStockTool, handleProductCategoryTool, handleChangeOrderTool, } from './tools/index.js';
 // Tool name prefixes for routing
 const TOOL_PREFIXES = {
-    projects: ['list_projects', 'get_project', 'create_project', 'update_project', 'delete_project', 'get_project_tree', 'change_project_stage', 'calculate_project'],
+    // Original tools
+    projects: ['list_projects', 'get_project', 'create_project', 'update_project', 'delete_project', 'get_project_tree', 'change_project_stage', 'calculate_project', 'clone_project', 'get_project_gate_status', 'get_project_bom', 'generate_project_order'],
     rooms: ['list_rooms', 'get_room', 'create_room', 'update_room', 'delete_room'],
     locations: ['list_locations', 'get_location', 'create_location', 'update_location', 'delete_location'],
     cabinetRuns: ['list_cabinet_runs', 'get_cabinet_run', 'create_cabinet_run', 'update_cabinet_run', 'delete_cabinet_run'],
@@ -28,6 +35,16 @@ const TOOL_PREFIXES = {
     reviews: ['list_reviews', 'get_review', 'approve_review', 'reject_review'],
     webhooks: ['list_webhooks', 'create_webhook', 'delete_webhook', 'test_webhook'],
     batch: ['batch_create', 'batch_update', 'batch_delete'],
+    // New tools
+    salesOrders: ['list_sales_orders', 'get_sales_order', 'create_sales_order', 'update_sales_order', 'delete_sales_order', 'confirm_sales_order', 'cancel_sales_order', 'create_sales_order_invoice', 'send_sales_order_email', 'list_sales_order_lines', 'create_sales_order_line', 'update_sales_order_line', 'delete_sales_order_line'],
+    purchaseOrders: ['list_purchase_orders', 'get_purchase_order', 'create_purchase_order', 'update_purchase_order', 'delete_purchase_order', 'confirm_purchase_order', 'cancel_purchase_order', 'create_purchase_order_bill', 'send_purchase_order_email', 'list_purchase_order_lines', 'create_purchase_order_line', 'update_purchase_order_line', 'delete_purchase_order_line'],
+    invoices: ['list_invoices', 'get_invoice', 'create_invoice', 'update_invoice', 'delete_invoice', 'post_invoice', 'pay_invoice', 'create_invoice_credit_note', 'reset_invoice_to_draft', 'send_invoice_email', 'list_bills', 'get_bill', 'create_bill', 'update_bill', 'delete_bill', 'post_bill', 'pay_bill', 'reset_bill_to_draft'],
+    payments: ['list_payments', 'get_payment', 'create_payment', 'update_payment', 'delete_payment', 'post_payment', 'cancel_payment', 'register_payment'],
+    calculators: ['calculate_cabinet_dimensions', 'calculate_drawer_dimensions', 'calculate_stretcher_dimensions'],
+    bom: ['list_bom', 'get_bom', 'create_bom', 'update_bom', 'delete_bom', 'get_bom_by_project', 'get_bom_by_cabinet', 'generate_bom', 'bulk_update_bom_status'],
+    stock: ['list_stock', 'get_stock', 'get_stock_by_product', 'get_stock_by_location', 'adjust_stock', 'transfer_stock'],
+    productCategories: ['list_product_categories', 'get_product_categories_tree', 'get_product_category', 'create_product_category', 'update_product_category', 'delete_product_category'],
+    changeOrders: ['list_change_orders', 'get_change_order', 'create_change_order', 'update_change_order', 'delete_change_order', 'approve_change_order', 'reject_change_order', 'get_change_orders_by_project'],
 };
 /**
  * Route a tool call to the appropriate handler
@@ -81,6 +98,34 @@ async function routeToolCall(client, toolName, args) {
     }
     if (TOOL_PREFIXES.batch.includes(toolName)) {
         return handleBatchTool(client, toolName, args);
+    }
+    // New tools
+    if (TOOL_PREFIXES.salesOrders.includes(toolName)) {
+        return handleSalesOrderTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.purchaseOrders.includes(toolName)) {
+        return handlePurchaseOrderTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.invoices.includes(toolName)) {
+        return handleInvoiceTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.payments.includes(toolName)) {
+        return handlePaymentTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.calculators.includes(toolName)) {
+        return handleCalculatorTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.bom.includes(toolName)) {
+        return handleBomTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.stock.includes(toolName)) {
+        return handleStockTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.productCategories.includes(toolName)) {
+        return handleProductCategoryTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.changeOrders.includes(toolName)) {
+        return handleChangeOrderTool(client, toolName, args);
     }
     throw new Error(`Unknown tool: ${toolName}`);
 }
@@ -141,9 +186,13 @@ async function main() {
     // Start the server with stdio transport
     const transport = new StdioServerTransport();
     await server.connect(transport);
+    const baseUrl = process.env.TCS_ERP_BASE_URL || 'http://aureuserp.test';
     console.error('TCS ERP MCP Server started');
+    console.error(`Base URL: ${baseUrl}`);
     console.error(`Total tools: ${toolCounts.total}`);
-    console.error(`Categories: projects(${toolCounts.projects}), rooms(${toolCounts.rooms}), locations(${toolCounts.locations}), cabinet-runs(${toolCounts.cabinetRuns}), cabinets(${toolCounts.cabinets}), sections(${toolCounts.sections}), drawers(${toolCounts.drawers}), doors(${toolCounts.doors}), products(${toolCounts.products}), partners(${toolCounts.partners}), employees(${toolCounts.employees}), tasks(${toolCounts.tasks}), rhino(${toolCounts.rhino}), reviews(${toolCounts.reviews}), webhooks(${toolCounts.webhooks}), batch(${toolCounts.batch})`);
+    console.error('Categories:');
+    console.error(`  Original: projects(${toolCounts.projects}), rooms(${toolCounts.rooms}), locations(${toolCounts.locations}), cabinet-runs(${toolCounts.cabinetRuns}), cabinets(${toolCounts.cabinets}), sections(${toolCounts.sections}), drawers(${toolCounts.drawers}), doors(${toolCounts.doors}), products(${toolCounts.products}), partners(${toolCounts.partners}), employees(${toolCounts.employees}), tasks(${toolCounts.tasks}), rhino(${toolCounts.rhino}), reviews(${toolCounts.reviews}), webhooks(${toolCounts.webhooks}), batch(${toolCounts.batch})`);
+    console.error(`  New: salesOrders(${toolCounts.salesOrders}), purchaseOrders(${toolCounts.purchaseOrders}), invoices(${toolCounts.invoices}), payments(${toolCounts.payments}), calculators(${toolCounts.calculators}), bom(${toolCounts.bom}), stock(${toolCounts.stock}), productCategories(${toolCounts.productCategories}), changeOrders(${toolCounts.changeOrders})`);
 }
 main().catch((error) => {
     console.error('Fatal error:', error);
