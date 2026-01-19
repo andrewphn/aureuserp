@@ -103,6 +103,78 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     Route::apiResource('tasks', V1\TaskController::class);
     Route::apiResource('milestones', V1\MilestoneController::class);
 
+    // Project Workflow Operations
+    Route::post('projects/{id}/clone', [V1\ProjectController::class, 'clone'])->name('projects.clone');
+    Route::get('projects/{id}/gate-status', [V1\ProjectController::class, 'gateStatus'])->name('projects.gate-status');
+    Route::get('projects/{id}/bom', [V1\ProjectController::class, 'bom'])->name('projects.bom');
+    Route::post('projects/{id}/generate-order', [V1\ProjectController::class, 'generateOrder'])->name('projects.generate-order');
+
+    // Bill of Materials (BOM)
+    Route::apiResource('bom', V1\BomController::class);
+    Route::get('bom/by-project/{projectId}', [V1\BomController::class, 'byProject'])->name('bom.by-project');
+    Route::get('bom/by-cabinet/{cabinetId}', [V1\BomController::class, 'byCabinet'])->name('bom.by-cabinet');
+    Route::post('bom/generate/{projectId}', [V1\BomController::class, 'generate'])->name('bom.generate');
+    Route::post('bom/bulk-update-status', [V1\BomController::class, 'bulkUpdateStatus'])->name('bom.bulk-update-status');
+
+    // Change Orders
+    Route::apiResource('change-orders', V1\ChangeOrderController::class);
+    Route::post('change-orders/{id}/submit', [V1\ChangeOrderController::class, 'submit'])->name('change-orders.submit');
+    Route::post('change-orders/{id}/approve', [V1\ChangeOrderController::class, 'approve'])->name('change-orders.approve');
+    Route::post('change-orders/{id}/reject', [V1\ChangeOrderController::class, 'reject'])->name('change-orders.reject');
+    Route::post('change-orders/{id}/cancel', [V1\ChangeOrderController::class, 'cancel'])->name('change-orders.cancel');
+    Route::get('change-orders/by-project/{projectId}', [V1\ChangeOrderController::class, 'byProject'])->name('change-orders.by-project');
+
+    // ========================================
+    // Sales Module
+    // ========================================
+
+    // Sales Orders
+    Route::apiResource('sales-orders', V1\SalesOrderController::class);
+    Route::apiResource('sales-orders.lines', V1\SalesOrderLineController::class)->shallow();
+    Route::post('sales-orders/{id}/confirm', [V1\SalesOrderController::class, 'confirm'])->name('sales-orders.confirm');
+    Route::post('sales-orders/{id}/cancel', [V1\SalesOrderController::class, 'cancel'])->name('sales-orders.cancel');
+    Route::post('sales-orders/{id}/send', [V1\SalesOrderController::class, 'send'])->name('sales-orders.send');
+    Route::post('sales-orders/{id}/reset-to-draft', [V1\SalesOrderController::class, 'resetToDraft'])->name('sales-orders.reset-to-draft');
+
+    // ========================================
+    // Purchases Module
+    // ========================================
+
+    // Purchase Orders
+    Route::apiResource('purchase-orders', V1\PurchaseOrderController::class);
+    Route::apiResource('purchase-orders.lines', V1\PurchaseOrderLineController::class)->shallow();
+    Route::post('purchase-orders/{id}/confirm', [V1\PurchaseOrderController::class, 'confirm'])->name('purchase-orders.confirm');
+    Route::post('purchase-orders/{id}/cancel', [V1\PurchaseOrderController::class, 'cancel'])->name('purchase-orders.cancel');
+    Route::post('purchase-orders/{id}/send', [V1\PurchaseOrderController::class, 'send'])->name('purchase-orders.send');
+    Route::post('purchase-orders/{id}/done', [V1\PurchaseOrderController::class, 'done'])->name('purchase-orders.done');
+    Route::post('purchase-orders/{id}/reset-to-draft', [V1\PurchaseOrderController::class, 'resetToDraft'])->name('purchase-orders.reset-to-draft');
+
+    // ========================================
+    // Accounts Module (Invoices, Bills, Payments)
+    // ========================================
+
+    // Customer Invoices
+    Route::apiResource('invoices', V1\InvoiceController::class);
+    Route::post('invoices/{id}/post', [V1\InvoiceController::class, 'post'])->name('invoices.post');
+    Route::post('invoices/{id}/reset-to-draft', [V1\InvoiceController::class, 'resetToDraft'])->name('invoices.reset-to-draft');
+    Route::post('invoices/{id}/cancel', [V1\InvoiceController::class, 'cancel'])->name('invoices.cancel');
+    Route::post('invoices/{id}/credit-note', [V1\InvoiceController::class, 'createCreditNote'])->name('invoices.credit-note');
+
+    // Vendor Bills
+    Route::apiResource('bills', V1\BillController::class);
+    Route::post('bills/{id}/post', [V1\BillController::class, 'post'])->name('bills.post');
+    Route::post('bills/{id}/reset-to-draft', [V1\BillController::class, 'resetToDraft'])->name('bills.reset-to-draft');
+    Route::post('bills/{id}/cancel', [V1\BillController::class, 'cancel'])->name('bills.cancel');
+    Route::post('bills/{id}/refund', [V1\BillController::class, 'createRefund'])->name('bills.refund');
+    Route::post('bills/from-purchase-order/{purchaseOrderId}', [V1\BillController::class, 'createFromPurchaseOrder'])->name('bills.from-purchase-order');
+
+    // Payments
+    Route::apiResource('payments', V1\PaymentController::class);
+    Route::post('payments/register', [V1\PaymentController::class, 'register'])->name('payments.register');
+    Route::post('payments/{id}/post', [V1\PaymentController::class, 'post'])->name('payments.post');
+    Route::post('payments/{id}/cancel', [V1\PaymentController::class, 'cancel'])->name('payments.cancel');
+    Route::post('payments/{id}/reset-to-draft', [V1\PaymentController::class, 'resetToDraft'])->name('payments.reset-to-draft');
+
     // ========================================
     // Employees Module
     // ========================================
@@ -111,17 +183,56 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     Route::apiResource('calendars', V1\CalendarController::class);
 
     // ========================================
-    // Inventory Module
+    // Products Module
     // ========================================
     Route::apiResource('products', V1\ProductController::class);
+    Route::apiResource('product-categories', V1\ProductCategoryController::class);
+    Route::get('product-categories/tree', [V1\ProductCategoryController::class, 'tree'])->name('product-categories.tree');
+
+    // ========================================
+    // Inventory Module
+    // ========================================
     Route::apiResource('warehouses', V1\WarehouseController::class);
     Route::apiResource('warehouses.locations', V1\LocationController::class)->shallow();
     Route::apiResource('inventory-moves', V1\MoveController::class);
+
+    // Stock (Product Quantities)
+    Route::apiResource('stock', V1\StockController::class);
+    Route::get('stock/by-product/{productId}', [V1\StockController::class, 'byProduct'])->name('stock.by-product');
+    Route::get('stock/by-location/{locationId}', [V1\StockController::class, 'byLocation'])->name('stock.by-location');
+    Route::get('stock/by-warehouse/{warehouseId}', [V1\StockController::class, 'byWarehouse'])->name('stock.by-warehouse');
+    Route::post('stock/adjust', [V1\StockController::class, 'adjust'])->name('stock.adjust');
+    Route::post('stock/availability', [V1\StockController::class, 'availability'])->name('stock.availability');
 
     // ========================================
     // Partners Module
     // ========================================
     Route::apiResource('partners', V1\PartnerController::class);
+
+    // ========================================
+    // Calculators (Cabinet, Drawer, etc.)
+    // ========================================
+    Route::prefix('calculators')->name('calculators.')->group(function () {
+        // Cabinet calculations
+        Route::post('cabinet', [V1\CalculatorController::class, 'cabinet'])->name('cabinet');
+        Route::post('depth-validation', [V1\CalculatorController::class, 'depthValidation'])->name('depth-validation');
+        Route::post('max-slide', [V1\CalculatorController::class, 'maxSlide'])->name('max-slide');
+        Route::post('required-depth', [V1\CalculatorController::class, 'requiredDepth'])->name('required-depth');
+        Route::get('min-cabinet-depths', [V1\CalculatorController::class, 'minCabinetDepths'])->name('min-cabinet-depths');
+        Route::get('blum-specs', [V1\CalculatorController::class, 'blumSpecs'])->name('blum-specs');
+
+        // Drawer calculations
+        Route::post('drawer', [V1\CalculatorController::class, 'drawer'])->name('drawer');
+        Route::post('drawer-stack', [V1\CalculatorController::class, 'drawerStack'])->name('drawer-stack');
+        Route::post('drawer-cut-list', [V1\CalculatorController::class, 'drawerCutList'])->name('drawer-cut-list');
+        Route::post('drawer-quick-quote', [V1\CalculatorController::class, 'drawerQuickQuote'])->name('drawer-quick-quote');
+
+        // Stretcher calculations
+        Route::post('stretcher', [V1\CalculatorController::class, 'stretcher'])->name('stretcher');
+
+        // Face frame styles
+        Route::get('face-frame-styles', [V1\CalculatorController::class, 'faceFrameStyles'])->name('face-frame-styles');
+    });
 
     // ========================================
     // Batch Operations

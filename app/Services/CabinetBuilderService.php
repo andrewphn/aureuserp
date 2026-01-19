@@ -428,6 +428,9 @@ class CabinetBuilderService
      */
     protected function createCabinet(array $cabinetData, ?int $cabinetRunId): Cabinet
     {
+        // Calculate the depth breakdown using ConstructionStandardsService
+        $depthBreakdown = $this->calculateDepthBreakdown($cabinetData);
+
         $cabinet = Cabinet::create([
             'cabinet_run_id' => $cabinetRunId,
             'cabinet_number' => $this->getNextCabinetNumber($cabinetRunId),
@@ -443,9 +446,89 @@ class CabinetBuilderService
             'top_construction_type' => 'stretchers',
             'side_panel_thickness' => $cabinetData['side_panel_thickness'],
             'back_panel_thickness' => $cabinetData['back_panel_thickness'],
+            // Calculated depth breakdown fields (TCS standard formula)
+            'face_frame_depth_inches' => $depthBreakdown['face_frame_depth'],
+            'internal_depth_inches' => $depthBreakdown['internal_depth'],
+            'drawer_depth_inches' => $depthBreakdown['drawer_depth'],
+            'drawer_clearance_inches' => $depthBreakdown['drawer_clearance'],
+            'back_wall_gap_inches' => $depthBreakdown['back_wall_gap'],
+            'box_height_inches' => $depthBreakdown['box_height'],
+            'depth_validated' => $depthBreakdown['validated'],
+            'depth_validation_message' => $depthBreakdown['validation_message'],
+            'max_slide_length_inches' => $depthBreakdown['max_slide_length'],
+            'calculated_at' => now(),
         ]);
 
         return $cabinet;
+    }
+
+    /**
+     * Calculate depth breakdown for cabinet using ConstructionStandardsService
+     *
+     * TCS DEPTH FORMULA (Bryan Patton, Jan 2025-2026):
+     * Total = Face Frame + Drawer + Clearance + Back + Wall Gap
+     * 21"   = 1.5"       + 18"    + 0.25"     + 0.75" + 0.5"
+     *
+     * @param array $cabinetData Cabinet data with dimensions
+     * @return array Depth breakdown with all calculated values
+     */
+    protected function calculateDepthBreakdown(array $cabinetData): array
+    {
+        $standards = app(ConstructionStandardsService::class);
+        $calculator = app(CabinetCalculatorService::class);
+
+        // Get construction values from standards service
+        $faceFrameDepth = $cabinetData['face_frame_stile_width'] ?? self::TCS_FACE_FRAME_STILE;
+        $backThickness = $cabinetData['back_panel_thickness'] ?? self::PLYWOOD_3_4;
+
+        // Get drawer clearance and wall gap from standards (or use fallback)
+        $drawerClearance = $standards->get('drawer_rear_clearance', null, 0.75);
+        $backWallGap = $standards->get('back_wall_gap', null, 0.5);
+
+        // Total depth from CAD data
+        $totalDepth = $cabinetData['depth_inches'];
+
+        // Calculate internal depth (side panel depth)
+        // Internal = Total - Face Frame - Back Wall Gap
+        $internalDepth = $totalDepth - $backWallGap - $backThickness;
+
+        // Calculate available drawer depth
+        // Drawer depth = Internal - Clearance
+        $availableForDrawer = $internalDepth - $drawerClearance;
+
+        // Determine max slide length that fits
+        $slideLengths = [21, 18, 15, 12, 9];
+        $maxSlideLength = null;
+        foreach ($slideLengths as $length) {
+            if ($availableForDrawer >= $length) {
+                $maxSlideLength = $length;
+                break;
+            }
+        }
+
+        // The actual drawer depth is the slide length (or available space if smaller)
+        $drawerDepth = $maxSlideLength ?? $availableForDrawer;
+
+        // Calculate box height
+        $boxHeight = $cabinetData['height_inches'] - ($cabinetData['toe_kick_height_inches'] ?? self::TCS_TOE_KICK_HEIGHT);
+
+        // Validate depth is sufficient for standard drawers
+        $validated = $maxSlideLength !== null && $maxSlideLength >= 12; // At least 12" slides
+        $validationMessage = $validated
+            ? sprintf('Depth sufficient for %d" drawer slides', $maxSlideLength)
+            : sprintf('Depth insufficient - only %.2f" available for drawers', $availableForDrawer);
+
+        return [
+            'face_frame_depth' => $faceFrameDepth,
+            'internal_depth' => round($internalDepth, 4),
+            'drawer_depth' => $drawerDepth,
+            'drawer_clearance' => $drawerClearance,
+            'back_wall_gap' => $backWallGap,
+            'box_height' => round($boxHeight, 4),
+            'validated' => $validated,
+            'validation_message' => $validationMessage,
+            'max_slide_length' => $maxSlideLength,
+        ];
     }
 
     /**

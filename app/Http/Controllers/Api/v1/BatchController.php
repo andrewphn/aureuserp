@@ -48,17 +48,17 @@ class BatchController extends BaseApiController
     public function handle(Request $request, string $resource): JsonResponse
     {
         if (!isset($this->resourceMap[$resource])) {
-            return $this->error("Unknown resource: {$resource}", null, 400);
+            return $this->notFound("Unknown resource: {$resource}");
         }
 
-        $validated = $request->validate([
+        $request->validate([
             'operation' => 'required|string|in:create,update,delete',
             'data' => 'required|array|min:1|max:100',
             'data.*.id' => 'required_if:operation,update,delete|integer',
         ]);
 
-        $operation = $validated['operation'];
-        $data = $validated['data'];
+        $operation = $request->input('operation');
+        $data = $request->input('data');
         $controller = app($this->resourceMap[$resource]);
 
         $results = [

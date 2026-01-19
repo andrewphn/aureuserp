@@ -1,0 +1,207 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "version": "1.0.0",
+  "description": "TCS Construction Standards - Shared configuration for ERP, Rhino, and Grasshopper",
+
+  "material_thicknesses": {
+    "PLYWOOD_3_4": 0.75,
+    "PLYWOOD_1_2": 0.5,
+    "PLYWOOD_1_4": 0.25,
+    "HARDWOOD_5_4": 1.0,
+    "DRAWER_FACE": 1.0
+  },
+
+  "material_layers": {
+    "3-4_PreFin": {
+      "thickness": 0.75,
+      "color": [139, 90, 43],
+      "description": "3/4\" Prefinished Plywood"
+    },
+    "3-4_Medex": {
+      "thickness": 0.75,
+      "color": [65, 105, 225],
+      "description": "3/4\" Medex MDF (paint grade)"
+    },
+    "3-4_RiftWO": {
+      "thickness": 0.75,
+      "color": [210, 180, 140],
+      "description": "3/4\" Rift White Oak"
+    },
+    "1-2_Baltic": {
+      "thickness": 0.5,
+      "color": [255, 228, 181],
+      "description": "1/2\" Baltic Birch"
+    },
+    "1-4_Plywood": {
+      "thickness": 0.25,
+      "color": [240, 230, 200],
+      "description": "1/4\" Plywood (backs, bottoms)"
+    },
+    "5-4_Hardwood": {
+      "thickness": 1.0,
+      "color": [205, 133, 63],
+      "description": "5/4\" Hardwood (face frames)"
+    }
+  },
+
+  "part_type_to_material": {
+    "cabinet_box": "3-4_PreFin",
+    "toe_kick": "3-4_Medex",
+    "face_frame": "5-4_Hardwood",
+    "drawer_face": "3-4_RiftWO",
+    "finished_end": "3-4_RiftWO",
+    "stretcher": "3-4_PreFin",
+    "drawer_box": "1-2_Baltic",
+    "drawer_box_bottom": "1-4_Plywood",
+    "shelf": "3-4_PreFin",
+    "divider": "3-4_PreFin",
+    "back": "1-4_Plywood",
+    "door": "3-4_RiftWO"
+  },
+
+  "default_edgeband": {
+    "cabinet_box": "F",
+    "finished_end": "F,T",
+    "stretcher": "F",
+    "shelf": "F",
+    "drawer_face": "",
+    "door": "",
+    "face_frame": "",
+    "drawer_box": "",
+    "drawer_box_bottom": "",
+    "toe_kick": "F",
+    "divider": "F,B",
+    "back": ""
+  },
+
+  "machining_operations": {
+    "shelf_pins": {
+      "description": "5mm shelf pin holes (32mm system)",
+      "tool": "5mm drill",
+      "pattern": "system_32"
+    },
+    "dado_back": {
+      "description": "Back panel dado",
+      "tool": "1/4\" straight bit",
+      "depth": 0.25,
+      "width": 0.375,
+      "offset_from_back": 0.75
+    },
+    "dado_bottom": {
+      "description": "Bottom panel dado",
+      "tool": "1/4\" straight bit",
+      "depth": 0.25,
+      "width": 0.375
+    },
+    "hinge_bore": {
+      "description": "35mm cup hinge boring",
+      "tool": "35mm Forstner",
+      "depth": 0.5
+    },
+    "slide_holes": {
+      "description": "Drawer slide pilot holes",
+      "tool": "3mm drill"
+    },
+    "adjustable_shelf": {
+      "description": "System 32 shelf pin rows",
+      "tool": "5mm drill",
+      "pattern": "system_32",
+      "both_sides": true
+    },
+    "cam_lock": {
+      "description": "Cam lock boring for RTA",
+      "tools": ["20mm Forstner", "8mm drill"]
+    }
+  },
+
+  "construction_defaults": {
+    "cabinet": {
+      "material_thickness": 0.75,
+      "back_inset": 0.75,
+      "dado_depth": 0.25,
+      "dado_width": 0.375,
+      "toe_kick_height": 4.5,
+      "toe_kick_inset": 3.0,
+      "stretcher_width": 4.0,
+      "shelf_pin_inset": 2.0,
+      "shelf_pin_spacing": 1.26
+    },
+    "drawer": {
+      "box_material_thickness": 0.5,
+      "bottom_material_thickness": 0.25,
+      "side_height": 4.0,
+      "bottom_dado_depth": 0.25,
+      "bottom_dado_height": 0.5,
+      "clearance_width": 1.0,
+      "clearance_height": 0.75
+    },
+    "face_frame": {
+      "material_thickness": 0.75,
+      "stile_width": 1.5,
+      "rail_width": 1.5,
+      "reveal": 0.125
+    }
+  },
+
+  "layer_hierarchy": {
+    "TCS_Materials": {
+      "description": "Material-based layers for V-Carve nesting",
+      "children": ["3-4_PreFin", "3-4_Medex", "3-4_RiftWO", "1-2_Baltic", "1-4_Plywood", "5-4_Hardwood"]
+    },
+    "TCS_Projects": {
+      "description": "Project organization (dynamic)",
+      "children": []
+    },
+    "TCS_Dimensions": {
+      "description": "Dimension annotations",
+      "color": [0, 0, 0]
+    },
+    "TCS_Annotations": {
+      "description": "Text and notes",
+      "color": [0, 0, 0]
+    },
+    "TCS_Construction": {
+      "description": "Construction geometry (hidden by default)",
+      "color": [128, 128, 128],
+      "visible": false
+    }
+  },
+
+  "user_text_schema": {
+    "required": [
+      "TCS_PART_ID",
+      "TCS_CABINET_ID",
+      "TCS_ERP_ID",
+      "TCS_MATERIAL",
+      "TCS_PART_TYPE",
+      "TCS_THICKNESS"
+    ],
+    "optional": [
+      "TCS_PROJECT_NUMBER",
+      "TCS_CABINET_NUMBER",
+      "TCS_FULL_CODE",
+      "TCS_CUT_WIDTH",
+      "TCS_CUT_LENGTH",
+      "TCS_GRAIN",
+      "TCS_EDGEBAND",
+      "TCS_MACHINING",
+      "TCS_DADO",
+      "TCS_HAS_OVERRIDES",
+      "TCS_OVERRIDES"
+    ]
+  },
+
+  "coordinate_system": {
+    "rhino": {
+      "up": "Z",
+      "forward": "Y",
+      "right": "X"
+    },
+    "cabinet_origin": {
+      "description": "Front-left-bottom corner of cabinet",
+      "x": "left to right (width)",
+      "y": "front to back (depth)",
+      "z": "bottom to top (height)"
+    }
+  }
+}

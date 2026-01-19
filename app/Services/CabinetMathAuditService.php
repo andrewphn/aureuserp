@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Services\SheetNestingService;
 use App\Services\CabinetXYZService;
+use App\Services\TcsMaterialService;
 use Webkul\Project\Models\Cabinet;
 use Illuminate\Support\Collection;
 
@@ -105,8 +106,15 @@ class CabinetMathAuditService
         // Run position validation (including drawer fit validation)
         $positions3d['validation'] = $this->xyzService->validatePartPositions($positions3d, $specs);
 
+        // Build cabinet identification for Rhino/V-Carve export
+        $cabinetIdentification = $this->buildCabinetIdentification($input);
+
         return [
             'input_specs' => $specs,
+            'cabinet_id' => $cabinetIdentification['cabinet_id'],
+            'project_number' => $cabinetIdentification['project_number'],
+            'cabinet_number' => $cabinetIdentification['cabinet_number'],
+            'full_code' => $cabinetIdentification['full_code'],
             'gates' => [
                 'gate_1_cabinet_box' => $gate1,
                 'gate_2_face_frame_opening' => $gate2,
@@ -139,6 +147,15 @@ class CabinetMathAuditService
             // Get template for face frame style values
             $template = $this->standards->resolveTemplate($input);
 
+            // Use persisted calculated values if available, otherwise calculate
+            $boxHeight = $input->box_height_inches
+                ?? ($input->height_inches - ($input->toe_kick_height_inches ?? 4.5));
+            $internalDepth = $input->internal_depth_inches
+                ?? ($input->depth_inches - ($input->back_panel_thickness ?? self::PLYWOOD_3_4) - ($input->back_wall_gap_inches ?? self::WALL_GAP));
+            $drawerSlideLength = $input->max_slide_length_inches
+                ?? $input->drawer_slide_length
+                ?? 18;
+
             return [
                 'width' => $input->length_inches ?? $input->width_inches ?? 24,
                 'height' => $input->height_inches ?? 30,
@@ -148,6 +165,17 @@ class CabinetMathAuditService
                 'face_frame_stile' => $input->face_frame_stile_width ?? 1.5,
                 'face_frame_rail' => $input->face_frame_rail_width ?? 1.5,
                 'face_frame_thickness' => $this->standards->getFaceFrameThickness($input),
+                // Persisted calculated values (centralized source of truth)
+                'box_height' => $boxHeight,
+                'internal_depth' => $internalDepth,
+                'face_frame_depth' => $input->face_frame_depth_inches ?? ($input->face_frame_stile_width ?? 1.5),
+                'drawer_depth' => $input->drawer_depth_inches ?? $drawerSlideLength,
+                'drawer_clearance' => $input->drawer_clearance_inches ?? self::DRAWER_CAVITY_CLEARANCE,
+                'back_wall_gap' => $input->back_wall_gap_inches ?? self::WALL_GAP,
+                'depth_validated' => $input->depth_validated ?? false,
+                'depth_validation_message' => $input->depth_validation_message,
+                'max_slide_length' => $input->max_slide_length_inches,
+                'calculated_at' => $input->calculated_at,
                 'face_frame_style' => $input->face_frame_style ?? ($template->default_face_frame_style ?? CabinetXYZService::STYLE_FULL_OVERLAY),
                 'side_panel_thickness' => $input->side_panel_thickness ?? self::PLYWOOD_3_4,
                 'back_panel_thickness' => $input->back_panel_thickness ?? self::PLYWOOD_3_4,
@@ -184,7 +212,7 @@ class CabinetMathAuditService
         }
 
         // Array input - fill in defaults using ConstructionStandardsService
-        return array_merge([
+        $defaults = [
             'width' => 24,
             'height' => 30,
             'depth' => 24,
@@ -201,6 +229,17 @@ class CabinetMathAuditService
             // TCS Assembly Standards
             'cabinet_type' => 'base',           // base, sink_base, wall, tall
             'has_end_panels' => false,          // Decorative end panels (mitered)
+            // Calculated depth breakdown fields (TCS standard formula)
+            'box_height' => null,  // Will be calculated below if not provided
+            'internal_depth' => null,
+            'face_frame_depth' => null,
+            'drawer_depth' => null,
+            'drawer_clearance' => self::DRAWER_CAVITY_CLEARANCE,
+            'back_wall_gap' => self::WALL_GAP,
+            'depth_validated' => false,
+            'depth_validation_message' => null,
+            'max_slide_length' => null,
+            'calculated_at' => null,
             // General Construction Values (use ConstructionStandardsService fallbacks)
             'reveal_top' => ConstructionStandardsService::getFallbackDefault('reveal_top', self::REVEAL_TOP),
             'reveal_bottom' => ConstructionStandardsService::getFallbackDefault('reveal_bottom', self::REVEAL_BOTTOM),
@@ -227,7 +266,35 @@ class CabinetMathAuditService
             'sides_on_bottom' => true,          // TCS: Sides sit ON TOP of bottom panel
             'back_inset_from_sides' => false,   // TCS: Back goes FULL WIDTH (sides/bottom shortened)
             'stretchers_on_top' => true,        // TCS: Stretchers sit ON TOP of sides = FULL WIDTH
-        ], $input);
+        ];
+
+        $merged = array_merge($defaults, $input);
+
+        // Calculate derived values if not provided
+        if ($merged['box_height'] === null) {
+            $merged['box_height'] = $merged['height'] - $merged['toe_kick_height'];
+        }
+        if ($merged['internal_depth'] === null) {
+            $merged['internal_depth'] = $merged['depth'] - $merged['back_panel_thickness'] - $merged['back_wall_gap'];
+        }
+        if ($merged['face_frame_depth'] === null) {
+            $merged['face_frame_depth'] = $merged['face_frame_stile'];
+        }
+        if ($merged['drawer_depth'] === null) {
+            $merged['drawer_depth'] = $merged['drawer_slide_length'];
+        }
+        if ($merged['max_slide_length'] === null) {
+            // Calculate max slide that fits
+            $available = $merged['internal_depth'] - $merged['drawer_clearance'];
+            foreach ([21, 18, 15, 12, 9] as $len) {
+                if ($available >= $len) {
+                    $merged['max_slide_length'] = $len;
+                    break;
+                }
+            }
+        }
+
+        return $merged;
     }
 
     /**
@@ -1801,6 +1868,54 @@ class CabinetMathAuditService
     // =========================================================================
     // SUMMARY & UTILITIES
     // =========================================================================
+
+    /**
+     * Build cabinet identification for Rhino/V-Carve export
+     *
+     * Extracts project_number, cabinet_number, and full_code from Cabinet model
+     * or generates defaults for array input.
+     *
+     * @param Cabinet|array $input Cabinet model or specs array
+     * @return array Cabinet identification data
+     */
+    protected function buildCabinetIdentification(Cabinet|array $input): array
+    {
+        if ($input instanceof Cabinet) {
+            // Get project through relationship chain
+            $project = $input->project
+                ?? $input->room?->project
+                ?? $input->cabinetRun?->roomLocation?->room?->project;
+
+            $projectNumber = $project?->project_number ?? 'TCS-000-Unknown';
+            $cabinetNumber = $input->cabinet_number ?? 'CAB-' . $input->id;
+            $fullCode = $input->full_code ?? $input->generateFullCode();
+
+            // Use TcsMaterialService for short code generation
+            $materialService = app(TcsMaterialService::class);
+            $shortCode = $materialService->getShortProjectCode($projectNumber);
+            $cabinetId = $materialService->buildCabinetId($projectNumber, $cabinetNumber);
+
+            return [
+                'cabinet_id' => $cabinetId,           // AUST-BTH1-B1-C1 (for Rhino)
+                'project_number' => $projectNumber,   // TCS-001-9AustinFarmRoad
+                'cabinet_number' => $cabinetNumber,   // BTH1-B1-C1
+                'full_code' => $fullCode,             // TCS-001-9AustinFarmRoad-BTH1-SW-B1
+                'short_project_code' => $shortCode,   // AUST
+            ];
+        }
+
+        // Array input - generate defaults
+        $projectCode = $input['project_code'] ?? 'TCS';
+        $cabinetNumber = $input['cabinet_number'] ?? 'CAB-001';
+
+        return [
+            'cabinet_id' => $projectCode . '-' . $cabinetNumber,
+            'project_number' => $input['project_number'] ?? $projectCode,
+            'cabinet_number' => $cabinetNumber,
+            'full_code' => $input['full_code'] ?? $projectCode . '-' . $cabinetNumber,
+            'short_project_code' => $projectCode,
+        ];
+    }
 
     /**
      * Generate audit summary

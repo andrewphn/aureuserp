@@ -73,11 +73,29 @@ class Room extends Model
         'total_linear_feet_tier_5',
         // Construction template
         'construction_template_id',
+        // Calculated depth/aggregate fields
+        'default_base_depth_inches',
+        'default_wall_depth_inches',
+        'default_vanity_depth_inches',
+        'room_total_lf',
+        'room_cabinet_count',
+        'room_sheet_goods_sqft',
+        'room_solid_wood_bf',
+        'dimensions_calculated_at',
     ];
 
     protected $casts = [
         'pdf_page_number' => 'integer',
         'sort_order' => 'integer',
+        // Calculated depth/aggregate casts
+        'default_base_depth_inches' => 'decimal:4',
+        'default_wall_depth_inches' => 'decimal:4',
+        'default_vanity_depth_inches' => 'decimal:4',
+        'room_total_lf' => 'decimal:4',
+        'room_cabinet_count' => 'integer',
+        'room_sheet_goods_sqft' => 'decimal:2',
+        'room_solid_wood_bf' => 'decimal:2',
+        'dimensions_calculated_at' => 'datetime',
     ];
 
     /**

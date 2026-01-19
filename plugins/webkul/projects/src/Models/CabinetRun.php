@@ -66,6 +66,14 @@ class CabinetRun extends Model
         // Default hardware products for this run
         'default_hinge_product_id',
         'default_slide_product_id',
+        // Calculated depth/aggregate fields
+        'run_depth_inches',
+        'run_internal_depth_inches',
+        'run_max_slide_length',
+        'run_total_width_inches',
+        'run_sheet_goods_sqft',
+        'run_solid_wood_bf',
+        'dimensions_calculated_at',
     ];
 
     protected $casts = [
@@ -77,6 +85,14 @@ class CabinetRun extends Model
         'slides_count' => 'integer',
         'shelf_pins_count' => 'integer',
         'pullouts_count' => 'integer',
+        // Calculated depth/aggregate casts
+        'run_depth_inches' => 'decimal:4',
+        'run_internal_depth_inches' => 'decimal:4',
+        'run_max_slide_length' => 'integer',
+        'run_total_width_inches' => 'decimal:4',
+        'run_sheet_goods_sqft' => 'decimal:2',
+        'run_solid_wood_bf' => 'decimal:2',
+        'dimensions_calculated_at' => 'datetime',
     ];
 
     /**

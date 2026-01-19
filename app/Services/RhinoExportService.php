@@ -33,8 +33,20 @@ namespace App\Services;
  */
 class RhinoExportService
 {
+    protected TcsMaterialService $materialService;
+    protected ?string $cabinetId = null;
+    protected ?string $projectNumber = null;
+    protected ?string $cabinetNumber = null;
+    protected bool $includeTcsMetadata = true;
+
+    public function __construct(?TcsMaterialService $materialService = null)
+    {
+        $this->materialService = $materialService ?? new TcsMaterialService();
+    }
+
     /**
      * Layer colors by part type (RGB 0-255)
+     * Kept for 3D visualization compatibility
      */
     protected const LAYER_COLORS = [
         'cabinet_box' => [139, 90, 43],           // Saddle brown - plywood
@@ -82,10 +94,18 @@ class RhinoExportService
      * The output can be rendered directly in Rhino without any math.
      *
      * @param array $auditData Output from CabinetMathAuditService::generateFullAudit()
+     * @param array $options Export options (include_tcs_metadata, cabinet_id, etc.)
      * @return array Rhino-ready data structure
      */
-    public function generateRhinoData(array $auditData): array
+    public function generateRhinoData(array $auditData, array $options = []): array
     {
+        $this->includeTcsMetadata = $options['include_tcs_metadata'] ?? true;
+        $this->cabinetId = $options['cabinet_id'] ?? $auditData['cabinet_id'] ?? 'CAB-001';
+
+        // Store additional ERP identification for TCS metadata generation
+        $this->projectNumber = $auditData['project_number'] ?? null;
+        $this->cabinetNumber = $auditData['cabinet_number'] ?? null;
+
         $this->toeKickHeight = $auditData['input_specs']['toe_kick_height'] ?? 4.0;
         $cabinetHeight = $auditData['input_specs']['height'] ?? 32.75;
         $boxHeight = $cabinetHeight - $this->toeKickHeight;
@@ -100,7 +120,7 @@ class RhinoExportService
             }
         }
 
-        return [
+        $result = [
             'cabinet_envelope' => [
                 'width' => $auditData['input_specs']['width'] ?? 0,
                 'height' => $cabinetHeight,
@@ -118,6 +138,17 @@ class RhinoExportService
             'parts' => $parts,
             // Dimensions are MEASURED by Rhino from actual geometry (not pre-calculated)
         ];
+
+        // Add TCS layer hierarchy for V-Carve nesting
+        if ($this->includeTcsMetadata) {
+            $result['tcs_layers'] = $this->materialService->getTcsLayerHierarchy();
+            $result['cabinet_id'] = $this->cabinetId;
+            $result['project_number'] = $this->projectNumber;
+            $result['cabinet_number'] = $this->cabinetNumber;
+            $result['full_code'] = $auditData['full_code'] ?? null;
+        }
+
+        return $result;
     }
 
     /**
@@ -174,6 +205,18 @@ class RhinoExportService
         // Transform miter cut vertices if present
         if (isset($part['miter_cut'])) {
             $rhinoPart['miter_cut'] = $this->transformMiterCutToRhino($part['miter_cut']);
+        }
+
+        // Add TCS metadata for V-Carve CNC nesting
+        if ($this->includeTcsMetadata && $this->cabinetId) {
+            $rhinoPart['tcs_layer'] = $this->materialService->getMaterialForPart($part);
+            $rhinoPart['tcs_metadata'] = $this->materialService->generateTcsMetadata(
+                $part,
+                $this->cabinetId,
+                $partKey,
+                $this->projectNumber,
+                $this->cabinetNumber
+            );
         }
 
         return $rhinoPart;
@@ -296,11 +339,61 @@ def delete_by_type(part_types):
     if deleted > 0:
         print("Deleted " + str(deleted) + " objects of types: " + str(part_types))
 
+# ============================================================
+# TCS LAYER AND METADATA FUNCTIONS
+# ============================================================
+
+def create_tcs_layer_hierarchy():
+    """Create TCS material layer hierarchy for V-Carve nesting."""
+    if "tcs_layers" not in DATA:
+        return
+
+    tcs_data = DATA["tcs_layers"]
+    parent = tcs_data.get("parent", "TCS_Materials")
+
+    # Create parent layer
+    if not rs.IsLayer(parent):
+        rs.AddLayer(parent)
+        print("Created parent layer: " + parent)
+
+    # Create material layers
+    for layer in tcs_data.get("layers", []):
+        full_path = layer["full_path"]
+        color = layer["color"]
+
+        if not rs.IsLayer(full_path):
+            rs.AddLayer(full_path, color)
+            print("  Created: " + full_path)
+
+def set_tcs_user_text(obj, metadata):
+    """Set TCS metadata as Rhino User Text attributes."""
+    if not metadata or not obj:
+        return
+
+    for key, value in metadata.items():
+        if value is not None:
+            rs.SetUserText(obj, key, str(value))
+
+def assign_to_tcs_layer(obj, tcs_layer):
+    """Assign object to TCS material layer."""
+    if not tcs_layer:
+        return
+
+    full_layer = "TCS_Materials::" + tcs_layer
+
+    # Ensure layer exists
+    if not rs.IsLayer(full_layer):
+        # Create with default color
+        rs.AddLayer(full_layer)
+
+    rs.ObjectLayer(obj, full_layer)
+
 def create_box(part):
     """
     Create a box from part data. Coordinates are already in Rhino system.
 
     Uses 8-corner AddBox method for precise corner placement.
+    Also sets TCS metadata and layer assignment for V-Carve nesting.
     """
     pos = part["position"]
     dim = part["dimensions"]
@@ -333,6 +426,16 @@ def create_box(part):
         rs.ObjectName(box, part["part_name"])
         color = part.get("color", (128, 128, 128))
         rs.ObjectColor(box, color)
+
+        # Set TCS metadata as User Text (for V-Carve extraction)
+        tcs_metadata = part.get("tcs_metadata")
+        if tcs_metadata:
+            set_tcs_user_text(box, tcs_metadata)
+
+        # Assign to TCS material layer (for nesting)
+        tcs_layer = part.get("tcs_layer")
+        if tcs_layer:
+            assign_to_tcs_layer(box, tcs_layer)
 
     return box
 
@@ -405,13 +508,14 @@ def apply_miter_cut(box, miter_cut, part_name):
 # MAIN
 # ============================================================
 
-def main(component_types=None, clear_existing=True):
+def main(component_types=None, clear_existing=True, create_tcs_layers=True):
     """
     Build cabinet parts in Rhino.
 
     Args:
         component_types: List of part types to build, or None for all.
         clear_existing: If True, delete existing objects first.
+        create_tcs_layers: If True, create TCS material layer hierarchy.
     """
     if 'DATA' not in globals():
         print("ERROR: DATA not defined.")
@@ -421,9 +525,15 @@ def main(component_types=None, clear_existing=True):
     print("TCS CABINET BUILDER (Pure Renderer)")
     print("=" * 50)
 
+    # Create TCS layer hierarchy for V-Carve nesting
+    if create_tcs_layers:
+        create_tcs_layer_hierarchy()
+
     envelope = DATA["cabinet_envelope"]
     parts = DATA["parts"]
+    cabinet_id = DATA.get("cabinet_id", "CABINET")
 
+    print("Cabinet ID: " + cabinet_id)
     print("Cabinet: " + str(envelope["width"]) + " x " + str(envelope["height"]) + " x " + str(envelope["depth"]))
     print("Coordinate System: " + DATA.get("coordinate_system", {}).get("origin", "Rhino standard"))
 

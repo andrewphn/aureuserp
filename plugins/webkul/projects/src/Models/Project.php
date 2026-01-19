@@ -173,6 +173,18 @@ class Project extends Model implements HasMedia, Sortable
         'production_locked_by',
         'bom_snapshot_json',
         'pricing_snapshot_json',
+        // Calculated aggregate fields
+        'total_base_cabinet_lf',
+        'total_wall_cabinet_lf',
+        'total_tall_cabinet_lf',
+        'total_vanity_lf',
+        'total_sheet_goods_sqft',
+        'total_solid_wood_bf',
+        'total_edge_banding_lf',
+        'total_cabinet_count',
+        'total_drawer_count',
+        'total_door_count',
+        'dimensions_calculated_at',
     ];
 
     /**
@@ -216,6 +228,18 @@ class Project extends Model implements HasMedia, Sortable
         'production_locked_at' => 'datetime',
         'bom_snapshot_json' => 'array',
         'pricing_snapshot_json' => 'array',
+        // Calculated aggregate fields
+        'total_base_cabinet_lf' => 'decimal:4',
+        'total_wall_cabinet_lf' => 'decimal:4',
+        'total_tall_cabinet_lf' => 'decimal:4',
+        'total_vanity_lf' => 'decimal:4',
+        'total_sheet_goods_sqft' => 'decimal:2',
+        'total_solid_wood_bf' => 'decimal:2',
+        'total_edge_banding_lf' => 'decimal:2',
+        'total_cabinet_count' => 'integer',
+        'total_drawer_count' => 'integer',
+        'total_door_count' => 'integer',
+        'dimensions_calculated_at' => 'datetime',
     ];
 
     protected array $logAttributes = [

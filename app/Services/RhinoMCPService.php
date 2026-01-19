@@ -11,6 +11,13 @@ use Illuminate\Support\Facades\Log;
  * Provides a PHP interface to execute commands on Rhino via the MCP protocol.
  * Handles RhinoScript execution, document queries, and object manipulation.
  *
+ * Available MCP tools:
+ * - get_document_info, get_object_info, get_selected_objects_info
+ * - execute_rhinoscript_python_code
+ * - create_object, create_objects, modify_object, modify_objects, delete_object
+ * - select_objects
+ * - create_layer, get_or_set_current_layer, delete_layer
+ *
  * @author TCS Woodwork
  * @since January 2026
  */
@@ -173,8 +180,22 @@ class RhinoMCPService
             'code' => $code,
         ], $timeout ?? self::LONG_TIMEOUT);
 
-        // Extract the actual output from the nested result structure
-        // Response format: {"success": true, "result": "Script successfully executed! Print output: [data]\n"}
+        // Handle string response
+        if (is_string($result)) {
+            return ['output' => $result, 'success' => true];
+        }
+
+        // Handle raw string response
+        if (isset($result['raw'])) {
+            $output = $result['raw'];
+            // Check for error indicators
+            if (stripos($output, 'Error') === 0 || stripos($output, 'error:') !== false) {
+                return ['error' => $output, 'success' => false];
+            }
+            return ['output' => $output, 'success' => true];
+        }
+
+        // Format: {"success": true, "result": "Script successfully executed! Print output: [data]\n"}
         if (isset($result['success']) && $result['success'] === true && isset($result['result'])) {
             $resultText = $result['result'];
 
@@ -219,31 +240,127 @@ class RhinoMCPService
     /**
      * Select objects based on filters
      *
+     * Note: SerjoschDuering/rhino-mcp doesn't have a direct select_objects tool,
+     * so this is implemented via execute_rhino_code.
+     *
      * @param array $filters Filter criteria
      * @param string $filterType 'and' or 'or'
      * @return int Number of selected objects
      */
     public function selectObjects(array $filters = [], string $filterType = 'and'): int
     {
-        $result = $this->callMcp('rhino', 'select_objects', [
-            'filters' => $filters,
-            'filters_type' => $filterType,
-        ]);
+        // Build RhinoScript to select objects based on filters
+        $filtersJson = json_encode($filters);
+        $filterTypeJson = json_encode($filterType);
 
-        return $result['selected_count'] ?? 0;
+        $result = $this->executeRhinoScript(<<<PYTHON
+import rhinoscriptsyntax as rs
+import json
+
+filters = {$filtersJson}
+filter_type = {$filterTypeJson}
+
+rs.UnselectAllObjects()
+selected = []
+
+for obj in rs.AllObjects():
+    match = filter_type == 'or'  # Start with False for 'and', True for 'or'
+
+    if filter_type == 'and':
+        match = True
+        for key, value in filters.items():
+            if key == 'layer':
+                if rs.ObjectLayer(obj) != value:
+                    match = False
+                    break
+            elif key == 'name':
+                name = rs.ObjectName(obj)
+                if name != value and not (value.endswith('*') and name and name.startswith(value[:-1])):
+                    match = False
+                    break
+    else:  # 'or'
+        match = False
+        for key, value in filters.items():
+            if key == 'layer' and rs.ObjectLayer(obj) == value:
+                match = True
+                break
+            elif key == 'name':
+                name = rs.ObjectName(obj)
+                if name == value or (value.endswith('*') and name and name.startswith(value[:-1])):
+                    match = True
+                    break
+
+    if match:
+        rs.SelectObject(obj)
+        selected.append(str(obj))
+
+print(json.dumps({"selected_count": len(selected), "selected_ids": selected}))
+PYTHON);
+
+        if (isset($result['output'])) {
+            $decoded = json_decode($result['output'], true);
+            return $decoded['selected_count'] ?? 0;
+        }
+
+        return 0;
     }
 
     /**
      * Get information about currently selected objects
+     *
+     * Note: SerjoschDuering/rhino-mcp doesn't have a direct get_selected_objects_info tool,
+     * so this is implemented via execute_rhino_code.
      *
      * @param bool $includeAttributes Include custom user attributes
      * @return array List of selected objects with their info
      */
     public function getSelectedObjectsInfo(bool $includeAttributes = true): array
     {
-        return $this->callMcp('rhino', 'get_selected_objects_info', [
-            'include_attributes' => $includeAttributes,
-        ]);
+        $includeAttrs = $includeAttributes ? 'True' : 'False';
+
+        $result = $this->executeRhinoScript(<<<PYTHON
+import rhinoscriptsyntax as rs
+import json
+
+include_attrs = {$includeAttrs}
+selected = rs.SelectedObjects()
+objects = []
+
+if selected:
+    for obj in selected:
+        info = {
+            'id': str(obj),
+            'name': rs.ObjectName(obj),
+            'layer': rs.ObjectLayer(obj),
+            'type': rs.ObjectType(obj)
+        }
+
+        bbox = rs.BoundingBox([obj])
+        if bbox and len(bbox) >= 7:
+            info['bounding_box'] = {
+                'min': [bbox[0][0], bbox[0][1], bbox[0][2]],
+                'max': [bbox[6][0], bbox[6][1], bbox[6][2]]
+            }
+
+        if include_attrs:
+            attrs = {}
+            keys = rs.GetUserText(obj)
+            if keys:
+                for key in keys:
+                    attrs[key] = rs.GetUserText(obj, key)
+            info['attributes'] = attrs
+
+        objects.append(info)
+
+print(json.dumps(objects))
+PYTHON);
+
+        if (isset($result['output'])) {
+            $decoded = json_decode($result['output'], true);
+            return is_array($decoded) ? $decoded : [];
+        }
+
+        return [];
     }
 
     /**
@@ -510,10 +627,11 @@ PYTHON);
      * @param string|null $objectType Optional type filter (Curve, Surface, etc.)
      * @return array Object info list
      */
-    public function getAllObjects(?string $layer = null, ?string $objectType = null): array
+    public function getAllObjects(?string $layer = null, ?string $objectType = null, bool $includeUserText = false): array
     {
         $layerFilter = $layer ? "filter_layer = \"{$layer}\"" : "filter_layer = None";
         $typeFilter = $objectType ? "filter_type = \"{$objectType}\"" : "filter_type = None";
+        $includeUserTextPython = $includeUserText ? 'True' : 'False';
 
         $result = $this->executeRhinoScript(<<<PYTHON
 import rhinoscriptsyntax as rs
@@ -521,6 +639,7 @@ import json
 
 {$layerFilter}
 {$typeFilter}
+include_user_text = {$includeUserTextPython}
 
 objects = []
 for obj in rs.AllObjects():
@@ -546,8 +665,8 @@ for obj in rs.AllObjects():
     name = rs.ObjectName(obj)
     bbox = rs.BoundingBox([obj])
 
-    objects.append({
-        'id': str(obj),
+    obj_data = {
+        'guid': str(obj),
         'name': name,
         'type': type_name,
         'type_code': obj_type,
@@ -556,7 +675,18 @@ for obj in rs.AllObjects():
             'min': [bbox[0][0], bbox[0][1], bbox[0][2]] if bbox else None,
             'max': [bbox[6][0], bbox[6][1], bbox[6][2]] if bbox else None
         } if bbox and len(bbox) >= 7 else None
-    })
+    }
+
+    # Include TCS User Text metadata if requested
+    if include_user_text:
+        keys = rs.GetUserText(obj)
+        if keys:
+            user_text = {}
+            for key in keys:
+                user_text[key] = rs.GetUserText(obj, key)
+            obj_data['user_text'] = user_text
+
+    objects.append(obj_data)
 
 print(json.dumps(objects))
 PYTHON);

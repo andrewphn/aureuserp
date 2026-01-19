@@ -547,16 +547,22 @@ class CabinetXYZService
         $cabW = $specs['width'];
         $cabH = $specs['height'];
         $cabD = $specs['depth'];
-        $boxH = $gate1['outputs']['box_height'];
+        // Use persisted calculated values from specs (centralized) first, then fall back to gate1 outputs
+        $boxH = $specs['box_height'] ?? $gate1['outputs']['box_height'];
         $toeKick = $specs['toe_kick_height'];
         $toeKickRecess = $specs['toe_kick_recess'] ?? 3.0;
         $sideThickness = $specs['side_panel_thickness'];
         $backThickness = $specs['back_panel_thickness'];
         $insideW = $gate1['outputs']['inside_width'];
-        $insideD = $gate1['outputs']['inside_depth'];
+        // Use persisted internal_depth (side panel depth) when available
+        $insideD = $specs['internal_depth'] ?? $gate1['outputs']['inside_depth'];
         $ffStile = $specs['face_frame_stile'];
         $ffRail = $specs['face_frame_rail'];
         $gap = self::COMPONENT_GAP;
+        // Drawer depth and clearance from persisted values
+        $drawerDepth = $specs['drawer_depth'] ?? $specs['drawer_slide_length'] ?? 18;
+        $drawerClearance = $specs['drawer_clearance'] ?? self::COMPONENT_GAP;
+        $maxSlideLength = $specs['max_slide_length'] ?? 18;
 
         // Get face frame style configuration (TCS default: full_overlay)
         $faceFrameStyle = $specs['face_frame_style'] ?? self::STYLE_FULL_OVERLAY;

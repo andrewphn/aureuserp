@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 /**
  * RhinoDataExtractor - Extract cabinet data from Rhino 3DM files
  *
+ * Supports both TCS standard layer format and legacy drawing conventions.
+ *
  * TCS Rhino drawings are organized as multiple 2D views arranged spatially:
  * - Plan Views: Top-down (Width × Depth)
  * - Elevations: Front-facing (Width × Height)
@@ -63,15 +65,17 @@ class RhinoDataExtractor
     ];
 
     protected RhinoMCPService $rhinoMcp;
+    protected TcsMaterialService $materialService;
     protected array $views = [];
     protected array $groups = [];
     protected array $dimensions = [];
     protected array $textLabels = [];
     protected array $fixtures = [];
 
-    public function __construct(RhinoMCPService $rhinoMcp)
+    public function __construct(RhinoMCPService $rhinoMcp, ?TcsMaterialService $materialService = null)
     {
         $this->rhinoMcp = $rhinoMcp;
+        $this->materialService = $materialService ?? new TcsMaterialService();
     }
 
     /**
@@ -986,5 +990,216 @@ class RhinoDataExtractor
         }
 
         return $analysis;
+    }
+
+    // ============================================================
+    // TCS METADATA EXTRACTION (V-Carve Compatible)
+    // ============================================================
+
+    /**
+     * Parse material layer name (TCS or legacy format)
+     *
+     * Supports both new TCS format (3-4_Medex) and legacy formats
+     * from existing drawings (3/4 Medex, 3/4" Rift WO, etc.)
+     *
+     * @param string $layerName Layer name to parse
+     * @return array|null Parsed material data or null if unrecognized
+     */
+    public function parseMaterialLayer(string $layerName): ?array
+    {
+        return $this->materialService->parseMaterialLayer($layerName);
+    }
+
+    /**
+     * Extract TCS metadata from Rhino User Text attributes
+     *
+     * @param array $objectInfo Object data including user_text
+     * @return array Extracted TCS metadata
+     */
+    public function extractTcsMetadata(array $objectInfo): array
+    {
+        $userText = $objectInfo['user_text'] ?? [];
+
+        $metadata = [
+            'part_id' => $userText['TCS_PART_ID'] ?? null,
+            'cabinet_id' => $userText['TCS_CABINET_ID'] ?? null,
+            'project_code' => $userText['TCS_PROJECT_CODE'] ?? null,
+            'part_type' => $userText['TCS_PART_TYPE'] ?? null,
+            'part_name' => $userText['TCS_PART_NAME'] ?? null,
+            'material' => $userText['TCS_MATERIAL'] ?? null,
+            'thickness' => isset($userText['TCS_THICKNESS']) ? (float) $userText['TCS_THICKNESS'] : null,
+            'grain' => $userText['TCS_GRAIN'] ?? null,
+            'edgeband' => $userText['TCS_EDGEBAND'] ?? null,
+            'machining' => $userText['TCS_MACHINING'] ?? null,
+            'cut_dimensions' => [
+                'width' => isset($userText['TCS_CUT_WIDTH']) ? (float) $userText['TCS_CUT_WIDTH'] : null,
+                'length' => isset($userText['TCS_CUT_LENGTH']) ? (float) $userText['TCS_CUT_LENGTH'] : null,
+            ],
+            'dado' => $this->parseDadoString($userText['TCS_DADO'] ?? null),
+            'format' => 'tcs',
+        ];
+
+        // Extract project code from cabinet ID if not explicitly set
+        if (!$metadata['project_code'] && $metadata['cabinet_id']) {
+            $metadata['project_code'] = $this->materialService->extractProjectCode($metadata['cabinet_id']);
+        }
+
+        // Remove null values from cut_dimensions
+        $metadata['cut_dimensions'] = array_filter($metadata['cut_dimensions'], fn($v) => $v !== null);
+        if (empty($metadata['cut_dimensions'])) {
+            unset($metadata['cut_dimensions']);
+        }
+
+        // Remove top-level nulls
+        return array_filter($metadata, fn($v) => $v !== null);
+    }
+
+    /**
+     * Parse dado specification string
+     *
+     * Format: "depth x width @ height_from_bottom"
+     * Example: "0.25 x 0.25 @ 0.5"
+     *
+     * @param string|null $dadoString Dado specification string
+     * @return array|null Parsed dado data
+     */
+    protected function parseDadoString(?string $dadoString): ?array
+    {
+        if (!$dadoString) {
+            return null;
+        }
+
+        // Pattern: depth x width @ height
+        if (preg_match('/^([\d.]+)\s*x\s*([\d.]+)\s*@\s*([\d.]+)$/', $dadoString, $matches)) {
+            return [
+                'depth' => (float) $matches[1],
+                'width' => (float) $matches[2],
+                'height_from_bottom' => (float) $matches[3],
+            ];
+        }
+
+        return null;
+    }
+
+    /**
+     * Normalize a legacy layer name to TCS standard format
+     *
+     * @param string $layerName Legacy layer name
+     * @return array|null Normalized data with TCS layer name
+     */
+    public function normalizeLegacyLayer(string $layerName): ?array
+    {
+        return $this->materialService->parseLegacyLayerName($layerName);
+    }
+
+    /**
+     * Extract all objects with TCS metadata from the document
+     *
+     * @return array Objects grouped by cabinet ID
+     */
+    public function extractTcsObjects(): array
+    {
+        $allObjects = $this->rhinoMcp->getAllObjects(null, null, true); // include_user_text = true
+        $cabinetParts = [];
+
+        foreach ($allObjects as $obj) {
+            $metadata = $this->extractTcsMetadata($obj);
+
+            if (!empty($metadata['cabinet_id'])) {
+                $cabinetId = $metadata['cabinet_id'];
+
+                if (!isset($cabinetParts[$cabinetId])) {
+                    $cabinetParts[$cabinetId] = [
+                        'cabinet_id' => $cabinetId,
+                        'parts' => [],
+                    ];
+                }
+
+                $cabinetParts[$cabinetId]['parts'][] = [
+                    'guid' => $obj['guid'] ?? null,
+                    'name' => $obj['name'] ?? $metadata['part_name'] ?? null,
+                    'layer' => $obj['layer'] ?? null,
+                    'metadata' => $metadata,
+                    'bounding_box' => $obj['bounding_box'] ?? null,
+                ];
+            }
+        }
+
+        return $cabinetParts;
+    }
+
+    /**
+     * Detect material from layer name (TCS or legacy)
+     *
+     * Attempts to parse the layer name and return material information.
+     *
+     * @param string $layerName Layer name from Rhino object
+     * @return array|null Material data or null
+     */
+    public function detectMaterialFromLayer(string $layerName): ?array
+    {
+        // Check for TCS_Materials:: prefix
+        if (str_starts_with($layerName, 'TCS_Materials::')) {
+            $materialPart = substr($layerName, strlen('TCS_Materials::'));
+            return $this->materialService->parseMaterialLayer($materialPart);
+        }
+
+        // Try direct parse (for TCS format without prefix)
+        $parsed = $this->materialService->parseMaterialLayer($layerName);
+        if ($parsed) {
+            return $parsed;
+        }
+
+        // Try legacy format
+        return $this->materialService->parseLegacyLayerName($layerName);
+    }
+
+    /**
+     * Analyze TCS layer structure in the document
+     *
+     * @return array Analysis of TCS layers found
+     */
+    public function analyzeTcsLayers(): array
+    {
+        $layers = $this->rhinoMcp->getLayers();
+        $tcsLayers = [];
+        $legacyLayers = [];
+        $unmappedLayers = [];
+
+        foreach ($layers as $layer) {
+            $layerName = is_array($layer) ? ($layer['name'] ?? $layer[0] ?? '') : $layer;
+
+            if (str_starts_with($layerName, 'TCS_Materials::')) {
+                $materialPart = substr($layerName, strlen('TCS_Materials::'));
+                $parsed = $this->materialService->parseMaterialLayer($materialPart);
+                if ($parsed) {
+                    $tcsLayers[] = [
+                        'layer' => $layerName,
+                        'material' => $parsed,
+                    ];
+                }
+            } else {
+                $legacy = $this->materialService->parseLegacyLayerName($layerName);
+                if ($legacy) {
+                    $legacyLayers[] = [
+                        'layer' => $layerName,
+                        'material' => $legacy,
+                        'suggested_tcs_layer' => 'TCS_Materials::' . $legacy['layer'],
+                    ];
+                } else {
+                    $unmappedLayers[] = $layerName;
+                }
+            }
+        }
+
+        return [
+            'tcs_format_count' => count($tcsLayers),
+            'legacy_format_count' => count($legacyLayers),
+            'unmapped_count' => count($unmappedLayers),
+            'tcs_layers' => $tcsLayers,
+            'legacy_layers' => $legacyLayers,
+            'unmapped_layers' => $unmappedLayers,
+            'migration_needed' => count($legacyLayers) > 0,
+        ];
     }
 }

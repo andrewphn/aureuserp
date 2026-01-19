@@ -1,0 +1,221 @@
+TCS GRASSHOPPER CABINET SYSTEM - WIRING DIAGRAM
+================================================
+
+This file describes how to wire the TCS Grasshopper components together.
+Use this as a reference when building your definition in Grasshopper.
+
+
+LAYER 1: API CONNECTION
+=======================
+
+Components:
+  - Panel (api_url)
+  - Panel (api_token)
+  - Boolean Toggle (test_connection)
+  - GHPython: TCS API Connect
+
+Wiring:
+  [Panel: "http://aureuserp.test"] -----> api_url
+  [Panel: "your_token_here"] -----------> api_token
+  [Boolean Toggle] ---------------------> test_connection
+
+Outputs used downstream:
+  api_base -----> (to all components that need API)
+  auth_header -> (to all components that need API)
+
+
+LAYER 2: PROJECT NAVIGATION
+===========================
+
+Components:
+  - GHPython: TCS Project Selector
+  - GHPython: TCS Room Navigator
+  - GHPython: TCS Cabinet List
+  - Number Sliders (for selection)
+  - Boolean Toggles (for refresh)
+
+Wiring Project Selector:
+  api_base (from API Connect) ---------> api_base
+  auth_header (from API Connect) ------> auth_header
+  [Boolean Toggle] --------------------> refresh
+  [Number Slider 0-20] ----------------> selected_index
+
+Wiring Room Navigator:
+  api_base (from API Connect) ---------> api_base
+  auth_header (from API Connect) ------> auth_header
+  selected_id (from Project Selector) -> project_id
+  [Number Slider 0-10] ----------------> selected_room_index
+  [Number Slider 0-10] ----------------> selected_location_index
+  [Boolean Toggle] --------------------> refresh
+
+Wiring Cabinet List:
+  api_base (from API Connect) ---------> api_base
+  auth_header (from API Connect) ------> auth_header
+  (cabinet_run_id - see note below) ---> cabinet_run_id
+  [Number Slider 0-20] ----------------> selected_index
+  [Boolean Toggle] --------------------> refresh
+
+NOTE: To get cabinet_run_id:
+  Option 1: Use List Item component
+    cabinet_run_ids (from Room Nav) --> L input of List Item
+    [Number Slider] -----------------> i input of List Item
+    List Item output ----------------> cabinet_run_id
+
+  Option 2: Type ID directly in Panel
+    [Panel: "123"] ------------------> cabinet_run_id
+
+
+LAYER 3: CALCULATOR
+===================
+
+Components:
+  - GHPython: TCS Cabinet Calculator
+  - GHPython: TCS Cut List Display
+  - GHPython: TCS Pricing
+  - Number Sliders (for overrides)
+
+Wiring Cabinet Calculator:
+  api_base (from API Connect) ---------> api_base
+  auth_header (from API Connect) ------> auth_header
+  selected_id (from Cabinet List) -----> cabinet_id
+  [Number Slider 0-60] (or 0) ---------> override_width
+  [Number Slider 0-96] (or 0) ---------> override_height
+  [Number Slider 0-36] (or 0) ---------> override_depth
+  [Boolean Toggle] --------------------> calculate
+
+Wiring Cut List Display:
+  cut_list_json (from Calculator) -----> cut_list_json
+  [Panel or empty] --------------------> filter_type
+
+Wiring Pricing (optional):
+  width (from Calculator) -------------> width
+  height (from Calculator) ------------> height
+  depth (from Calculator) -------------> depth
+  [Panel: "base"] ---------------------> cabinet_type
+
+
+LAYER 4: GEOMETRY
+=================
+
+Components:
+  - GHPython: TCS Cabinet Box
+  - GHPython: TCS Parts Generator
+  - GHPython: TCS Face Frame (optional)
+  - GHPython: TCS Drawer (optional)
+  - Number Sliders (position)
+
+Wiring Cabinet Box:
+  width (from Calculator) -------------> width
+  height (from Calculator) ------------> height
+  depth (from Calculator) -------------> depth
+  cabinet_type (from Cabinet List) ----> cabinet_type
+  [Number Slider 0-200] ---------------> position_x
+  [Number Slider 0-200] ---------------> position_y
+  [Number Slider 0-200] ---------------> position_z
+  [Boolean Toggle] --------------------> include_toe_kick
+  [Boolean Toggle] --------------------> generate
+
+Wiring Parts Generator:
+  cut_list_json (from Calculator) -----> cut_list_json
+  calculation_json (from Calculator) --> calculation_json
+  [Number Slider 0-200] ---------------> position_x
+  [Number Slider 0-200] ---------------> position_y
+  [Number Slider 0-200] ---------------> position_z
+  [Panel: "base"] ---------------------> cabinet_type
+  [Number Slider 0-10] ----------------> explode_distance
+  [Boolean Toggle] --------------------> generate
+
+
+LAYER 5: OUTPUT / SAVE
+======================
+
+Components:
+  - GHPython: TCS Save to ERP
+  - Bake Button (from Human UI) or right-click bake
+
+Wiring Save to ERP:
+  api_base (from API Connect) ---------> api_base
+  auth_header (from API Connect) ------> auth_header
+  selected_id (from Cabinet List) -----> cabinet_id
+  width (from override slider) --------> width
+  height (from override slider) -------> height
+  depth (from override slider) --------> depth
+  [Boolean Toggle] --------------------> save
+
+
+VISUAL LAYOUT
+=============
+
+Arrange components on canvas like this:
+
+    +------------------+
+    |  API CONNECTION  |  <-- Top left
+    +------------------+
+           |
+           v
+    +------------------+     +------------------+
+    | PROJECT SELECTOR | --> |  ROOM NAVIGATOR  |
+    +------------------+     +------------------+
+                                    |
+                                    v
+                             +------------------+
+                             |   CABINET LIST   |
+                             +------------------+
+                                    |
+           +------------------------+------------------------+
+           |                        |                        |
+           v                        v                        v
+    +------------------+     +------------------+     +------------------+
+    |    CALCULATOR    |     |    CUT LIST     |     |     PRICING      |
+    +------------------+     +------------------+     +------------------+
+           |
+           +------------------------+
+           |                        |
+           v                        v
+    +------------------+     +------------------+
+    |   CABINET BOX    |     | PARTS GENERATOR  |
+    +------------------+     +------------------+
+           |                        |
+           v                        v
+    +------------------+     +------------------+
+    |   RHINO GEOM     |     |   RHINO GEOM     |
+    +------------------+     +------------------+
+
+
+COMPONENT FILE LOCATIONS
+========================
+
+api/tcs_api_connect.py      -> TCS API Connect
+api/tcs_api_fetch.py        -> TCS API Fetch
+api/tcs_api_write.py        -> TCS API Write
+
+navigation/tcs_project_selector.py -> TCS Project Selector
+navigation/tcs_room_navigator.py   -> TCS Room Navigator
+navigation/tcs_cabinet_list.py     -> TCS Cabinet List
+navigation/tcs_hierarchy_tree.py   -> TCS Hierarchy Tree
+
+calculator/tcs_cabinet_calc.py     -> TCS Cabinet Calculator
+calculator/tcs_cut_list.py         -> TCS Cut List Display
+calculator/tcs_override_manager.py -> TCS Override Manager
+calculator/tcs_pricing.py          -> TCS Pricing
+
+geometry/tcs_cabinet_box.py        -> TCS Cabinet Box
+geometry/tcs_parts_generator.py    -> TCS Parts Generator
+geometry/tcs_face_frame_geo.py     -> TCS Face Frame
+geometry/tcs_drawer_geo.py         -> TCS Drawer
+
+ui/tcs_cabinet_panel.py            -> TCS Cabinet Panel
+ui/tcs_save_to_erp.py              -> TCS Save to ERP
+
+
+QUICK TEST SEQUENCE
+===================
+
+1. Set up API Connect with URL and token
+2. Toggle test_connection -> verify "Connected"
+3. Add Project Selector -> verify projects listed
+4. Add Room Navigator -> verify rooms load
+5. Get a cabinet_run_id from ERP or Room Navigator
+6. Add Cabinet List with cabinet_run_id -> verify cabinets listed
+7. Add Calculator with cabinet_id -> verify dimensions
+8. Add Cabinet Box with dimensions -> verify geometry in Rhino

@@ -214,6 +214,24 @@ class Cabinet extends Model
         'edge_banding_product_id',
         // Construction template
         'construction_template_id',
+        // Base construction fields (needed for audit)
+        'toe_kick_height',
+        'toe_kick_depth',
+        'back_panel_thickness',
+        'has_back_panel',
+        // Calculated depth breakdown (TCS standard formula)
+        // Total = Face Frame + Drawer + Clearance + Back + Wall Gap
+        'face_frame_depth_inches',
+        'internal_depth_inches',
+        'drawer_depth_inches',
+        'drawer_clearance_inches',
+        'back_wall_gap_inches',
+        'box_height_inches',
+        // Calculation validation
+        'depth_validated',
+        'depth_validation_message',
+        'max_slide_length_inches',
+        'calculated_at',
     ];
 
     protected $casts = [
@@ -246,6 +264,16 @@ class Cabinet extends Model
         'sink_requires_extended_sides' => 'boolean',
         'sink_side_extension_inches' => 'decimal:3',
         'face_frame_door_gap_inches' => 'decimal:3',
+        // Calculated depth breakdown casts
+        'face_frame_depth_inches' => 'decimal:4',
+        'internal_depth_inches' => 'decimal:4',
+        'drawer_depth_inches' => 'decimal:4',
+        'drawer_clearance_inches' => 'decimal:4',
+        'back_wall_gap_inches' => 'decimal:4',
+        'box_height_inches' => 'decimal:4',
+        'depth_validated' => 'boolean',
+        'max_slide_length_inches' => 'integer',
+        'calculated_at' => 'datetime',
     ];
 
     /**

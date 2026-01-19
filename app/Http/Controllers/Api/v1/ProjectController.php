@@ -612,4 +612,384 @@ class ProjectController extends BaseResourceController
             'estimated_value' => round($estimatedValue, 2),
         ], 'Project calculations completed');
     }
+
+    /**
+     * POST /projects/{id}/clone - Deep clone a project
+     *
+     * Clones the project with all rooms, locations, cabinet runs, and cabinets.
+     */
+    public function clone(Request $request, int $id): JsonResponse
+    {
+        $project = Project::with([
+            'rooms.locations.cabinetRuns.cabinets.sections',
+            'addresses',
+            'tags',
+        ])->find($id);
+
+        if (!$project) {
+            return $this->notFound('Project not found');
+        }
+
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'partner_id' => 'nullable|integer|exists:partners_partners,id',
+            'include_addresses' => 'nullable|boolean',
+            'include_tags' => 'nullable|boolean',
+        ]);
+
+        try {
+            \DB::beginTransaction();
+
+            // Clone the project
+            $newProject = $project->replicate([
+                'project_number',
+                'created_at',
+                'updated_at',
+            ]);
+
+            $newProject->name = $validated['name'] ?? $project->name . ' (Copy)';
+            $newProject->partner_id = $validated['partner_id'] ?? $project->partner_id;
+            $newProject->project_number = $this->generateProjectNumber([
+                'company_id' => $project->company_id,
+            ]);
+            $newProject->is_converted = false;
+            $newProject->current_production_stage = 'discovery';
+            $newProject->creator_id = $request->user()->id;
+            $newProject->save();
+
+            // Clone addresses if requested
+            if ($validated['include_addresses'] ?? true) {
+                foreach ($project->addresses as $address) {
+                    $newAddress = $address->replicate();
+                    $newAddress->addressable_id = $newProject->id;
+                    $newAddress->save();
+                }
+            }
+
+            // Clone tags if requested
+            if ($validated['include_tags'] ?? true) {
+                $newProject->tags()->sync($project->tags->pluck('id'));
+            }
+
+            // Clone rooms hierarchy
+            foreach ($project->rooms as $room) {
+                $newRoom = $room->replicate(['created_at', 'updated_at']);
+                $newRoom->project_id = $newProject->id;
+                $newRoom->save();
+
+                foreach ($room->locations as $location) {
+                    $newLocation = $location->replicate(['created_at', 'updated_at']);
+                    $newLocation->project_id = $newProject->id;
+                    $newLocation->room_id = $newRoom->id;
+                    $newLocation->save();
+
+                    foreach ($location->cabinetRuns as $run) {
+                        $newRun = $run->replicate(['created_at', 'updated_at']);
+                        $newRun->project_id = $newProject->id;
+                        $newRun->room_id = $newRoom->id;
+                        $newRun->room_location_id = $newLocation->id;
+                        $newRun->save();
+
+                        foreach ($run->cabinets as $cabinet) {
+                            $newCabinet = $cabinet->replicate(['created_at', 'updated_at']);
+                            $newCabinet->project_id = $newProject->id;
+                            $newCabinet->room_id = $newRoom->id;
+                            $newCabinet->cabinet_run_id = $newRun->id;
+                            $newCabinet->save();
+
+                            // Clone sections if they exist
+                            if ($cabinet->sections) {
+                                foreach ($cabinet->sections as $section) {
+                                    $newSection = $section->replicate(['created_at', 'updated_at']);
+                                    $newSection->cabinet_id = $newCabinet->id;
+                                    $newSection->save();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            \DB::commit();
+
+            $this->dispatchWebhookEvent($newProject, 'cloned');
+
+            return $this->success(
+                $this->transformModel($newProject->fresh()),
+                'Project cloned successfully',
+                201
+            );
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            return $this->error('Clone failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * GET /projects/{id}/gate-status - Get project gate status
+     *
+     * Returns the status of all project gates and requirements.
+     */
+    public function gateStatus(int $id): JsonResponse
+    {
+        $project = Project::with([
+            'rooms.locations.cabinetRuns.cabinets',
+            'milestones',
+            'tasks',
+        ])->find($id);
+
+        if (!$project) {
+            return $this->notFound('Project not found');
+        }
+
+        // Define gate requirements
+        $gates = [
+            'design' => [
+                'name' => 'Design Gate',
+                'requirements' => [
+                    'has_rooms' => [
+                        'status' => $project->rooms->isNotEmpty(),
+                        'message' => 'Project must have at least one room',
+                    ],
+                    'has_cabinets' => [
+                        'status' => $this->projectHasCabinets($project),
+                        'message' => 'Project must have at least one cabinet',
+                    ],
+                    'all_cabinets_dimensioned' => [
+                        'status' => $this->allCabinetsDimensioned($project),
+                        'message' => 'All cabinets must have dimensions',
+                    ],
+                ],
+            ],
+            'sourcing' => [
+                'name' => 'Sourcing Gate',
+                'requirements' => [
+                    'design_approved' => [
+                        'status' => in_array($project->current_production_stage, ['sourcing', 'material_reserved', 'material_issued', 'production', 'delivery']),
+                        'message' => 'Design must be approved',
+                    ],
+                ],
+            ],
+            'production' => [
+                'name' => 'Production Gate',
+                'requirements' => [
+                    'materials_reserved' => [
+                        'status' => in_array($project->current_production_stage, ['material_reserved', 'material_issued', 'production', 'delivery']),
+                        'message' => 'Materials must be reserved',
+                    ],
+                    'materials_issued' => [
+                        'status' => in_array($project->current_production_stage, ['material_issued', 'production', 'delivery']),
+                        'message' => 'Materials must be issued',
+                    ],
+                ],
+            ],
+            'delivery' => [
+                'name' => 'Delivery Gate',
+                'requirements' => [
+                    'production_complete' => [
+                        'status' => $project->current_production_stage === 'delivery',
+                        'message' => 'Production must be complete',
+                    ],
+                    'all_tasks_complete' => [
+                        'status' => $this->allTasksComplete($project),
+                        'message' => 'All production tasks must be complete',
+                    ],
+                ],
+            ],
+        ];
+
+        // Calculate gate status
+        foreach ($gates as $key => &$gate) {
+            $passed = collect($gate['requirements'])->every(fn($req) => $req['status']);
+            $gate['passed'] = $passed;
+            $gate['progress'] = collect($gate['requirements'])->filter(fn($req) => $req['status'])->count() . '/' . count($gate['requirements']);
+        }
+
+        return $this->success([
+            'project_id' => $project->id,
+            'current_stage' => $project->current_production_stage,
+            'gates' => $gates,
+        ], 'Gate status retrieved');
+    }
+
+    /**
+     * GET /projects/{id}/bom - Get project bill of materials
+     */
+    public function bom(int $id): JsonResponse
+    {
+        $project = Project::with([
+            'rooms.locations.cabinetRuns.cabinets.sections',
+        ])->find($id);
+
+        if (!$project) {
+            return $this->notFound('Project not found');
+        }
+
+        // Generate BOM summary from cabinets
+        $bomSummary = $this->generateBomSummary($project);
+
+        return $this->success([
+            'project_id' => $project->id,
+            'summary' => $bomSummary,
+        ], 'BOM summary retrieved');
+    }
+
+    /**
+     * POST /projects/{id}/generate-order - Generate sales order from project
+     */
+    public function generateOrder(Request $request, int $id): JsonResponse
+    {
+        $project = Project::with(['partner', 'rooms'])->find($id);
+
+        if (!$project) {
+            return $this->notFound('Project not found');
+        }
+
+        if (!$project->partner_id) {
+            return $this->error('Project must have a partner to generate an order', 422);
+        }
+
+        $validated = $request->validate([
+            'order_type' => 'nullable|string|in:quote,order',
+            'include_rooms' => 'nullable|boolean',
+        ]);
+
+        $orderType = $validated['order_type'] ?? 'quote';
+        $includeRooms = $validated['include_rooms'] ?? true;
+
+        try {
+            // Create sales order
+            $order = \Webkul\Sale\Models\Order::create([
+                'partner_id' => $project->partner_id,
+                'project_id' => $project->id,
+                'company_id' => $project->company_id,
+                'user_id' => $request->user()->id,
+                'creator_id' => $request->user()->id,
+                'state' => $orderType === 'order' ? 'sale' : 'draft',
+                'date_order' => now(),
+                'validity_date' => now()->addDays(30),
+                'origin' => $project->project_number,
+            ]);
+
+            // Create order lines from rooms
+            if ($includeRooms) {
+                $lineSort = 1;
+                foreach ($project->rooms as $room) {
+                    // Create section header
+                    \Webkul\Sale\Models\OrderLine::create([
+                        'order_id' => $order->id,
+                        'name' => $room->name,
+                        'display_type' => 'line_section',
+                        'sort' => $lineSort++,
+                    ]);
+
+                    // Create line for room cabinets
+                    $linearFeet = ($room->total_linear_feet_tier_1 ?? 0) + ($room->total_linear_feet_tier_2 ?? 0) + ($room->total_linear_feet_tier_3 ?? 0);
+                    if ($linearFeet > 0) {
+                        \Webkul\Sale\Models\OrderLine::create([
+                            'order_id' => $order->id,
+                            'company_id' => $order->company_id,
+                            'currency_id' => $order->currency_id,
+                            'order_partner_id' => $order->partner_id,
+                            'salesman_id' => $order->user_id,
+                            'creator_id' => $request->user()->id,
+                            'state' => $order->state,
+                            'name' => "Cabinetry - {$room->name}",
+                            'product_uom_qty' => $linearFeet,
+                            'price_unit' => ($room->estimated_cabinet_value ?? 0) / max(1, $linearFeet),
+                            'price_subtotal' => $room->estimated_cabinet_value ?? 0,
+                            'price_total' => $room->estimated_cabinet_value ?? 0,
+                            'sort' => $lineSort++,
+                        ]);
+                    }
+                }
+            }
+
+            // Recalculate order totals
+            $order->load('lines');
+            $order->update([
+                'amount_untaxed' => $order->lines->sum('price_subtotal'),
+                'amount_total' => $order->lines->sum('price_total'),
+            ]);
+
+            // Mark project as converted
+            $project->update(['is_converted' => true]);
+
+            $this->dispatchWebhookEvent($order, 'created');
+
+            return $this->success([
+                'project_id' => $project->id,
+                'order_id' => $order->id,
+                'order_name' => $order->name,
+                'order_type' => $orderType,
+                'amount_total' => $order->amount_total,
+            ], 'Order generated from project', 201);
+        } catch (\Exception $e) {
+            return $this->error('Order generation failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    // Helper methods for gate status
+    protected function projectHasCabinets(Project $project): bool
+    {
+        foreach ($project->rooms as $room) {
+            foreach ($room->locations as $location) {
+                foreach ($location->cabinetRuns as $run) {
+                    if ($run->cabinets->isNotEmpty()) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    protected function allCabinetsDimensioned(Project $project): bool
+    {
+        foreach ($project->rooms as $room) {
+            foreach ($room->locations as $location) {
+                foreach ($location->cabinetRuns as $run) {
+                    foreach ($run->cabinets as $cabinet) {
+                        if (!$cabinet->length_inches || !$cabinet->height_inches || !$cabinet->depth_inches) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    protected function allTasksComplete(Project $project): bool
+    {
+        if ($project->tasks->isEmpty()) {
+            return true;
+        }
+        return $project->tasks->every(fn($task) => $task->state === 'done');
+    }
+
+    protected function generateBomSummary(Project $project): array
+    {
+        $summary = [
+            'sheet_goods' => [],
+            'hardware' => [],
+            'total_cabinets' => 0,
+            'total_drawers' => 0,
+            'total_doors' => 0,
+        ];
+
+        foreach ($project->rooms as $room) {
+            foreach ($room->locations as $location) {
+                foreach ($location->cabinetRuns as $run) {
+                    foreach ($run->cabinets as $cabinet) {
+                        $summary['total_cabinets']++;
+                        $summary['total_drawers'] += $cabinet->drawer_count ?? 0;
+                        $summary['total_doors'] += $cabinet->door_count ?? 0;
+                    }
+                }
+            }
+        }
+
+        return $summary;
+    }
 }

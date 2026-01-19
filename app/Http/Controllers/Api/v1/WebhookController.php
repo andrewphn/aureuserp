@@ -27,12 +27,18 @@ class WebhookController extends BaseApiController
      */
     public function subscribe(Request $request): JsonResponse
     {
+        // Build allowed events list including wildcards
+        $allowedEvents = array_merge(
+            WebhookSubscription::EVENTS,
+            ['*', 'project.*', 'room.*', 'cabinet.*', 'cabinet_run.*', 'drawer.*', 'door.*', 'task.*', 'employee.*', 'product.*', 'partner.*']
+        );
+
         $validated = $request->validate([
             'url' => 'required|url|max:2048',
             'events' => 'required|array|min:1',
-            'events.*' => 'string|in:' . implode(',', WebhookSubscription::EVENTS) . ',*',
+            'events.*' => 'string|in:' . implode(',', $allowedEvents),
             'name' => 'nullable|string|max:255',
-            'secret' => 'nullable|string|min:16|max:64',
+            'secret' => 'nullable|string|max:64',
         ]);
 
         $subscription = WebhookSubscription::create([
@@ -63,12 +69,18 @@ class WebhookController extends BaseApiController
             return $this->notFound('Webhook subscription not found');
         }
 
+        // Build allowed events list including wildcards
+        $allowedEvents = array_merge(
+            WebhookSubscription::EVENTS,
+            ['*', 'project.*', 'room.*', 'cabinet.*', 'cabinet_run.*', 'drawer.*', 'door.*', 'task.*', 'employee.*', 'product.*', 'partner.*']
+        );
+
         $validated = $request->validate([
             'url' => 'sometimes|url|max:2048',
             'events' => 'sometimes|array|min:1',
-            'events.*' => 'string|in:' . implode(',', WebhookSubscription::EVENTS) . ',*',
+            'events.*' => 'string|in:' . implode(',', $allowedEvents),
             'name' => 'nullable|string|max:255',
-            'secret' => 'nullable|string|min:16|max:64',
+            'secret' => 'nullable|string|max:64',
             'is_active' => 'sometimes|boolean',
         ]);
 

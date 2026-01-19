@@ -87,6 +87,17 @@ class CabinetSection extends Model
         'cabinet_position_from_top_inches',
         'section_width_ratio',
         'section_height_ratio',
+        // Calculated opening/layout fields
+        'calculated_opening_width_inches',
+        'calculated_opening_height_inches',
+        'available_component_height_inches',
+        'total_drawer_height_inches',
+        'total_door_height_inches',
+        'unused_height_inches',
+        'section_stretcher_count',
+        'layout_validated',
+        'layout_validation_message',
+        'dimensions_calculated_at',
     ];
 
     /**
@@ -122,6 +133,16 @@ class CabinetSection extends Model
             'cabinet_position_from_top_inches' => 'float',
             'section_width_ratio' => 'float',
             'section_height_ratio' => 'float',
+            // Calculated opening/layout casts
+            'calculated_opening_width_inches' => 'decimal:4',
+            'calculated_opening_height_inches' => 'decimal:4',
+            'available_component_height_inches' => 'decimal:4',
+            'total_drawer_height_inches' => 'decimal:4',
+            'total_door_height_inches' => 'decimal:4',
+            'unused_height_inches' => 'decimal:4',
+            'section_stretcher_count' => 'integer',
+            'layout_validated' => 'boolean',
+            'dimensions_calculated_at' => 'datetime',
         ];
     }
 
