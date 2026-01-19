@@ -100,7 +100,63 @@ class ConstructionStandardsService
         // TCS Depth Rule: Sides/bottom fit BETWEEN face frame (front) and back panel (rear)
         // Inside Depth = Cabinet Depth - Face Frame Thickness - Back Thickness
         // TCS Face Frame Rule: Stiles extend full cabinet height (to floor), rails fit between stiles
+
+        // ========================================
+        // FACE FRAME STYLE DEFAULTS
+        // ========================================
+        'default_face_frame_style' => 'full_overlay',
+
+        // Frameless Style
+        'frameless_reveal_gap' => 0.09375,       // 3/32"
+        'frameless_bottom_reveal' => 0,
+
+        // Face Frame (Traditional) Style
+        'face_frame_reveal_gap' => 0.125,        // 1/8"
+        'face_frame_bottom_reveal' => 0.125,
+
+        // Full Overlay Style (TCS Default)
+        'full_overlay_amount' => 1.25,           // 1-1/4"
+        'full_overlay_reveal_gap' => 0.125,      // 1/8"
+        'full_overlay_bottom_reveal' => 0,       // No bottom reveal
+
+        // Inset Style
+        'inset_reveal_gap' => 0.0625,            // 1/16"
+        'inset_bottom_reveal' => 0.0625,
+
+        // Partial Overlay Style
+        'partial_overlay_amount' => 0.375,       // 3/8"
+        'partial_overlay_reveal_gap' => 0.125,   // 1/8"
+        'partial_overlay_bottom_reveal' => 0.125,
+
+        // Additional Clearances (from CabinetMathAuditService)
+        'drawer_cavity_clearance' => 0.25,       // 1/4" clearance beyond slide length
+        'end_panel_install_overage' => 0.5,      // +1/2" on end panels for install adjustment
     ];
+
+    /**
+     * Get a fallback default value without needing an entity.
+     *
+     * Used by services like CabinetXYZService when no Cabinet model is available
+     * but a default value is needed for calculations.
+     *
+     * @param string $key The fallback key (e.g., 'face_frame_thickness')
+     * @param mixed $default Default if key not found
+     * @return mixed The fallback value
+     */
+    public static function getFallbackDefault(string $key, mixed $default = null): mixed
+    {
+        return self::FALLBACK_DEFAULTS[$key] ?? $default;
+    }
+
+    /**
+     * Get all fallback defaults.
+     *
+     * @return array All fallback default values
+     */
+    public static function getAllFallbackDefaults(): array
+    {
+        return self::FALLBACK_DEFAULTS;
+    }
 
     /**
      * Resolve the effective template for an entity.

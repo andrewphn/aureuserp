@@ -47,7 +47,7 @@ class CabinetCalculatorService
     public const DEFAULT_COMPONENT_GAP = 0.125;
     public const DEFAULT_STRETCHER_DEPTH = 3.0;
     public const DEFAULT_MATERIAL_THICKNESS = 0.75;
-    public const DEFAULT_BACK_WALL_GAP = 0.25;
+    public const DEFAULT_BACK_WALL_GAP = 0.5;  // 1/2" gap between cabinet back and wall
     public const DEFAULT_SINK_SIDE_EXTENSION = 0.75;
     public const DEFAULT_SLIDE_LENGTH = 18;
     public const DEFAULT_FF_BACKING_OVERHANG = 1.0;
@@ -95,6 +95,35 @@ class CabinetCalculatorService
         // 2. Get construction standards (from template or defaults)
         $standards = $this->resolveStandards($input);
 
+        // 2b. Check if cabinet has drawers and validate depth
+        $hasDrawers = $this->componentsHaveDrawers($components);
+        $drawerDepthValidation = null;
+
+        if ($hasDrawers) {
+            $slideLength = $standards['values']['drawer_slide_length'] ?? self::DEFAULT_SLIDE_LENGTH;
+            $drawerDepthValidation = $this->validateCabinetDepthForDrawers(
+                $cabinetDepth,
+                $slideLength,
+                $standards
+            );
+
+            // If depth is insufficient and auto_adjust is enabled, use the required depth
+            if (!$drawerDepthValidation['is_sufficient'] && ($input['auto_adjust_depth'] ?? false)) {
+                $originalDepth = $cabinetDepth;
+                $cabinetDepth = $drawerDepthValidation['required_depth'];
+
+                // Re-validate with adjusted depth and note the adjustment
+                $drawerDepthValidation = $this->validateCabinetDepthForDrawers(
+                    $cabinetDepth,
+                    $slideLength,
+                    $standards
+                );
+                $drawerDepthValidation['auto_adjusted'] = true;
+                $drawerDepthValidation['original_depth'] = $originalDepth;
+                $drawerDepthValidation['adjusted_depth'] = $cabinetDepth;
+            }
+        }
+
         // 3. Calculate box dimensions
         $box = $this->calculateBoxDimensions($cabinetWidth, $cabinetHeight, $cabinetDepth, $cabinetType, $standards);
 
@@ -113,6 +142,14 @@ class CabinetCalculatorService
         // 8. Validate
         $validation = $this->validate($box, $faceFrame, $componentCalcs);
 
+        // 8b. Add drawer depth validation to overall validation
+        if ($drawerDepthValidation) {
+            $validation['drawer_depth'] = $drawerDepthValidation;
+            if (!$drawerDepthValidation['is_sufficient']) {
+                $validation['errors'][] = $drawerDepthValidation['message'];
+            }
+        }
+
         return [
             'input_summary' => [
                 'exterior' => [
@@ -122,6 +159,7 @@ class CabinetCalculatorService
                 ],
                 'cabinet_type' => $cabinetType,
                 'component_count' => count($components),
+                'has_drawers' => $hasDrawers,
             ],
             'construction_standards' => $standards,
             'calculations' => [
@@ -133,6 +171,20 @@ class CabinetCalculatorService
             'cut_list' => $cutList,
             'validation' => $validation,
         ];
+    }
+
+    /**
+     * Check if components array includes any drawers
+     */
+    protected function componentsHaveDrawers(array $components): bool
+    {
+        foreach ($components as $component) {
+            $type = $component['type'] ?? '';
+            if (in_array($type, ['drawer', 'drawer_bank', 'drawers'])) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -164,6 +216,263 @@ class CabinetCalculatorService
                 'sink_side_extension' => $template?->sink_side_extension ?? self::DEFAULT_SINK_SIDE_EXTENSION,
                 'drawer_slide_length' => $input['drawer_slide_length'] ?? self::DEFAULT_SLIDE_LENGTH,
             ],
+        ];
+    }
+
+    /**
+     * Calculate the minimum required cabinet depth based on drawer slide requirements.
+     *
+     * TOTAL DEPTH FORMULA (front of face frame to wall):
+     * Total = Face Frame + Drawer + Clearance + Back + Wall Gap
+     * 21"   = 1.25"      + 18"    + 0.75"     + 0.75" + 0.25"
+     *
+     * Components (front to back):
+     * 1. Face frame depth (stile thickness): typically 1.25" or 0.75"
+     * 2. Drawer depth (slide length): 18", 21", 15", 12", or 9"
+     * 3. Clearance behind drawer: 0.75" (shop practice)
+     * 4. Back material thickness: 0.75"
+     * 5. Wall gap (scribe/clearance): 0.25"
+     *
+     * @param int $slideLength Drawer slide length in inches (9, 12, 15, 18, or 21)
+     * @param array $standards Construction standards array
+     * @return array Depth requirements with formulas
+     */
+    public function calculateRequiredCabinetDepth(int $slideLength, array $standards): array
+    {
+        $s = $standards['values'];
+
+        // Face frame depth (stile thickness)
+        $faceFrameDepth = $s['face_frame_stile_width'] ?? self::DEFAULT_STILE_WIDTH;
+
+        // Drawer depth = slide length
+        $drawerDepth = $slideLength;
+
+        // Clearance behind drawer (shop practice)
+        $clearance = DrawerConfiguratorService::SHOP_MIN_DEPTH_ADDITION;
+
+        // Back panel thickness
+        $backThickness = $s['back_panel_thickness'] ?? self::DEFAULT_MATERIAL_THICKNESS;
+
+        // Wall gap for clearance/scribing
+        $backGap = $s['back_wall_gap'] ?? self::DEFAULT_BACK_WALL_GAP;
+
+        // Internal depth (side panel depth) = drawer + clearance
+        $internalDepth = $drawerDepth + $clearance;
+
+        // Total cabinet depth = face frame + drawer + clearance + back + gap
+        $requiredTotalDepth = $faceFrameDepth + $drawerDepth + $clearance + $backThickness + $backGap;
+
+        // Blum's official minimum (for reference)
+        $blumMinDepth = DrawerConfiguratorService::BLUM_MIN_CABINET_DEPTHS[$slideLength]
+            ?? ($slideLength + 0.90625);
+
+        return [
+            'slide_length' => $slideLength,
+            'components' => [
+                'face_frame_depth' => $faceFrameDepth,
+                'drawer_depth' => $drawerDepth,
+                'clearance_behind_drawer' => $clearance,
+                'back_thickness' => $backThickness,
+                'back_wall_gap' => $backGap,
+            ],
+            'internal_depth' => [
+                'value' => $internalDepth,
+                'formula' => sprintf(
+                    'Drawer + Clearance = %d" + %.4f" = %.4f"',
+                    $drawerDepth,
+                    $clearance,
+                    $internalDepth
+                ),
+                'blum_reference' => $blumMinDepth,
+            ],
+            'required_cabinet_depth' => [
+                'value' => $requiredTotalDepth,
+                'formula' => sprintf(
+                    'Face Frame + Drawer + Clearance + Back + Gap = %.4f" + %d" + %.4f" + %.4f" + %.4f" = %.4f"',
+                    $faceFrameDepth,
+                    $drawerDepth,
+                    $clearance,
+                    $backThickness,
+                    $backGap,
+                    $requiredTotalDepth
+                ),
+            ],
+        ];
+    }
+
+    /**
+     * Calculate internal depth available from a given total cabinet depth.
+     *
+     * Works backwards: Total depth to wall - gap - back = internal depth
+     *
+     * @param float $totalDepth Total cabinet depth to wall
+     * @param array $standards Construction standards
+     * @return array Internal depth and available drawer space
+     */
+    public function calculateInternalDepthFromTotal(float $totalDepth, array $standards): array
+    {
+        $s = $standards['values'];
+
+        $backThickness = $s['back_panel_thickness'] ?? self::DEFAULT_MATERIAL_THICKNESS;
+        $backGap = $s['back_wall_gap'] ?? self::DEFAULT_BACK_WALL_GAP;
+
+        // Internal depth = total - gap - back
+        $internalDepth = $totalDepth - $backGap - $backThickness;
+
+        // Available for drawer = internal - clearance
+        $shopClearance = DrawerConfiguratorService::SHOP_MIN_DEPTH_ADDITION;
+        $availableForDrawer = $internalDepth - $shopClearance;
+
+        // What slide fits?
+        $slideLengths = [21, 18, 15, 12, 9];
+        $maxSlide = null;
+        foreach ($slideLengths as $length) {
+            if ($availableForDrawer >= $length) {
+                $maxSlide = $length;
+                break;
+            }
+        }
+
+        return [
+            'total_depth_to_wall' => $totalDepth,
+            'back_wall_gap' => $backGap,
+            'back_thickness' => $backThickness,
+            'internal_depth' => [
+                'value' => $internalDepth,
+                'formula' => sprintf(
+                    'Total - Gap - Back = %.4f" - %.4f" - %.4f" = %.4f"',
+                    $totalDepth,
+                    $backGap,
+                    $backThickness,
+                    $internalDepth
+                ),
+            ],
+            'available_for_drawer' => [
+                'value' => $availableForDrawer,
+                'formula' => sprintf(
+                    'Internal - Clearance = %.4f" - %.4f" = %.4f"',
+                    $internalDepth,
+                    $shopClearance,
+                    $availableForDrawer
+                ),
+            ],
+            'max_slide_length' => $maxSlide,
+            'slide_options' => array_map(function ($length) use ($availableForDrawer) {
+                return [
+                    'length' => $length,
+                    'fits' => $availableForDrawer >= $length,
+                    'clearance' => round($availableForDrawer - $length, 4),
+                ];
+            }, $slideLengths),
+        ];
+    }
+
+    /**
+     * Validate and optionally adjust cabinet depth for drawer requirements.
+     *
+     * Call this when configuring a drawer cabinet to ensure the depth is sufficient.
+     * Returns validation result and recommended depth if current is insufficient.
+     *
+     * @param float $currentDepth Current cabinet depth
+     * @param int $slideLength Drawer slide length required
+     * @param array $standards Construction standards
+     * @return array Validation result with recommendation
+     */
+    public function validateCabinetDepthForDrawers(
+        float $currentDepth,
+        int $slideLength,
+        array $standards
+    ): array {
+        $required = $this->calculateRequiredCabinetDepth($slideLength, $standards);
+        $requiredDepth = $required['required_cabinet_depth']['value'];
+
+        $isSufficient = $currentDepth >= $requiredDepth;
+        $shortage = $isSufficient ? 0 : ($requiredDepth - $currentDepth);
+
+        return [
+            'is_sufficient' => $isSufficient,
+            'current_depth' => $currentDepth,
+            'required_depth' => $requiredDepth,
+            'shortage' => $shortage,
+            'slide_length' => $slideLength,
+            'min_internal_depth' => $required['internal_depth']['value'],
+            'message' => $isSufficient
+                ? sprintf('Cabinet depth (%.4f") is sufficient for %d" drawer slides.', $currentDepth, $slideLength)
+                : sprintf(
+                    'Cabinet depth (%.4f") is %.4f" short for %d" drawer slides. Required: %.4f"',
+                    $currentDepth,
+                    $shortage,
+                    $slideLength,
+                    $requiredDepth
+                ),
+            'recommendation' => $isSufficient ? null : [
+                'action' => 'increase_depth',
+                'recommended_depth' => $requiredDepth,
+                'alternative' => $slideLength > 9
+                    ? sprintf('Or use shorter %d" slides (requires %.4f" depth)',
+                        $slideLength - 3,
+                        $this->calculateRequiredCabinetDepth($slideLength - 3, $standards)['required_cabinet_depth']['value'])
+                    : null,
+            ],
+            'calculation_details' => $required,
+        ];
+    }
+
+    /**
+     * Determine the appropriate slide length for a given cabinet depth.
+     *
+     * Works in reverse - given a cabinet depth, what's the longest slide that fits?
+     *
+     * @param float $cabinetDepth Cabinet depth in inches
+     * @param array $standards Construction standards
+     * @return array Recommended slide length and details
+     */
+    public function getMaxSlideForCabinetDepth(float $cabinetDepth, array $standards): array
+    {
+        $s = $standards['values'];
+        $backThickness = $s['back_panel_thickness'] ?? self::DEFAULT_MATERIAL_THICKNESS;
+        $backGap = $s['back_wall_gap'] ?? self::DEFAULT_BACK_WALL_GAP;
+
+        // Available internal depth
+        $internalDepth = $cabinetDepth - $backThickness - $backGap;
+
+        // Available for slide (minus shop clearance)
+        $availableForSlide = $internalDepth - DrawerConfiguratorService::SHOP_MIN_DEPTH_ADDITION;
+
+        // Standard slide lengths
+        $slideLengths = [21, 18, 15, 12, 9];
+        $recommendedSlide = null;
+
+        foreach ($slideLengths as $length) {
+            if ($availableForSlide >= $length) {
+                $recommendedSlide = $length;
+                break;
+            }
+        }
+
+        return [
+            'cabinet_depth' => $cabinetDepth,
+            'internal_depth' => $internalDepth,
+            'available_for_slide' => $availableForSlide,
+            'recommended_slide_length' => $recommendedSlide,
+            'formula' => sprintf(
+                'Cabinet Depth - Back - Gap - Clearance = %.4f" - %.4f" - %.4f" - %.4f" = %.4f" available',
+                $cabinetDepth,
+                $backThickness,
+                $backGap,
+                DrawerConfiguratorService::SHOP_MIN_DEPTH_ADDITION,
+                $availableForSlide
+            ),
+            'all_options' => array_map(function ($length) use ($availableForSlide) {
+                return [
+                    'slide_length' => $length,
+                    'fits' => $availableForSlide >= $length,
+                    'clearance' => $availableForSlide - $length,
+                ];
+            }, $slideLengths),
+            'warning' => $recommendedSlide === null
+                ? 'Cabinet depth is too shallow for any standard drawer slides. Minimum 9" slides require ~10.5" cabinet depth.'
+                : null,
         ];
     }
 

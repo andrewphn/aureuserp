@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Services\CabinetCalculatorService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Webkul\Project\Models\Cabinet;
 
@@ -138,5 +140,132 @@ class CabinetController extends BaseResourceController
         }
 
         return $data;
+    }
+
+    /**
+     * Calculate cabinet dimensions and pricing
+     *
+     * POST /api/v1/cabinets/{id}/calculate
+     *
+     * Uses the CabinetCalculatorService to run calculations
+     * based on exterior dimensions and component specification
+     */
+    public function calculate(int $id, CabinetCalculatorService $calculator): JsonResponse
+    {
+        $cabinet = Cabinet::with(['sections.drawers', 'sections.doors', 'sections.shelves', 'stretchers'])->findOrFail($id);
+
+        try {
+            // Build input from cabinet data
+            $components = [];
+
+            // Add drawers from sections
+            foreach ($cabinet->sections as $section) {
+                foreach ($section->drawers as $drawer) {
+                    $components[] = [
+                        'type' => 'drawer',
+                        'height' => $drawer->front_height_inches ?? 6.0,
+                    ];
+                }
+                foreach ($section->doors as $door) {
+                    $components[] = [
+                        'type' => 'door',
+                        'height' => $door->height_inches ?? 12.0,
+                    ];
+                }
+            }
+
+            $input = [
+                'exterior' => [
+                    'width' => (float) ($cabinet->width_inches ?? $cabinet->length_inches),
+                    'height' => (float) $cabinet->height_inches,
+                    'depth' => (float) $cabinet->depth_inches,
+                ],
+                'cabinet_type' => $cabinet->construction_type ?? 'base',
+                'components' => $components,
+                'template_id' => $cabinet->construction_template_id,
+            ];
+
+            $result = $calculator->calculateFromExterior($input);
+
+            return $this->success([
+                'cabinet_id' => $cabinet->id,
+                'dimensions' => [
+                    'width_inches' => $cabinet->width_inches ?? $cabinet->length_inches,
+                    'height_inches' => $cabinet->height_inches,
+                    'depth_inches' => $cabinet->depth_inches,
+                    'linear_feet' => $cabinet->linear_feet,
+                ],
+                'pricing' => [
+                    'unit_price_per_lf' => $cabinet->unit_price_per_lf,
+                    'total_price' => $cabinet->total_price,
+                    'adjustment_amount' => $cabinet->adjustment_amount,
+                    'final_price' => $cabinet->final_price,
+                ],
+                'complexity' => [
+                    'score' => $cabinet->complexity_score,
+                    'breakdown' => $cabinet->complexity_breakdown,
+                ],
+                'calculation_result' => $result,
+            ], 'Cabinet calculated successfully');
+        } catch (\Exception $e) {
+            return $this->error('Calculation failed: ' . $e->getMessage(), null, 500);
+        }
+    }
+
+    /**
+     * Get cabinet cut list for shop production
+     *
+     * GET /api/v1/cabinets/{id}/cut-list
+     *
+     * Uses the CabinetCalculatorService to generate a cut list
+     */
+    public function cutList(int $id, CabinetCalculatorService $calculator): JsonResponse
+    {
+        $cabinet = Cabinet::with([
+            'sections.drawers',
+            'sections.doors',
+            'sections.shelves',
+            'stretchers',
+            'constructionTemplate',
+        ])->findOrFail($id);
+
+        try {
+            // Build components list
+            $components = [];
+            foreach ($cabinet->sections as $section) {
+                foreach ($section->drawers as $drawer) {
+                    $components[] = [
+                        'type' => 'drawer',
+                        'height' => $drawer->front_height_inches ?? 6.0,
+                    ];
+                }
+            }
+
+            $input = [
+                'exterior' => [
+                    'width' => (float) ($cabinet->width_inches ?? $cabinet->length_inches),
+                    'height' => (float) $cabinet->height_inches,
+                    'depth' => (float) $cabinet->depth_inches,
+                ],
+                'cabinet_type' => $cabinet->construction_type ?? 'base',
+                'components' => $components,
+                'template_id' => $cabinet->construction_template_id,
+            ];
+
+            // Full calculation includes cut list
+            $result = $calculator->calculateFromExterior($input);
+
+            return $this->success([
+                'cabinet_id' => $cabinet->id,
+                'cabinet_number' => $cabinet->cabinet_number,
+                'full_code' => $cabinet->full_code,
+                'cut_list' => $result['cut_list'] ?? [],
+                'box' => $result['box'] ?? null,
+                'face_frame' => $result['face_frame'] ?? null,
+                'stretchers' => $result['stretchers'] ?? null,
+            ], 'Cut list generated');
+        } catch (\Exception $e) {
+            return $this->error('Cut list generation failed: ' . $e->getMessage(), null, 500);
+        }
     }
 }

@@ -202,6 +202,155 @@ class ConstructionTemplateResource extends Resource
                             ->suffix('"'),
                     ]),
 
+                // ========================================
+                // FACE FRAME STYLES
+                // ========================================
+                Section::make('Face Frame Styles')
+                    ->columnSpan(3)
+                    ->description('Configure overlay amounts and reveal gaps for each face frame style')
+                    ->collapsible()
+                    ->schema([
+                        Select::make('default_face_frame_style')
+                            ->label('Default Style')
+                            ->options([
+                                'frameless' => 'Frameless (European)',
+                                'face_frame' => 'Face Frame (Traditional)',
+                                'full_overlay' => 'Full Overlay (TCS Default)',
+                                'inset' => 'Inset',
+                                'partial_overlay' => 'Partial Overlay',
+                            ])
+                            ->default('full_overlay')
+                            ->columnSpan(1),
+
+                        // Full Overlay (TCS Default)
+                        Section::make('Full Overlay (TCS Default)')
+                            ->columnSpan(1)
+                            ->compact()
+                            ->schema([
+                                Grid::make(3)->schema([
+                                    TextInput::make('full_overlay_amount')
+                                        ->label('Overlay Amount')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(1.25)
+                                        ->suffix('"')
+                                        ->helperText('1-1/4"'),
+                                    TextInput::make('full_overlay_reveal_gap')
+                                        ->label('Reveal Gap')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.125)
+                                        ->suffix('"')
+                                        ->helperText('1/8"'),
+                                    TextInput::make('full_overlay_bottom_reveal')
+                                        ->label('Bottom Reveal')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0)
+                                        ->suffix('"')
+                                        ->helperText('TCS: 0'),
+                                ]),
+                            ]),
+
+                        // Frameless (European)
+                        Section::make('Frameless (European)')
+                            ->columnSpan(1)
+                            ->compact()
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    TextInput::make('frameless_reveal_gap')
+                                        ->label('Reveal Gap')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.09375)
+                                        ->suffix('"')
+                                        ->helperText('3/32"'),
+                                    TextInput::make('frameless_bottom_reveal')
+                                        ->label('Bottom Reveal')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0)
+                                        ->suffix('"'),
+                                ]),
+                            ]),
+
+                        // Face Frame (Traditional)
+                        Section::make('Face Frame (Traditional)')
+                            ->columnSpan(1)
+                            ->compact()
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    TextInput::make('face_frame_reveal_gap')
+                                        ->label('Reveal Gap')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.125)
+                                        ->suffix('"')
+                                        ->helperText('1/8"'),
+                                    TextInput::make('face_frame_bottom_reveal')
+                                        ->label('Bottom Reveal')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.125)
+                                        ->suffix('"')
+                                        ->helperText('1/8"'),
+                                ]),
+                            ]),
+
+                        // Inset
+                        Section::make('Inset')
+                            ->columnSpan(1)
+                            ->compact()
+                            ->schema([
+                                Grid::make(2)->schema([
+                                    TextInput::make('inset_reveal_gap')
+                                        ->label('Reveal Gap')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.0625)
+                                        ->suffix('"')
+                                        ->helperText('1/16"'),
+                                    TextInput::make('inset_bottom_reveal')
+                                        ->label('Bottom Reveal')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.0625)
+                                        ->suffix('"')
+                                        ->helperText('1/16"'),
+                                ]),
+                            ]),
+
+                        // Partial Overlay
+                        Section::make('Partial Overlay')
+                            ->columnSpan(1)
+                            ->compact()
+                            ->schema([
+                                Grid::make(3)->schema([
+                                    TextInput::make('partial_overlay_amount')
+                                        ->label('Overlay Amount')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.375)
+                                        ->suffix('"')
+                                        ->helperText('3/8"'),
+                                    TextInput::make('partial_overlay_reveal_gap')
+                                        ->label('Reveal Gap')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.125)
+                                        ->suffix('"')
+                                        ->helperText('1/8"'),
+                                    TextInput::make('partial_overlay_bottom_reveal')
+                                        ->label('Bottom Reveal')
+                                        ->numeric()
+                                        ->step(0.0625)
+                                        ->default(0.125)
+                                        ->suffix('"')
+                                        ->helperText('1/8"'),
+                                ]),
+                            ]),
+                    ]),
+
                 // Default Materials Section
                 Section::make('Default Materials')
                     ->columnSpan(1)
@@ -526,6 +675,20 @@ class ConstructionTemplateResource extends Resource
                             ->default(0.5)
                             ->suffix('"')
                             ->helperText('Gap from cabinet to wall (1/2")'),
+                        TextInput::make('drawer_cavity_clearance')
+                            ->label('Drawer Cavity Clearance')
+                            ->numeric()
+                            ->step(0.0625)
+                            ->default(0.25)
+                            ->suffix('"')
+                            ->helperText('Clearance beyond slide length (1/4")'),
+                        TextInput::make('end_panel_install_overage')
+                            ->label('End Panel Overage')
+                            ->numeric()
+                            ->step(0.0625)
+                            ->default(0.5)
+                            ->suffix('"')
+                            ->helperText('Extra for install adjustment (1/2")'),
                     ]),
             ]);
     }

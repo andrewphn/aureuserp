@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 
@@ -23,24 +24,7 @@ class PdfDocumentResource extends Resource
 {
     protected static ?string $model = PdfDocument::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $navigationLabel = 'PDF Documents';
-
-    protected static ?string $navigationGroup = 'Documents';
-
-    protected static ?int $navigationSort = 1;
-
-    /**
-     * Define the form schema
-     *
-     * @param Form $form
-     * @return Form
-     */
-    public static function form(Form $form): Form
-    {
-        return 'heroicon-o-document-text';
-    }
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
     public static function getNavigationLabel(): string
     {

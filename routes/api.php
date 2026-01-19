@@ -66,6 +66,10 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     Route::get('locations', [V1\RoomLocationController::class, 'index'])->name('locations.index');
     Route::get('cabinet-runs', [V1\CabinetRunController::class, 'index'])->name('cabinet-runs.index');
     Route::get('cabinets', [V1\CabinetController::class, 'index'])->name('cabinets.index');
+
+    // Cabinet special operations
+    Route::post('cabinets/{id}/calculate', [V1\CabinetController::class, 'calculate'])->name('cabinets.calculate');
+    Route::get('cabinets/{id}/cut-list', [V1\CabinetController::class, 'cutList'])->name('cabinets.cut-list');
     Route::get('sections', [V1\CabinetSectionController::class, 'index'])->name('sections.index');
     Route::get('drawers', [V1\DrawerController::class, 'index'])->name('drawers.index');
     Route::get('doors', [V1\DoorController::class, 'index'])->name('doors.index');
@@ -130,6 +134,41 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
         Route::get('events', [V1\WebhookController::class, 'events'])->name('events');
         Route::post('{id}/test', [V1\WebhookController::class, 'test'])->name('test');
         Route::get('{id}/deliveries', [V1\WebhookController::class, 'deliveries'])->name('deliveries');
+    });
+
+    // ========================================
+    // Rhino Extraction & Sync
+    // ========================================
+    Route::prefix('rhino')->name('rhino.')->middleware('throttle:60,1')->group(function () {
+        // Document operations
+        Route::post('document/scan', [V1\RhinoExtractionController::class, 'scanDocument'])->name('document.scan');
+        Route::get('document/info', [V1\RhinoExtractionController::class, 'getDocumentInfo'])->name('document.info');
+        Route::get('document/groups', [V1\RhinoExtractionController::class, 'getDocumentGroups'])->name('document.groups');
+
+        // Cabinet extraction
+        Route::post('cabinet/extract', [V1\RhinoExtractionController::class, 'extractCabinet'])->name('cabinet.extract');
+        Route::post('cabinet/extract-all', [V1\RhinoExtractionController::class, 'extractAllCabinets'])->name('cabinet.extract-all');
+
+        // Bidirectional sync
+        Route::post('sync/push', [V1\RhinoExtractionController::class, 'pushSync'])->name('sync.push');
+        Route::post('sync/pull', [V1\RhinoExtractionController::class, 'pullSync'])->name('sync.pull');
+        Route::get('sync/status', [V1\RhinoExtractionController::class, 'getSyncStatus'])->name('sync.status');
+        Route::post('sync/force', [V1\RhinoExtractionController::class, 'forceSync'])->name('sync.force');
+
+        // Script execution
+        Route::post('execute-script', [V1\RhinoExtractionController::class, 'executeScript'])->name('execute-script');
+    });
+
+    // Extraction jobs & review queue
+    Route::prefix('extraction')->name('extraction.')->group(function () {
+        Route::get('jobs', [V1\RhinoExtractionController::class, 'listJobs'])->name('jobs.index');
+        Route::get('jobs/{id}', [V1\RhinoExtractionController::class, 'getJob'])->name('jobs.show');
+        Route::get('review-queue', [V1\RhinoExtractionController::class, 'getReviewQueue'])->name('review-queue');
+        Route::get('review/{id}', [V1\RhinoExtractionController::class, 'getReview'])->name('review.show');
+        Route::get('review/{id}/interpretation-context', [V1\RhinoExtractionController::class, 'getInterpretationContext'])->name('review.interpretation-context');
+        Route::post('review/{id}/save-interpretation', [V1\RhinoExtractionController::class, 'saveInterpretation'])->name('review.save-interpretation');
+        Route::post('review/{id}/approve', [V1\RhinoExtractionController::class, 'approveReview'])->name('review.approve');
+        Route::post('review/{id}/reject', [V1\RhinoExtractionController::class, 'rejectReview'])->name('review.reject');
     });
 });
 

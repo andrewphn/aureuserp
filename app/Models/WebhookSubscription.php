@@ -103,6 +103,20 @@ class WebhookSubscription extends Model
         'partner.created',
         'partner.updated',
         'partner.deleted',
+
+        // Rhino Extraction
+        'rhino.extraction_started',
+        'rhino.extraction_completed',
+        'rhino.extraction_failed',
+        'rhino.review_required',
+        'rhino.review_approved',
+        'rhino.review_rejected',
+
+        // Rhino Sync
+        'rhino.sync_push',
+        'rhino.sync_pull',
+        'rhino.sync_conflict',
+        'rhino.sync_resolved',
     ];
 
     /**

@@ -102,6 +102,9 @@ class CabinetMathAuditService
         // Apply miter joints if joint_type is 'miter'
         $positions3d = $this->xyzService->calculateMiterJoints($positions3d, $specs);
 
+        // Run position validation (including drawer fit validation)
+        $positions3d['validation'] = $this->xyzService->validatePartPositions($positions3d, $specs);
+
         return [
             'input_specs' => $specs,
             'gates' => [
@@ -122,6 +125,8 @@ class CabinetMathAuditService
 
     /**
      * Normalize input to standard array format
+     *
+     * Includes face frame style values from Construction Template for use by CabinetXYZService.
      */
     protected function normalizeInput(Cabinet|array $input): array
     {
@@ -130,6 +135,9 @@ class CabinetMathAuditService
             $sidesOnBottom = $this->standards->sidesOnBottom($input);
             $backInsetFromSides = $this->standards->backInsetFromSides($input);
             $stretchersOnTop = $this->standards->stretchersOnTop($input);
+
+            // Get template for face frame style values
+            $template = $this->standards->resolveTemplate($input);
 
             return [
                 'width' => $input->length_inches ?? $input->width_inches ?? 24,
@@ -140,6 +148,7 @@ class CabinetMathAuditService
                 'face_frame_stile' => $input->face_frame_stile_width ?? 1.5,
                 'face_frame_rail' => $input->face_frame_rail_width ?? 1.5,
                 'face_frame_thickness' => $this->standards->getFaceFrameThickness($input),
+                'face_frame_style' => $input->face_frame_style ?? ($template->default_face_frame_style ?? CabinetXYZService::STYLE_FULL_OVERLAY),
                 'side_panel_thickness' => $input->side_panel_thickness ?? self::PLYWOOD_3_4,
                 'back_panel_thickness' => $input->back_panel_thickness ?? self::PLYWOOD_3_4,
                 'drawer_heights' => $this->extractDrawerHeights($input),
@@ -149,10 +158,32 @@ class CabinetMathAuditService
                 'sides_on_bottom' => $sidesOnBottom,
                 'back_inset_from_sides' => $backInsetFromSides,
                 'stretchers_on_top' => $stretchersOnTop,
+                // General Construction Values (from Template)
+                'reveal_top' => $template->reveal_top ?? self::REVEAL_TOP,
+                'reveal_bottom' => $template->reveal_bottom ?? self::REVEAL_BOTTOM,
+                'component_gap' => $template->component_gap ?? self::COMPONENT_GAP,
+                'door_to_ff_gap' => $template->door_side_reveal ?? self::DOOR_TO_FF_GAP,
+                'wall_gap' => $template->back_wall_gap ?? self::WALL_GAP,
+                'end_panel_gap' => $template->finished_end_gap ?? self::END_PANEL_GAP,
+                'end_panel_install_overage' => $template->end_panel_install_overage ?? self::END_PANEL_INSTALL_OVERAGE,
+                'drawer_cavity_clearance' => $template->drawer_cavity_clearance ?? self::DRAWER_CAVITY_CLEARANCE,
+                // Face Frame Style Values (from Template - for CabinetXYZService)
+                'frameless_reveal_gap' => $template->frameless_reveal_gap ?? 0.09375,
+                'frameless_bottom_reveal' => $template->frameless_bottom_reveal ?? 0,
+                'face_frame_reveal_gap' => $template->face_frame_reveal_gap ?? 0.125,
+                'face_frame_bottom_reveal' => $template->face_frame_bottom_reveal ?? 0.125,
+                'full_overlay_amount' => $template->full_overlay_amount ?? 1.25,
+                'full_overlay_reveal_gap' => $template->full_overlay_reveal_gap ?? 0.125,
+                'full_overlay_bottom_reveal' => $template->full_overlay_bottom_reveal ?? 0,
+                'inset_reveal_gap' => $template->inset_reveal_gap ?? 0.0625,
+                'inset_bottom_reveal' => $template->inset_bottom_reveal ?? 0.0625,
+                'partial_overlay_amount' => $template->partial_overlay_amount ?? 0.375,
+                'partial_overlay_reveal_gap' => $template->partial_overlay_reveal_gap ?? 0.125,
+                'partial_overlay_bottom_reveal' => $template->partial_overlay_bottom_reveal ?? 0.125,
             ];
         }
 
-        // Array input - fill in defaults
+        // Array input - fill in defaults using ConstructionStandardsService
         return array_merge([
             'width' => 24,
             'height' => 30,
@@ -161,6 +192,7 @@ class CabinetMathAuditService
             'face_frame_stile' => 1.5,
             'face_frame_rail' => 1.5,
             'face_frame_thickness' => self::HARDWOOD_5_4,  // 5/4 hardwood = 1" actual (TCS standard)
+            'face_frame_style' => CabinetXYZService::STYLE_FULL_OVERLAY,  // TCS default: full overlay
             'side_panel_thickness' => self::PLYWOOD_3_4,
             'back_panel_thickness' => self::PLYWOOD_3_4,
             'drawer_heights' => [],
@@ -169,8 +201,28 @@ class CabinetMathAuditService
             // TCS Assembly Standards
             'cabinet_type' => 'base',           // base, sink_base, wall, tall
             'has_end_panels' => false,          // Decorative end panels (mitered)
-            'wall_gap' => self::WALL_GAP,       // Gap from wall for shimming
-            'end_panel_gap' => self::END_PANEL_GAP,  // Gap between side and end panel
+            // General Construction Values (use ConstructionStandardsService fallbacks)
+            'reveal_top' => ConstructionStandardsService::getFallbackDefault('reveal_top', self::REVEAL_TOP),
+            'reveal_bottom' => ConstructionStandardsService::getFallbackDefault('reveal_bottom', self::REVEAL_BOTTOM),
+            'component_gap' => ConstructionStandardsService::getFallbackDefault('component_gap', self::COMPONENT_GAP),
+            'door_to_ff_gap' => ConstructionStandardsService::getFallbackDefault('door_side_reveal', self::DOOR_TO_FF_GAP),
+            'wall_gap' => ConstructionStandardsService::getFallbackDefault('back_wall_gap', self::WALL_GAP),
+            'end_panel_gap' => ConstructionStandardsService::getFallbackDefault('finished_end_gap', self::END_PANEL_GAP),
+            'end_panel_install_overage' => ConstructionStandardsService::getFallbackDefault('end_panel_install_overage', self::END_PANEL_INSTALL_OVERAGE),
+            'drawer_cavity_clearance' => ConstructionStandardsService::getFallbackDefault('drawer_cavity_clearance', self::DRAWER_CAVITY_CLEARANCE),
+            // Face Frame Style Values (use ConstructionStandardsService fallbacks)
+            'frameless_reveal_gap' => ConstructionStandardsService::getFallbackDefault('frameless_reveal_gap', 0.09375),
+            'frameless_bottom_reveal' => ConstructionStandardsService::getFallbackDefault('frameless_bottom_reveal', 0),
+            'face_frame_reveal_gap' => ConstructionStandardsService::getFallbackDefault('face_frame_reveal_gap', 0.125),
+            'face_frame_bottom_reveal' => ConstructionStandardsService::getFallbackDefault('face_frame_bottom_reveal', 0.125),
+            'full_overlay_amount' => ConstructionStandardsService::getFallbackDefault('full_overlay_amount', 1.25),
+            'full_overlay_reveal_gap' => ConstructionStandardsService::getFallbackDefault('full_overlay_reveal_gap', 0.125),
+            'full_overlay_bottom_reveal' => ConstructionStandardsService::getFallbackDefault('full_overlay_bottom_reveal', 0),
+            'inset_reveal_gap' => ConstructionStandardsService::getFallbackDefault('inset_reveal_gap', 0.0625),
+            'inset_bottom_reveal' => ConstructionStandardsService::getFallbackDefault('inset_bottom_reveal', 0.0625),
+            'partial_overlay_amount' => ConstructionStandardsService::getFallbackDefault('partial_overlay_amount', 0.375),
+            'partial_overlay_reveal_gap' => ConstructionStandardsService::getFallbackDefault('partial_overlay_reveal_gap', 0.125),
+            'partial_overlay_bottom_reveal' => ConstructionStandardsService::getFallbackDefault('partial_overlay_bottom_reveal', 0.125),
             // Assembly Rules (from ConstructionStandardsService)
             'sides_on_bottom' => true,          // TCS: Sides sit ON TOP of bottom panel
             'back_inset_from_sides' => false,   // TCS: Back goes FULL WIDTH (sides/bottom shortened)
@@ -764,13 +816,21 @@ class CabinetMathAuditService
             // (assuming array is ordered top-to-bottom, reverse it)
             $drawersBottomUp = array_reverse($drawerHeights);
 
+            // Stretcher mounting offset derived from Blum TANDEM 563H specs:
+            // Offset = Bottom clearance (9/16") - Reveal gap (1/8") = 7/16"
+            // This positions the stretcher TOP at the bottom of the upper drawer's opening
+            $blumBottomClearance = 0.5625;  // 9/16" (14mm) - Blum spec
+            $stretcherMountingOffset = $blumBottomClearance - $stretcherGap;  // 0.5625 - 0.125 = 0.4375
+
             for ($i = 0; $i < count($drawersBottomUp) - 1; $i++) {
                 $drawerFaceHeight = $drawersBottomUp[$i];
                 $currentPositionFromBottom += $drawerFaceHeight;
 
-                // Stretcher position from bottom = sum of faces below + half gap
-                $stretcherPositionFromBottom = $currentPositionFromBottom + ($stretcherGap / 2);
-                $stretcherPositionFromTop = $boxHeight - $stretcherPositionFromBottom;
+                // Stretcher TOP position from bottom = sum of faces below + mounting offset
+                // This positions the stretcher TOP at the correct height for slide mounting
+                $stretcherTopFromBottom = $currentPositionFromBottom + $stretcherMountingOffset;
+                $stretcherPositionFromBottom = $stretcherTopFromBottom - $stretcherThickness;
+                $stretcherPositionFromTop = $boxHeight - $stretcherTopFromBottom;
 
                 $stretchers[] = [
                     'number' => 3 + $i,
@@ -780,6 +840,7 @@ class CabinetMathAuditService
                     'thickness' => $stretcherThickness,
                     'position_from_top' => $stretcherPositionFromTop,
                     'position_from_bottom' => $stretcherPositionFromBottom,
+                    'stretcher_top_from_bottom' => $stretcherTopFromBottom,
                     'supports_drawer_above' => $i + 1, // Index of drawer above this stretcher
                 ];
 
@@ -787,8 +848,11 @@ class CabinetMathAuditService
                     'stretcher_number' => 3 + $i,
                     'drawer_below_height' => $drawerFaceHeight,
                     'cumulative_height' => $currentPositionFromBottom,
-                    'position_from_bottom' => $stretcherPositionFromBottom,
+                    'mounting_offset' => $stretcherMountingOffset,
+                    'stretcher_top_from_bottom' => $stretcherTopFromBottom,
+                    'stretcher_bottom_from_bottom' => $stretcherPositionFromBottom,
                     'position_from_top' => $stretcherPositionFromTop,
+                    'note' => 'Stretcher TOP at ' . $this->formatInches($stretcherTopFromBottom) . ' from bottom (CAD: 17-1/8" from top)',
                 ];
 
                 // Add gap for next iteration
@@ -802,8 +866,11 @@ class CabinetMathAuditService
             'tcs_standard' => [
                 'stretcher_depth' => '3"',
                 'stretcher_thickness' => '3/4"',
-                'gap_between_faces' => '1/8"',
-                'rule' => 'Stretcher splits the gap between drawer faces',
+                'gap_between_faces' => '1/8" (reveal gap)',
+                'blum_bottom_clearance' => '9/16" (14mm) - Blum TANDEM 563H spec',
+                'mounting_offset' => '7/16" (0.4375") = Bottom clearance - Reveal gap',
+                'rule' => 'Stretcher TOP = Drawer face TOP + (Blum bottom clearance - Reveal gap)',
+                'formula' => 'Position = Face height + 9/16" - 1/8" = Face height + 7/16"',
             ],
             'calculations' => [
                 [
@@ -2285,13 +2352,22 @@ class CabinetMathAuditService
                 $slideHeight = 1.46875; // 37mm in inches
                 $drawerBoxY = $currentY + $drawerFaceH - $boxH - self::BLUM_BOTTOM_CLEARANCE;
 
+                // Drawer box X position: centered on cabinet (same center as drawer face)
+                // The drawer box is narrower than the face opening by the Blum side deduction
+                // But it must be centered so the face attaches properly to the front
+                $drawerBoxX = ($cabW - $boxW) / 2;
+
+                // Drawer box Z position: starts at rear of drawer face and goes back
+                // Drawer face is at Z=0 with thickness 0.75", so box starts at Z=0.75"
+                $drawerBoxZ = self::PLYWOOD_3_4;  // Behind the drawer face
+
                 $parts["drawer_{$drawerNum}_box"] = [
                     'part_name' => "{$drawerLabel} #{$drawerNum} Box",
                     'part_type' => 'drawer_box',
                     'position' => [
-                        'x' => $sideThickness + (self::BLUM_SIDE_DEDUCTION / 2),
+                        'x' => $drawerBoxX,
                         'y' => $drawerBoxY,
-                        'z' => 0.125, // Slight setback for clearance
+                        'z' => $drawerBoxZ,
                     ],
                     'dimensions' => ['w' => $boxW, 'h' => $boxH, 'd' => $boxD],
                     'box_parts' => [

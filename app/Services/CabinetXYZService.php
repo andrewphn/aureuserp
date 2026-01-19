@@ -39,14 +39,23 @@ class CabinetXYZService
     public const PLYWOOD_3_4 = 0.75;
     public const PLYWOOD_1_2 = 0.5;
     public const PLYWOOD_1_4 = 0.25;
+    public const DRAWER_FACE_THICKNESS = 1.0;  // TCS standard: 1" thick drawer faces
 
     // Blum TANDEM clearances - reference DrawerConfiguratorService for authoritative values
     public const BLUM_SIDE_DEDUCTION = 0.625;    // 5/8" total (drawer narrower than opening)
     public const BLUM_TOP_CLEARANCE = 0.25;       // 1/4" above drawer box
     public const BLUM_BOTTOM_CLEARANCE = 0.5625;  // 9/16" below drawer box
 
-    // Standard gaps
+    // Standard gaps and reveals
     public const COMPONENT_GAP = 0.125;  // 1/8" between components
+    public const DRAWER_BOTTOM_REVEAL = 0.5;  // 1/2" clearance from cabinet box bottom to bottom drawer face
+
+    // Face frame style constants
+    public const STYLE_FRAMELESS = 'frameless';           // European/modern - no face frame
+    public const STYLE_FACE_FRAME = 'face_frame';         // Traditional American with full frame
+    public const STYLE_FULL_OVERLAY = 'full_overlay';     // Modern look with frame strength (TCS default)
+    public const STYLE_INSET = 'inset';                   // High-end traditional - faces flush in frame
+    public const STYLE_PARTIAL_OVERLAY = 'partial_overlay'; // Standard/economical
 
     /**
      * Calculate drawer box individual part positions for 3D rendering.
@@ -234,6 +243,137 @@ class CabinetXYZService
     }
 
     /**
+     * Get face frame configuration based on style.
+     *
+     * Each style defines different rules for stiles, rails, and drawer/door face positioning.
+     * Values are pulled from $specs (Construction Template) with fallbacks to ConstructionStandardsService.
+     *
+     * STYLE DESCRIPTIONS:
+     * - frameless: European/modern - no face frame, faces flush with box edges
+     * - face_frame: Traditional American - full frame with faces inside rail openings
+     * - full_overlay: Modern look - stiles present, rails optional, faces overlay frame
+     * - inset: Premium traditional - full frame with faces flush inside openings
+     * - partial_overlay: Standard/economical - full frame with partial face overlap
+     *
+     * @param string $style Face frame style constant
+     * @param array $specs Cabinet specs array (from Construction Template)
+     * @return array Configuration for stiles, rails, face positioning, and overlay amounts
+     */
+    public function getFaceFrameConfig(string $style, array $specs = []): array
+    {
+        return match ($style) {
+            self::STYLE_FRAMELESS => [
+                'has_stiles' => false,
+                'has_rails' => false,
+                'has_mid_rails' => false,
+                'face_position' => 'flush',      // Faces flush with box edges
+                'overlay_amount' => 0,
+                'reveal_gap' => $specs['frameless_reveal_gap']
+                    ?? ConstructionStandardsService::getFallbackDefault('frameless_reveal_gap', 0.09375),
+                'bottom_reveal' => $specs['frameless_bottom_reveal']
+                    ?? ConstructionStandardsService::getFallbackDefault('frameless_bottom_reveal', 0),
+                'description' => 'European/modern - no face frame, maximizes interior space',
+            ],
+            self::STYLE_FACE_FRAME => [
+                'has_stiles' => true,
+                'has_rails' => true,
+                'has_mid_rails' => true,
+                'face_position' => 'inside',     // Faces fit inside rail openings
+                'overlay_amount' => 0,
+                'reveal_gap' => $specs['face_frame_reveal_gap']
+                    ?? ConstructionStandardsService::getFallbackDefault('face_frame_reveal_gap', 0.125),
+                'bottom_reveal' => $specs['face_frame_bottom_reveal']
+                    ?? ConstructionStandardsService::getFallbackDefault('face_frame_bottom_reveal', 0.125),
+                'description' => 'Traditional American - structural face frame with visible rails',
+            ],
+            self::STYLE_FULL_OVERLAY => [
+                'has_stiles' => true,
+                'has_rails' => false,            // Rails optional (covered by faces)
+                'has_mid_rails' => false,        // Mid rails not needed (faces cover them)
+                'face_position' => 'overlay',    // Faces overlay the stiles
+                'overlay_amount' => $specs['full_overlay_amount']
+                    ?? ConstructionStandardsService::getFallbackDefault('full_overlay_amount', 1.25),
+                'reveal_gap' => $specs['full_overlay_reveal_gap']
+                    ?? ConstructionStandardsService::getFallbackDefault('full_overlay_reveal_gap', 0.125),
+                'bottom_reveal' => $specs['full_overlay_bottom_reveal']
+                    ?? ConstructionStandardsService::getFallbackDefault('full_overlay_bottom_reveal', 0),
+                'description' => 'Modern aesthetic with face frame strength - TCS default',
+            ],
+            self::STYLE_INSET => [
+                'has_stiles' => true,
+                'has_rails' => true,
+                'has_mid_rails' => true,
+                'face_position' => 'inset',      // Faces sit flush inside frame openings
+                'overlay_amount' => 0,
+                'reveal_gap' => $specs['inset_reveal_gap']
+                    ?? ConstructionStandardsService::getFallbackDefault('inset_reveal_gap', 0.0625),
+                'bottom_reveal' => $specs['inset_bottom_reveal']
+                    ?? ConstructionStandardsService::getFallbackDefault('inset_bottom_reveal', 0.0625),
+                'description' => 'High-end traditional - requires precision craftsmanship',
+            ],
+            self::STYLE_PARTIAL_OVERLAY => [
+                'has_stiles' => true,
+                'has_rails' => true,
+                'has_mid_rails' => true,
+                'face_position' => 'overlay',    // Faces partially overlay frame
+                'overlay_amount' => $specs['partial_overlay_amount']
+                    ?? ConstructionStandardsService::getFallbackDefault('partial_overlay_amount', 0.375),
+                'reveal_gap' => $specs['partial_overlay_reveal_gap']
+                    ?? ConstructionStandardsService::getFallbackDefault('partial_overlay_reveal_gap', 0.125),
+                'bottom_reveal' => $specs['partial_overlay_bottom_reveal']
+                    ?? ConstructionStandardsService::getFallbackDefault('partial_overlay_bottom_reveal', 0.125),
+                'description' => 'Standard/economical option with visible frame',
+            ],
+            default => throw new \InvalidArgumentException("Unknown face frame style: $style"),
+        };
+    }
+
+    /**
+     * Calculate face dimensions based on face frame style.
+     *
+     * This method determines the width and X position of drawer/door faces
+     * based on the selected face frame style.
+     *
+     * @param string $style Face frame style
+     * @param float $openingWidth Face frame opening width (between stiles)
+     * @param float $railXPosition X position where rail starts (inside edge of left stile)
+     * @param float $cabinetWidth Full cabinet width
+     * @param array $specs Cabinet specs array (from Construction Template)
+     * @return array ['face_width' => float, 'face_x' => float]
+     */
+    public function calculateFaceDimensions(string $style, float $openingWidth, float $railXPosition, float $cabinetWidth, array $specs = []): array
+    {
+        $config = $this->getFaceFrameConfig($style, $specs);
+
+        return match ($config['face_position']) {
+            'flush' => [
+                // Frameless: Face equals cabinet width
+                'face_width' => $cabinetWidth,
+                'face_x' => 0,
+            ],
+            'inside' => [
+                // Traditional face frame: Face fits inside rail opening
+                'face_width' => $openingWidth,
+                'face_x' => $railXPosition,
+            ],
+            'overlay' => [
+                // Full or partial overlay: Face extends past opening
+                'face_width' => $openingWidth + (2 * $config['overlay_amount']),
+                'face_x' => $railXPosition - $config['overlay_amount'],
+            ],
+            'inset' => [
+                // Inset: Face smaller than opening by reveal gap
+                'face_width' => $openingWidth - (2 * $config['reveal_gap']),
+                'face_x' => $railXPosition + $config['reveal_gap'],
+            ],
+            default => [
+                'face_width' => $openingWidth,
+                'face_x' => $railXPosition,
+            ],
+        };
+    }
+
+    /**
      * PART CATEGORIES define which boundary constraints apply.
      *
      * EXTERNAL: Parts that can extend beyond cabinet box (face frame, end panels)
@@ -418,6 +558,10 @@ class CabinetXYZService
         $ffRail = $specs['face_frame_rail'];
         $gap = self::COMPONENT_GAP;
 
+        // Get face frame style configuration (TCS default: full_overlay)
+        $faceFrameStyle = $specs['face_frame_style'] ?? self::STYLE_FULL_OVERLAY;
+        $ffConfig = $this->getFaceFrameConfig($faceFrameStyle, $specs);
+
         // Calculate internal bounds for INTERNAL parts
         $internalBounds = $this->calculateInternalBounds($specs, $gate1);
 
@@ -481,22 +625,24 @@ class CabinetXYZService
             $backWidth = $insideW;              // Back fits between sides
             $backXPosition = $sideThickness;    // Inset from sides
         } else {
-            // TCS Standard: Back panel COVERS the back of sides/bottom
-            // Sides and bottom go to where back starts (cabD - backThickness)
-            // Back panel sits at the very back, covering ends of sides/bottom
-            // CAVITY = cabD - backThickness = 18.75 - 0.75 = 18"
-            // But we REPORT cavity as full cabinet depth (18-3/4") because
-            // the drawer slides mount to sides, and the 18" box fits in 18" space
-            $sideDepth = $cabD - $backThickness;    // Sides end where back starts (18")
-            $bottomDepth = $cabD - $backThickness;  // Bottom ends where back starts (18")
+            // TCS Standard: Cabinet depth (18-3/4") = INTERIOR CAVITY depth
+            // Back panel sits OUTSIDE/BEHIND, does NOT reduce cavity
+            // Sides and bottom go FULL cabinet depth (18-3/4")
+            // Back panel attaches to the back, adding to total depth
+            $sideDepth = $cabD;                     // Full cavity depth (18.75")
+            $bottomDepth = $cabD;                   // Full cavity depth (18.75")
             $backWidth = $cabW;                     // Back spans full width
             $backXPosition = 0;                     // Starts at X=0
         }
 
-        // Z position for sides/bottom starts at FRONT of cabinet (Z=0)
-        // Face frame OVERLAYS the front - cabinet box goes to the front edge
-        // This gives full cavity depth for drawer slides
-        $boxZPosition = 0;
+        // Z position for sides/bottom starts BEHIND the face frame
+        // Face frame sits in FRONT of the cabinet box
+        // Sides/bottom align with back of face frame (stile depth)
+        // This prevents collision between face frame and cabinet box
+        // Default from ConstructionStandardsService (TCS standard: 1" actual from 5/4 hardwood)
+        $defaultStileDepth = ConstructionStandardsService::getFallbackDefault('face_frame_thickness', 1.0);
+        $stileDepth = $specs['face_frame_stile_depth'] ?? $defaultStileDepth;
+        $boxZPosition = $stileDepth;
 
         // LEFT SIDE PANEL - starts behind face frame
         $parts['left_side'] = [
@@ -562,12 +708,15 @@ class CabinetXYZService
         ];
 
         // BACK PANEL - position/width based on assembly rule
-        // TCS Standard (back_inset_from_sides=false): Full width back, sides/bottom shortened
-        // Alternative (back_inset_from_sides=true): Back fits between sides
+        // TCS Standard: Back sits BEHIND sides/bottom (at end of cavity)
+        // Back Z = boxZPosition + sideDepth (where sides end)
+        $backZPosition = $backInsetFromSides
+            ? ($cabD - $backThickness)
+            : ($boxZPosition + $sideDepth);  // 1.0 + 18.75 = 19.75
         $parts['back'] = [
             'part_name' => 'Back',
             'part_type' => 'cabinet_box',
-            'position' => ['x' => $backXPosition, 'y' => 0, 'z' => $cabD - $backThickness],
+            'position' => ['x' => $backXPosition, 'y' => 0, 'z' => $backZPosition],
             'dimensions' => ['w' => $backWidth, 'h' => $boxH, 'd' => $backThickness],
             'cut_dimensions' => ['width' => $backWidth, 'length' => $boxH, 'thickness' => $backThickness],
             'orientation' => [
@@ -647,6 +796,7 @@ class CabinetXYZService
 
         // ========================================
         // FACE FRAME PARTS
+        // Generation controlled by face_frame_style configuration
         // TCS Rule: Stiles extend FULL CABINET HEIGHT (to floor)
         // TCS Rule: If end panels exist, stiles extend to OUTER WIDTH and miter with end panel
         // Rails fit between stiles
@@ -665,119 +815,141 @@ class CabinetXYZService
         $leftStileX = -$leftExtension;  // Extends left if end panel exists
         $rightStileX = $cabW + $rightExtension - $ffStile;  // Extends right if end panel exists
 
-        // LEFT STILE - FULL HEIGHT from floor to top
-        // If left end panel: extends to outer edge, mitered with end panel
-        $stileHeight = $cabH;  // Full cabinet height including toe kick
-        $stileYPosition = -$toeKick;  // Start at floor level (negative Y)
+        // Calculate opening width and rail position based on style
+        // For frameless: opening = cabinet width, no stiles
+        // For styles with stiles: opening = between stiles
+        if ($ffConfig['has_stiles']) {
+            $openingW = $faceFrameWidth - (2 * $ffStile);
+            $railXPosition = $leftStileX + $ffStile;
+        } else {
+            // Frameless: full cabinet width, no stile offset
+            $openingW = $cabW;
+            $railXPosition = 0;
+        }
 
-        $leftStileMiter = ($finishedEndEnabled && $leftEndPanel) ? 'outside_miter' : 'none';
-        $parts['left_stile'] = [
-            'part_name' => 'Left Stile',
-            'part_type' => 'face_frame',
-            'position' => ['x' => $leftStileX, 'y' => $stileYPosition, 'z' => 0],
-            'dimensions' => ['w' => $ffStile, 'h' => $stileHeight, 'd' => $faceFrameThickness],
-            'cut_dimensions' => ['width' => $ffStile, 'length' => $stileHeight, 'thickness' => $faceFrameThickness],
-            'orientation' => [
-                'rotation' => 0,
-                'grain_direction' => 'vertical',
-                'face_up' => 'front',
-            ],
-            'cnc' => [
-                'finished_ends' => 'both',
-                'edgebanding' => ['front', 'back'],
-                'machining' => [],
-                'miter' => $leftStileMiter,
-            ],
-            'material' => '5/4 Hardwood',
-            'notes' => $leftEndPanel
-                ? 'TCS Rule: Stile extends to outer edge, mitered with end panel'
-                : 'TCS Rule: Stiles extend to floor',
-            'end_panel_extension' => $leftExtension,
-        ];
+        // STILES - only if style has them
+        if ($ffConfig['has_stiles']) {
+            // LEFT STILE - FULL HEIGHT from floor to top
+            // If left end panel: extends to outer edge, mitered with end panel
+            $stileHeight = $cabH;  // Full cabinet height including toe kick
+            $stileYPosition = -$toeKick;  // Start at floor level (negative Y)
 
-        // RIGHT STILE - FULL HEIGHT from floor to top
-        // If right end panel: extends to outer edge, mitered with end panel
-        $rightStileMiter = ($finishedEndEnabled && $rightEndPanel) ? 'outside_miter' : 'none';
-        $parts['right_stile'] = [
-            'part_name' => 'Right Stile',
-            'part_type' => 'face_frame',
-            'position' => ['x' => $rightStileX, 'y' => $stileYPosition, 'z' => 0],
-            'dimensions' => ['w' => $ffStile, 'h' => $stileHeight, 'd' => $faceFrameThickness],
-            'cut_dimensions' => ['width' => $ffStile, 'length' => $stileHeight, 'thickness' => $faceFrameThickness],
-            'orientation' => [
-                'rotation' => 0,
-                'grain_direction' => 'vertical',
-                'face_up' => 'front',
-            ],
-            'cnc' => [
-                'finished_ends' => 'both',
-                'edgebanding' => ['front', 'back'],
-                'machining' => [],
-                'miter' => $rightStileMiter,
-            ],
-            'material' => '5/4 Hardwood',
-            'notes' => $rightEndPanel
-                ? 'TCS Rule: Stile extends to outer edge, mitered with end panel'
-                : 'TCS Rule: Stiles extend to floor',
-            'end_panel_extension' => $rightExtension,
-        ];
+            $leftStileMiter = ($finishedEndEnabled && $leftEndPanel) ? 'outside_miter' : 'none';
+            $parts['left_stile'] = [
+                'part_name' => 'Left Stile',
+                'part_type' => 'face_frame',
+                'position' => ['x' => $leftStileX, 'y' => $stileYPosition, 'z' => 0],
+                'dimensions' => ['w' => $ffStile, 'h' => $stileHeight, 'd' => $faceFrameThickness],
+                'cut_dimensions' => ['width' => $ffStile, 'length' => $stileHeight, 'thickness' => $faceFrameThickness],
+                'orientation' => [
+                    'rotation' => 0,
+                    'grain_direction' => 'vertical',
+                    'face_up' => 'front',
+                ],
+                'cnc' => [
+                    'finished_ends' => 'both',
+                    'edgebanding' => ['front', 'back'],
+                    'machining' => [],
+                    'miter' => $leftStileMiter,
+                ],
+                'material' => '5/4 Hardwood',
+                'notes' => $leftEndPanel
+                    ? 'TCS Rule: Stile extends to outer edge, mitered with end panel'
+                    : 'TCS Rule: Stiles extend to floor',
+                'end_panel_extension' => $leftExtension,
+                'face_frame_style' => $faceFrameStyle,
+            ];
 
-        // TOP RAIL - fits between stiles (uses extended positions)
-        // Rail length = distance between inner edges of stiles
-        $openingW = $faceFrameWidth - (2 * $ffStile);
-        // Rail X position starts at inner edge of left stile
-        $railXPosition = $leftStileX + $ffStile;
+            // RIGHT STILE - FULL HEIGHT from floor to top
+            // If right end panel: extends to outer edge, mitered with end panel
+            $rightStileMiter = ($finishedEndEnabled && $rightEndPanel) ? 'outside_miter' : 'none';
+            $parts['right_stile'] = [
+                'part_name' => 'Right Stile',
+                'part_type' => 'face_frame',
+                'position' => ['x' => $rightStileX, 'y' => $stileYPosition, 'z' => 0],
+                'dimensions' => ['w' => $ffStile, 'h' => $stileHeight, 'd' => $faceFrameThickness],
+                'cut_dimensions' => ['width' => $ffStile, 'length' => $stileHeight, 'thickness' => $faceFrameThickness],
+                'orientation' => [
+                    'rotation' => 0,
+                    'grain_direction' => 'vertical',
+                    'face_up' => 'front',
+                ],
+                'cnc' => [
+                    'finished_ends' => 'both',
+                    'edgebanding' => ['front', 'back'],
+                    'machining' => [],
+                    'miter' => $rightStileMiter,
+                ],
+                'material' => '5/4 Hardwood',
+                'notes' => $rightEndPanel
+                    ? 'TCS Rule: Stile extends to outer edge, mitered with end panel'
+                    : 'TCS Rule: Stiles extend to floor',
+                'end_panel_extension' => $rightExtension,
+                'face_frame_style' => $faceFrameStyle,
+            ];
+        }
 
-        // TCS Rule: Top rail aligns with TOP of stretcher (top of box)
-        // The top rail sits behind the stretcher, both tops at same Y level
-        $topRailYTop = $boxH;  // Top of box = top of stretcher
-        $topRailYBottom = $topRailYTop - $ffRail;
+        // TOP RAIL - only if style has rails
+        if ($ffConfig['has_rails']) {
+            // TCS Rule: Top rail aligns with TOP of stretcher (top of box)
+            // The top rail sits behind the stretcher, both tops at same Y level
+            $topRailYTop = $boxH;  // Top of box = top of stretcher
+            $topRailYBottom = $topRailYTop - $ffRail;
 
-        $parts['top_rail'] = [
-            'part_name' => 'Top Rail',
-            'part_type' => 'face_frame',
-            'position' => ['x' => $railXPosition, 'y' => $topRailYBottom, 'z' => 0],
-            'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => self::PLYWOOD_3_4],
-            'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => self::PLYWOOD_3_4],
-            'orientation' => [
-                'rotation' => 0,
-                'grain_direction' => 'horizontal',
-                'face_up' => 'front',
-            ],
-            'cnc' => [
-                'finished_ends' => 'none',
-                'edgebanding' => ['front', 'back'],
-                'machining' => [],
-            ],
-            'material' => '3/4" Hardwood',
-        ];
+            $parts['top_rail'] = [
+                'part_name' => 'Top Rail',
+                'part_type' => 'face_frame',
+                'position' => ['x' => $railXPosition, 'y' => $topRailYBottom, 'z' => 0],
+                'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => $faceFrameThickness],
+                'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => $faceFrameThickness],
+                'orientation' => [
+                    'rotation' => 0,
+                    'grain_direction' => 'horizontal',
+                    'face_up' => 'front',
+                ],
+                'cnc' => [
+                    'finished_ends' => 'none',
+                    'edgebanding' => ['front', 'back'],
+                    'machining' => [],
+                ],
+                'material' => '3/4" Hardwood',
+                'face_frame_style' => $faceFrameStyle,
+            ];
 
-        // BOTTOM RAIL - at bottom of box (Y = 0)
-        $parts['bottom_rail'] = [
-            'part_name' => 'Bottom Rail',
-            'part_type' => 'face_frame',
-            'position' => ['x' => $railXPosition, 'y' => 0, 'z' => 0],
-            'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => self::PLYWOOD_3_4],
-            'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => self::PLYWOOD_3_4],
-            'orientation' => [
-                'rotation' => 0,
-                'grain_direction' => 'horizontal',
-                'face_up' => 'front',
-            ],
-            'cnc' => [
-                'finished_ends' => 'none',
-                'edgebanding' => ['front', 'back'],
-                'machining' => [],
-            ],
-            'material' => '3/4" Hardwood',
-        ];
+            // BOTTOM RAIL - at bottom of box (Y = 0)
+            $parts['bottom_rail'] = [
+                'part_name' => 'Bottom Rail',
+                'part_type' => 'face_frame',
+                'position' => ['x' => $railXPosition, 'y' => 0, 'z' => 0],
+                'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => $faceFrameThickness],
+                'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => $faceFrameThickness],
+                'orientation' => [
+                    'rotation' => 0,
+                    'grain_direction' => 'horizontal',
+                    'face_up' => 'front',
+                ],
+                'cnc' => [
+                    'finished_ends' => 'none',
+                    'edgebanding' => ['front', 'back'],
+                    'machining' => [],
+                ],
+                'material' => '3/4" Hardwood',
+                'face_frame_style' => $faceFrameStyle,
+            ];
+        } // End of has_rails conditional
 
         // ========================================
         // COMPONENT POSITIONS (False Fronts, Drawers)
-        // FULL OVERLAY positioning - faces OVERLAP the rails
+        // Face positioning controlled by face_frame_style configuration
         // Stack from TOP going DOWN in Y-up system
         // Top of box = boxH, bottom = 0
         // ========================================
+
+        // Calculate face dimensions based on face frame style
+        $faceDims = $this->calculateFaceDimensions($faceFrameStyle, $openingW, $railXPosition, $cabW, $specs);
+        $faceWidth = $faceDims['face_width'];
+        $faceX = $faceDims['face_x'];
+
         $currentY = $boxH - $gap; // Start at top (just below top of box)
         $falseFronts = $specs['false_fronts'] ?? [];
         $drawerHeights = $specs['drawer_heights'] ?? [];
@@ -788,13 +960,14 @@ class CabinetXYZService
             $faceH = $ff['face_height'] ?? 7;
 
             // FALSE FRONT FACE - position is at bottom of face
+            // Position and width from calculateFaceDimensions based on style
             $faceY = $currentY - $faceH;
             $parts["false_front_{$ffNum}_face"] = [
                 'part_name' => "False Front #{$ffNum} Face",
                 'part_type' => 'false_front',
-                'position' => ['x' => $railXPosition, 'y' => $faceY, 'z' => 0],
-                'dimensions' => ['w' => $openingW, 'h' => $faceH, 'd' => self::PLYWOOD_3_4],
-                'cut_dimensions' => ['width' => $faceH, 'length' => $faceFrameWidth, 'thickness' => self::PLYWOOD_3_4],
+                'position' => ['x' => $faceX, 'y' => $faceY, 'z' => 0],
+                'dimensions' => ['w' => $faceWidth, 'h' => $faceH, 'd' => self::PLYWOOD_3_4],
+                'cut_dimensions' => ['width' => $faceH, 'length' => $faceWidth, 'thickness' => self::PLYWOOD_3_4],
                 'orientation' => [
                     'rotation' => 0,
                     'grain_direction' => 'horizontal',
@@ -806,7 +979,8 @@ class CabinetXYZService
                     'machining' => [],
                 ],
                 'material' => '3/4" Plywood',
-                'notes' => 'Full overlay - extends past stiles',
+                'notes' => "Face frame style: {$faceFrameStyle} - {$ffConfig['description']}",
+                'face_frame_style' => $faceFrameStyle,
             ];
 
             // FALSE FRONT BACKING (horizontal stretcher)
@@ -835,10 +1009,12 @@ class CabinetXYZService
                 // Also ensure backing doesn't go below bottom panel
                 $backingY = max($backingY, $internalBounds['y_min']);
 
+                // False front backing sits INSIDE the cabinet cavity, behind face frame
+                // Z position = $boxZPosition (behind face frame, same as sides/bottom)
                 $backingPart = [
                     'part_name' => "False Front #{$ffNum} Backing",
                     'part_type' => 'false_front_backing',
-                    'position' => ['x' => $sideThickness, 'y' => $backingY, 'z' => self::PLYWOOD_3_4],
+                    'position' => ['x' => $sideThickness, 'y' => $backingY, 'z' => $boxZPosition],
                     'dimensions' => ['w' => $insideW, 'h' => $backingH, 'd' => self::PLYWOOD_3_4],
                     'cut_dimensions' => ['width' => $backingH, 'length' => $insideW, 'thickness' => self::PLYWOOD_3_4],
                     'orientation' => [
@@ -866,26 +1042,29 @@ class CabinetXYZService
 
             $currentY = $faceY - $gap; // Move down for next component
 
-            // Mid rail after false front
-            $midRailY = $faceY - $gap / 2 - $ffRail / 2;
-            $parts["mid_rail_ff_{$ffNum}"] = [
-                'part_name' => "Mid Rail (after FF#{$ffNum})",
-                'part_type' => 'face_frame',
-                'position' => ['x' => $railXPosition, 'y' => $midRailY, 'z' => 0],
-                'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => self::PLYWOOD_3_4],
-                'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => self::PLYWOOD_3_4],
-                'orientation' => [
-                    'rotation' => 0,
-                    'grain_direction' => 'horizontal',
-                    'face_up' => 'front',
-                ],
-                'cnc' => [
-                    'finished_ends' => 'none',
-                    'edgebanding' => ['front', 'back'],
-                    'machining' => [],
-                ],
-                'material' => '3/4" Hardwood',
-            ];
+            // Mid rail after false front - only if style has mid rails
+            if ($ffConfig['has_mid_rails']) {
+                $midRailY = $faceY - $gap / 2 - $ffRail / 2;
+                $parts["mid_rail_ff_{$ffNum}"] = [
+                    'part_name' => "Mid Rail (after FF#{$ffNum})",
+                    'part_type' => 'face_frame',
+                    'position' => ['x' => $railXPosition, 'y' => $midRailY, 'z' => 0],
+                    'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => $faceFrameThickness],
+                    'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => $faceFrameThickness],
+                    'orientation' => [
+                        'rotation' => 0,
+                        'grain_direction' => 'horizontal',
+                        'face_up' => 'front',
+                    ],
+                    'cnc' => [
+                        'finished_ends' => 'none',
+                        'edgebanding' => ['front', 'back'],
+                        'machining' => [],
+                    ],
+                    'material' => '3/4" Hardwood',
+                    'face_frame_style' => $faceFrameStyle,
+                ];
+            }
         }
 
         // Drawers (from top to bottom in Y-up system)
@@ -897,12 +1076,30 @@ class CabinetXYZService
 
             // DRAWER FACE - position is at bottom of face
             $faceY = $currentY - $drawerFaceH;
+
+            // Bottom reveal depends on face frame style:
+            // Now pulled from template via getFaceFrameConfig()
+            // - full_overlay/frameless: No bottom reveal (default 0)
+            // - face_frame/inset/partial_overlay: 1/8" reveal (default 0.125)
+            $isBottomDrawer = ($idx === count($drawerHeights) - 1);
+            if ($isBottomDrawer) {
+                // Use bottom_reveal from face frame config (template-configurable)
+                $bottomReveal = $ffConfig['bottom_reveal'] ?? 0;
+                if ($faceY < $bottomReveal) {
+                    $faceY = $bottomReveal;
+                }
+            }
+
+            // Drawer face front aligns with front of face frame (Z=0)
+            // Thickness from specs or TCS standard 1"
+            // Position and width from calculateFaceDimensions based on style
+            $drawerFaceThickness = $specs['drawer_face_thickness'] ?? self::DRAWER_FACE_THICKNESS;
             $parts["drawer_{$drawerNum}_face"] = [
                 'part_name' => "{$drawerLabel} #{$drawerNum} Face",
                 'part_type' => 'drawer_face',
-                'position' => ['x' => $railXPosition, 'y' => $faceY, 'z' => 0],
-                'dimensions' => ['w' => $openingW, 'h' => $drawerFaceH, 'd' => self::PLYWOOD_3_4],
-                'cut_dimensions' => ['width' => $drawerFaceH, 'length' => $faceFrameWidth, 'thickness' => self::PLYWOOD_3_4],
+                'position' => ['x' => $faceX, 'y' => $faceY, 'z' => 0],
+                'dimensions' => ['w' => $faceWidth, 'h' => $drawerFaceH, 'd' => $drawerFaceThickness],
+                'cut_dimensions' => ['width' => $drawerFaceH, 'length' => $faceWidth, 'thickness' => $drawerFaceThickness],
                 'orientation' => [
                     'rotation' => 0,
                     'grain_direction' => 'horizontal',
@@ -915,9 +1112,11 @@ class CabinetXYZService
                 ],
                 'material' => '3/4" Plywood',
                 'drawer_type' => $drawerType,
+                'face_frame_style' => $faceFrameStyle,
+                'notes' => "Face frame style: {$faceFrameStyle} - {$ffConfig['description']}",
             ];
 
-            // DRAWER BOX (from Gate 4 calculations)
+            // DRAWER BOX (from Gate 4 calculations) - EXPLODED INTO INDIVIDUAL PARTS
             if (isset($drawerBoxes[$idx])) {
                 $box = $drawerBoxes[$idx];
                 $boxW = $box['outputs']['box_width'] ?? 0;
@@ -933,50 +1132,149 @@ class CabinetXYZService
                 // Box attaches to rear of drawer face, so they must share the same center X
                 $drawerBoxX = ($cabW - $boxW) / 2;
 
-                // Drawer box Z position: front of box at face frame plane (Z=0)
-                // Drawer face attaches to FRONT of box and overlays face frame
-                // Box extends from Z=0 back to Z=boxDepth
-                $drawerBoxZ = 0;
+                // Drawer box Z position: starts at back of drawer FACE
+                // Drawer face is at Z=0, thickness from material ($drawerFaceThickness)
+                // Drawer box attaches directly to back of drawer face
+                // This allows the face to be screwed to box front from inside
+                $drawerBoxZ = $drawerFaceThickness;  // Right behind drawer face
 
-                $parts["drawer_{$drawerNum}_box"] = [
-                    'part_name' => "{$drawerLabel} #{$drawerNum} Box",
-                    'part_type' => 'drawer_box',
+                // Drawer box material thicknesses - use DrawerConfiguratorService constants
+                $sideThk = DrawerConfiguratorService::MATERIAL_THICKNESS;  // 0.5"
+                $bottomThk = DrawerConfiguratorService::BOTTOM_THICKNESS;  // 0.25"
+                $dadoDepth = DrawerConfiguratorService::DADO_DEPTH;        // 0.25" - bottom sits in dado
+                $dadoInset = DrawerConfiguratorService::BOTTOM_DADO_HEIGHT; // 0.5" - dado is up from bottom
+                $dadoClearance = DrawerConfiguratorService::BOTTOM_CLEARANCE_IN_DADO; // 0.0625"
+
+                // Calculate individual part dimensions
+                // Sides: full depth, full height, 1/2" thick
+                $sideW = $sideThk;
+                $sideH = $boxHt;
+                $sideD = $boxD;
+
+                // Front/Back: between sides, full height, 1/2" thick
+                $fbW = $boxW - (2 * $sideThk);
+                $fbH = $boxHt;
+                $fbD = $sideThk;
+
+                // Bottom: fits in dado, slightly smaller for clearance
+                // Uses dadoClearance from DrawerConfiguratorService::BOTTOM_CLEARANCE_IN_DADO
+                $bottomW = $boxW - ($dadoClearance * 2);  // 1/16" clearance each side (0.0625 * 2 = 0.125)
+                $bottomH = $bottomThk;
+                $bottomD = $boxD - ($dadoInset * 2);      // Dado inset clearance front and back (0.5 * 2 = 1.0)
+
+                // LEFT SIDE - at left edge of drawer box
+                $parts["drawer_{$drawerNum}_box_left_side"] = [
+                    'part_name' => "{$drawerLabel} #{$drawerNum} Box Left Side",
+                    'part_type' => 'drawer_box_side',
                     'position' => [
                         'x' => $drawerBoxX,
                         'y' => $drawerBoxY,
                         'z' => $drawerBoxZ,
                     ],
-                    'dimensions' => ['w' => $boxW, 'h' => $boxHt, 'd' => $boxD],
-                    'box_parts' => [
-                        'sides' => ['qty' => 2, 'width' => $boxHt, 'length' => $boxD, 'thickness' => self::PLYWOOD_1_2],
-                        'front_back' => ['qty' => 2, 'width' => $boxHt, 'length' => $boxW - (2 * self::PLYWOOD_1_2), 'thickness' => self::PLYWOOD_1_2],
-                        'bottom' => ['qty' => 1, 'width' => $boxW - 0.125, 'length' => $boxD - 0.5, 'thickness' => self::PLYWOOD_1_4],
-                    ],
-                    'orientation' => [
-                        'rotation' => 0,
-                        'grain_direction' => 'none',
-                        'face_up' => 'n/a',
-                    ],
+                    'dimensions' => ['w' => $sideW, 'h' => $sideH, 'd' => $sideD],
+                    'cut_dimensions' => ['width' => $sideH, 'length' => $sideD, 'thickness' => $sideThk],
+                    'orientation' => ['rotation' => 0, 'grain_direction' => 'horizontal', 'face_up' => 'outside'],
                     'cnc' => [
                         'finished_ends' => 'none',
                         'edgebanding' => ['top'],
-                        'machining' => ['dado_1_4', 'locking_device_holes', 'rear_hook_holes'],
+                        'machining' => ['dado_1_4_for_bottom', 'locking_device_holes'],
                     ],
-                    'material' => '1/2" Plywood (sides), 1/4" (bottom)',
+                    'material' => '1/2" Plywood',
+                ];
+
+                // RIGHT SIDE - at right edge of drawer box
+                $parts["drawer_{$drawerNum}_box_right_side"] = [
+                    'part_name' => "{$drawerLabel} #{$drawerNum} Box Right Side",
+                    'part_type' => 'drawer_box_side',
+                    'position' => [
+                        'x' => $drawerBoxX + $boxW - $sideThk,
+                        'y' => $drawerBoxY,
+                        'z' => $drawerBoxZ,
+                    ],
+                    'dimensions' => ['w' => $sideW, 'h' => $sideH, 'd' => $sideD],
+                    'cut_dimensions' => ['width' => $sideH, 'length' => $sideD, 'thickness' => $sideThk],
+                    'orientation' => ['rotation' => 0, 'grain_direction' => 'horizontal', 'face_up' => 'outside'],
+                    'cnc' => [
+                        'finished_ends' => 'none',
+                        'edgebanding' => ['top'],
+                        'machining' => ['dado_1_4_for_bottom', 'locking_device_holes'],
+                    ],
+                    'material' => '1/2" Plywood',
+                ];
+
+                // FRONT - between sides, at front (Z=0)
+                $parts["drawer_{$drawerNum}_box_front"] = [
+                    'part_name' => "{$drawerLabel} #{$drawerNum} Box Front",
+                    'part_type' => 'drawer_box_front',
+                    'position' => [
+                        'x' => $drawerBoxX + $sideThk,
+                        'y' => $drawerBoxY,
+                        'z' => $drawerBoxZ,
+                    ],
+                    'dimensions' => ['w' => $fbW, 'h' => $fbH, 'd' => $fbD],
+                    'cut_dimensions' => ['width' => $fbH, 'length' => $fbW, 'thickness' => $fbD],
+                    'orientation' => ['rotation' => 0, 'grain_direction' => 'horizontal', 'face_up' => 'front'],
+                    'cnc' => [
+                        'finished_ends' => 'none',
+                        'edgebanding' => ['top'],
+                        'machining' => ['dado_1_4_for_bottom', 'rear_hook_holes'],
+                    ],
+                    'material' => '1/2" Plywood',
+                ];
+
+                // BACK - between sides, at back (Z = boxD - thickness)
+                $parts["drawer_{$drawerNum}_box_back"] = [
+                    'part_name' => "{$drawerLabel} #{$drawerNum} Box Back",
+                    'part_type' => 'drawer_box_back',
+                    'position' => [
+                        'x' => $drawerBoxX + $sideThk,
+                        'y' => $drawerBoxY,
+                        'z' => $drawerBoxZ + $boxD - $fbD,
+                    ],
+                    'dimensions' => ['w' => $fbW, 'h' => $fbH, 'd' => $fbD],
+                    'cut_dimensions' => ['width' => $fbH, 'length' => $fbW, 'thickness' => $fbD],
+                    'orientation' => ['rotation' => 0, 'grain_direction' => 'horizontal', 'face_up' => 'back'],
+                    'cnc' => [
+                        'finished_ends' => 'none',
+                        'edgebanding' => ['top'],
+                        'machining' => ['dado_1_4_for_bottom'],
+                    ],
+                    'material' => '1/2" Plywood',
+                ];
+
+                // BOTTOM - sits in dado, raised from bottom of sides
+                // Position offsets use DrawerConfiguratorService constants
+                $parts["drawer_{$drawerNum}_box_bottom"] = [
+                    'part_name' => "{$drawerLabel} #{$drawerNum} Box Bottom",
+                    'part_type' => 'drawer_box_bottom',
+                    'position' => [
+                        'x' => $drawerBoxX + $dadoClearance,     // Use constant (0.0625")
+                        'y' => $drawerBoxY + $dadoInset,         // Sits in dado, raised from bottom
+                        'z' => $drawerBoxZ + $dadoDepth,         // Use constant (0.25") inset from front
+                    ],
+                    'dimensions' => ['w' => $bottomW, 'h' => $bottomH, 'd' => $bottomD],
+                    'cut_dimensions' => ['width' => $bottomD, 'length' => $bottomW, 'thickness' => $bottomThk],
+                    'orientation' => ['rotation' => 90, 'grain_direction' => 'lengthwise', 'face_up' => 'top'],
+                    'cnc' => [
+                        'finished_ends' => 'none',
+                        'edgebanding' => [],
+                        'machining' => [],
+                    ],
+                    'material' => '1/4" Plywood',
                 ];
             }
 
             $currentY = $faceY - $gap; // Move down for next component
 
-            // Mid rail between drawers (not after last one)
-            if ($idx < count($drawerHeights) - 1) {
+            // Mid rail between drawers - only if style has mid rails (not after last one)
+            if ($ffConfig['has_mid_rails'] && $idx < count($drawerHeights) - 1) {
                 $midRailY = $faceY - $gap / 2 - $ffRail / 2;
                 $parts["mid_rail_drawer_{$drawerNum}"] = [
                     'part_name' => "Mid Rail (after Drawer #{$drawerNum})",
                     'part_type' => 'face_frame',
                     'position' => ['x' => $railXPosition, 'y' => $midRailY, 'z' => 0],
-                    'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => self::PLYWOOD_3_4],
-                    'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => self::PLYWOOD_3_4],
+                    'dimensions' => ['w' => $openingW, 'h' => $ffRail, 'd' => $faceFrameThickness],
+                    'cut_dimensions' => ['width' => $ffRail, 'length' => $openingW, 'thickness' => $faceFrameThickness],
                     'orientation' => [
                         'rotation' => 0,
                         'grain_direction' => 'horizontal',
@@ -988,6 +1286,7 @@ class CabinetXYZService
                         'machining' => [],
                     ],
                     'material' => '3/4" Hardwood',
+                    'face_frame_style' => $faceFrameStyle,
                 ];
             }
         }
@@ -1027,12 +1326,13 @@ class CabinetXYZService
         ];
 
         // Back stretcher (at top of box, BUTTS back panel - no gap)
-        // Z position: Back panel starts at (cabD - backThickness), stretcher ends there
-        // So stretcher starts at (cabD - backThickness - stretcherDepth)
+        // Z position: Back panel starts at $backZPosition, stretcher ends there
+        // So stretcher starts at ($backZPosition - stretcherDepth)
+        $backStretcherZ = $backZPosition - $stretcherDepth;  // 19.75 - 3 = 16.75
         $parts['back_stretcher'] = [
             'part_name' => 'Back Stretcher',
             'part_type' => 'stretcher',
-            'position' => ['x' => $stretcherXPosition, 'y' => $boxH - $stretcherThickness, 'z' => $cabD - $backThickness - $stretcherDepth],
+            'position' => ['x' => $stretcherXPosition, 'y' => $boxH - $stretcherThickness, 'z' => $backStretcherZ],
             'dimensions' => ['w' => $stretcherWidth, 'h' => $stretcherThickness, 'd' => $stretcherDepth],
             'cut_dimensions' => ['width' => $stretcherDepth, 'length' => $stretcherWidth, 'thickness' => $stretcherThickness],
             'orientation' => [
@@ -1180,6 +1480,14 @@ class CabinetXYZService
                 'box_height' => $boxH,
                 'depth' => $cabD,
                 'toe_kick_height' => $toeKick,
+            ],
+            'face_frame_style' => [
+                'style' => $faceFrameStyle,
+                'config' => $ffConfig,
+                'face_dimensions' => [
+                    'width' => $faceWidth,
+                    'x_position' => $faceX,
+                ],
             ],
             'parts' => $parts,
             'part_count' => count($parts),

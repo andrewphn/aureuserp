@@ -87,6 +87,18 @@
 				"N8N_HOST": "https://n8n.tcswoodwork.com"
 			},
 			"description": "n8n workflow automation - manage and trigger workflows"
+		},
+		"tcs-erp": {
+			"type": "stdio",
+			"command": "node",
+			"args": [
+				"/Users/andrewphan/tcsadmin/aureuserp/mcp-servers/tcs-erp/dist/index.js"
+			],
+			"env": {
+				"TCS_ERP_BASE_URL": "http://aureuserp.test",
+				"TCS_ERP_API_TOKEN": "2|Okvx5q4e5SqQyeHWqo2pHMMIiXuM6YEzeh1wdWR42444a5b3"
+			},
+			"description": "TCS ERP API - 87 tools for projects, cabinets, rooms, products, partners, employees, tasks, Rhino integration, webhooks, and batch operations"
 		}
 	}
 }

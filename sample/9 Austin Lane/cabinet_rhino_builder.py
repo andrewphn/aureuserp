@@ -1,183 +1,43 @@
 """
-Cabinet Rhino Builder Script
+Cabinet Rhino Builder Script - TEMPLATE
 TCS Woodwork - Pure JSON Renderer with Miter Joints
 
-THIS SCRIPT ONLY RENDERS - NO CALCULATIONS
-All math comes from CabinetXYZService.php.
+THIS SCRIPT IS A TEMPLATE - DATA COMES FROM PHP
+All math comes from CabinetMathAuditService.php.
 If geometry is wrong, fix it in PHP services, not here.
 
-Source of Truth:
-- CabinetXYZService.php -> positions_3d output
-- CabinetXYZService.php -> calculateMiterJoints() for miter cuts
-- ConstructionStandardsService.php -> assembly rules
+HOW IT WORKS:
+1. PHP generates JSON data from CabinetMathAuditService
+2. PHP injects DATA variable into this template
+3. Template executes in Rhino via MCP
 
-To regenerate DATA: Run PHP export and copy output here.
+USAGE (from PHP):
+  $template = file_get_contents('cabinet_rhino_builder.py');
+  $data = $rhinoExportService->generatePythonData($audit);
+  $script = "DATA = " . json_encode($data) . "\n\n" . $template;
+  // Execute $script via Rhino MCP
+
+COMPONENT TYPES:
+  - cabinet_box      (sides, bottom, back)
+  - face_frame       (stiles, rails)
+  - stretcher        (front, back, drawer support)
+  - false_front      (faces)
+  - false_front_backing
+  - drawer_face      (fronts only)
+  - drawer_box       (boxes only)
+  - drawer_box_bottom
+  - finished_end     (end panels)
+  - toe_kick
 """
 
 import rhinoscriptsyntax as rs
 
 # ============================================================
-# DATA FROM CabinetXYZService.php (regenerate with PHP export)
-# joint_type: miter
+# DATA - INJECTED BY PHP (DO NOT HARDCODE)
+# This variable must be set before running this script
 # ============================================================
 
-DATA = {
-    "cabinet_envelope": {
-        "width": 41.3125,
-        "height": 32.75,
-        "box_height": 28.75,
-        "depth": 18.75,
-        "toe_kick_height": 4
-    },
-    "parts": {
-        "left_side": {
-            "part_name": "Left Side",
-            "part_type": "cabinet_box",
-            "position": {"x": 0, "y": 0.75, "z": 1},
-            "dimensions": {"w": 0.75, "h": 27.25, "d": 17}
-        },
-        "right_side": {
-            "part_name": "Right Side",
-            "part_type": "cabinet_box",
-            "position": {"x": 40.5625, "y": 0.75, "z": 1},
-            "dimensions": {"w": 0.75, "h": 27.25, "d": 17}
-        },
-        "bottom": {
-            "part_name": "Bottom",
-            "part_type": "cabinet_box",
-            "position": {"x": 0, "y": 0, "z": 1},
-            "dimensions": {"w": 41.3125, "h": 0.75, "d": 17}
-        },
-        "back": {
-            "part_name": "Back",
-            "part_type": "cabinet_box",
-            "position": {"x": 0, "y": 0, "z": 18},
-            "dimensions": {"w": 41.3125, "h": 28.75, "d": 0.75}
-        },
-        "toe_kick": {
-            "part_name": "Toe Kick",
-            "part_type": "cabinet_box",
-            "position": {"x": 0.75, "y": -4, "z": 3},
-            "dimensions": {"w": 39.8125, "h": 4, "d": 0.75}
-        },
-        "left_stile": {
-            "part_name": "Left Stile",
-            "part_type": "face_frame",
-            "position": {"x": -1, "y": -4, "z": 0},
-            "dimensions": {"w": 1.75, "h": 32.75, "d": 1},
-            "miter_cut": {
-                "type": "triangular_prism",
-                "remove_from": "collision_zone_front",
-                "vertices_xz": [
-                    {"x": -1, "z": 0},
-                    {"x": -0.25, "z": 1},
-                    {"x": -0.25, "z": 0}
-                ],
-                "y_range": {"start": -4, "end": 28.75},
-                "miter_angle": 45
-            }
-        },
-        "right_stile": {
-            "part_name": "Right Stile",
-            "part_type": "face_frame",
-            "position": {"x": 40.5625, "y": -4, "z": 0},
-            "dimensions": {"w": 1.75, "h": 32.75, "d": 1},
-            "miter_cut": {
-                "type": "triangular_prism",
-                "remove_from": "collision_zone_front",
-                "vertices_xz": [
-                    {"x": 42.3125, "z": 0},
-                    {"x": 41.5625, "z": 1},
-                    {"x": 41.5625, "z": 0}
-                ],
-                "y_range": {"start": -4, "end": 28.75},
-                "miter_angle": 45
-            }
-        },
-        "top_rail": {
-            "part_name": "Top Rail",
-            "part_type": "face_frame",
-            "position": {"x": 0.75, "y": 26.5, "z": 0},
-            "dimensions": {"w": 39.8125, "h": 1.5, "d": 0.75}
-        },
-        "front_stretcher": {
-            "part_name": "Front Stretcher",
-            "part_type": "stretcher",
-            "position": {"x": 0, "y": 28, "z": 1},
-            "dimensions": {"w": 41.3125, "h": 0.75, "d": 3}
-        },
-        "back_stretcher": {
-            "part_name": "Back Stretcher",
-            "part_type": "stretcher",
-            "position": {"x": 0, "y": 28, "z": 14},
-            "dimensions": {"w": 41.3125, "h": 0.75, "d": 3}
-        },
-        "drawer_divider_stretcher": {
-            "part_name": "Drawer Divider Stretcher",
-            "part_type": "stretcher",
-            "position": {"x": 0.75, "y": 11.25, "z": 1},
-            "dimensions": {"w": 39.8125, "h": 0.75, "d": 16}
-        },
-        "left_end_panel": {
-            "part_name": "Left End Panel",
-            "part_type": "finished_end",
-            "position": {"x": -1, "y": -4, "z": 0},
-            "dimensions": {"w": 0.75, "h": 32.75, "d": 19.25},
-            "miter_cut": {
-                "type": "triangular_prism",
-                "remove_from": "collision_zone_back",
-                "vertices_xz": [
-                    {"x": -1, "z": 0},
-                    {"x": -0.25, "z": 1},
-                    {"x": -1, "z": 1}
-                ],
-                "y_range": {"start": -4, "end": 28.75},
-                "miter_angle": 45
-            }
-        },
-        "right_end_panel": {
-            "part_name": "Right End Panel",
-            "part_type": "finished_end",
-            "position": {"x": 41.5625, "y": -4, "z": 0},
-            "dimensions": {"w": 0.75, "h": 32.75, "d": 19.25},
-            "miter_cut": {
-                "type": "triangular_prism",
-                "remove_from": "collision_zone_back",
-                "vertices_xz": [
-                    {"x": 42.3125, "z": 0},
-                    {"x": 41.5625, "z": 1},
-                    {"x": 42.3125, "z": 1}
-                ],
-                "y_range": {"start": -4, "end": 28.75},
-                "miter_angle": 45
-            }
-        },
-        "false_front_1_face": {
-            "part_name": "False Front #1 Face",
-            "part_type": "false_front",
-            "position": {"x": 0.75, "y": 22.625, "z": 0},
-            "dimensions": {"w": 39.8125, "h": 6, "d": 0.75}
-        },
-        "false_front_1_backing": {
-            "part_name": "False Front #1 Backing",
-            "part_type": "false_front_backing",
-            "position": {"x": 0.75, "y": 21, "z": 0.75},
-            "dimensions": {"w": 39.8125, "h": 7, "d": 0.75}
-        },
-        "drawer_1_face": {
-            "part_name": "Upper Drawer Face",
-            "part_type": "drawer_face",
-            "position": {"x": 0.875, "y": 11.3125, "z": 0},
-            "dimensions": {"w": 39.5625, "h": 11.1875, "d": 0.75}
-        },
-        "drawer_2_face": {
-            "part_name": "Lower Drawer Face",
-            "part_type": "drawer_face",
-            "position": {"x": 0.875, "y": 0, "z": 0},
-            "dimensions": {"w": 39.5625, "h": 11.1875, "d": 0.75}
-        }
-    }
-}
+# DATA = { ... }  # Injected by PHP
 
 # ============================================================
 # COLORS BY PART TYPE
@@ -191,7 +51,9 @@ COLORS = {
     "finished_end": (205, 133, 63),
     "false_front": (222, 184, 135),
     "false_front_backing": (188, 143, 143),
-    "drawer_face": (245, 222, 179)
+    "drawer_face": (245, 222, 179),
+    "drawer_box": (255, 228, 181),
+    "drawer_box_bottom": (255, 239, 213)
 }
 
 # ============================================================
@@ -204,9 +66,25 @@ def delete_all():
         rs.DeleteObjects(all_objs)
         print("Deleted " + str(len(all_objs)) + " objects")
 
+def delete_by_type(part_types):
+    """Delete only objects matching specified part types."""
+    all_objs = rs.AllObjects()
+    deleted = 0
+    if all_objs:
+        for obj in all_objs:
+            name = rs.ObjectName(obj)
+            if name:
+                for part_key, part in DATA["parts"].items():
+                    if part["part_name"] == name and part["part_type"] in part_types:
+                        rs.DeleteObject(obj)
+                        deleted += 1
+                        break
+    if deleted > 0:
+        print("Deleted " + str(deleted) + " objects of types: " + str(part_types))
+
 def to_rhino(x, y, z, toe_kick_height):
     """
-    Transform from CabinetXYZService coords to Rhino coords.
+    Transform from CabinetMathAuditService coords to Rhino coords.
     Rhino X = Our X
     Rhino Y = Our Z (depth)
     Rhino Z = Our Y + toe_kick (shift to floor level)
@@ -214,7 +92,7 @@ def to_rhino(x, y, z, toe_kick_height):
     return (x, z, y + toe_kick_height)
 
 def create_box_from_part(part, toe_kick_height):
-    """Create a box from part data."""
+    """Create a box from part data using 8-corner method."""
     pos = part["position"]
     dim = part["dimensions"]
     x = pos["x"]
@@ -227,6 +105,7 @@ def create_box_from_part(part, toe_kick_height):
     if w <= 0 or h <= 0 or d <= 0:
         return None
 
+    # 8 corner points for AddBox (more reliable than centered BOX)
     p1 = to_rhino(x, y, z, toe_kick_height)
     p2 = to_rhino(x + w, y, z, toe_kick_height)
     p3 = to_rhino(x + w, y, z + d, toe_kick_height)
@@ -251,10 +130,6 @@ def create_miter_cutter_solid(miter_cut, toe_kick_height):
     """
     Create a solid triangular prism to subtract for miter cut.
     Uses polyline -> planar surface -> extrude -> cap for valid brep.
-
-    The miter_cut contains:
-    - vertices_xz: 3 points defining triangle in XZ plane
-    - y_range: start and end Y values (full height of cut)
     """
     vertices = miter_cut["vertices_xz"]
     y_range = miter_cut["y_range"]
@@ -262,23 +137,19 @@ def create_miter_cutter_solid(miter_cut, toe_kick_height):
     y_start = y_range["start"]
     y_end = y_range["end"]
 
-    # Get triangle vertices in XZ
     v0 = vertices[0]
     v1 = vertices[1]
     v2 = vertices[2]
 
-    # Create triangle at bottom (y_start)
     p1 = to_rhino(v0["x"], y_start, v0["z"], toe_kick_height)
     p2 = to_rhino(v1["x"], y_start, v1["z"], toe_kick_height)
     p3 = to_rhino(v2["x"], y_start, v2["z"], toe_kick_height)
 
-    # Create closed polyline for triangle
     triangle = rs.AddPolyline([p1, p2, p3, p1])
     if not triangle:
         print("  Failed to create triangle polyline")
         return None
 
-    # Create planar surface from closed polyline
     surface = rs.AddPlanarSrf([triangle])
     rs.DeleteObject(triangle)
 
@@ -288,12 +159,10 @@ def create_miter_cutter_solid(miter_cut, toe_kick_height):
 
     srf = surface[0]
 
-    # Create extrusion direction (from y_start to y_end)
     start_pt = p1
     end_pt = to_rhino(v0["x"], y_end, v0["z"], toe_kick_height)
     line = rs.AddLine(start_pt, end_pt)
 
-    # Extrude surface along direction
     extruded = rs.ExtrudeSurface(srf, line)
     rs.DeleteObject(srf)
     rs.DeleteObject(line)
@@ -302,7 +171,6 @@ def create_miter_cutter_solid(miter_cut, toe_kick_height):
         print("  Failed to extrude surface")
         return None
 
-    # Cap the ends to make it a solid
     rs.CapPlanarHoles(extruded)
 
     return extruded
@@ -317,7 +185,6 @@ def apply_miter_cut(box, miter_cut, toe_kick_height, part_name):
         print("  Warning: Could not create miter cutter for " + part_name)
         return box
 
-    # Boolean difference
     result = rs.BooleanDifference([box], [cutter], delete_input=True)
 
     if result and len(result) > 0:
@@ -325,7 +192,6 @@ def apply_miter_cut(box, miter_cut, toe_kick_height, part_name):
         return result[0]
     else:
         print("  Warning: Boolean failed for " + part_name)
-        # Clean up cutter if boolean failed
         if rs.IsObject(cutter):
             rs.DeleteObject(cutter)
         return box
@@ -334,9 +200,21 @@ def apply_miter_cut(box, miter_cut, toe_kick_height, part_name):
 # MAIN
 # ============================================================
 
-def main():
+def main(component_types=None, clear_existing=True):
+    """
+    Build cabinet parts in Rhino.
+
+    Args:
+        component_types: List of part types to build, or None for all.
+        clear_existing: If True, delete existing objects first.
+    """
+    # Check DATA exists
+    if 'DATA' not in dir() and 'DATA' not in globals():
+        print("ERROR: DATA not defined. This template requires DATA to be injected by PHP.")
+        return 0
+
     print("=" * 50)
-    print("TCS CABINET - WITH MITER JOINTS")
+    print("TCS CABINET BUILDER")
     print("=" * 50)
 
     envelope = DATA["cabinet_envelope"]
@@ -345,18 +223,32 @@ def main():
 
     print("Cabinet: " + str(envelope["width"]) + " x " + str(envelope["height"]) + " x " + str(envelope["depth"]))
     print("Box Height: " + str(envelope["box_height"]))
+
+    if component_types:
+        print("Building components: " + str(component_types))
+    else:
+        print("Building ALL components")
     print("")
 
-    delete_all()
+    if clear_existing:
+        if component_types:
+            delete_by_type(component_types)
+        else:
+            delete_all()
     print("")
 
     print("Creating parts:")
     created = 0
+    skipped = 0
 
     for part_key in parts:
         part = parts[part_key]
+        part_type = part["part_type"]
 
-        # Create the base box
+        if component_types and part_type not in component_types:
+            skipped += 1
+            continue
+
         box = create_box_from_part(part, toe_kick_height)
 
         if box:
@@ -364,17 +256,64 @@ def main():
             dim = part["dimensions"]
             print("  " + part["part_name"] + ": Y=" + str(pos["y"]) + " to " + str(pos["y"] + dim["h"]))
 
-            # Apply miter cut if present
             miter_cut = part.get("miter_cut")
             if miter_cut:
                 box = apply_miter_cut(box, miter_cut, toe_kick_height, part["part_name"])
 
-            created = created + 1
+            created += 1
 
     print("")
     print("Created " + str(created) + " objects")
+    if skipped > 0:
+        print("Skipped " + str(skipped) + " objects (filtered)")
 
     rs.ZoomExtents()
     print("=" * 50)
 
-main()
+    return created
+
+
+# ============================================================
+# COMPONENT BUILD FUNCTIONS
+# ============================================================
+
+def build_cabinet_box():
+    return main(["cabinet_box"])
+
+def build_face_frame():
+    return main(["face_frame"])
+
+def build_stretchers():
+    return main(["stretcher"])
+
+def build_drawers():
+    return main(["drawer_face", "drawer_box", "drawer_box_bottom"])
+
+def build_drawer_faces():
+    return main(["drawer_face"])
+
+def build_drawer_boxes():
+    return main(["drawer_box", "drawer_box_bottom"])
+
+def build_false_fronts():
+    return main(["false_front", "false_front_backing"])
+
+def build_end_panels():
+    return main(["finished_end"])
+
+def build_toe_kick():
+    return main(["toe_kick"])
+
+def build_all():
+    return main()
+
+
+# ============================================================
+# EXECUTE (called after DATA is injected)
+# ============================================================
+
+# Check if COMPONENT_TYPES was specified (optional filter)
+if 'COMPONENT_TYPES' in dir() or 'COMPONENT_TYPES' in globals():
+    main(COMPONENT_TYPES)
+else:
+    main()

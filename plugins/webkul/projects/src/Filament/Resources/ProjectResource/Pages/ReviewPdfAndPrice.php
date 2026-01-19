@@ -52,8 +52,6 @@ class ReviewPdfAndPrice extends Page implements HasForms
 
     public ?array $data = [];
 
-    public $record;
-
     public $pdfDocument;
 
     #[Url]

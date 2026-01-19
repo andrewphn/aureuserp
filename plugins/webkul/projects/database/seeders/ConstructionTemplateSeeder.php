@@ -45,6 +45,22 @@ class ConstructionTemplateSeeder extends Seeder
                 'face_frame_rail_width' => 1.5,      // 1 1/2"
                 'face_frame_door_gap' => 0.125,      // 1/8"
                 'face_frame_thickness' => 0.75,      // 3/4"
+                // Face Frame Style Settings (TCS uses Full Overlay)
+                'default_face_frame_style' => 'full_overlay',
+                'frameless_reveal_gap' => 0.09375,       // 3/32"
+                'frameless_bottom_reveal' => 0,
+                'face_frame_reveal_gap' => 0.125,        // 1/8"
+                'face_frame_bottom_reveal' => 0.125,
+                'full_overlay_amount' => 1.25,           // 1-1/4" (TCS standard)
+                'full_overlay_reveal_gap' => 0.125,      // 1/8"
+                'full_overlay_bottom_reveal' => 0,       // No bottom reveal (TCS)
+                'inset_reveal_gap' => 0.0625,            // 1/16"
+                'inset_bottom_reveal' => 0.0625,
+                'partial_overlay_amount' => 0.375,       // 3/8"
+                'partial_overlay_reveal_gap' => 0.125,
+                'partial_overlay_bottom_reveal' => 0.125,
+                'drawer_cavity_clearance' => 0.25,       // 1/4"
+                'end_panel_install_overage' => 0.5,      // 1/2"
                 // Material Thickness Overrides (used when product has no thickness attribute)
                 'box_material_thickness' => 0.75,    // 3/4"
                 'back_panel_thickness' => 0.75,      // 3/4" full backs (TCS standard)
@@ -85,6 +101,22 @@ class ConstructionTemplateSeeder extends Seeder
                 'face_frame_rail_width' => 0.0,
                 'face_frame_door_gap' => 0.0625,     // 1/16" for overlay
                 'face_frame_thickness' => 0.0,
+                // Face Frame Style Settings (European Frameless)
+                'default_face_frame_style' => 'frameless',
+                'frameless_reveal_gap' => 0.09375,       // 3/32" (European standard)
+                'frameless_bottom_reveal' => 0,
+                'face_frame_reveal_gap' => 0.125,
+                'face_frame_bottom_reveal' => 0.125,
+                'full_overlay_amount' => 1.25,
+                'full_overlay_reveal_gap' => 0.125,
+                'full_overlay_bottom_reveal' => 0,
+                'inset_reveal_gap' => 0.0625,
+                'inset_bottom_reveal' => 0.0625,
+                'partial_overlay_amount' => 0.375,
+                'partial_overlay_reveal_gap' => 0.125,
+                'partial_overlay_bottom_reveal' => 0.125,
+                'drawer_cavity_clearance' => 0.25,
+                'end_panel_install_overage' => 0.5,
                 // Material Thickness
                 'box_material_thickness' => 0.75,
                 'back_panel_thickness' => 0.25,      // 1/4" backs common in frameless
@@ -125,6 +157,22 @@ class ConstructionTemplateSeeder extends Seeder
                 'face_frame_rail_width' => 2.0,     // 2" rails for inset
                 'face_frame_door_gap' => 0.0625,    // 1/16" tight gap for inset
                 'face_frame_thickness' => 0.75,
+                // Face Frame Style Settings (Traditional Inset)
+                'default_face_frame_style' => 'inset',
+                'frameless_reveal_gap' => 0.09375,
+                'frameless_bottom_reveal' => 0,
+                'face_frame_reveal_gap' => 0.125,
+                'face_frame_bottom_reveal' => 0.125,
+                'full_overlay_amount' => 1.25,
+                'full_overlay_reveal_gap' => 0.125,
+                'full_overlay_bottom_reveal' => 0,
+                'inset_reveal_gap' => 0.0625,            // 1/16" (tight fit for inset)
+                'inset_bottom_reveal' => 0.0625,         // 1/16"
+                'partial_overlay_amount' => 0.375,
+                'partial_overlay_reveal_gap' => 0.125,
+                'partial_overlay_bottom_reveal' => 0.125,
+                'drawer_cavity_clearance' => 0.25,
+                'end_panel_install_overage' => 0.5,
                 // Material Thickness
                 'box_material_thickness' => 0.75,
                 'back_panel_thickness' => 0.75,

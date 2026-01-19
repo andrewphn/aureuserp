@@ -7,6 +7,7 @@ use Filament\Actions;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Infolists;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * View Pdf Document class
@@ -28,10 +29,10 @@ class ViewPdfDocument extends ViewRecord
     /**
      * Define the infolist schema
      *
-     * @param Infolist $infolist
-     * @return Infolist
+     * @param Schema $schema
+     * @return Schema
      */
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $schema
             ->components([

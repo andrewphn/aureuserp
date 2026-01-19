@@ -571,9 +571,21 @@ class StretcherCalculator
     /**
      * Calculate stretcher position from bottom of box.
      *
-     * Alternative calculation method - calculates based on faces BELOW the stretcher.
+     * TCS Rule: Stretcher TOP provides mounting surface for upper drawer slides.
+     * The stretcher is positioned so its TOP surface is at the correct height
+     * for slide mounting, accounting for drawer face overlap.
      *
-     * TCS Rule: Bottom drawer face lines up with bottom of cabinet (above toe kick).
+     * Formula derived from Blum TANDEM 563H specs:
+     *   Stretcher TOP = Lower drawer face TOP + BOTTOM_CLEARANCE - REVEAL_GAP
+     *
+     * Where:
+     *   - BOTTOM_CLEARANCE = 9/16" (14mm) - Blum spec for gap below drawer box
+     *   - REVEAL_GAP = 1/8" - Visual gap between drawer faces
+     *   - Offset = 9/16" - 1/8" = 7/16" (0.4375")
+     *
+     * The drawer face extends below the opening (full overlay), so:
+     *   - Face bottom = Opening bottom - some overlap
+     *   - Stretcher TOP = Face TOP + offset = Opening bottom (for upper drawer)
      *
      * @param Cabinet $cabinet The cabinet
      * @param array $drawersBelow Collection of drawers below this stretcher
@@ -602,8 +614,14 @@ class StretcherCalculator
             $position += $faceHeight;
         }
 
-        // Add half the gap (stretcher centered in gap)
-        $position += self::STANDARD_GAP_INCHES / 2;
+        // Calculate mounting offset from Blum specs:
+        // Offset = Bottom clearance (9/16") - Reveal gap (1/8")
+        // This positions the stretcher TOP at the bottom of the upper drawer's opening
+        $bottomClearance = DrawerConfiguratorService::BOTTOM_CLEARANCE;  // 0.5625" (9/16")
+        $revealGap = self::STANDARD_GAP_INCHES;  // 0.125" (1/8")
+        $mountingOffset = $bottomClearance - $revealGap;  // 0.4375" (7/16")
+
+        $position += $mountingOffset;
 
         return $position;
     }

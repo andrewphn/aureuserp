@@ -9,6 +9,8 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Grid;
@@ -17,6 +19,9 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Webkul\Product\Models\AttributeOption;
 use Webkul\Project\Models\Cabinet;
+use App\Services\RhinoMCPService;
+use App\Services\RhinoDataExtractor;
+use App\Services\RhinoToCabinetMapper;
 
 /**
  * Cabinets Relation Manager class
@@ -357,6 +362,128 @@ class CabinetsRelationManager extends RelationManager
                         $data['creator_id'] = auth()->id();
                         $data['project_id'] = $livewire->getOwnerRecord()->id;
                         return $data;
+                    }),
+                \Filament\Actions\Action::make('importFromRhino')
+                    ->label('Import from Rhino')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->modalWidth('4xl')
+                    ->modalHeading('Import Cabinets from Rhino')
+                    ->modalDescription('Extract cabinet data from the currently open Rhino document')
+                    ->form(function (RelationManager $livewire) {
+                        return [
+                            Placeholder::make('rhino_status')
+                                ->label('Rhino Connection')
+                                ->content(function () {
+                                    try {
+                                        $rhinoMcp = app(RhinoMCPService::class);
+                                        $docInfo = $rhinoMcp->getDocumentInfo();
+                                        $docName = $docInfo['name'] ?? 'Unknown';
+                                        return "✅ Connected to Rhino: {$docName}";
+                                    } catch (\Exception $e) {
+                                        return "❌ Not connected to Rhino. Make sure Rhino is running with the MCP server.";
+                                    }
+                                }),
+                            Select::make('room_id')
+                                ->label('Assign to Room (optional)')
+                                ->options(fn () => $livewire->getOwnerRecord()->rooms()->pluck('name', 'id'))
+                                ->searchable()
+                                ->helperText('Leave empty to import without room assignment'),
+                            Select::make('material_category')
+                                ->label('Default Material Category')
+                                ->options(fn () => AttributeOption::where('attribute_id', 18)
+                                    ->orderBy('sort')
+                                    ->pluck('name', 'name')
+                                    ->toArray())
+                                ->native(false)
+                                ->searchable(),
+                            Select::make('finish_option')
+                                ->label('Default Finish Option')
+                                ->options(fn () => AttributeOption::where('attribute_id', 19)
+                                    ->orderBy('sort')
+                                    ->pluck('name', 'name')
+                                    ->toArray())
+                                ->native(false)
+                                ->searchable(),
+                            Toggle::make('update_existing')
+                                ->label('Update existing cabinets by name match')
+                                ->default(false)
+                                ->helperText('If enabled, existing cabinets with matching names will be updated'),
+                        ];
+                    })
+                    ->action(function (array $data, RelationManager $livewire): void {
+                        try {
+                            $rhinoMcp = app(RhinoMCPService::class);
+                            $extractor = app(RhinoDataExtractor::class);
+                            $mapper = app(RhinoToCabinetMapper::class);
+
+                            // Check connection
+                            $rhinoMcp->getDocumentInfo();
+
+                            // Extract cabinets
+                            $extractedData = $extractor->extractCabinets();
+                            $cabinetCount = count($extractedData['cabinets'] ?? []);
+
+                            if ($cabinetCount === 0) {
+                                Notification::make()
+                                    ->title('No cabinets found')
+                                    ->body('No cabinet groups were detected in the Rhino document.')
+                                    ->warning()
+                                    ->send();
+                                return;
+                            }
+
+                            // Build context
+                            $context = [
+                                'project_id' => $livewire->getOwnerRecord()->id,
+                                'room_id' => $data['room_id'] ?? null,
+                                'material_category' => $data['material_category'] ?? null,
+                                'finish_option' => $data['finish_option'] ?? null,
+                            ];
+
+                            // Map and create cabinets
+                            $mappedData = $mapper->mapAllCabinets($extractedData, $context);
+
+                            $created = 0;
+                            $updated = 0;
+
+                            foreach ($mappedData['cabinets'] as $cabinetData) {
+                                $existingCabinet = null;
+
+                                if ($data['update_existing'] ?? false) {
+                                    $existingCabinet = $mapper->findMatchingCabinet(
+                                        $cabinetData['_rhino_source']['group_name'] ?? '',
+                                        $context['project_id']
+                                    );
+                                }
+
+                                if ($existingCabinet) {
+                                    // Update existing
+                                    $mapper->updateCabinet(
+                                        $existingCabinet,
+                                        $extractedData['cabinets'][array_search($cabinetData, $mappedData['cabinets'])]
+                                    );
+                                    $updated++;
+                                } else {
+                                    // Create new
+                                    $mapper->createCabinets(['cabinets' => [$cabinetData]], false);
+                                    $created++;
+                                }
+                            }
+
+                            Notification::make()
+                                ->title('Import Complete')
+                                ->body("Created {$created} cabinet(s), updated {$updated} cabinet(s)")
+                                ->success()
+                                ->send();
+
+                        } catch (\Exception $e) {
+                            Notification::make()
+                                ->title('Import Failed')
+                                ->body($e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     }),
                 \Filament\Actions\Action::make('manageOptions')
                     ->label('Add Option')
