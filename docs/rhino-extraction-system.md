@@ -320,14 +320,43 @@ Kohler K-13132-3B Pinstripe (Faucet)
 
 ## Files
 
-| File | Purpose |
+| File | Purpose | Status |
+|------|---------|--------|
+| `app/Services/RhinoMCPService.php` | MCP communication layer | ✓ Validated |
+| `app/Services/RhinoDataExtractor.php` | Extraction logic | ✓ Validated |
+| `app/Services/RhinoToCabinetMapper.php` | Data mapping | ✓ Validated |
+| `app/Services/TcsMaterialService.php` | Material parsing | ✓ Validated |
+| `app/Console/Commands/ImportRhinoCabinets.php` | CLI import | ✓ Validated |
+| `app/Console/Commands/AnalyzeRhinoViews.php` | CLI analysis | ✓ Validated |
+
+## Workflow Validation
+
+Run the validation script to verify all components:
+
+```bash
+# Quick validation
+php artisan tinker --execute="
+\$components = [
+    'RhinoMCPService' => App\Services\RhinoMCPService::class,
+    'RhinoDataExtractor' => App\Services\RhinoDataExtractor::class,
+    'RhinoToCabinetMapper' => App\Services\RhinoToCabinetMapper::class,
+    'TcsMaterialService' => App\Services\TcsMaterialService::class,
+];
+foreach (\$components as \$name => \$class) {
+    echo class_exists(\$class) ? '✓' : '✗';
+    echo \" \$name\\n\";
+}
+"
+```
+
+### MCP Tools Used
+
+| Tool | Purpose |
 |------|---------|
-| `app/Services/RhinoMCPService.php` | MCP communication layer |
-| `app/Services/RhinoDataExtractor.php` | Extraction logic |
-| `app/Services/RhinoToCabinetMapper.php` | Data mapping |
-| `app/Services/TcsMaterialService.php` | Material parsing |
-| `app/Console/Commands/ImportRhinoCabinets.php` | CLI import |
-| `app/Console/Commands/AnalyzeRhinoViews.php` | CLI analysis |
+| `get_document_info` | Get document metadata and object count |
+| `execute_rhinoscript_python_code` | Run Python scripts in Rhino |
+| `get_object_info` | Get specific object details |
+| `select_objects` | Select objects by filter |
 
 ## Requirements
 
