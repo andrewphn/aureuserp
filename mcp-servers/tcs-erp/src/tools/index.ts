@@ -35,6 +35,7 @@ export { bomTools, handleBomTool } from './bom.js';
 export { stockTools, handleStockTool } from './stock.js';
 export { productCategoryTools, handleProductCategoryTool } from './product-categories.js';
 export { changeOrderTools, handleChangeOrderTool } from './change-orders.js';
+export { chatterTools, handleChatterTool } from './chatter.js';
 
 // Import for allTools array - Original
 import { projectTools } from './projects.js';
@@ -64,6 +65,7 @@ import { bomTools } from './bom.js';
 import { stockTools } from './stock.js';
 import { productCategoryTools } from './product-categories.js';
 import { changeOrderTools } from './change-orders.js';
+import { chatterTools } from './chatter.js';
 
 /**
  * All available MCP tools
@@ -95,6 +97,7 @@ export const allTools: Tool[] = [
   ...stockTools,
   ...productCategoryTools,
   ...changeOrderTools,
+  ...chatterTools,
 ];
 
 /**
@@ -127,5 +130,6 @@ export const toolCounts = {
   stock: stockTools.length,
   productCategories: productCategoryTools.length,
   changeOrders: changeOrderTools.length,
+  chatter: chatterTools.length,
   total: allTools.length,
 };

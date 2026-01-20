@@ -15,7 +15,7 @@ import { CallToolRequestSchema, ListToolsRequestSchema, } from '@modelcontextpro
 import { TcsErpApiClient } from './api-client.js';
 import { allTools, toolCounts, handleProjectTool, handleRoomTool, handleLocationTool, handleCabinetRunTool, handleCabinetTool, handleSectionTool, handleDrawerTool, handleDoorTool, handleProductTool, handlePartnerTool, handleEmployeeTool, handleTaskTool, handleRhinoTool, handleReviewTool, handleWebhookTool, handleBatchTool, 
 // New handlers
-handleSalesOrderTool, handlePurchaseOrderTool, handleInvoiceTool, handlePaymentTool, handleCalculatorTool, handleBomTool, handleStockTool, handleProductCategoryTool, handleChangeOrderTool, } from './tools/index.js';
+handleSalesOrderTool, handlePurchaseOrderTool, handleInvoiceTool, handlePaymentTool, handleCalculatorTool, handleBomTool, handleStockTool, handleProductCategoryTool, handleChangeOrderTool, handleChatterTool, } from './tools/index.js';
 // Tool name prefixes for routing
 const TOOL_PREFIXES = {
     // Original tools
@@ -45,6 +45,7 @@ const TOOL_PREFIXES = {
     stock: ['list_stock', 'get_stock', 'get_stock_by_product', 'get_stock_by_location', 'adjust_stock', 'transfer_stock'],
     productCategories: ['list_product_categories', 'get_product_categories_tree', 'get_product_category', 'create_product_category', 'update_product_category', 'delete_product_category'],
     changeOrders: ['list_change_orders', 'get_change_order', 'create_change_order', 'update_change_order', 'delete_change_order', 'approve_change_order', 'reject_change_order', 'get_change_orders_by_project'],
+    chatter: ['list_chatter', 'get_chatter', 'create_chatter', 'update_chatter', 'delete_chatter', 'get_chatter_for_resource', 'add_chatter_to_resource', 'pin_chatter', 'unpin_chatter', 'get_chatter_types'],
 };
 /**
  * Route a tool call to the appropriate handler
@@ -126,6 +127,9 @@ async function routeToolCall(client, toolName, args) {
     }
     if (TOOL_PREFIXES.changeOrders.includes(toolName)) {
         return handleChangeOrderTool(client, toolName, args);
+    }
+    if (TOOL_PREFIXES.chatter.includes(toolName)) {
+        return handleChatterTool(client, toolName, args);
     }
     throw new Error(`Unknown tool: ${toolName}`);
 }

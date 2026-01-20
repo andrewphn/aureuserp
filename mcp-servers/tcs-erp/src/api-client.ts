@@ -950,4 +950,49 @@ export class TcsErpApiClient {
   async generateProjectOrder(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
     return this.request('POST', `/projects/${id}/generate-order`, data);
   }
+
+  // =========================================================================
+  // Chatter (Messages/Notes on any resource)
+  // =========================================================================
+
+  async listChatter(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>> {
+    return this.request('GET', '/chatter', undefined, filters as Record<string, string>);
+  }
+
+  async getChatter(id: number, include?: string): Promise<ApiResponse<unknown>> {
+    const params = include ? { include } : undefined;
+    return this.request('GET', `/chatter/${id}`, undefined, params);
+  }
+
+  async createChatter(data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', '/chatter', data);
+  }
+
+  async updateChatter(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('PUT', `/chatter/${id}`, data);
+  }
+
+  async deleteChatter(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('DELETE', `/chatter/${id}`);
+  }
+
+  async getChatterForResource(type: string, id: number, filters?: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('GET', `/chatter/for/${type}/${id}`, undefined, filters as Record<string, string>);
+  }
+
+  async addChatterToResource(type: string, id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/chatter/for/${type}/${id}`, data);
+  }
+
+  async pinChatter(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/chatter/${id}/pin`);
+  }
+
+  async unpinChatter(id: number): Promise<ApiResponse<unknown>> {
+    return this.request('POST', `/chatter/${id}/unpin`);
+  }
+
+  async getChatterTypes(): Promise<ApiResponse<unknown>> {
+    return this.request('GET', '/chatter/types');
+  }
 }

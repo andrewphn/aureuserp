@@ -236,6 +236,17 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     });
 
     // ========================================
+    // Chatter (Messages/Notes on any resource)
+    // ========================================
+    // These routes must come BEFORE apiResource to avoid {id} conflict
+    Route::get('chatter/types', [V1\ChatterController::class, 'types'])->name('chatter.types');
+    Route::get('chatter/for/{type}/{id}', [V1\ChatterController::class, 'forResource'])->name('chatter.for-resource');
+    Route::post('chatter/for/{type}/{id}', [V1\ChatterController::class, 'addToResource'])->name('chatter.add-to-resource');
+    Route::post('chatter/{id}/pin', [V1\ChatterController::class, 'pin'])->name('chatter.pin');
+    Route::post('chatter/{id}/unpin', [V1\ChatterController::class, 'unpin'])->name('chatter.unpin');
+    Route::apiResource('chatter', V1\ChatterController::class);
+
+    // ========================================
     // Batch Operations
     // ========================================
     Route::post('batch/{resource}', [V1\BatchController::class, 'handle'])

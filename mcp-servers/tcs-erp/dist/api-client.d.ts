@@ -200,4 +200,14 @@ export declare class TcsErpApiClient {
     getProjectGateStatus(id: number): Promise<ApiResponse<unknown>>;
     getProjectBom(id: number): Promise<ApiResponse<unknown>>;
     generateProjectOrder(id: number, data?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    listChatter(filters?: Record<string, unknown>): Promise<PaginatedResponse<unknown>>;
+    getChatter(id: number, include?: string): Promise<ApiResponse<unknown>>;
+    createChatter(data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    updateChatter(id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    deleteChatter(id: number): Promise<ApiResponse<unknown>>;
+    getChatterForResource(type: string, id: number, filters?: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    addChatterToResource(type: string, id: number, data: Record<string, unknown>): Promise<ApiResponse<unknown>>;
+    pinChatter(id: number): Promise<ApiResponse<unknown>>;
+    unpinChatter(id: number): Promise<ApiResponse<unknown>>;
+    getChatterTypes(): Promise<ApiResponse<unknown>>;
 }

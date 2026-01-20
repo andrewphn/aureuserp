@@ -30,6 +30,7 @@ export { bomTools, handleBomTool } from './bom.js';
 export { stockTools, handleStockTool } from './stock.js';
 export { productCategoryTools, handleProductCategoryTool } from './product-categories.js';
 export { changeOrderTools, handleChangeOrderTool } from './change-orders.js';
+export { chatterTools, handleChatterTool } from './chatter.js';
 /**
  * All available MCP tools
  */
@@ -63,5 +64,6 @@ export declare const toolCounts: {
     stock: number;
     productCategories: number;
     changeOrders: number;
+    chatter: number;
     total: number;
 };

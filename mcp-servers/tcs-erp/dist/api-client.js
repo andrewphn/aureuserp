@@ -717,4 +717,38 @@ export class TcsErpApiClient {
     async generateProjectOrder(id, data) {
         return this.request('POST', `/projects/${id}/generate-order`, data);
     }
+    // =========================================================================
+    // Chatter (Messages/Notes on any resource)
+    // =========================================================================
+    async listChatter(filters) {
+        return this.request('GET', '/chatter', undefined, filters);
+    }
+    async getChatter(id, include) {
+        const params = include ? { include } : undefined;
+        return this.request('GET', `/chatter/${id}`, undefined, params);
+    }
+    async createChatter(data) {
+        return this.request('POST', '/chatter', data);
+    }
+    async updateChatter(id, data) {
+        return this.request('PUT', `/chatter/${id}`, data);
+    }
+    async deleteChatter(id) {
+        return this.request('DELETE', `/chatter/${id}`);
+    }
+    async getChatterForResource(type, id, filters) {
+        return this.request('GET', `/chatter/for/${type}/${id}`, undefined, filters);
+    }
+    async addChatterToResource(type, id, data) {
+        return this.request('POST', `/chatter/for/${type}/${id}`, data);
+    }
+    async pinChatter(id) {
+        return this.request('POST', `/chatter/${id}/pin`);
+    }
+    async unpinChatter(id) {
+        return this.request('POST', `/chatter/${id}/unpin`);
+    }
+    async getChatterTypes() {
+        return this.request('GET', '/chatter/types');
+    }
 }
