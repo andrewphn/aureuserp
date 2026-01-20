@@ -99,19 +99,13 @@ class ChatterController extends BaseResourceController
     public function forResource(Request $request, string $type, int $id): JsonResponse
     {
         // Map short type names to full model classes
-        $typeMap = [
-            'project' => 'Webkul\\Project\\Models\\Project',
-            'cabinet' => 'Webkul\\Project\\Models\\Cabinet',
-            'room' => 'Webkul\\Project\\Models\\Room',
-            'partner' => 'Webkul\\Partner\\Models\\Partner',
-            'sales_order' => 'Webkul\\Sales\\Models\\Order',
-            'purchase_order' => 'Webkul\\Purchase\\Models\\Order',
-            'invoice' => 'Webkul\\Account\\Models\\Move',
-            'task' => 'Webkul\\Project\\Models\\Task',
-            'employee' => 'Webkul\\Employee\\Models\\Employee',
-        ];
-
+        $typeMap = $this->getTypeMap();
         $messageableType = $typeMap[$type] ?? $type;
+
+        // Check permission on the parent resource
+        if (!$this->canAccessParentResource($type, $id)) {
+            return $this->forbidden("You don't have permission to view messages for this {$type}");
+        }
 
         $query = Message::query()
             ->where('messageable_type', $messageableType)
@@ -165,18 +159,12 @@ class ChatterController extends BaseResourceController
      */
     public function addToResource(Request $request, string $type, int $id): JsonResponse
     {
-        $typeMap = [
-            'project' => 'Webkul\\Project\\Models\\Project',
-            'cabinet' => 'Webkul\\Project\\Models\\Cabinet',
-            'room' => 'Webkul\\Project\\Models\\Room',
-            'partner' => 'Webkul\\Partner\\Models\\Partner',
-            'sales_order' => 'Webkul\\Sales\\Models\\Order',
-            'purchase_order' => 'Webkul\\Purchase\\Models\\Order',
-            'invoice' => 'Webkul\\Account\\Models\\Move',
-            'task' => 'Webkul\\Project\\Models\\Task',
-            'employee' => 'Webkul\\Employee\\Models\\Employee',
-        ];
+        // Check permission on the parent resource (need update permission to add messages)
+        if (!$this->canAccessParentResource($type, $id, 'update')) {
+            return $this->forbidden("You don't have permission to add messages to this {$type}");
+        }
 
+        $typeMap = $this->getTypeMap();
         $messageableType = $typeMap[$type] ?? $type;
 
         // Merge the resource info into the request
@@ -199,6 +187,11 @@ class ChatterController extends BaseResourceController
             return $this->notFound('Message not found');
         }
 
+        // Check update permission on message
+        if (!$this->authorizeAction('update', $message)) {
+            return $this->forbidden("You don't have permission to pin this message");
+        }
+
         $message->update(['pinned_at' => now()]);
 
         return $this->success(
@@ -218,6 +211,11 @@ class ChatterController extends BaseResourceController
             return $this->notFound('Message not found');
         }
 
+        // Check update permission on message
+        if (!$this->authorizeAction('update', $message)) {
+            return $this->forbidden("You don't have permission to unpin this message");
+        }
+
         $message->update(['pinned_at' => null]);
 
         return $this->success(
@@ -232,18 +230,72 @@ class ChatterController extends BaseResourceController
     public function types(): JsonResponse
     {
         return $this->success([
-            'types' => [
-                'project' => 'Webkul\\Project\\Models\\Project',
-                'cabinet' => 'Webkul\\Project\\Models\\Cabinet',
-                'room' => 'Webkul\\Project\\Models\\Room',
-                'partner' => 'Webkul\\Partner\\Models\\Partner',
-                'sales_order' => 'Webkul\\Sales\\Models\\Order',
-                'purchase_order' => 'Webkul\\Purchase\\Models\\Order',
-                'invoice' => 'Webkul\\Account\\Models\\Move',
-                'task' => 'Webkul\\Project\\Models\\Task',
-                'employee' => 'Webkul\\Employee\\Models\\Employee',
-            ],
+            'types' => $this->getTypeMap(),
             'message_types' => ['comment', 'note', 'activity', 'log'],
         ], 'Chatter types retrieved');
+    }
+
+    /**
+     * Get the type mapping for messageable types
+     */
+    protected function getTypeMap(): array
+    {
+        return [
+            'project' => 'Webkul\\Project\\Models\\Project',
+            'cabinet' => 'Webkul\\Project\\Models\\Cabinet',
+            'room' => 'Webkul\\Project\\Models\\Room',
+            'partner' => 'Webkul\\Partner\\Models\\Partner',
+            'sales_order' => 'Webkul\\Sales\\Models\\Order',
+            'purchase_order' => 'Webkul\\Purchase\\Models\\Order',
+            'invoice' => 'Webkul\\Account\\Models\\Move',
+            'task' => 'Webkul\\Project\\Models\\Task',
+            'employee' => 'Webkul\\Employee\\Models\\Employee',
+        ];
+    }
+
+    /**
+     * Check if user can access the parent resource
+     *
+     * @param string $type The resource type (project, cabinet, etc.)
+     * @param int $id The resource ID
+     * @param string $action The action (view, update, etc.)
+     * @return bool
+     */
+    protected function canAccessParentResource(string $type, int $id, string $action = 'view'): bool
+    {
+        $user = request()->user();
+        if (!$user) {
+            return false;
+        }
+
+        $typeMap = $this->getTypeMap();
+        $modelClass = $typeMap[$type] ?? null;
+
+        if (!$modelClass || !class_exists($modelClass)) {
+            return false;
+        }
+
+        // Get the resource name for permission
+        $resourceName = \Illuminate\Support\Str::snake(class_basename($modelClass));
+        $permission = "{$action}_{$resourceName}";
+
+        // Check permission
+        if (!$user->can($permission)) {
+            return false;
+        }
+
+        // For instance-level check, verify the resource exists and user can access it
+        $model = $modelClass::find($id);
+        if (!$model) {
+            return false;
+        }
+
+        // Try to check policy if it exists
+        try {
+            return $user->can($action, $model);
+        } catch (\Exception $e) {
+            // If no policy, just return based on permission
+            return true;
+        }
     }
 }

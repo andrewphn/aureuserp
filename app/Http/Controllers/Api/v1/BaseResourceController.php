@@ -95,6 +95,11 @@ abstract class BaseResourceController extends BaseApiController
      */
     public function index(Request $request): JsonResponse
     {
+        // Check viewAny permission
+        if (!$this->authorizeAction('viewAny')) {
+            return $this->forbidden("You don't have permission to view {$this->getResourceName()} records");
+        }
+
         $query = $this->getBaseQuery();
 
         // Apply includes
@@ -142,6 +147,11 @@ abstract class BaseResourceController extends BaseApiController
      */
     public function store(Request $request): JsonResponse
     {
+        // Check create permission
+        if (!$this->authorizeAction('create')) {
+            return $this->forbidden("You don't have permission to create {$this->getResourceName()} records");
+        }
+
         $validated = $request->validate($this->validateStore());
 
         // Allow child classes to modify data before creation
@@ -178,6 +188,11 @@ abstract class BaseResourceController extends BaseApiController
             return $this->notFound("{$this->getResourceName()} not found");
         }
 
+        // Check view permission
+        if (!$this->authorizeAction('view', $model)) {
+            return $this->forbidden("You don't have permission to view this {$this->getResourceName()}");
+        }
+
         return $this->success(
             $this->transformModel($model),
             "{$this->getResourceName()} retrieved"
@@ -193,6 +208,11 @@ abstract class BaseResourceController extends BaseApiController
 
         if (!$model) {
             return $this->notFound("{$this->getResourceName()} not found");
+        }
+
+        // Check update permission
+        if (!$this->authorizeAction('update', $model)) {
+            return $this->forbidden("You don't have permission to update this {$this->getResourceName()}");
         }
 
         $validated = $request->validate($this->validateUpdate());
@@ -223,6 +243,11 @@ abstract class BaseResourceController extends BaseApiController
 
         if (!$model) {
             return $this->notFound("{$this->getResourceName()} not found");
+        }
+
+        // Check delete permission
+        if (!$this->authorizeAction('delete', $model)) {
+            return $this->forbidden("You don't have permission to delete this {$this->getResourceName()}");
         }
 
         // Allow child classes to perform actions before deletion
@@ -438,5 +463,71 @@ abstract class BaseResourceController extends BaseApiController
         $resourceName = Str::kebab(Str::plural(class_basename($this->modelClass)));
         return request()->user()->tokenCan("{$resourceName}:{$ability}") ||
                request()->user()->tokenCan('*');
+    }
+
+    /**
+     * Authorize an action using the model's policy
+     *
+     * Maps standard CRUD actions to Filament Shield permission names:
+     * - viewAny -> view_any_{resource}
+     * - view -> view_{resource}
+     * - create -> create_{resource}
+     * - update -> update_{resource}
+     * - delete -> delete_{resource}
+     *
+     * @param string $action The action to authorize (viewAny, view, create, update, delete)
+     * @param Model|null $model The model instance for instance-level checks
+     * @return bool
+     */
+    protected function authorizeAction(string $action, ?Model $model = null): bool
+    {
+        $user = request()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        // Get the resource name for permission (e.g., 'project', 'cabinet')
+        $resourceName = Str::snake(class_basename($this->modelClass));
+
+        // Map action to Filament Shield permission name
+        $permissionMap = [
+            'viewAny' => "view_any_{$resourceName}",
+            'view' => "view_{$resourceName}",
+            'create' => "create_{$resourceName}",
+            'update' => "update_{$resourceName}",
+            'delete' => "delete_{$resourceName}",
+            'deleteAny' => "delete_any_{$resourceName}",
+            'forceDelete' => "force_delete_{$resourceName}",
+            'restore' => "restore_{$resourceName}",
+        ];
+
+        $permission = $permissionMap[$action] ?? "{$action}_{$resourceName}";
+
+        // Check if user has the permission
+        if (!$user->can($permission)) {
+            return false;
+        }
+
+        // For instance-level actions, also check the policy if it exists
+        if ($model && in_array($action, ['view', 'update', 'delete', 'forceDelete', 'restore'])) {
+            try {
+                return $user->can($action, $model);
+            } catch (\Exception $e) {
+                // If policy doesn't exist, fall back to permission check only
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Get the permission name for the current resource
+     */
+    protected function getPermissionName(string $action): string
+    {
+        $resourceName = Str::snake(class_basename($this->modelClass));
+        return "{$action}_{$resourceName}";
     }
 }

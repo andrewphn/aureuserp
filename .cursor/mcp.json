@@ -14,6 +14,23 @@
 				"AZURE_OPENAI_API_KEY": "YOUR_AZURE_KEY_HERE",
 				"OLLAMA_API_KEY": "YOUR_OLLAMA_API_KEY_HERE"
 			}
+		},
+		"playwright": {
+			"command": "npx",
+			"args": ["-y", "@playwright/mcp@latest"]
+		},
+		"n8n": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"n8n-mcp"
+			],
+			"env": {
+				"N8N_API_URL": "https://n8n.tcswoodwork.com",
+				"N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NTI2N2JmYy0wNThmLTQ5NGItYTQ1NC1hYmJjMjA5MDU5MmUiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzY4NTA3ODE0LCJleHAiOjE3NzEwNDUyMDB9.kXAZe_j2gSG-roUuisVcKtlOnbCpSm_ahWjLK07LIHA"
+			},
+			"description": "n8n workflow automation - manage and trigger workflows"
 		}
 	}
 }
