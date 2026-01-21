@@ -82,11 +82,8 @@ class TimeClockKiosk extends Component
 
     public function mount(): void
     {
-        $this->loadEmployees();
-        $this->loadProjects();
-        $this->loadTodayAttendance();
-
-        // Check for clockout summary in session (set after successful clock out)
+        // Check for clockout summary in session FIRST (set after successful clock out)
+        // This must be checked before loading attendance to avoid state conflicts
         if (session()->has('clockout_summary')) {
             $summary = session()->pull('clockout_summary');
             $this->summaryClockInTime = $summary['clock_in_time'] ?? null;
@@ -96,7 +93,15 @@ class TimeClockKiosk extends Component
             $this->summaryProjectName = $summary['project_name'] ?? null;
             $this->selectedUserName = $summary['employee_name'] ?? null;
             $this->mode = 'summary';
+            // Don't load attendance when showing summary
+            $this->loadEmployees();
+            $this->loadProjects();
+            return;
         }
+
+        $this->loadEmployees();
+        $this->loadProjects();
+        $this->loadTodayAttendance();
     }
 
     /**
