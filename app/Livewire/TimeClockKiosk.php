@@ -85,7 +85,7 @@ class TimeClockKiosk extends Component
         $this->loadEmployees();
         $this->loadProjects();
         $this->loadTodayAttendance();
-        
+
         // Check for clockout summary in session (set after successful clock out)
         if (session()->has('clockout_summary')) {
             $summary = session()->pull('clockout_summary');
@@ -498,7 +498,6 @@ class TimeClockKiosk extends Component
                 ]);
 
                 // Redirect to reload page - this avoids checksum corruption by doing a full page reload
-                $this->dispatch('$refresh');
                 return $this->redirect(request()->url(), navigate: false);
             } else {
                 $this->setStatus($result['message'], 'error');
