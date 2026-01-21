@@ -6,6 +6,9 @@
 /public/storage
 /storage/*.key
 /storage/pail
+# Storage files (media uploads, user-generated content)
+/storage/app/public/*
+!/storage/app/public/.gitkeep
 /vendor
 .env
 .env.backup
