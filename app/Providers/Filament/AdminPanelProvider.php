@@ -48,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->darkMode()
             ->login()
-            ->favicon(asset('tcs_logo.png'))
+            ->favicon(asset('images/logo-light.svg'))
             ->brandLogo(asset('images/logo-light.svg'))
             ->darkModeBrandLogo(asset('images/logo-dark.svg'))
             ->brandLogoHeight('2rem')
@@ -145,6 +145,11 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_END,
                 fn (): string => <<<'HTML'
                     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+                    <!-- Dark/Light Mode Favicons -->
+                    <link rel="icon" type="image/svg+xml" href="/images/logo-light.svg" media="(prefers-color-scheme: light)">
+                    <link rel="icon" type="image/svg+xml" href="/images/logo-dark.svg" media="(prefers-color-scheme: dark)">
+                    <link rel="icon" type="image/png" href="/tcs_logo.png">
+                    <!-- Apple Touch Icons (use PNG for better compatibility) -->
                     <link rel="apple-touch-icon" sizes="180x180" href="/tcs_logo.png">
                     <link rel="apple-touch-icon" sizes="152x152" href="/tcs_logo.png">
                     <link rel="apple-touch-icon" sizes="144x144" href="/tcs_logo.png">
