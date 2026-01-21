@@ -405,6 +405,20 @@ class TimeClockKiosk extends Component
     }
 
     /**
+     * Set lunch duration and proceed with clock out in one call
+     */
+    public function setLunchAndClockOut(int $minutes): void
+    {
+        if ($minutes < 1 || $minutes > 480) {
+            $this->setStatus('Lunch duration must be between 1 and 480 minutes', 'error');
+            $this->mode = 'clockout-lunch'; // Stay in lunch selection mode
+            return;
+        }
+        $this->breakDurationMinutes = $minutes;
+        $this->clockOut();
+    }
+    
+    /**
      * Actually perform clock out (called after lunch duration is set)
      */
     public function proceedClockOut(): void

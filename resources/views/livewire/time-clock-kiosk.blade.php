@@ -62,16 +62,10 @@
              x-data="{
                  customMinutes: '',
                  showCustom: false,
-                 selectDuration(minutes) {
-                     // Set duration and proceed
-                     @this.set('breakDurationMinutes', minutes);
-                     @this.call('proceedClockOut');
-                 },
                  submitCustom() {
                      const minutes = parseInt(this.customMinutes);
                      if (minutes >= 1 && minutes <= 480) {
-                         @this.set('breakDurationMinutes', minutes);
-                         @this.call('proceedClockOut');
+                         @this.call('setLunchAndClockOut', minutes);
                      } else {
                          alert('Please enter a duration between 1 and 480 minutes');
                      }
@@ -92,31 +86,31 @@
                 {{-- Preset Duration Buttons --}}
                 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0;">
                     <button
-                        x-on:click="selectDuration(30)"
+                        wire:click="setLunchAndClockOut(30)"
                         wire:loading.attr="disabled"
-                        wire:target="proceedClockOut"
+                        wire:target="setLunchAndClockOut"
                         class="clock-in-btn"
                         style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
-                        <span wire:loading.remove wire:target="proceedClockOut">30 min</span>
-                        <span wire:loading wire:target="proceedClockOut">...</span>
+                        <span wire:loading.remove wire:target="setLunchAndClockOut">30 min</span>
+                        <span wire:loading wire:target="setLunchAndClockOut">...</span>
                     </button>
                     <button
-                        x-on:click="selectDuration(45)"
+                        wire:click="setLunchAndClockOut(45)"
                         wire:loading.attr="disabled"
-                        wire:target="proceedClockOut"
+                        wire:target="setLunchAndClockOut"
                         class="clock-in-btn"
                         style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
-                        <span wire:loading.remove wire:target="proceedClockOut">45 min</span>
-                        <span wire:loading wire:target="proceedClockOut">...</span>
+                        <span wire:loading.remove wire:target="setLunchAndClockOut">45 min</span>
+                        <span wire:loading wire:target="setLunchAndClockOut">...</span>
                     </button>
                     <button
-                        x-on:click="selectDuration(60)"
+                        wire:click="setLunchAndClockOut(60)"
                         wire:loading.attr="disabled"
-                        wire:target="proceedClockOut"
+                        wire:target="setLunchAndClockOut"
                         class="clock-in-btn"
                         style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
-                        <span wire:loading.remove wire:target="proceedClockOut">1 hour</span>
-                        <span wire:loading wire:target="proceedClockOut">...</span>
+                        <span wire:loading.remove wire:target="setLunchAndClockOut">1 hour</span>
+                        <span wire:loading wire:target="setLunchAndClockOut">...</span>
                     </button>
                 </div>
 
@@ -149,11 +143,11 @@
                             x-on:click="submitCustom()"
                             x-bind:disabled="!customMinutes || customMinutes < 1 || customMinutes > 480"
                             wire:loading.attr="disabled"
-                            wire:target="proceedClockOut"
+                            wire:target="setLunchAndClockOut"
                             class="clock-in-btn"
                             style="width: 100%;">
-                            <span wire:loading.remove wire:target="proceedClockOut">Submit</span>
-                            <span wire:loading wire:target="proceedClockOut">Processing...</span>
+                            <span wire:loading.remove wire:target="setLunchAndClockOut">Submit</span>
+                            <span wire:loading wire:target="setLunchAndClockOut">Processing...</span>
                         </button>
                     </div>
                 </div>
