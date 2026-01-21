@@ -67,8 +67,7 @@ class TimeClockKiosk extends Component
     #[Locked]
     public array $projects = [];
 
-    // Today's attendance summary (locked to prevent checksum issues)
-    #[Locked]
+    // Today's attendance summary (not locked - dynamic data that changes)
     public array $todayAttendance = [];
 
     protected ClockingService $clockingService;
@@ -200,7 +199,7 @@ class TimeClockKiosk extends Component
         // Check PIN (trim whitespace and compare as strings)
         $storedPin = trim((string) ($employee->pin ?? ''));
         $enteredPin = trim((string) $this->pin);
-        
+
         if ($storedPin === $enteredPin && !empty($storedPin)) {
             $this->pinVerified = true;
             $this->pinAttempts = 0;
