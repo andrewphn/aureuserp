@@ -460,12 +460,12 @@
                                     // Stop polling for this component
                                     component.stopPolling();
                                 }
-                                
+
                                 // Stop all Livewire polling globally
                                 if (window.Livewire.stopPolling) {
                                     window.Livewire.stopPolling();
                                 }
-                                
+
                                 // Cancel any pending XHR requests
                                 if (window.Livewire.all && window.Livewire.all().length > 0) {
                                     window.Livewire.all().forEach(comp => {
@@ -803,7 +803,7 @@
                                 wire:loading.attr="disabled"
                                 wire:target="showLunchDuration"
                                 class="clock-in-btn"
-                                style="background: #f59e0b; width: 100%; margin-top: 1rem;"
+                                style="background: #f59e0b; width: 100%; margin-top: 1rem; touch-action: manipulation; -webkit-tap-highlight-color: transparent; cursor: pointer; min-height: 48px;"
                             >
                                 <span wire:loading.remove wire:target="showLunchDuration">Start Lunch (L)</span>
                                 <span wire:loading wire:target="showLunchDuration">Loading...</span>
