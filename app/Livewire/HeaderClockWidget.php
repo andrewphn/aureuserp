@@ -231,10 +231,30 @@ class HeaderClockWidget extends Component
             $this->closeModal();
 
             $hoursWorked = $result['hours_worked'] ?? 0;
-            $this->notify('Clocked Out', sprintf("%.1f hours today", $hoursWorked), 'success');
+            $this->notify('Clocked Out', sprintf("%s today", $this->formatHours($hoursWorked)), 'success');
         } else {
             $this->notify('Clock Out Failed', $result['error'] ?? 'Unknown error', 'danger');
         }
+    }
+
+    /**
+     * Format decimal hours to hours and minutes display
+     * Example: 8.5 -> "8h 30m", 8.0 -> "8h"
+     */
+    protected function formatHours(float $hours): string
+    {
+        if ($hours === 0.0) {
+            return '0h';
+        }
+
+        $wholeHours = floor($hours);
+        $minutes = round(($hours - $wholeHours) * 60);
+
+        if ($minutes > 0) {
+            return "{$wholeHours}h {$minutes}m";
+        }
+
+        return "{$wholeHours}h";
     }
 
     /**

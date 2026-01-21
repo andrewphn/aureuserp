@@ -42,7 +42,7 @@
                                     @if($attendance['is_clocked_in'])
                                         In at {{ $attendance['clock_in_time'] }}
                                     @else
-                                        {{ ($attendance['today_hours'] ?? 0) > 0 ? sprintf('%.1fh', $attendance['today_hours']) : 'Not in' }}
+                                        {{ ($attendance['today_hours'] ?? 0) > 0 ? $this->formatHours($attendance['today_hours']) : 'Not in' }}
                                     @endif
                                 </span>
                             </div>
@@ -246,12 +246,12 @@
                          // Prevent multiple calls
                          if (this.hasReturned) return;
                          this.hasReturned = true;
-                         
+
                          // Clear all timers
                          if (this.timer) clearInterval(this.timer);
                          if (this.countdownTimer) clearInterval(this.countdownTimer);
                          if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
-                         
+
                          // Return to employee selection (login page)
                          @this.call('backToSelect').catch(() => {
                              // If call fails, try redirecting anyway

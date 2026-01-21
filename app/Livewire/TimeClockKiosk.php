@@ -372,7 +372,7 @@ class TimeClockKiosk extends Component
             $this->isClockedIn = false;
             $hoursWorked = $result['hours_worked'] ?? 0;
             $this->setStatus(
-                sprintf("Clocked out! Worked %.1f hours today.", $hoursWorked),
+                sprintf("Clocked out! Worked %s today.", $this->formatHours($hoursWorked)),
                 'success'
             );
             $this->loadTodayAttendance();
@@ -479,6 +479,26 @@ class TimeClockKiosk extends Component
     {
         $currentHour = (int) now()->format('H');
         return $currentHour < 16; // Before 4 PM
+    }
+
+    /**
+     * Format decimal hours to hours and minutes display
+     * Example: 8.5 -> "8h 30m", 8.0 -> "8h"
+     */
+    public function formatHours(float $hours): string
+    {
+        if ($hours === 0.0) {
+            return '0h';
+        }
+
+        $wholeHours = floor($hours);
+        $minutes = round(($hours - $wholeHours) * 60);
+
+        if ($minutes > 0) {
+            return "{$wholeHours}h {$minutes}m";
+        }
+
+        return "{$wholeHours}h";
     }
 
     public function render(): View
