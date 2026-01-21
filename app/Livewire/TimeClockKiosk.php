@@ -281,7 +281,7 @@ class TimeClockKiosk extends Component
             $this->lunchTaken = $status['lunch_taken'] ?? false;
             $this->lunchStartTime = $status['lunch_start_time'];
             $this->lunchEndTime = $status['lunch_end_time'];
-            
+
             // Store clock in timestamp for elapsed time calculation
             if ($this->isClockedIn && $status['clock_in_timestamp'] ?? null) {
                 $this->clockInTimestamp = $status['clock_in_timestamp'];
@@ -481,19 +481,14 @@ class TimeClockKiosk extends Component
             return;
         }
 
-        // Validate duration
-        if ($this->breakDurationMinutes < 1 || $this->breakDurationMinutes > 480) {
-            $this->setStatus('Lunch duration must be between 1 and 480 minutes', 'error');
-            $this->mode = 'clock';
-            return;
-        }
-
+        // Note: Duration is not used when starting lunch - it's only used when clocking out
+        // The actual lunch duration is calculated when ending lunch
         $result = $this->clockingService->startLunch($this->selectedUserId);
 
         if ($result['success']) {
             $this->isOnLunch = true;
             $this->lunchStartTime = $result['lunch_start_time'];
-            $this->setStatus("Lunch started at {$this->lunchStartTime} for {$this->breakDurationMinutes} minutes. Enjoy your break!", 'success');
+            $this->setStatus("Lunch started at {$this->lunchStartTime}. Enjoy your break!", 'success');
             $this->mode = 'clock'; // Return to clock mode
             $this->loadTodayAttendance();
         } else {
