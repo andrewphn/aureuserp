@@ -463,7 +463,7 @@ class TimeClockKiosk extends Component
     /**
      * Clock out the selected employee
      */
-    public function clockOut(): void
+    public function clockOut()
     {
         if (!$this->selectedUserId) {
             $this->setStatus('No employee selected', 'error');
