@@ -21,6 +21,7 @@ export default defineConfig({
         }),
     ],
     build: {
+        chunkSizeWarningLimit: 1000, // Increase limit to 1MB (5MB chunk is likely PDF.js which is acceptable)
         rollupOptions: {
             output: {
                 manualChunks: (id) => {
@@ -41,7 +42,6 @@ export default defineConfig({
                         return 'pdf-managers';
                     }
                 },
-                chunkSizeWarningLimit: 1000, // Increase limit to 1MB (5MB chunk is likely PDF.js which is acceptable)
             },
         },
     },
