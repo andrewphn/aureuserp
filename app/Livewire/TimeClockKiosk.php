@@ -230,6 +230,11 @@ class TimeClockKiosk extends Component
     {
         if (strlen($this->pin) < $this->getPinLength()) {
             $this->pin .= $digit;
+            
+            // Auto-submit when PIN is complete
+            if (strlen($this->pin) >= $this->getPinLength()) {
+                $this->verifyPin();
+            }
         }
     }
 

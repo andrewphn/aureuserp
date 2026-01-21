@@ -55,20 +55,22 @@
 
     {{-- PIN Entry Mode --}}
     @if($mode === 'pin')
-        <div class="clock-panel" 
-             x-data="{ 
+        <div class="clock-panel"
+             x-data="{
                  handleKeydown(event) {
-                     // Number keys (0-9) - add digit
+                     // Number keys (0-9) - add digit (auto-submits when complete)
                      if (event.key >= '0' && event.key <= '9') {
                          event.preventDefault();
-                         @this.call('addPinDigit', event.key);
+                         @this.call('addPinDigit', event.key).then(() => {
+                             // Auto-submit is handled in addPinDigit method
+                         });
                      }
                      // Backspace/Delete - remove last digit
                      else if (event.key === 'Backspace' || event.key === 'Delete') {
                          event.preventDefault();
                          @this.call('removePinDigit');
                      }
-                     // Enter - submit PIN if complete
+                     // Enter - submit PIN if complete (optional, auto-submits on 4th digit)
                      else if (event.key === 'Enter') {
                          event.preventDefault();
                          const pinLength = @js($this->getPinLength());
@@ -100,7 +102,7 @@
                 <h2 class="employee-name">{{ $selectedUserName }}</h2>
                 <p class="clock-status">Enter your {{ $this->getPinLength() }}-digit PIN</p>
                 <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;">
-                    Use keyboard: 0-9 to enter, Backspace to delete, Enter to submit, Esc to go back
+                    Use keyboard: 0-9 to enter (auto-submits), Backspace to delete, Esc to go back
                 </p>
 
                 {{-- PIN Display --}}
