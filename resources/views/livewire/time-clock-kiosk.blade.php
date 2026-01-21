@@ -225,6 +225,7 @@
                  timer: null,
                  timeoutTimer: null,
                  countdownTimer: null,
+                 hasReturned: false,
                  init() {
                      // Start running timer
                      this.timer = setInterval(() => {
@@ -240,14 +241,22 @@
                          }
                      }, 1000);
 
-                     // Auto-return to main screen after 5 seconds
+                     // Auto-return to login page after 5 seconds
                      this.timeoutTimer = setTimeout(() => {
-                         // Clear all timers before calling backToSelect
+                         // Prevent multiple calls
+                         if (this.hasReturned) return;
+                         this.hasReturned = true;
+                         
+                         // Clear all timers
                          if (this.timer) clearInterval(this.timer);
                          if (this.countdownTimer) clearInterval(this.countdownTimer);
                          if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
-                         // Call backToSelect once
-                         @this.call('backToSelect');
+                         
+                         // Return to employee selection (login page)
+                         @this.call('backToSelect').catch(() => {
+                             // If call fails, try redirecting anyway
+                             window.location.reload();
+                         });
                      }, 5000);
                  },
                  destroy() {
