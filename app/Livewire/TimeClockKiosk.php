@@ -485,8 +485,15 @@ class TimeClockKiosk extends Component
      * Format decimal hours to hours and minutes display
      * Example: 8.5 -> "8h 30m", 8.0 -> "8h"
      */
-    public function formatHours(float $hours): string
+    public function formatHours($hours): string
     {
+        // Handle null, empty, or non-numeric values
+        if ($hours === null || $hours === '' || !is_numeric($hours)) {
+            return '0h';
+        }
+
+        $hours = (float) $hours;
+
         if ($hours === 0.0) {
             return '0h';
         }

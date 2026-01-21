@@ -241,8 +241,15 @@ class HeaderClockWidget extends Component
      * Format decimal hours to hours and minutes display
      * Example: 8.5 -> "8h 30m", 8.0 -> "8h"
      */
-    protected function formatHours(float $hours): string
+    protected function formatHours($hours): string
     {
+        // Handle null, empty, or non-numeric values
+        if ($hours === null || $hours === '' || !is_numeric($hours)) {
+            return '0h';
+        }
+
+        $hours = (float) $hours;
+
         if ($hours === 0.0) {
             return '0h';
         }
