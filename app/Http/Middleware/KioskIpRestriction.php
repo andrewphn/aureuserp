@@ -50,7 +50,7 @@ class KioskIpRestriction
     }
 
     /**
-     * Check if IP is in allowed list (supports CIDR notation)
+     * Check if IP is in allowed list (supports CIDR notation for IPv4 and IPv6)
      */
     protected function isIpAllowed(string $clientIp, array $allowedIps): bool
     {
@@ -62,7 +62,7 @@ class KioskIpRestriction
                 return true;
             }
 
-            // CIDR notation check (e.g., 192.168.1.0/24)
+            // CIDR notation check
             if (str_contains($allowed, '/')) {
                 if ($this->ipInCidr($clientIp, $allowed)) {
                     return true;
@@ -74,18 +74,70 @@ class KioskIpRestriction
     }
 
     /**
-     * Check if IP is within CIDR range
+     * Check if IP is within CIDR range (supports both IPv4 and IPv6)
      */
     protected function ipInCidr(string $ip, string $cidr): bool
     {
         list($subnet, $mask) = explode('/', $cidr);
 
-        $ipLong = ip2long($ip);
-        $subnetLong = ip2long($subnet);
-        $maskLong = -1 << (32 - (int)$mask);
+        // IPv6 check
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return $this->ipv6InCidr($ip, $cidr);
+        }
 
-        $subnetLong &= $maskLong;
+        // IPv4 check
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+            $ipLong = ip2long($ip);
+            $subnetLong = ip2long($subnet);
+            
+            if ($ipLong === false || $subnetLong === false) {
+                return false;
+            }
+            
+            $maskLong = -1 << (32 - (int)$mask);
+            $subnetLong &= $maskLong;
+            
+            return ($ipLong & $maskLong) === $subnetLong;
+        }
 
-        return ($ipLong & $maskLong) === $subnetLong;
+        return false;
+    }
+
+    /**
+     * Check if IPv6 address is within CIDR range
+     */
+    protected function ipv6InCidr(string $ip, string $cidr): bool
+    {
+        list($subnet, $mask) = explode('/', $cidr);
+        
+        // Normalize IPv6 addresses
+        $ipBin = inet_pton($ip);
+        $subnetBin = inet_pton($subnet);
+        
+        if ($ipBin === false || $subnetBin === false) {
+            return false;
+        }
+        
+        // Calculate mask bytes
+        $maskBytes = (int)$mask;
+        $fullBytes = intval($maskBytes / 8);
+        $bits = $maskBytes % 8;
+        
+        // Compare full bytes
+        for ($i = 0; $i < $fullBytes; $i++) {
+            if ($ipBin[$i] !== $subnetBin[$i]) {
+                return false;
+            }
+        }
+        
+        // Compare partial byte if needed
+        if ($bits > 0 && $fullBytes < 16) {
+            $maskByte = 0xFF << (8 - $bits);
+            if ((ord($ipBin[$fullBytes]) & $maskByte) !== (ord($subnetBin[$fullBytes]) & $maskByte)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
 }
