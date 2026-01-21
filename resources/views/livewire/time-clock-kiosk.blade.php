@@ -1,9 +1,19 @@
 <div class="kiosk-container"
      @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin' && $mode !== 'clockout-lunch' && $mode !== 'summary')
      wire:poll.30s="loadTodayAttendance"
-     @endif
-     x-data="{}"
-     @clockout-complete.window="window.location.reload()">
+     @endif>
+    
+    @script
+    <script>
+        window.addEventListener('clockout-complete', () => {
+            // Small delay to ensure Livewire state is saved
+            setTimeout(() => {
+                window.location.reload();
+            }, 100);
+        });
+    </script>
+    @endscript
+    
     {{-- Header --}}
     <div class="kiosk-header">
         <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
