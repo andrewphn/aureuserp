@@ -1,9 +1,9 @@
-<div class="kiosk-container" x-data="{ time: '{{ $this->getCurrentTime() }}' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }), 1000)">
+<div class="kiosk-container" wire:poll.30s="loadTodayAttendance">
     {{-- Header --}}
     <div class="kiosk-header">
         <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
         <p class="kiosk-subtitle">Time Clock</p>
-        <div class="kiosk-time" x-text="time"></div>
+        <div class="kiosk-time">{{ $this->getCurrentTime() }}</div>
         <p class="kiosk-date">{{ $this->getCurrentDate() }}</p>
     </div>
 
@@ -55,17 +55,53 @@
 
     {{-- PIN Entry Mode --}}
     @if($mode === 'pin')
-        <div class="clock-panel">
+        <div class="clock-panel" 
+             x-data="{ 
+                 handleKeydown(event) {
+                     // Number keys (0-9) - add digit
+                     if (event.key >= '0' && event.key <= '9') {
+                         event.preventDefault();
+                         @this.call('addPinDigit', event.key);
+                     }
+                     // Backspace/Delete - remove last digit
+                     else if (event.key === 'Backspace' || event.key === 'Delete') {
+                         event.preventDefault();
+                         @this.call('removePinDigit');
+                     }
+                     // Enter - submit PIN if complete
+                     else if (event.key === 'Enter') {
+                         event.preventDefault();
+                         const pinLength = @js($this->getPinLength());
+                         const currentPin = @this.get('pin') || '';
+                         if (currentPin.length >= pinLength) {
+                             @this.call('verifyPin');
+                         }
+                     }
+                     // Escape - go back
+                     else if (event.key === 'Escape') {
+                         event.preventDefault();
+                         @this.call('backToSelect');
+                     }
+                 }
+             }"
+             x-on:keydown="handleKeydown"
+             x-on:click="$el.focus()"
+             tabindex="0"
+             style="outline: none;"
+             autofocus>
             <button wire:click="backToSelect" class="back-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Back to employee list
+                Back to employee list (Esc)
             </button>
 
             <div class="clock-card">
                 <h2 class="employee-name">{{ $selectedUserName }}</h2>
                 <p class="clock-status">Enter your {{ $this->getPinLength() }}-digit PIN</p>
+                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; text-align: center;">
+                    Use keyboard: 0-9 to enter, Backspace to delete, Enter to submit, Esc to go back
+                </p>
 
                 {{-- PIN Display --}}
                 <div class="pin-display">
@@ -95,7 +131,7 @@
                     style="margin-top: 1.5rem;"
                     {{ strlen($pin) < $this->getPinLength() ? 'disabled' : '' }}
                 >
-                    Continue
+                    Continue (Enter)
                 </button>
             </div>
         </div>
@@ -103,16 +139,61 @@
 
     {{-- Clock In/Out Mode --}}
     @if($mode === 'clock')
-        <div class="clock-panel">
+        <div class="clock-panel"
+             x-data="{
+                 handleKeydown(event) {
+                     // Escape - go back
+                     if (event.key === 'Escape') {
+                         event.preventDefault();
+                         @this.call('backToSelect');
+                     }
+                     // Clock In (I key) - only if not clocked in
+                     else if (event.key === 'i' || event.key === 'I') {
+                         @if(!$isClockedIn)
+                             event.preventDefault();
+                             @this.call('clockIn');
+                         @endif
+                     }
+                     // Clock Out (O key) - only if clocked in
+                     else if (event.key === 'o' || event.key === 'O') {
+                         @if($isClockedIn && !$isOnLunch)
+                             event.preventDefault();
+                             @this.call('clockOut');
+                         @endif
+                     }
+                     // Start Lunch (L key) - only if clocked in and not on lunch
+                     else if (event.key === 'l' || event.key === 'L') {
+                         @if($isClockedIn && !$isOnLunch && !$lunchTaken)
+                             event.preventDefault();
+                             @this.call('startLunch');
+                         @endif
+                     }
+                     // End Lunch (E key) - only if on lunch
+                     else if (event.key === 'e' || event.key === 'E') {
+                         @if($isOnLunch)
+                             event.preventDefault();
+                             @this.call('endLunch');
+                         @endif
+                     }
+                 }
+             }"
+             x-on:keydown="handleKeydown"
+             x-on:click="$el.focus()"
+             tabindex="0"
+             style="outline: none;"
+             autofocus>
             <button wire:click="backToSelect" class="back-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
                 </svg>
-                Back to employee list
+                Back to employee list (Esc)
             </button>
 
             <div class="clock-card">
                 <h2 class="employee-name">{{ $selectedUserName }}</h2>
+                <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; margin-bottom: 1rem; text-align: center;">
+                    Keyboard shortcuts: I=Clock In, O=Clock Out, L=Start Lunch, E=End Lunch, Esc=Back
+                </p>
 
                 @if($isClockedIn)
                     <p class="clock-status">
@@ -138,7 +219,7 @@
                             class="clock-in-btn"
                             style="background: #059669; margin-top: 1rem;"
                         >
-                            <span wire:loading.remove>End Lunch</span>
+                            <span wire:loading.remove>End Lunch (E)</span>
                             <span wire:loading>Processing...</span>
                         </button>
 
@@ -170,7 +251,7 @@
                             wire:loading.attr="disabled"
                             class="clock-out-btn"
                         >
-                            <span wire:loading.remove>Clock Out</span>
+                            <span wire:loading.remove>Clock Out (O)</span>
                             <span wire:loading>Processing...</span>
                         </button>
 
@@ -183,7 +264,7 @@
                             class="lunch-btn"
                             style="background: #f59e0b; color: white; font-size: 1.25rem; padding: 1rem 2rem; border-radius: 12px; border: none; cursor: pointer; width: 100%; margin: 1rem 0; font-weight: 600;"
                         >
-                            <span wire:loading.remove>Start Lunch</span>
+                            <span wire:loading.remove>Start Lunch (L)</span>
                             <span wire:loading>Processing...</span>
                         </button>
 
@@ -225,7 +306,7 @@
                             wire:loading.attr="disabled"
                             class="clock-out-btn"
                         >
-                            <span wire:loading.remove>Clock Out</span>
+                            <span wire:loading.remove>Clock Out (O)</span>
                             <span wire:loading>Processing...</span>
                         </button>
                     @endif
@@ -238,7 +319,7 @@
                         wire:loading.attr="disabled"
                         class="clock-in-btn"
                     >
-                        <span wire:loading.remove>Clock In</span>
+                        <span wire:loading.remove>Clock In (I)</span>
                         <span wire:loading>Processing...</span>
                     </button>
                 @endif
