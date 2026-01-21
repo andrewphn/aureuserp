@@ -409,6 +409,10 @@ class TimeClockKiosk extends Component
      */
     public function setClockOutLunchDuration(int $minutes): void
     {
+        if ($minutes < 1 || $minutes > 480) {
+            $this->setStatus('Lunch duration must be between 1 and 480 minutes', 'error');
+            return;
+        }
         $this->breakDurationMinutes = $minutes;
         $this->clockOut();
     }
@@ -445,33 +449,45 @@ class TimeClockKiosk extends Component
             return;
         }
 
-        $result = $this->clockingService->clockOut(
-            $this->selectedUserId,
-            $this->breakDurationMinutes,
-            $this->selectedProjectId
-        );
+        try {
+            $result = $this->clockingService->clockOut(
+                $this->selectedUserId,
+                $this->breakDurationMinutes,
+                $this->selectedProjectId
+            );
 
-        if ($result['success']) {
-            $this->isClockedIn = false;
+            if ($result['success']) {
+                $this->isClockedIn = false;
 
-            // Store summary data
-            $this->summaryClockInTime = $this->clockedInAt;
-            $this->summaryClockOutTime = now()->format('g:i A');
-            $this->summaryHoursWorked = $result['hours_worked'] ?? 0;
-            $this->summaryLunchMinutes = $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null;
+                // Store summary data
+                $this->summaryClockInTime = $this->clockedInAt;
+                $this->summaryClockOutTime = now()->format('g:i A');
+                $this->summaryHoursWorked = $result['hours_worked'] ?? 0;
+                $this->summaryLunchMinutes = $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null;
 
-            // Get project name if selected
-            if ($this->selectedProjectId) {
-                $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
-                $this->summaryProjectName = $project ? $project->name : null;
+                // Get project name if selected
+                if ($this->selectedProjectId) {
+                    $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
+                    $this->summaryProjectName = $project ? $project->name : null;
+                } else {
+                    $this->summaryProjectName = null;
+                }
+
+                // Change mode last to prevent checksum issues
+                $this->mode = 'summary';
+                // Don't call loadTodayAttendance here - it will be called on next render if needed
             } else {
-                $this->summaryProjectName = null;
+                $this->setStatus($result['message'], 'error');
+                $this->mode = 'clock'; // Stay in clock mode on error
             }
-
-            $this->mode = 'summary'; // Show summary page
-            $this->loadTodayAttendance();
-        } else {
-            $this->setStatus($result['message'], 'error');
+        } catch (\Exception $e) {
+            \Log::error('TimeClockKiosk: Clock out error', [
+                'user_id' => $this->selectedUserId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            $this->setStatus('An error occurred while clocking out. Please try again.', 'error');
+            $this->mode = 'clock'; // Stay in clock mode on error
         }
     }
 
