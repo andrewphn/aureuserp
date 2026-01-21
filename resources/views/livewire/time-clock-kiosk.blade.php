@@ -63,19 +63,22 @@
                  customMinutes: '',
                  showCustom: false,
                  selectDuration(minutes) {
-                     // Auto-submit for preset durations
-                     @this.call('setClockOutLunchDuration', minutes);
+                     // Set duration and proceed
+                     @this.set('breakDurationMinutes', minutes);
+                     @this.call('proceedClockOut');
                  },
                  submitCustom() {
                      const minutes = parseInt(this.customMinutes);
                      if (minutes >= 1 && minutes <= 480) {
-                         @this.call('setClockOutLunchDuration', minutes);
+                         @this.set('breakDurationMinutes', minutes);
+                         @this.call('proceedClockOut');
                      } else {
                          alert('Please enter a duration between 1 and 480 minutes');
                      }
                  }
              }"
-             x-on:keydown.escape="@this.call('cancelClockOutLunch')">
+             x-on:keydown.escape="@this.call('cancelClockOutLunch')"
+             @proceed-clock-out.window="$wire.proceedClockOut()">
             <button wire:click="cancelClockOutLunch" class="back-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
