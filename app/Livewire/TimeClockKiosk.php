@@ -27,7 +27,7 @@ use Webkul\Security\Models\User;
  */
 class TimeClockKiosk extends Component
 {
-    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation), 'clockout-lunch'
+    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation), 'clockout-lunch', 'summary' (clock out summary)
     public string $mode = 'select';
 
     // Currently selected user
@@ -418,6 +418,13 @@ class TimeClockKiosk extends Component
         $this->breakDurationMinutes = 60; // Reset to default
     }
 
+    // Summary data for clock out summary page
+    public ?string $summaryClockInTime = null;
+    public ?string $summaryClockOutTime = null;
+    public ?float $summaryHoursWorked = null;
+    public ?int $summaryLunchMinutes = null;
+    public ?string $summaryProjectName = null;
+
     /**
      * Clock out the selected employee
      */
@@ -442,16 +449,34 @@ class TimeClockKiosk extends Component
 
         if ($result['success']) {
             $this->isClockedIn = false;
-            $hoursWorked = $result['hours_worked'] ?? 0;
-            $this->setStatus(
-                sprintf("Clocked out! Worked %s today.", $this->formatHours($hoursWorked)),
-                'success'
-            );
-            $this->mode = 'select'; // Return to selection screen
+            
+            // Store summary data
+            $this->summaryClockInTime = $this->clockedInAt;
+            $this->summaryClockOutTime = now()->format('g:i A');
+            $this->summaryHoursWorked = $result['hours_worked'] ?? 0;
+            $this->summaryLunchMinutes = $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null;
+            
+            // Get project name if selected
+            if ($this->selectedProjectId) {
+                $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
+                $this->summaryProjectName = $project ? $project->name : null;
+            } else {
+                $this->summaryProjectName = null;
+            }
+            
+            $this->mode = 'summary'; // Show summary page
             $this->loadTodayAttendance();
         } else {
             $this->setStatus($result['message'], 'error');
         }
+    }
+
+    /**
+     * Return to select screen from summary
+     */
+    public function backToSelectFromSummary(): void
+    {
+        $this->backToSelect();
     }
 
 

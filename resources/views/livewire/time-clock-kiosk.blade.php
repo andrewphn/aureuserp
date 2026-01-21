@@ -1,5 +1,5 @@
 <div class="kiosk-container"
-     @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin' && $mode !== 'clockout-lunch')
+     @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin' && $mode !== 'clockout-lunch' && $mode !== 'summary')
      wire:poll.30s="loadTodayAttendance"
      @endif>
     {{-- Header --}}
@@ -723,6 +723,82 @@
                         </button>
                     @endif
                 @endif
+            </div>
+        </div>
+    @endif
+
+    {{-- Clock Out Summary Mode --}}
+    @if($mode === 'summary')
+        <div class="clock-panel" wire:key="summary-panel"
+             x-data="{
+                 timeoutTimer: null,
+                 hasReturned: false,
+                 init() {
+                     // Auto-return to select screen after 5 seconds
+                     this.timeoutTimer = setTimeout(() => {
+                         if (this.hasReturned) return;
+                         this.hasReturned = true;
+                         @this.call('backToSelectFromSummary');
+                     }, 5000);
+                 },
+                 destroy() {
+                     if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
+                 }
+             }"
+             x-init="init()"
+             x-on:destroyed="destroy()">
+            <div class="clock-card">
+                <h2 class="employee-name">{{ $selectedUserName }}</h2>
+                <p class="clock-status" style="color: #10b981; font-size: 1.5rem; font-weight: 600; margin-bottom: 2rem;">
+                    ✓ Clocked Out
+                </p>
+
+                {{-- Summary Details --}}
+                <div style="background: #f9fafb; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 2px solid #e5e7eb;">
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Clock In</p>
+                        <p style="font-size: 1.5rem; font-weight: 600; color: #111827;">{{ $summaryClockInTime ?? 'N/A' }}</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Clock Out</p>
+                        <p style="font-size: 1.5rem; font-weight: 600; color: #111827;">{{ $summaryClockOutTime ?? 'N/A' }}</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Hours Worked</p>
+                        <p style="font-size: 2rem; font-weight: 700; color: #059669;">
+                            {{ $summaryHoursWorked ? $this->formatHours($summaryHoursWorked) : '0h 0m' }}
+                        </p>
+                    </div>
+
+                    @if($summaryLunchMinutes)
+                        <div style="margin-bottom: 1.5rem;">
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Lunch</p>
+                            <p style="font-size: 1.25rem; font-weight: 600; color: #10b981;">{{ $summaryLunchMinutes }} minutes</p>
+                        </div>
+                    @endif
+
+                    @if($summaryProjectName)
+                        <div>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Project</p>
+                            <p style="font-size: 1.25rem; font-weight: 600; color: #3b82f6;">{{ $summaryProjectName }}</p>
+                        </div>
+                    @endif
+                </div>
+
+                <p style="color: #6b7280; font-size: 0.9rem; text-align: center; margin-top: 1rem;"
+                   x-data="{ countdown: 5 }"
+                   x-init="
+                       const interval = setInterval(() => {
+                           countdown--;
+                           if (countdown <= 0) {
+                               clearInterval(interval);
+                           }
+                       }, 1000);
+                   ">
+                    Returning to main screen in <span x-text="countdown"></span> seconds...
+                </p>
             </div>
         </div>
     @endif
