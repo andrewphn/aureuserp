@@ -93,7 +93,7 @@ class TimeClockKiosk extends Component
             if (session()->has('clockout_summary')) {
                 $summary = session()->pull('clockout_summary');
                 \Log::info('TimeClockKiosk: Loading summary from session', ['summary' => $summary]);
-                
+
                 $this->summaryClockInTime = $summary['clock_in_time'] ?? null;
                 $this->summaryClockOutTime = $summary['clock_out_time'] ?? null;
                 $this->summaryHoursWorked = $summary['hours_worked'] ?? null;
@@ -101,12 +101,12 @@ class TimeClockKiosk extends Component
                 $this->summaryProjectName = $summary['project_name'] ?? null;
                 $this->selectedUserName = $summary['employee_name'] ?? null;
                 $this->mode = 'summary';
-                
+
                 \Log::info('TimeClockKiosk: Summary mode set', [
                     'mode' => $this->mode,
                     'employee' => $this->selectedUserName,
                 ]);
-                
+
                 // Don't load attendance when showing summary
                 $this->loadEmployees();
                 $this->loadProjects();
@@ -116,7 +116,7 @@ class TimeClockKiosk extends Component
             $this->loadEmployees();
             $this->loadProjects();
             $this->loadTodayAttendance();
-            
+
             \Log::info('TimeClockKiosk: mount() completed normally', [
                 'mode' => $this->mode,
                 'employees_count' => count($this->employees),
@@ -190,7 +190,7 @@ class TimeClockKiosk extends Component
                 \Log::debug('TimeClockKiosk: loadTodayAttendance() skipped', ['mode' => $this->mode]);
                 return;
             }
-            
+
             \Log::debug('TimeClockKiosk: loadTodayAttendance() called', ['mode' => $this->mode]);
             $attendance = $this->clockingService->getTodayAttendance();
             $this->todayAttendance = $attendance['employees'] ?? [];
@@ -531,14 +531,33 @@ class TimeClockKiosk extends Component
             if ($result['success']) {
                 $this->isClockedIn = false;
 
-                // Store summary data in session - will be loaded on page reload
-                session()->flash('clockout_summary', [
+                $projectName = null;
+                if ($this->selectedProjectId) {
+                    $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
+                    $projectName = $project?->name;
+                }
+
+                $summaryData = [
                     'clock_in_time' => $this->clockedInAt,
                     'clock_out_time' => now()->format('g:i A'),
                     'hours_worked' => $result['hours_worked'] ?? 0,
                     'lunch_minutes' => $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null,
-                    'project_name' => $this->selectedProjectId ? (\Webkul\Project\Models\Project::find($this->selectedProjectId)?->name ?? null) : null,
+                    'project_name' => $projectName,
                     'employee_name' => $this->selectedUserName,
+                ];
+
+                \Log::info('TimeClockKiosk: Storing summary in session', ['summary' => $summaryData]);
+
+                // Store summary data in session - will be loaded on page reload
+                session()->flash('clockout_summary', $summaryData);
+
+                \Log::info('TimeClockKiosk: Resetting component state before redirect');
+
+                // Reset component state before redirect to prevent checksum issues
+                $this->reset(['isClockedIn', 'clockedInAt', 'clockInTimestamp', 'isOnLunch', 'lunchTaken', 'breakDurationMinutes', 'selectedProjectId']);
+
+                \Log::info('TimeClockKiosk: Redirecting to kiosk route', [
+                    'route' => route('time-clock.kiosk'),
                 ]);
 
                 // Use redirect to force full page reload and avoid Livewire checksum issues
