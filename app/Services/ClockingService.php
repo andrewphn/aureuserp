@@ -334,6 +334,7 @@ class ClockingService
         return [
             'is_clocked_in' => $isClockedIn,
             'clock_in_time' => $currentEntry?->getFormattedClockIn(),
+            'clock_in_timestamp' => $currentEntry?->clock_in_time ? Carbon::parse($currentEntry->clock_in_time)->toIso8601String() : null,
             'running_hours' => $runningHours,
             'today_hours' => $todayHours,
             'weekly_hours' => $weeklyHours,

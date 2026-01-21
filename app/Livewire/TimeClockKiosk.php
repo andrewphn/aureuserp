@@ -27,7 +27,7 @@ use Webkul\Security\Models\User;
  */
 class TimeClockKiosk extends Component
 {
-    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation)
+    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation), 'lunch-duration', 'clockout-lunch'
     public string $mode = 'select';
 
     // Currently selected user
@@ -44,6 +44,7 @@ class TimeClockKiosk extends Component
     // Clock state
     public bool $isClockedIn = false;
     public ?string $clockedInAt = null;
+    public ?string $clockInTimestamp = null; // For calculating elapsed time
 
     // Lunch state
     public bool $isOnLunch = false;
@@ -211,6 +212,7 @@ class TimeClockKiosk extends Component
                 if ($result['success']) {
                     $this->isClockedIn = true;
                     $this->clockedInAt = now()->format('g:i A');
+                    $this->clockInTimestamp = now()->toIso8601String(); // Store timestamp for elapsed time
                     $this->setStatus("Clocked in at {$this->clockedInAt}", 'success');
                     $this->loadTodayAttendance();
                     // Show confirmation screen, then auto-return after 5 seconds
@@ -279,6 +281,11 @@ class TimeClockKiosk extends Component
             $this->lunchTaken = $status['lunch_taken'] ?? false;
             $this->lunchStartTime = $status['lunch_start_time'];
             $this->lunchEndTime = $status['lunch_end_time'];
+            
+            // Store clock in timestamp for elapsed time calculation
+            if ($this->isClockedIn && $status['clock_in_timestamp'] ?? null) {
+                $this->clockInTimestamp = $status['clock_in_timestamp'];
+            }
         }
     }
 
@@ -357,6 +364,50 @@ class TimeClockKiosk extends Component
     }
 
     /**
+     * Show clock out screen - if no lunch, show lunch duration selection
+     */
+    public function showClockOut(): void
+    {
+        if (!$this->selectedUserId) {
+            $this->setStatus('No employee selected', 'error');
+            return;
+        }
+
+        if ($this->isPinRequired() && !$this->pinVerified) {
+            $this->setStatus('PIN verification required', 'error');
+            $this->mode = 'pin';
+            return;
+        }
+
+        // If no lunch was taken, show lunch duration selection
+        if (!$this->lunchTaken && !$this->isOnLunch) {
+            $this->mode = 'clockout-lunch';
+            $this->breakDurationMinutes = 60; // Reset to default
+        } else {
+            // Lunch already taken, proceed with clock out
+            $this->clockOut();
+        }
+    }
+
+    /**
+     * Set lunch duration for clock out and proceed
+     */
+    public function setClockOutLunchDuration(int $minutes): void
+    {
+        $this->breakDurationMinutes = $minutes;
+        $this->clockOut();
+    }
+
+    /**
+     * Cancel clock out lunch selection and return to clock mode
+     */
+    public function cancelClockOutLunch(): void
+    {
+        $this->mode = 'clock';
+        $this->breakDurationMinutes = 60; // Reset to default
+    }
+
+    /**
      * Clock out the selected employee
      */
     public function clockOut(): void
@@ -385,6 +436,7 @@ class TimeClockKiosk extends Component
                 sprintf("Clocked out! Worked %s today.", $this->formatHours($hoursWorked)),
                 'success'
             );
+            $this->mode = 'select'; // Return to selection screen
             $this->loadTodayAttendance();
         } else {
             $this->setStatus($result['message'], 'error');
@@ -392,7 +444,29 @@ class TimeClockKiosk extends Component
     }
 
     /**
-     * Start lunch break
+     * Show lunch duration selection
+     */
+    public function showLunchDuration(): void
+    {
+        if (!$this->canTakeLunch()) {
+            $this->setStatus('Lunch break not available after 4 PM', 'error');
+            return;
+        }
+        $this->mode = 'lunch-duration';
+        $this->breakDurationMinutes = 60; // Reset to default
+    }
+
+    /**
+     * Set lunch duration and start lunch
+     */
+    public function setLunchDuration(int $minutes): void
+    {
+        $this->breakDurationMinutes = $minutes;
+        $this->startLunch();
+    }
+
+    /**
+     * Start lunch break with current breakDurationMinutes
      */
     public function startLunch(): void
     {
@@ -407,15 +481,24 @@ class TimeClockKiosk extends Component
             return;
         }
 
+        // Validate duration
+        if ($this->breakDurationMinutes < 1 || $this->breakDurationMinutes > 480) {
+            $this->setStatus('Lunch duration must be between 1 and 480 minutes', 'error');
+            $this->mode = 'clock';
+            return;
+        }
+
         $result = $this->clockingService->startLunch($this->selectedUserId);
 
         if ($result['success']) {
             $this->isOnLunch = true;
             $this->lunchStartTime = $result['lunch_start_time'];
-            $this->setStatus("Lunch started at {$this->lunchStartTime}. Enjoy your break!", 'success');
+            $this->setStatus("Lunch started at {$this->lunchStartTime} for {$this->breakDurationMinutes} minutes. Enjoy your break!", 'success');
+            $this->mode = 'clock'; // Return to clock mode
             $this->loadTodayAttendance();
         } else {
             $this->setStatus($result['message'], 'error');
+            $this->mode = 'clock';
         }
     }
 
@@ -450,11 +533,20 @@ class TimeClockKiosk extends Component
     }
 
     /**
-     * Set break duration
+     * Set break duration (legacy method, kept for compatibility)
      */
     public function setBreakDuration(int $minutes): void
     {
         $this->breakDurationMinutes = $minutes;
+    }
+
+    /**
+     * Cancel lunch duration selection and return to clock mode
+     */
+    public function cancelLunchDuration(): void
+    {
+        $this->mode = 'clock';
+        $this->breakDurationMinutes = 60; // Reset to default
     }
 
     /**

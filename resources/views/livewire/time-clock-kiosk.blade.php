@@ -373,101 +373,97 @@
                 </p>
 
                 @if($isClockedIn)
-                    <p class="clock-status">
-                        Clocked in at
-                        @if(!$isOnLunch && !$lunchTaken && $this->canTakeLunch())
-                            <span class="time"
-                                  wire:click="startLunch"
-                                  wire:loading.attr="disabled"
-                                  wire:target="startLunch"
-                                  style="cursor: pointer; text-decoration: underline; color: #f59e0b; font-weight: 600; transition: opacity 0.1s;"
-                                  x-on:mousedown="$el.style.opacity = '0.7'"
-                                  x-on:mouseup="$el.style.opacity = '1'"
-                                  x-on:mouseleave="$el.style.opacity = '1'"
-                                  title="Click to start lunch break">
-                                {{ $clockedInAt }}
-                            </span>
+                    {{-- Clocked In Display --}}
+                    <div style="background: #f3f4f6; border-radius: 12px; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+                        {{-- Clocked In Time --}}
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Clocked In</p>
+                        <p style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">
+                            {{ $clockedInAt }}
+                        </p>
+                        
+                        {{-- Counting Duration --}}
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Duration</p>
+                        <p style="font-size: 2rem; font-weight: 600; color: #059669;"
+                           x-data="{
+                               clockInTime: @js($clockInTimestamp),
+                               elapsedSeconds: 0,
+                               timer: null,
+                               init() {
+                                   if (this.clockInTime) {
+                                       const startTime = new Date(this.clockInTime);
+                                       this.timer = setInterval(() => {
+                                           const now = new Date();
+                                           this.elapsedSeconds = Math.floor((now - startTime) / 1000);
+                                       }, 1000);
+                                   }
+                               },
+                               destroy() {
+                                   if (this.timer) clearInterval(this.timer);
+                               },
+                               formatTime(seconds) {
+                                   const hours = Math.floor(seconds / 3600);
+                                   const mins = Math.floor((seconds % 3600) / 60);
+                                   const secs = seconds % 60;
+                                   if (hours > 0) {
+                                       return `${hours}h ${mins}m ${secs}s`;
+                                   }
+                                   return `${mins}m ${secs}s`;
+                               }
+                           }"
+                           x-init="init()"
+                           x-on:destroyed="destroy()">
+                            <span x-text="formatTime(elapsedSeconds)">0m 0s</span>
+                        </p>
+                        
+                        {{-- Lunch Status --}}
+                        @if($isOnLunch)
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">Lunch</p>
+                            <p style="font-size: 1.5rem; font-weight: 600; color: #f59e0b;">
+                                On Break<br>
+                                <span style="font-size: 1rem; color: #92400e;">Started: {{ $lunchStartTime }}</span>
+                            </p>
+                        @elseif($lunchTaken)
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">Lunch</p>
+                            <p style="font-size: 1.25rem; font-weight: 600; color: #10b981;">
+                                {{ $lunchStartTime }} - {{ $lunchEndTime }}<br>
+                                <span style="font-size: 0.9rem; color: #047857;">({{ $breakDurationMinutes }} min)</span>
+                            </p>
                         @else
-                            <span class="time">{{ $clockedInAt }}</span>
+                            <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem;">No lunch taken</p>
                         @endif
-                    </p>
+                    </div>
 
-                    {{-- ON LUNCH STATE --}}
+                    {{-- Action Buttons --}}
                     @if($isOnLunch)
-                        <div class="lunch-status" style="background: #fef3c7; border: 2px solid #f59e0b; border-radius: 12px; padding: 1.5rem; margin: 1rem 0; text-align: center;">
-                            <p style="font-size: 1.25rem; color: #92400e; margin-bottom: 0.5rem;">
-                                <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.5rem; height: 1.5rem; display: inline; vertical-align: middle; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                On Lunch Break
-                            </p>
-                            <p style="color: #b45309; font-size: 1rem;">
-                                Started at
-                                <span wire:click="endLunch"
-                                      wire:loading.attr="disabled"
-                                      wire:target="endLunch"
-                                      style="cursor: pointer; text-decoration: underline; color: #059669; font-weight: 600; transition: opacity 0.1s;"
-                                      x-on:mousedown="$el.style.opacity = '0.7'"
-                                      x-on:mouseup="$el.style.opacity = '1'"
-                                      x-on:mouseleave="$el.style.opacity = '1'"
-                                      title="Click to end lunch break">
-                                    {{ $lunchStartTime }}
-                                </span>
-                            </p>
-                        </div>
-
-                    {{-- LUNCH TAKEN - READY TO CLOCK OUT --}}
-                    @elseif($lunchTaken)
-                        <div class="lunch-summary" style="background: #d1fae5; border: 2px solid #10b981; border-radius: 12px; padding: 1rem; margin: 1rem 0;">
-                            <p style="color: #047857; font-size: 0.9rem; margin: 0;">
-                                Lunch: {{ $lunchStartTime }} - {{ $lunchEndTime }}
-                                ({{ $breakDurationMinutes }} min)
-                            </p>
-                        </div>
-
-                        {{-- Project Selection (Optional) --}}
-                        @if(count($projects) > 0)
-                            <div class="form-section">
-                                <label class="form-label">Project (Optional)</label>
-                                <select wire:model="selectedProjectId" class="project-select">
-                                    <option value="">No project</option>
-                                    @foreach($projects as $project)
-                                        <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-
-                        {{-- Clock Out Button --}}
+                        {{-- End Lunch Button --}}
                         <button
-                            wire:click="clockOut"
+                            wire:click="endLunch"
                             wire:loading.attr="disabled"
-                            wire:target="clockOut"
-                            class="clock-out-btn"
-                            style="transition: transform 0.1s, opacity 0.1s;"
-                            x-on:mousedown="$el.style.transform = 'scale(0.98)'"
-                            x-on:mouseup="$el.style.transform = 'scale(1)'"
-                            x-on:mouseleave="$el.style.transform = 'scale(1)'"
+                            wire:target="endLunch"
+                            class="clock-in-btn"
+                            style="background: #059669; width: 100%; margin-top: 1rem;"
                         >
-                            <span wire:loading.remove wire:target="clockOut">Clock Out (O)</span>
-                            <span wire:loading wire:target="clockOut">Processing...</span>
+                            <span wire:loading.remove wire:target="endLunch">End Lunch (E)</span>
+                            <span wire:loading wire:target="endLunch">Processing...</span>
                         </button>
-
-                    {{-- NO LUNCH YET - SHOW OPTIONS --}}
                     @else
+                        {{-- Start Lunch Button (if before 4 PM) --}}
                         @if($this->canTakeLunch())
-                            <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 1rem 0;">
-                                Click the time above to start lunch break
-                            </p>
-                        @else
-                            <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 1rem 0;">
-                                Lunch break not available after 4 PM
-                            </p>
+                            <button
+                                wire:click="showLunchDuration"
+                                wire:loading.attr="disabled"
+                                wire:target="showLunchDuration"
+                                class="clock-in-btn"
+                                style="background: #f59e0b; width: 100%; margin-top: 1rem;"
+                            >
+                                <span wire:loading.remove wire:target="showLunchDuration">Start Lunch (L)</span>
+                                <span wire:loading wire:target="showLunchDuration">Loading...</span>
+                            </button>
                         @endif
 
                         {{-- Project Selection (Optional) --}}
                         @if(count($projects) > 0)
-                            <div class="form-section">
+                            <div class="form-section" style="margin-top: 1.5rem;">
                                 <label class="form-label">Project (Optional)</label>
                                 <select wire:model="selectedProjectId" class="project-select">
                                     <option value="">No project</option>
@@ -480,17 +476,17 @@
 
                         {{-- Clock Out Button --}}
                         <button
-                            wire:click="clockOut"
+                            wire:click="showClockOut"
                             wire:loading.attr="disabled"
-                            wire:target="clockOut"
+                            wire:target="showClockOut"
                             class="clock-out-btn"
-                            style="transition: transform 0.1s, opacity 0.1s;"
+                            style="transition: transform 0.1s, opacity 0.1s; margin-top: 1rem; width: 100%;"
                             x-on:mousedown="$el.style.transform = 'scale(0.98)'"
                             x-on:mouseup="$el.style.transform = 'scale(1)'"
                             x-on:mouseleave="$el.style.transform = 'scale(1)'"
                         >
-                            <span wire:loading.remove wire:target="clockOut">Clock Out (O)</span>
-                            <span wire:loading wire:target="clockOut">Processing...</span>
+                            <span wire:loading.remove wire:target="showClockOut">Clock Out (O)</span>
+                            <span wire:loading wire:target="showClockOut">Processing...</span>
                         </button>
                     @endif
                 @endif
