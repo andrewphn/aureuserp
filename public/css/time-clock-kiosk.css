@@ -155,6 +155,13 @@ body {
     padding: 1rem 0;
 }
 
+.employee-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
 .section-title {
     font-size: 2rem;
     font-weight: 600;
@@ -164,40 +171,51 @@ body {
     letter-spacing: 0.5px;
 }
 
-.employee-card {
-    padding: 2rem 1.5rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    border: 1px solid var(--glass-border);
-    border-radius: 16px;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    text-align: center;
-    box-shadow: 0 4px 16px var(--glass-shadow);
+.employee-card,
+.employee-btn {
+    padding: 2rem 1.5rem !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 16px !important;
+    cursor: pointer !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-align: center !important;
+    box-shadow: 0 4px 16px var(--glass-shadow) !important;
     /* Performance optimization */
     will-change: transform;
     transform: translateZ(0);
+    /* Ensure proper sizing */
+    min-height: auto !important;
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
-.employee-card:hover {
-    transform: translateY(-4px) translateZ(0);
-    background: var(--glass-bg-hover);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+.employee-card:hover,
+.employee-btn:hover {
+    transform: translateY(-4px) translateZ(0) !important;
+    background: var(--glass-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-    .employee-card {
-        background: rgba(255, 255, 255, 0.2);
+    .employee-card,
+    .employee-btn {
+        background: rgba(255, 255, 255, 0.2) !important;
     }
-    .employee-card:hover {
-        background: rgba(255, 255, 255, 0.3);
+    .employee-card:hover,
+    .employee-btn:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
     }
 }
 
-.employee-card:active {
-    transform: translateY(-2px);
+.employee-card:active,
+.employee-btn:active {
+    transform: translateY(-2px) !important;
 }
 
 .employee-name {
@@ -245,14 +263,16 @@ body {
 }
 
 /* Number Pad with Glass Buttons */
-.number-pad {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    margin-top: 2rem;
+.number-pad,
+.numpad {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 1rem !important;
+    margin-top: 2rem !important;
 }
 
-.number-btn {
+.number-btn,
+.numpad-btn {
     padding: 1.5rem !important;
     font-size: 1.75rem !important;
     font-weight: 500 !important;
@@ -277,49 +297,60 @@ body {
     width: 100% !important;
 }
 
-.number-btn:hover {
-    background: var(--glass-bg-hover);
-    border-color: rgba(255, 255, 255, 0.35);
-    transform: scale(1.05) translateZ(0);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+.number-btn:hover,
+.numpad-btn:hover {
+    background: var(--glass-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    transform: scale(1.05) translateZ(0) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-    .number-btn {
-        background: rgba(255, 255, 255, 0.2);
+    .number-btn,
+    .numpad-btn {
+        background: rgba(255, 255, 255, 0.2) !important;
     }
-    .number-btn:hover {
-        background: rgba(255, 255, 255, 0.3);
+    .number-btn:hover,
+    .numpad-btn:hover {
+        background: rgba(255, 255, 255, 0.3) !important;
     }
 }
 
-.number-btn:active {
-    transform: scale(0.98);
-    background: rgba(255, 255, 255, 0.2);
+.number-btn:active,
+.numpad-btn:active {
+    transform: scale(0.98) !important;
+    background: rgba(255, 255, 255, 0.2) !important;
 }
 
-.number-btn.clear {
+.number-btn.clear,
+.numpad-btn.numpad-action {
     grid-column: span 2;
-    background: rgba(255, 59, 48, 0.2);
-    border-color: rgba(255, 59, 48, 0.3);
-    color: rgba(255, 59, 48, 0.95);
 }
 
-.number-btn.clear:hover {
-    background: rgba(255, 59, 48, 0.3);
+.numpad-btn.numpad-action:not(:last-child) {
+    background: rgba(255, 59, 48, 0.2) !important;
+    border-color: rgba(255, 59, 48, 0.3) !important;
+    color: rgba(255, 59, 48, 0.95) !important;
+}
+
+.numpad-btn.numpad-action:not(:last-child):hover {
+    background: rgba(255, 59, 48, 0.3) !important;
 }
 
 /* Clock Display with Glass */
-.clock-display {
+.clock-display,
+.clock-card,
+.clock-panel,
+.pin-entry-container {
     max-width: 600px;
     margin: 0 auto;
     padding: 3rem 2rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px var(--glass-shadow);
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(var(--glass-blur)) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 8px 32px var(--glass-shadow) !important;
     text-align: center;
     /* Performance optimization */
     will-change: transform;
@@ -327,8 +358,11 @@ body {
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-    .clock-display {
-        background: rgba(255, 255, 255, 0.25);
+    .clock-display,
+    .clock-card,
+    .clock-panel,
+    .pin-entry-container {
+        background: rgba(255, 255, 255, 0.25) !important;
     }
 }
 
@@ -357,7 +391,10 @@ body {
 }
 
 /* Buttons with Glass Effect */
-.btn {
+.btn,
+.clock-in-btn,
+.back-btn,
+.employee-btn {
     padding: 1rem 2rem !important;
     font-size: 1.125rem !important;
     font-weight: 500 !important;
@@ -386,56 +423,71 @@ body {
     width: auto !important;
 }
 
-.btn:hover {
-    transform: translateY(-2px) translateZ(0);
-    background: var(--glass-bg-hover);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+.btn:hover,
+.clock-in-btn:hover,
+.back-btn:hover,
+.employee-btn:hover {
+    transform: translateY(-2px) translateZ(0) !important;
+    background: var(--glass-bg-hover) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 @supports not (backdrop-filter: blur(1px)) {
-    .btn {
-        background: rgba(255, 255, 255, 0.25);
+    .btn,
+    .clock-in-btn,
+    .back-btn,
+    .employee-btn {
+        background: rgba(255, 255, 255, 0.25) !important;
     }
-    .btn:hover {
-        background: rgba(255, 255, 255, 0.35);
+    .btn:hover,
+    .clock-in-btn:hover,
+    .back-btn:hover,
+    .employee-btn:hover {
+        background: rgba(255, 255, 255, 0.35) !important;
     }
 }
 
-.btn:active {
-    transform: translateY(0);
+.btn:active,
+.clock-in-btn:active,
+.back-btn:active,
+.employee-btn:active {
+    transform: translateY(0) !important;
 }
 
-.btn-primary {
-    background: var(--accent-color);
-    border-color: var(--accent-hover);
-    color: white;
+.btn-primary,
+.clock-in-btn {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-hover) !important;
+    color: white !important;
 }
 
-.btn-primary:hover {
-    background: var(--accent-hover);
-    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+.btn-primary:hover,
+.clock-in-btn:hover {
+    background: var(--accent-hover) !important;
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4) !important;
 }
 
 .btn-secondary {
-    background: rgba(142, 142, 147, 0.2);
-    border-color: rgba(142, 142, 147, 0.3);
+    background: rgba(142, 142, 147, 0.2) !important;
+    border-color: rgba(142, 142, 147, 0.3) !important;
 }
 
 .btn-danger {
-    background: rgba(255, 59, 48, 0.2);
-    border-color: rgba(255, 59, 48, 0.3);
-    color: rgba(255, 59, 48, 0.95);
+    background: rgba(255, 59, 48, 0.2) !important;
+    border-color: rgba(255, 59, 48, 0.3) !important;
+    color: rgba(255, 59, 48, 0.95) !important;
 }
 
 .btn-danger:hover {
-    background: rgba(255, 59, 48, 0.3);
+    background: rgba(255, 59, 48, 0.3) !important;
 }
 
-.btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+.btn:disabled,
+.clock-in-btn:disabled {
+    opacity: 0.5 !important;
+    cursor: not-allowed !important;
+    transform: none !important;
 }
 
 /* Project Selection with Glass */
