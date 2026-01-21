@@ -126,7 +126,7 @@
                         <span x-show="showCustom">Cancel Custom</span>
                     </button>
 
-                    <div x-show="showCustom" 
+                    <div x-show="showCustom"
                          x-transition
                          style="margin-top: 1rem; padding: 1.5rem; background: #f9fafb; border-radius: 12px; border: 2px solid #e5e7eb;">
                         <label style="display: block; color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
@@ -229,7 +229,7 @@
                         <span x-show="showCustom">Cancel Custom</span>
                     </button>
 
-                    <div x-show="showCustom" 
+                    <div x-show="showCustom"
                          x-transition
                          style="margin-top: 1rem; padding: 1.5rem; background: #f9fafb; border-radius: 12px; border: 2px solid #e5e7eb;">
                         <label style="display: block; color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
@@ -656,14 +656,14 @@
                         {{-- Start Lunch Button (if before 4 PM) --}}
                         @if($this->canTakeLunch())
                             <button
-                                wire:click="showLunchDuration"
+                                wire:click="startLunch"
                                 wire:loading.attr="disabled"
-                                wire:target="showLunchDuration"
+                                wire:target="startLunch"
                                 class="clock-in-btn"
                                 style="background: #f59e0b; width: 100%; margin-top: 1rem;"
                             >
-                                <span wire:loading.remove wire:target="showLunchDuration">Start Lunch (L)</span>
-                                <span wire:loading wire:target="showLunchDuration">Loading...</span>
+                                <span wire:loading.remove wire:target="startLunch">Start Lunch (L)</span>
+                                <span wire:loading wire:target="startLunch">Loading...</span>
                             </button>
                         @endif
 

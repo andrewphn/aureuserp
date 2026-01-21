@@ -444,24 +444,13 @@ class TimeClockKiosk extends Component
     }
 
     /**
-     * Show lunch duration selection
+     * Show lunch duration selection (only used when starting lunch - but we removed this flow)
+     * Kept for backward compatibility but not used in current flow
      */
     public function showLunchDuration(): void
     {
-        if (!$this->canTakeLunch()) {
-            $this->setStatus('Lunch break not available after 4 PM', 'error');
-            return;
-        }
-        $this->mode = 'lunch-duration';
-        $this->breakDurationMinutes = 60; // Reset to default
-    }
-
-    /**
-     * Set lunch duration and start lunch
-     */
-    public function setLunchDuration(int $minutes): void
-    {
-        $this->breakDurationMinutes = $minutes;
+        // This is no longer used - startLunch is called directly
+        // Lunch duration is only selected when clocking out without lunch
         $this->startLunch();
     }
 
