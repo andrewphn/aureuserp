@@ -224,18 +224,16 @@ export function createPdfViewerComponent(config) {
                     if (this.isolationMode) {
                         console.log('🔍 Checking visibility for newly created annotation in isolation mode');
 
-                        // Import isAnnotationVisibleInIsolation
-                        import('./managers/isolation-mode-manager.js').then(isolationModule => {
-                            const isVisible = isolationModule.isAnnotationVisibleInIsolation(tempAnno, this);
+                        // Use statically imported IsolationMode
+                        const isVisible = IsolationMode.isAnnotationVisibleInIsolation(tempAnno, this);
 
-                            if (!isVisible && !this.hiddenAnnotations.includes(tempAnno.id)) {
-                                this.hiddenAnnotations.push(tempAnno.id);
-                                console.log(`👁️ Hiding newly created annotation ${tempAnno.id} (not visible in current isolation)`);
-                            } else if (isVisible && this.hiddenAnnotations.includes(tempAnno.id)) {
-                                this.hiddenAnnotations = this.hiddenAnnotations.filter(id => id !== tempAnno.id);
-                                console.log(`👁️ Showing newly created annotation ${tempAnno.id} (visible in current isolation)`);
-                            }
-                        });
+                        if (!isVisible && !this.hiddenAnnotations.includes(tempAnno.id)) {
+                            this.hiddenAnnotations.push(tempAnno.id);
+                            console.log(`👁️ Hiding newly created annotation ${tempAnno.id} (not visible in current isolation)`);
+                        } else if (isVisible && this.hiddenAnnotations.includes(tempAnno.id)) {
+                            this.hiddenAnnotations = this.hiddenAnnotations.filter(id => id !== tempAnno.id);
+                            console.log(`👁️ Showing newly created annotation ${tempAnno.id} (visible in current isolation)`);
+                        }
                     }
                 }
 
