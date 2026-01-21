@@ -306,7 +306,7 @@ class TimeClockKiosk extends Component
             $this->lunchEndTime = null;
             $this->selectedProjectId = null;
             $this->breakDurationMinutes = 60;
-            
+
             // Reload data safely
             $this->loadTodayAttendance();
         } catch (\Exception $e) {
@@ -325,6 +325,7 @@ class TimeClockKiosk extends Component
         $this->pin = '';
         $this->pinVerified = false;
         $this->statusMessage = '';
+        $this->statusType = 'info';
     }
 
     /**

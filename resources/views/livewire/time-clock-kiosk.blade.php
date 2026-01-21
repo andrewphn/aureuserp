@@ -1,4 +1,4 @@
-<div class="kiosk-container" 
+<div class="kiosk-container"
      @if($mode !== 'confirmed')
      wire:poll.30s="loadTodayAttendance"
      @endif>
@@ -122,49 +122,26 @@
                 </p>
 
                 {{-- PIN Display --}}
-                <div class="pin-display"
-                     x-data="{
-                         optimisticPin: @js($pin),
-                         pinLength: @js($this->getPinLength()),
-                         init() {
-                             // Sync optimistic pin when Livewire updates
-                             Livewire.hook('commit', ({ component }) => {
-                                 if (component === @this) {
-                                     this.optimisticPin = @this.get('pin') || '';
-                                 }
-                             });
-                         }
-                     }">
+                <div class="pin-display">
                     @for($i = 0; $i < 4; $i++)
                         <div class="pin-dot"
-                             x-bind:class="optimisticPin.length > {{ $i }} ? 'pin-dot-filled' : ''"></div>
+                             x-bind:class="$root.localPin.length > {{ $i }} ? 'pin-dot-filled' : ''"></div>
                     @endfor
                 </div>
 
                 {{-- Numpad --}}
-                <div class="numpad"
-                     x-data="{
-                         optimisticPin: @js($pin),
-                         pinLength: @js($this->getPinLength()),
-                         handlePinDigit(digit) {
-                             // Optimistic UI update - show digit immediately
-                             if (this.optimisticPin.length < this.pinLength) {
-                                 this.optimisticPin += digit;
-                             }
-
-                             // Then sync with server
-                             @this.call('addPinDigit', digit).then(() => {
-                                 this.optimisticPin = @this.get('pin') || '';
-                                 // Auto-submit when PIN is complete
-                                 if (this.optimisticPin.length >= this.pinLength) {
-                                     @this.call('verifyPin');
-                                 }
-                             });
-                         }
-                     }">
+                <div class="numpad">
                     @foreach([1,2,3,4,5,6,7,8,9] as $num)
                         <button
-                            x-on:click="handlePinDigit('{{ $num }}')"
+                            x-on:click="
+                                if ($root.localPin.length < $root.pinLength) {
+                                    $root.localPin += '{{ $num }}';
+                                    if ($root.localPin.length >= $root.pinLength) {
+                                        @this.set('pin', $root.localPin);
+                                        @this.call('verifyPin');
+                                    }
+                                }
+                            "
                             class="numpad-btn"
                             style="transition: transform 0.1s, background-color 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -173,17 +150,23 @@
                             {{ $num }}
                         </button>
                     @endforeach
-                    <button wire:click="clearPin"
-                            wire:loading.attr="disabled"
+                    <button x-on:click="$root.localPin = ''; @this.set('pin', '');"
                             class="numpad-btn numpad-action"
                             style="transition: transform 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
                             x-on:mouseup="$el.style.transform = 'scale(1)'"
                             x-on:mouseleave="$el.style.transform = 'scale(1)'">
-                        <span wire:loading.remove wire:target="clearPin">Clear</span>
-                        <span wire:loading wire:target="clearPin">...</span>
+                        Clear
                     </button>
-                    <button x-on:click="handlePinDigit('0')"
+                    <button x-on:click="
+                                if ($root.localPin.length < $root.pinLength) {
+                                    $root.localPin += '0';
+                                    if ($root.localPin.length >= $root.pinLength) {
+                                        @this.set('pin', $root.localPin);
+                                        @this.call('verifyPin');
+                                    }
+                                }
+                            "
                             class="numpad-btn"
                             style="transition: transform 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -191,8 +174,7 @@
                             x-on:mouseleave="$el.style.transform = 'scale(1)'">
                         0
                     </button>
-                    <button wire:click="removePinDigit"
-                            wire:loading.attr="disabled"
+                    <button x-on:click="$root.localPin = $root.localPin.slice(0, -1); @this.set('pin', $root.localPin);"
                             class="numpad-btn numpad-action"
                             style="transition: transform 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -206,10 +188,15 @@
 
                 {{-- Submit PIN --}}
                 <button
-                    wire:click="verifyPin"
+                    x-on:click="
+                        if ($root.localPin.length >= $root.pinLength) {
+                            @this.set('pin', $root.localPin);
+                            @this.call('verifyPin');
+                        }
+                    "
                     class="clock-in-btn"
                     style="margin-top: 1.5rem;"
-                    {{ strlen($pin) < $this->getPinLength() ? 'disabled' : '' }}
+                    x-bind:disabled="$root.localPin.length < $root.pinLength"
                 >
                     Continue (Enter)
                 </button>
