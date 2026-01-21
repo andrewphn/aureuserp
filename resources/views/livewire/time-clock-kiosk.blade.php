@@ -1,4 +1,7 @@
-<div class="kiosk-container" wire:poll.30s="loadTodayAttendance" wire:poll.keep-alive>
+<div class="kiosk-container" 
+     @if($mode !== 'confirmed')
+     wire:poll.30s="loadTodayAttendance"
+     @endif>
     {{-- Header --}}
     <div class="kiosk-header">
         <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
@@ -226,6 +229,7 @@
                  timeoutTimer: null,
                  countdownTimer: null,
                  hasReturned: false,
+                 isTransitioning: false,
                  init() {
                      // Start running timer
                      this.timer = setInterval(() => {
@@ -244,25 +248,30 @@
                      // Auto-return to login page after 5 seconds
                      this.timeoutTimer = setTimeout(() => {
                          // Prevent multiple calls
-                         if (this.hasReturned) return;
+                         if (this.hasReturned || this.isTransitioning) return;
                          this.hasReturned = true;
+                         this.isTransitioning = true;
 
                          // Clear all timers
                          if (this.timer) clearInterval(this.timer);
                          if (this.countdownTimer) clearInterval(this.countdownTimer);
                          if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
 
-                         // Return to employee selection (login page)
-                         @this.call('backToSelect').then(() => {
-                             // Success - component will update
-                         }).catch((error) => {
-                             // If call fails, reload the page to reset state
-                             console.error('backToSelect failed:', error);
-                             window.location.href = window.location.pathname;
-                         });
+                         // Use a small delay to ensure Livewire is ready
+                         setTimeout(() => {
+                             // Return to employee selection (login page)
+                             @this.call('backToSelect').then(() => {
+                                 // Success - component will update
+                             }).catch((error) => {
+                                 // If call fails, reload the page to reset state
+                                 console.error('backToSelect failed:', error);
+                                 window.location.href = window.location.pathname;
+                             });
+                         }, 100);
                      }, 5000);
                  },
                  destroy() {
+                     this.isTransitioning = true;
                      if (this.timer) clearInterval(this.timer);
                      if (this.countdownTimer) clearInterval(this.countdownTimer);
                      if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
