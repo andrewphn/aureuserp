@@ -43,7 +43,7 @@ class ManageTimesheets extends ManageRecords
                 ->modalDescription('Are you sure you want to clock in?')
                 ->action(function () use ($clockingService, $userId) {
                     $result = $clockingService->clockIn($userId);
-                    
+
                     if ($result['success']) {
                         Notification::make()
                             ->success()
@@ -57,10 +57,10 @@ class ManageTimesheets extends ManageRecords
                             ->body($result['message'] ?? 'Unable to clock in')
                             ->send();
                     }
-                    
+
                     $this->dispatch('$refresh');
                 }),
-            
+
             Action::make('clockOut')
                 ->label('Clock Out')
                 ->icon('heroicon-o-stop-circle')
@@ -79,7 +79,7 @@ class ManageTimesheets extends ManageRecords
                         ->helperText('Enter lunch duration in minutes (e.g., 60 for 1 hour)'),
                     \Filament\Forms\Components\Select::make('project_id')
                         ->label('Project')
-                        ->relationship('project', 'name')
+                        ->relationship('project', 'name', fn ($query) => $query->where('status', 'active'))
                         ->searchable()
                         ->preload()
                         ->required(),
@@ -87,7 +87,7 @@ class ManageTimesheets extends ManageRecords
                 ->fillForm(function () use ($currentEntry) {
                     return [
                         'break_duration' => $currentEntry?->break_duration_minutes ?? 60,
-                        'project_id' => $currentEntry?->project_id,
+                        'project_id' => $currentEntry?->project_id ?? null,
                     ];
                 })
                 ->action(function (array $data) use ($clockingService, $userId) {
@@ -96,7 +96,7 @@ class ManageTimesheets extends ManageRecords
                         $data['break_duration'] ?? 60,
                         $data['project_id'] ?? null
                     );
-                    
+
                     if ($result['success']) {
                         Notification::make()
                             ->success()
@@ -110,7 +110,7 @@ class ManageTimesheets extends ManageRecords
                             ->body($result['message'] ?? 'Unable to clock out')
                             ->send();
                     }
-                    
+
                     $this->dispatch('$refresh');
                 }),
 
