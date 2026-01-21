@@ -6,13 +6,14 @@
     {{-- Header --}}
     <div class="kiosk-header" wire:ignore>
         @php
-            $logoPath = public_path('tcs_logo.png');
-            $logoUrl = file_exists($logoPath) ? asset('tcs_logo.png') : asset('images/logo.svg');
+            // Use direct path instead of asset() to avoid URL generation issues
+            $logoUrl = '/tcs_logo.png';
+            $fallbackUrl = '/images/logo.svg';
         @endphp
         <img src="{{ $logoUrl }}"
              alt="TCS Woodwork"
              style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);"
-             onerror="this.onerror=null; this.style.display='none'; const fallback = this.nextElementSibling; if(fallback) fallback.style.display='block';">
+             onerror="this.onerror=null; this.src='{{ $fallbackUrl }}'; this.onerror=function(){this.style.display='none'; const fallback = this.nextElementSibling; if(fallback) fallback.style.display='block';};">
         <div style="display: none; font-size: 2rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">TCS Woodwork</div>
         <p class="kiosk-subtitle">Time Clock</p>
         <div class="kiosk-time">{{ $this->getCurrentTime() }}</div>
