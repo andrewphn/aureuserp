@@ -82,26 +82,52 @@ class TimeClockKiosk extends Component
 
     public function mount(): void
     {
-        // Check for clockout summary in session FIRST (set after successful clock out)
-        // This must be checked before loading attendance to avoid state conflicts
-        if (session()->has('clockout_summary')) {
-            $summary = session()->pull('clockout_summary');
-            $this->summaryClockInTime = $summary['clock_in_time'] ?? null;
-            $this->summaryClockOutTime = $summary['clock_out_time'] ?? null;
-            $this->summaryHoursWorked = $summary['hours_worked'] ?? null;
-            $this->summaryLunchMinutes = $summary['lunch_minutes'] ?? null;
-            $this->summaryProjectName = $summary['project_name'] ?? null;
-            $this->selectedUserName = $summary['employee_name'] ?? null;
-            $this->mode = 'summary';
-            // Don't load attendance when showing summary
+        try {
+            \Log::info('TimeClockKiosk: mount() called', [
+                'has_summary' => session()->has('clockout_summary'),
+                'current_mode' => $this->mode,
+            ]);
+
+            // Check for clockout summary in session FIRST (set after successful clock out)
+            // This must be checked before loading attendance to avoid state conflicts
+            if (session()->has('clockout_summary')) {
+                $summary = session()->pull('clockout_summary');
+                \Log::info('TimeClockKiosk: Loading summary from session', ['summary' => $summary]);
+                
+                $this->summaryClockInTime = $summary['clock_in_time'] ?? null;
+                $this->summaryClockOutTime = $summary['clock_out_time'] ?? null;
+                $this->summaryHoursWorked = $summary['hours_worked'] ?? null;
+                $this->summaryLunchMinutes = $summary['lunch_minutes'] ?? null;
+                $this->summaryProjectName = $summary['project_name'] ?? null;
+                $this->selectedUserName = $summary['employee_name'] ?? null;
+                $this->mode = 'summary';
+                
+                \Log::info('TimeClockKiosk: Summary mode set', [
+                    'mode' => $this->mode,
+                    'employee' => $this->selectedUserName,
+                ]);
+                
+                // Don't load attendance when showing summary
+                $this->loadEmployees();
+                $this->loadProjects();
+                return;
+            }
+
             $this->loadEmployees();
             $this->loadProjects();
-            return;
+            $this->loadTodayAttendance();
+            
+            \Log::info('TimeClockKiosk: mount() completed normally', [
+                'mode' => $this->mode,
+                'employees_count' => count($this->employees),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('TimeClockKiosk: mount() error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            throw $e;
         }
-
-        $this->loadEmployees();
-        $this->loadProjects();
-        $this->loadTodayAttendance();
     }
 
     /**
@@ -158,12 +184,26 @@ class TimeClockKiosk extends Component
      */
     public function loadTodayAttendance(): void
     {
-        // Don't reload if we're in a transition mode
-        if (in_array($this->mode, ['clockout-lunch', 'summary', 'confirmed'])) {
-            return;
+        try {
+            // Don't reload if we're in a transition mode
+            if (in_array($this->mode, ['clockout-lunch', 'summary', 'confirmed'])) {
+                \Log::debug('TimeClockKiosk: loadTodayAttendance() skipped', ['mode' => $this->mode]);
+                return;
+            }
+            
+            \Log::debug('TimeClockKiosk: loadTodayAttendance() called', ['mode' => $this->mode]);
+            $attendance = $this->clockingService->getTodayAttendance();
+            $this->todayAttendance = $attendance['employees'] ?? [];
+            \Log::debug('TimeClockKiosk: loadTodayAttendance() completed', [
+                'employees_count' => count($this->todayAttendance),
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('TimeClockKiosk: loadTodayAttendance() error', [
+                'error' => $e->getMessage(),
+                'mode' => $this->mode,
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
-        $attendance = $this->clockingService->getTodayAttendance();
-        $this->todayAttendance = $attendance['employees'] ?? [];
     }
 
     /**
