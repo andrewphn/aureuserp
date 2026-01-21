@@ -1,9 +1,7 @@
 <div class="kiosk-container"
      @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin' && $mode !== 'clockout-lunch' && $mode !== 'summary')
      wire:poll.30s="loadTodayAttendance"
-     @endif
-     x-data="{}"
-     x-on:clockout-complete.window="setTimeout(() => window.location.reload(), 100)">
+     @endif>
 
     {{-- Header --}}
     <div class="kiosk-header">

@@ -496,9 +496,8 @@ class TimeClockKiosk extends Component
                     'employee_name' => $this->selectedUserName,
                 ]);
 
-                // Don't change mode here - let the page reload handle it via mount()
-                // Use dispatch to trigger browser event for page reload
-                $this->dispatch('clockout-complete');
+                // Use redirect to force full page reload and avoid Livewire checksum issues
+                return $this->redirect(route('time-clock.kiosk'), navigate: false);
             } else {
                 $this->setStatus($result['message'], 'error');
                 $this->mode = 'clock'; // Stay in clock mode on error
