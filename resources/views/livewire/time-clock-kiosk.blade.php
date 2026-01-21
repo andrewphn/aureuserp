@@ -159,7 +159,7 @@
 
     {{-- Lunch Duration Selection Mode (for starting lunch) --}}
     @if($mode === 'lunch-duration')
-        <div class="clock-panel"
+        <div class="clock-panel" wire:key="lunch-duration-panel"
              x-data="{
                  customMinutes: '',
                  showCustom: false,
@@ -536,7 +536,7 @@
 
     {{-- Clock In/Out Mode --}}
     @if($mode === 'clock')
-        <div class="clock-panel"
+        <div class="clock-panel" wire:key="clock-panel"
              x-data="{
                  isClockedIn: @js($isClockedIn),
                  isOnLunch: @js($isOnLunch),
