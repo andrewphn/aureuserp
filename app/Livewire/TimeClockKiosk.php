@@ -85,6 +85,18 @@ class TimeClockKiosk extends Component
         $this->loadEmployees();
         $this->loadProjects();
         $this->loadTodayAttendance();
+        
+        // Check for clockout summary in session (set after successful clock out)
+        if (session()->has('clockout_summary')) {
+            $summary = session()->pull('clockout_summary');
+            $this->summaryClockInTime = $summary['clock_in_time'] ?? null;
+            $this->summaryClockOutTime = $summary['clock_out_time'] ?? null;
+            $this->summaryHoursWorked = $summary['hours_worked'] ?? null;
+            $this->summaryLunchMinutes = $summary['lunch_minutes'] ?? null;
+            $this->summaryProjectName = $summary['project_name'] ?? null;
+            $this->selectedUserName = $summary['employee_name'] ?? null;
+            $this->mode = 'summary';
+        }
     }
 
     /**
@@ -417,7 +429,7 @@ class TimeClockKiosk extends Component
         $this->breakDurationMinutes = $minutes;
         $this->clockOut();
     }
-    
+
     /**
      * Actually perform clock out (called after lunch duration is set)
      */
@@ -474,23 +486,20 @@ class TimeClockKiosk extends Component
             if ($result['success']) {
                 $this->isClockedIn = false;
 
-                // Store summary data
-                $this->summaryClockInTime = $this->clockedInAt;
-                $this->summaryClockOutTime = now()->format('g:i A');
-                $this->summaryHoursWorked = $result['hours_worked'] ?? 0;
-                $this->summaryLunchMinutes = $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null;
+                // Store summary data in session to avoid checksum corruption
+                // We'll reload the page to show the summary
+                session()->flash('clockout_summary', [
+                    'clock_in_time' => $this->clockedInAt,
+                    'clock_out_time' => now()->format('g:i A'),
+                    'hours_worked' => $result['hours_worked'] ?? 0,
+                    'lunch_minutes' => $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null,
+                    'project_name' => $this->selectedProjectId ? (\Webkul\Project\Models\Project::find($this->selectedProjectId)?->name ?? null) : null,
+                    'employee_name' => $this->selectedUserName,
+                ]);
 
-                // Get project name if selected
-                if ($this->selectedProjectId) {
-                    $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
-                    $this->summaryProjectName = $project ? $project->name : null;
-                } else {
-                    $this->summaryProjectName = null;
-                }
-
-                // Change mode last to prevent checksum issues
-                $this->mode = 'summary';
-                // Don't call loadTodayAttendance here - it will be called on next render if needed
+                // Redirect to reload page - this avoids checksum corruption by doing a full page reload
+                $this->dispatch('$refresh');
+                return $this->redirect(request()->url(), navigate: false);
             } else {
                 $this->setStatus($result['message'], 'error');
                 $this->mode = 'clock'; // Stay in clock mode on error
