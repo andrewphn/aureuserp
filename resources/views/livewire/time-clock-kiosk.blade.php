@@ -5,7 +5,12 @@
 
     {{-- Header --}}
     <div class="kiosk-header">
-        <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
+        <img src="{{ asset('tcs_logo.png') }}" 
+             alt="TCS Woodwork" 
+             style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" 
+             onerror="this.style.display='none'; this.nextElementSibling?.style.display='block';"
+             wire:ignore>
+        <div style="display: none; font-size: 2rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">TCS Woodwork</div>
         <p class="kiosk-subtitle">Time Clock</p>
         <div class="kiosk-time">{{ $this->getCurrentTime() }}</div>
         <p class="kiosk-date">{{ $this->getCurrentDate() }}</p>
