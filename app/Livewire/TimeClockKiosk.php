@@ -136,7 +136,7 @@ class TimeClockKiosk extends Component
     /**
      * Load today's attendance summary
      */
-    protected function loadTodayAttendance(): void
+    public function loadTodayAttendance(): void
     {
         $attendance = $this->clockingService->getTodayAttendance();
         $this->todayAttendance = $attendance['employees'] ?? [];
