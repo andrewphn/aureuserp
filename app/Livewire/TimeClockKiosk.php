@@ -27,7 +27,7 @@ use Webkul\Security\Models\User;
  */
 class TimeClockKiosk extends Component
 {
-    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation), 'lunch-duration', 'clockout-lunch'
+    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation), 'clockout-lunch'
     public string $mode = 'select';
 
     // Currently selected user
@@ -375,7 +375,7 @@ class TimeClockKiosk extends Component
     }
 
     /**
-     * Show clock out screen - if no lunch, show lunch duration selection
+     * Show clock out screen - if no lunch was logged, show lunch duration selection
      */
     public function showClockOut(): void
     {
@@ -390,12 +390,12 @@ class TimeClockKiosk extends Component
             return;
         }
 
-        // If no lunch was taken, show lunch duration selection
-        if (!$this->lunchTaken && !$this->isOnLunch) {
+        // If no lunch was logged, show lunch duration selection
+        if (!$this->lunchTaken) {
             $this->mode = 'clockout-lunch';
             $this->breakDurationMinutes = 60; // Reset to default
         } else {
-            // Lunch already taken, proceed with clock out
+            // Lunch already logged, proceed with clock out
             $this->clockOut();
         }
     }
@@ -454,132 +454,10 @@ class TimeClockKiosk extends Component
         }
     }
 
-    /**
-     * Show lunch duration selection when starting lunch
-     */
-    public function showLunchDuration(): void
-    {
-        // Simple validation - if anything fails, show error and stay in clock mode
-        if (!$this->selectedUserId || !$this->isClockedIn) {
-            $this->setStatus('You must be clocked in to start lunch', 'error');
-            return;
-        }
-
-        if ($this->isOnLunch || $this->lunchTaken) {
-            $this->setStatus('Lunch already taken or in progress', 'error');
-            return;
-        }
-
-        if (!$this->canTakeLunch()) {
-            $this->setStatus('Lunch break not available after 4 PM', 'error');
-            return;
-        }
-
-        // Set mode - Livewire will automatically update the view
-        $this->mode = 'lunch-duration';
-        $this->breakDurationMinutes = 60;
-    }
 
     /**
      * Set lunch duration and start lunch
      */
-    public function setLunchDuration(int $minutes): void
-    {
-        $this->breakDurationMinutes = $minutes;
-        $this->startLunch();
-    }
-
-    /**
-     * Start lunch break with current breakDurationMinutes
-     */
-    public function startLunch(): void
-    {
-        if (!$this->selectedUserId) {
-            $this->setStatus('No employee selected', 'error');
-            return;
-        }
-
-        if ($this->isPinRequired() && !$this->pinVerified) {
-            $this->setStatus('PIN verification required', 'error');
-            $this->mode = 'pin';
-            return;
-        }
-
-        // Validate duration
-        if ($this->breakDurationMinutes < 1 || $this->breakDurationMinutes > 480) {
-            $this->setStatus('Lunch duration must be between 1 and 480 minutes', 'error');
-            $this->mode = 'clock';
-            return;
-        }
-
-        $result = $this->clockingService->startLunch($this->selectedUserId);
-
-        if ($result['success']) {
-            $this->scheduledLunchDurationMinutes = $this->breakDurationMinutes; // Store selected duration BEFORE loading status
-            $this->loadClockStatus(); // Reload to get proper timestamps from database
-            $this->setStatus("Lunch started at {$this->lunchStartTime} for {$this->breakDurationMinutes} minutes. Enjoy your break!", 'success');
-            $this->mode = 'clock'; // Return to clock mode
-            $this->loadTodayAttendance();
-        } else {
-            $this->setStatus($result['message'], 'error');
-            $this->mode = 'clock';
-        }
-    }
-
-    /**
-     * End lunch break
-     */
-    public function endLunch(): void
-    {
-        if (!$this->selectedUserId) {
-            $this->setStatus('No employee selected', 'error');
-            return;
-        }
-
-        if ($this->isPinRequired() && !$this->pinVerified) {
-            $this->setStatus('PIN verification required', 'error');
-            $this->mode = 'pin';
-            return;
-        }
-
-        // Check if still on lunch (prevent double-ending)
-        if (!$this->isOnLunch) {
-            $this->setStatus('Not currently on lunch break', 'error');
-            return;
-        }
-
-        $result = $this->clockingService->endLunch($this->selectedUserId);
-
-        if ($result['success']) {
-            $this->isOnLunch = false;
-            $this->lunchTaken = true;
-            $this->lunchEndTime = $result['lunch_end_time'];
-            $this->breakDurationMinutes = $result['lunch_duration_minutes'];
-            $this->lunchStartTimestamp = null; // Clear timestamp to stop auto-end timer
-            $this->scheduledLunchDurationMinutes = 60; // Reset to default
-            $this->setStatus($result['message'], 'success');
-            $this->loadTodayAttendance();
-        } else {
-            $this->setStatus($result['message'], 'error');
-        }
-    }
-
-    /**
-     * Set break duration (legacy method, kept for compatibility)
-     */
-    public function setBreakDuration(int $minutes): void
-    {
-        $this->breakDurationMinutes = $minutes;
-    }
-
-    /**
-     * Cancel lunch duration selection and return to clock mode
-     */
-    public function cancelLunchDuration(): void
-    {
-        $this->mode = 'clock';
-        $this->breakDurationMinutes = 60; // Reset to default
-    }
 
     /**
      * Set status message
