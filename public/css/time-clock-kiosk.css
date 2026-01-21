@@ -256,10 +256,11 @@ body {
     transition: all 0.2s ease;
 }
 
-.pin-dot.filled {
-    background: var(--accent-color);
-    border-color: var(--accent-hover);
-    box-shadow: 0 0 12px rgba(0, 122, 255, 0.4);
+.pin-dot.filled,
+.pin-dot-filled {
+    background: var(--accent-color) !important;
+    border-color: var(--accent-hover) !important;
+    box-shadow: 0 0 12px rgba(0, 122, 255, 0.4) !important;
 }
 
 /* Number Pad with Glass Buttons */
@@ -393,6 +394,7 @@ body {
 /* Buttons with Glass Effect */
 .btn,
 .clock-in-btn,
+.clock-out-btn,
 .back-btn,
 .employee-btn {
     padding: 1rem 2rem !important;
@@ -425,6 +427,7 @@ body {
 
 .btn:hover,
 .clock-in-btn:hover,
+.clock-out-btn:hover,
 .back-btn:hover,
 .employee-btn:hover {
     transform: translateY(-2px) translateZ(0) !important;
@@ -436,12 +439,14 @@ body {
 @supports not (backdrop-filter: blur(1px)) {
     .btn,
     .clock-in-btn,
+    .clock-out-btn,
     .back-btn,
     .employee-btn {
         background: rgba(255, 255, 255, 0.25) !important;
     }
     .btn:hover,
     .clock-in-btn:hover,
+    .clock-out-btn:hover,
     .back-btn:hover,
     .employee-btn:hover {
         background: rgba(255, 255, 255, 0.35) !important;
@@ -450,6 +455,7 @@ body {
 
 .btn:active,
 .clock-in-btn:active,
+.clock-out-btn:active,
 .back-btn:active,
 .employee-btn:active {
     transform: translateY(0) !important;
@@ -468,6 +474,17 @@ body {
     box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4) !important;
 }
 
+.clock-out-btn {
+    background: rgba(255, 59, 48, 0.2) !important;
+    border-color: rgba(255, 59, 48, 0.3) !important;
+    color: rgba(255, 59, 48, 0.95) !important;
+}
+
+.clock-out-btn:hover {
+    background: rgba(255, 59, 48, 0.3) !important;
+    box-shadow: 0 6px 20px rgba(255, 59, 48, 0.3) !important;
+}
+
 .btn-secondary {
     background: rgba(142, 142, 147, 0.2) !important;
     border-color: rgba(142, 142, 147, 0.3) !important;
@@ -484,13 +501,55 @@ body {
 }
 
 .btn:disabled,
-.clock-in-btn:disabled {
+.clock-in-btn:disabled,
+.clock-out-btn:disabled {
     opacity: 0.5 !important;
     cursor: not-allowed !important;
     transform: none !important;
 }
 
+/* Form Sections with Glass */
+.form-section {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
+
+.form-label {
+    display: block !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+    margin-bottom: 0.75rem !important;
+}
+
 /* Project Selection with Glass */
+.project-selection,
+.project-select {
+    width: 100% !important;
+    padding: 1rem 1.5rem !important;
+    font-size: 1.125rem !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    color: var(--text-primary) !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.project-select {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.project-select:focus {
+    outline: none !important;
+    background: var(--glass-bg-hover) !important;
+    border-color: var(--accent-color) !important;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2) !important;
+}
+
 .project-selection {
     max-width: 600px;
     margin: 0 auto;
@@ -632,35 +691,66 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+/* Attendance Section with Glass */
+.attendance-section {
+    margin-top: 2rem;
+    padding: 1.5rem 0;
+}
+
+.attendance-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
 /* Attendance List with Glass */
 .attendance-list {
-    margin-top: 2rem;
+    margin-top: 1rem;
 }
 
 .attendance-item {
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--glass-border);
-    border-radius: 12px;
-    box-shadow: 0 4px 16px var(--glass-shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 1.25rem 1.5rem !important;
+    margin-bottom: 1rem !important;
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px var(--glass-shadow) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
 }
 
 .attendance-name {
-    font-size: 1.125rem;
-    font-weight: 500;
-    color: var(--text-primary);
+    font-size: 1.125rem !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
 }
 
 .attendance-time {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    font-variant-numeric: tabular-nums;
+    font-size: 1rem !important;
+    color: var(--text-secondary) !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.attendance-status {
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px !important;
+}
+
+.attendance-status.status-in {
+    color: rgba(52, 199, 89, 0.95) !important;
+    background: rgba(52, 199, 89, 0.15) !important;
+}
+
+.attendance-status.status-out {
+    color: var(--text-secondary) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* Responsive Design */
@@ -681,23 +771,34 @@ body {
         font-size: 3rem;
     }
 
-    .employee-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
+    .employee-grid,
+    .employee-buttons {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        gap: 1rem !important;
     }
 
-    .number-pad {
-        gap: 0.75rem;
+    .employee-btn {
+        padding: 1.25rem 1rem !important;
+        font-size: 1rem !important;
     }
 
-    .number-btn {
-        padding: 1.25rem;
-        font-size: 1.5rem;
+    .number-pad,
+    .numpad {
+        gap: 0.75rem !important;
     }
 
-    .btn {
-        padding: 0.875rem 1.5rem;
-        font-size: 1rem;
+    .number-btn,
+    .numpad-btn {
+        padding: 1.25rem !important;
+        font-size: 1.5rem !important;
+    }
+
+    .btn,
+    .clock-in-btn,
+    .clock-out-btn,
+    .back-btn {
+        padding: 0.875rem 1.5rem !important;
+        font-size: 1rem !important;
     }
 }
 
@@ -757,6 +858,16 @@ body {
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
     }
+}
+
+/* Footer */
+.kiosk-footer {
+    text-align: center !important;
+    padding: 1.5rem 0 !important;
+    margin-top: 2rem !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.875rem !important;
+    font-weight: 400 !important;
 }
 
 /* High contrast mode support */
