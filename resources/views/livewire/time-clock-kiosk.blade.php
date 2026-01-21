@@ -504,8 +504,7 @@
             <div class="clock-card">
                 <h2 class="employee-name">{{ $selectedUserName }}</h2>
                 <p style="font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem; margin-bottom: 1rem; text-align: center;">
-                    Keyboard shortcuts: I=Clock In, O=Clock Out, L=Start Lunch, E=End Lunch, Esc=Back<br>
-                    <span style="font-size: 0.7rem;">Click the time to start/end lunch</span>
+                    Keyboard shortcuts: I=Clock In, O=Clock Out, Esc=Back
                 </p>
 
                 @if($isClockedIn)
@@ -669,59 +668,33 @@
                         @endif
                     </div>
 
-                    {{-- Action Buttons --}}
-                    @if($isOnLunch)
-                        {{-- End Lunch Button --}}
-                        <button
-                            wire:click="endLunch"
-                            wire:loading.attr="disabled"
-                            wire:target="endLunch"
-                            class="clock-in-btn"
-                            style="background: #059669; width: 100%; margin-top: 1rem;"
-                            x-on:click="
-                                // Clear any auto-end timers when manually ending lunch
-                                const lunchTimer = document.querySelector('[x-data*=\"lunchStartTimestamp\"]');
-                                if (lunchTimer && lunchTimer._x_dataStack) {
-                                    const data = lunchTimer._x_dataStack[0];
-                                    if (data && data.timer) {
-                                        clearInterval(data.timer);
-                                        data.timer = null;
-                                    }
-                                }
-                            "
-                        >
-                            <span wire:loading.remove wire:target="endLunch">End Lunch (E)</span>
-                            <span wire:loading wire:target="endLunch">Processing...</span>
-                        </button>
-
-                        {{-- Project Selection (Optional) --}}
-                        @if(count($projects) > 0)
-                            <div class="form-section" style="margin-top: 1.5rem;">
-                                <label class="form-label">Project (Optional)</label>
-                                <select wire:model="selectedProjectId" class="project-select">
-                                    <option value="">No project</option>
-                                    @foreach($projects as $project)
-                                        <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
-
-                        {{-- Clock Out Button --}}
-                        <button
-                            wire:click="showClockOut"
-                            wire:loading.attr="disabled"
-                            wire:target="showClockOut"
-                            class="clock-out-btn"
-                            style="transition: transform 0.1s, opacity 0.1s; margin-top: 1rem; width: 100%;"
-                            x-on:mousedown="$el.style.transform = 'scale(0.98)'"
-                            x-on:mouseup="$el.style.transform = 'scale(1)'"
-                            x-on:mouseleave="$el.style.transform = 'scale(1)'"
-                        >
-                            <span wire:loading.remove wire:target="showClockOut">Clock Out (O)</span>
-                            <span wire:loading wire:target="showClockOut">Processing...</span>
-                        </button>
+                    {{-- Project Selection (Optional) --}}
+                    @if(count($projects) > 0)
+                        <div class="form-section" style="margin-top: 1.5rem;">
+                            <label class="form-label">Project (Optional)</label>
+                            <select wire:model="selectedProjectId" class="project-select">
+                                <option value="">No project</option>
+                                @foreach($projects as $project)
+                                    <option value="{{ $project['id'] }}">{{ $project['name'] }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     @endif
+
+                    {{-- Clock Out Button --}}
+                    <button
+                        wire:click="showClockOut"
+                        wire:loading.attr="disabled"
+                        wire:target="showClockOut"
+                        class="clock-out-btn"
+                        style="transition: transform 0.1s, opacity 0.1s; margin-top: 1rem; width: 100%;"
+                        x-on:mousedown="$el.style.transform = 'scale(0.98)'"
+                        x-on:mouseup="$el.style.transform = 'scale(1)'"
+                        x-on:mouseleave="$el.style.transform = 'scale(1)'"
+                    >
+                        <span wire:loading.remove wire:target="showClockOut">Clock Out (O)</span>
+                        <span wire:loading wire:target="showClockOut">Processing...</span>
+                    </button>
                 @endif
             </div>
         </div>
