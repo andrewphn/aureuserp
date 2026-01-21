@@ -1,79 +1,10 @@
-<div class="kiosk-container"
-     wire:poll.30s="loadTodayAttendance"
-     x-data="{
-         timeoutSeconds: @js(config('kiosk.timeout_seconds', 5)),
-         remainingSeconds: @js(config('kiosk.timeout_seconds', 5)),
-         timeoutTimer: null,
-         warningTimer: null,
-         showWarning: false,
-         init() {
-             this.resetTimeout();
-             // Track user activity
-             document.addEventListener('click', () => this.resetTimeout());
-             document.addEventListener('keydown', () => this.resetTimeout());
-             document.addEventListener('touchstart', () => this.resetTimeout());
-             // Also track Livewire events
-             Livewire.hook('commit', () => this.resetTimeout());
-         },
-         resetTimeout() {
-             // Clear existing timers
-             if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
-             if (this.warningTimer) clearInterval(this.warningTimer);
-
-             // Hide warning
-             this.showWarning = false;
-             this.remainingSeconds = this.timeoutSeconds;
-
-             // Only set timeout if not on select screen
-             const currentMode = @this.get('mode');
-             if (currentMode !== 'select') {
-                 // Show warning 10 seconds before timeout
-                 this.warningTimer = setInterval(() => {
-                     this.remainingSeconds--;
-                     if (this.remainingSeconds <= 10) {
-                         this.showWarning = true;
-                     }
-                     if (this.remainingSeconds <= 0) {
-                         clearInterval(this.warningTimer);
-                         this.resetToLogin();
-                     }
-                 }, 1000);
-
-                 // Set main timeout
-                 this.timeoutTimer = setTimeout(() => {
-                     this.resetToLogin();
-                 }, this.timeoutSeconds * 1000);
-             }
-         },
-         resetToLogin() {
-             @this.call('backToSelect');
-             this.showWarning = false;
-             this.remainingSeconds = this.timeoutSeconds;
-         }
-     }"
-     x-init="init()">
+<div class="kiosk-container" wire:poll.30s="loadTodayAttendance">
     {{-- Header --}}
     <div class="kiosk-header">
         <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
         <p class="kiosk-subtitle">Time Clock</p>
         <div class="kiosk-time">{{ $this->getCurrentTime() }}</div>
         <p class="kiosk-date">{{ $this->getCurrentDate() }}</p>
-    </div>
-
-    {{-- Timeout Warning --}}
-    <div x-show="showWarning"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform translate-y-[-10px]"
-         x-transition:enter-end="opacity-100 transform translate-y-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; background: #f59e0b; color: white; padding: 1rem 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; font-weight: 600;"
-         x-cloak>
-        <svg xmlns="http://www.w3.org/2000/svg" style="width: 1.5rem; height: 1.5rem; display: inline; vertical-align: middle; margin-right: 0.5rem;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        Returning to login screen in <span x-text="remainingSeconds"></span> seconds...
     </div>
 
     {{-- Status Message --}}
@@ -290,22 +221,38 @@
                  clockInTime: @js($clockedInAt),
                  startTime: new Date(),
                  elapsedSeconds: 0,
+                 remainingSeconds: 5,
                  timer: null,
                  timeoutTimer: null,
+                 countdownTimer: null,
                  init() {
                      // Start running timer
                      this.timer = setInterval(() => {
                          const now = new Date();
                          this.elapsedSeconds = Math.floor((now - this.startTime) / 1000);
                      }, 1000);
-                     
+
+                     // Countdown timer
+                     this.countdownTimer = setInterval(() => {
+                         this.remainingSeconds--;
+                         if (this.remainingSeconds <= 0) {
+                             clearInterval(this.countdownTimer);
+                         }
+                     }, 1000);
+
                      // Auto-return to main screen after 5 seconds
                      this.timeoutTimer = setTimeout(() => {
+                         // Clear all timers before calling backToSelect
+                         if (this.timer) clearInterval(this.timer);
+                         if (this.countdownTimer) clearInterval(this.countdownTimer);
+                         if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
+                         // Call backToSelect once
                          @this.call('backToSelect');
                      }, 5000);
                  },
                  destroy() {
                      if (this.timer) clearInterval(this.timer);
+                     if (this.countdownTimer) clearInterval(this.countdownTimer);
                      if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
                  },
                  formatTime(seconds) {
@@ -335,7 +282,7 @@
                     </p>
                 </div>
                 <p style="color: #6b7280; font-size: 0.85rem;">
-                    Returning to main screen in <span x-text="Math.max(0, 5 - Math.floor(elapsedSeconds))"></span> seconds...
+                    Returning to main screen in <span x-text="Math.max(0, remainingSeconds)"></span> seconds...
                 </p>
             </div>
         </div>
