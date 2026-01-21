@@ -8,19 +8,19 @@
     --glass-border: rgba(255, 255, 255, 0.25);
     --glass-shadow: rgba(0, 0, 0, 0.15);
     --glass-blur: 16px; /* Optimized: ≤20px for performance */
-    
+
     /* Text Colors - High contrast for readability */
     --text-primary: rgba(255, 255, 255, 0.98);
     --text-secondary: rgba(255, 255, 255, 0.75);
     --text-tertiary: rgba(255, 255, 255, 0.6);
-    
+
     /* Apple System Colors */
     --accent-color: rgba(0, 122, 255, 0.85);
     --accent-hover: rgba(0, 122, 255, 1);
     --success-color: rgba(52, 199, 89, 0.9);
     --error-color: rgba(255, 59, 48, 0.9);
     --warning-color: rgba(255, 149, 0, 0.9);
-    
+
     /* Dark mode support (for future enhancement) */
     --glass-bg-dark: rgba(0, 0, 0, 0.4);
     --glass-border-dark: rgba(255, 255, 255, 0.1);
@@ -660,4 +660,43 @@ body {
     outline: 2px solid var(--accent-color);
     outline-offset: 2px;
     border-radius: 4px;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Respect user's transparency preferences */
+@media (prefers-reduced-transparency: reduce) {
+    .kiosk-header,
+    .status-message,
+    .employee-card,
+    .number-btn,
+    .clock-display,
+    .btn,
+    .project-selection,
+    .lunch-input-container,
+    .summary-container,
+    .attendance-item {
+        background: rgba(255, 255, 255, 0.4) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    :root {
+        --glass-bg: rgba(255, 255, 255, 0.3);
+        --glass-border: rgba(255, 255, 255, 0.5);
+        --text-primary: rgba(255, 255, 255, 1);
+        --text-secondary: rgba(255, 255, 255, 0.9);
+    }
 }
