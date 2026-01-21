@@ -756,49 +756,160 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .kiosk-container {
-        padding: 1rem;
+        padding: 1rem !important;
     }
 
     .kiosk-header {
-        padding: 1.5rem;
+        padding: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
     .kiosk-time {
-        font-size: 2.5rem;
+        font-size: 2.5rem !important;
+    }
+
+    .kiosk-date {
+        font-size: 1rem !important;
     }
 
     .clock-time {
-        font-size: 3rem;
+        font-size: 3rem !important;
+    }
+
+    .section-title {
+        font-size: 1.5rem !important;
+        margin-bottom: 1.5rem !important;
     }
 
     .employee-grid,
     .employee-buttons {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+        grid-template-columns: 1fr !important;
         gap: 1rem !important;
+        padding: 0.5rem 0 !important;
     }
 
     .employee-btn {
         padding: 1.25rem 1rem !important;
         font-size: 1rem !important;
+        min-height: 60px !important;
+    }
+
+    .clock-card,
+    .clock-panel {
+        padding: 2rem 1.5rem !important;
+        max-width: 100% !important;
+    }
+
+    .clock-status {
+        font-size: 1.25rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .employee-name {
+        font-size: 1.125rem !important;
     }
 
     .number-pad,
     .numpad {
         gap: 0.75rem !important;
+        margin-top: 1.5rem !important;
+    }
+
+    .number-btn,
+    .numpad-btn {
+        padding: 1.5rem !important;
+        font-size: 1.5rem !important;
+        min-height: 60px !important;
+    }
+
+    .btn,
+    .clock-in-btn,
+    .clock-out-btn {
+        padding: 1rem 1.5rem !important;
+        font-size: 1rem !important;
+        width: 100% !important;
+        min-height: 48px !important;
+    }
+
+    .back-btn {
+        padding: 0.875rem 1rem !important;
+        font-size: 0.875rem !important;
+        width: auto !important;
+        min-height: 44px !important;
+    }
+
+    .pin-display {
+        gap: 0.75rem !important;
+        margin: 1.5rem 0 !important;
+    }
+
+    .pin-dot {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    .attendance-section {
+        margin-top: 1.5rem !important;
+        padding: 1rem 0 !important;
+    }
+
+    .attendance-title {
+        font-size: 1.25rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .attendance-item {
+        padding: 1rem 1.25rem !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.5rem !important;
+    }
+
+    .kiosk-footer {
+        font-size: 0.75rem !important;
+        padding: 1rem 0 !important;
+        margin-top: 1.5rem !important;
+    }
+}
+
+/* Extra small mobile devices */
+@media (max-width: 480px) {
+    .kiosk-container {
+        padding: 0.75rem !important;
+    }
+
+    .kiosk-header {
+        padding: 1.25rem !important;
+    }
+
+    .kiosk-time {
+        font-size: 2rem !important;
+    }
+
+    .section-title {
+        font-size: 1.25rem !important;
+    }
+
+    .employee-btn {
+        padding: 1rem 0.875rem !important;
+        font-size: 0.9375rem !important;
+    }
+
+    .clock-card,
+    .clock-panel {
+        padding: 1.5rem 1rem !important;
     }
 
     .number-btn,
     .numpad-btn {
         padding: 1.25rem !important;
-        font-size: 1.5rem !important;
+        font-size: 1.375rem !important;
+        min-height: 56px !important;
     }
 
-    .btn,
-    .clock-in-btn,
-    .clock-out-btn,
-    .back-btn {
-        padding: 0.875rem 1.5rem !important;
-        font-size: 1rem !important;
+    .number-pad,
+    .numpad {
+        gap: 0.5rem !important;
     }
 }
 
