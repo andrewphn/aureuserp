@@ -283,12 +283,12 @@ class TimeClockKiosk extends Component
             $this->lunchTaken = $status['lunch_taken'] ?? false;
             $this->lunchStartTime = $status['lunch_start_time'];
             $this->lunchEndTime = $status['lunch_end_time'];
-            
+
             // Store clock in timestamp for elapsed time calculation
             if ($this->isClockedIn && $status['clock_in_timestamp'] ?? null) {
                 $this->clockInTimestamp = $status['clock_in_timestamp'];
             }
-            
+
             // Store lunch start timestamp for auto-end calculation
             if ($this->isOnLunch && $status['lunch_start_timestamp'] ?? null) {
                 $this->lunchStartTimestamp = $status['lunch_start_timestamp'];
@@ -531,6 +531,12 @@ class TimeClockKiosk extends Component
             return;
         }
 
+        // Check if still on lunch (prevent double-ending)
+        if (!$this->isOnLunch) {
+            $this->setStatus('Not currently on lunch break', 'error');
+            return;
+        }
+
         $result = $this->clockingService->endLunch($this->selectedUserId);
 
         if ($result['success']) {
@@ -538,7 +544,8 @@ class TimeClockKiosk extends Component
             $this->lunchTaken = true;
             $this->lunchEndTime = $result['lunch_end_time'];
             $this->breakDurationMinutes = $result['lunch_duration_minutes'];
-            $this->lunchStartTimestamp = null; // Clear timestamp
+            $this->lunchStartTimestamp = null; // Clear timestamp to stop auto-end timer
+            $this->scheduledLunchDurationMinutes = 60; // Reset to default
             $this->setStatus($result['message'], 'success');
             $this->loadTodayAttendance();
         } else {

@@ -630,16 +630,28 @@
                                    scheduledMinutes: @js($scheduledLunchDurationMinutes ?? 60),
                                    remainingMinutes: 0,
                                    timer: null,
+                                   isOnLunch: @js($isOnLunch),
                                    init() {
-                                       if (this.lunchStartTimestamp && this.scheduledMinutes) {
+                                       if (this.lunchStartTimestamp && this.scheduledMinutes && this.isOnLunch) {
                                            const updateRemaining = () => {
+                                               // Check if still on lunch (user might have manually ended it)
+                                               const currentOnLunch = @this.get('isOnLunch');
+                                               if (!currentOnLunch) {
+                                                   // User manually ended lunch, stop timer
+                                                   if (this.timer) {
+                                                       clearInterval(this.timer);
+                                                       this.timer = null;
+                                                   }
+                                                   return;
+                                               }
+                                               
                                                const startTime = new Date(this.lunchStartTimestamp);
                                                const now = new Date();
                                                const elapsedMinutes = Math.floor((now - startTime) / 60000);
                                                this.remainingMinutes = Math.max(0, this.scheduledMinutes - elapsedMinutes);
                                                
-                                               // Auto-end lunch when time is up
-                                               if (this.remainingMinutes <= 0 && this.timer) {
+                                               // Auto-end lunch when time is up (only if still on lunch)
+                                               if (this.remainingMinutes <= 0 && this.timer && currentOnLunch) {
                                                    clearInterval(this.timer);
                                                    this.timer = null;
                                                    @this.call('endLunch');
@@ -684,6 +696,17 @@
                             wire:target="endLunch"
                             class="clock-in-btn"
                             style="background: #059669; width: 100%; margin-top: 1rem;"
+                            x-on:click="
+                                // Clear any auto-end timers when manually ending lunch
+                                const lunchTimer = document.querySelector('[x-data*=\"lunchStartTimestamp\"]');
+                                if (lunchTimer && lunchTimer._x_dataStack) {
+                                    const data = lunchTimer._x_dataStack[0];
+                                    if (data && data.timer) {
+                                        clearInterval(data.timer);
+                                        data.timer = null;
+                                    }
+                                }
+                            "
                         >
                             <span wire:loading.remove wire:target="endLunch">End Lunch (E)</span>
                             <span wire:loading wire:target="endLunch">Processing...</span>
