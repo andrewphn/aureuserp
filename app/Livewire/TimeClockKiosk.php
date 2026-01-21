@@ -197,8 +197,11 @@ class TimeClockKiosk extends Component
             return;
         }
 
-        // Check PIN
-        if ($employee->pin === $this->pin) {
+        // Check PIN (trim whitespace and compare as strings)
+        $storedPin = trim((string) ($employee->pin ?? ''));
+        $enteredPin = trim((string) $this->pin);
+        
+        if ($storedPin === $enteredPin && !empty($storedPin)) {
             $this->pinVerified = true;
             $this->pinAttempts = 0;
             $this->loadClockStatus();
