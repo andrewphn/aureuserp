@@ -653,6 +653,7 @@
                                x-data="{
                                    lunchStartTimestamp: @js($lunchStartTimestamp),
                                    scheduledMinutes: @js($scheduledLunchDurationMinutes ?? 60),
+                                   lunchDurationSeconds: 0,
                                    remainingMinutes: 0,
                                    timer: null,
                                    isOnLunch: @js($isOnLunch),
@@ -672,6 +673,9 @@
                                                
                                                const startTime = new Date(this.lunchStartTimestamp);
                                                const now = new Date();
+                                               // Calculate lunch duration (elapsed time)
+                                               this.lunchDurationSeconds = Math.floor((now - startTime) / 1000);
+                                               // Calculate remaining time until auto-end
                                                const elapsedMinutes = Math.floor((now - startTime) / 60000);
                                                this.remainingMinutes = Math.max(0, this.scheduledMinutes - elapsedMinutes);
                                                
@@ -683,21 +687,33 @@
                                                }
                                            };
                                            updateRemaining();
-                                           this.timer = setInterval(updateRemaining, 30000); // Update every 30 seconds
+                                           this.timer = setInterval(updateRemaining, 1000); // Update every second
                                        }
                                    },
                                    destroy() {
                                        if (this.timer) clearInterval(this.timer);
+                                   },
+                                   formatTime(seconds) {
+                                       const hours = Math.floor(seconds / 3600);
+                                       const mins = Math.floor((seconds % 3600) / 60);
+                                       const secs = seconds % 60;
+                                       if (hours > 0) {
+                                           return `${hours}h ${mins}m ${secs}s`;
+                                       }
+                                       return `${mins}m ${secs}s`;
                                    }
                                }"
                                x-init="init()"
                                x-on:destroyed="destroy()">
                                 On Break<br>
                                 <span style="font-size: 1rem; color: #92400e;">Started: {{ $lunchStartTime }}</span><br>
-                                <span style="font-size: 0.9rem; color: #b45309;" x-show="remainingMinutes > 0">
+                                <span style="font-size: 1.1rem; color: #b45309; font-weight: 600; margin-top: 0.5rem; display: block;">
+                                    Duration: <span x-text="formatTime(lunchDurationSeconds)"></span>
+                                </span>
+                                <span style="font-size: 0.9rem; color: #b45309; margin-top: 0.25rem; display: block;" x-show="remainingMinutes > 0">
                                     Auto-return in <span x-text="remainingMinutes"></span> min
                                 </span>
-                                <span style="font-size: 0.9rem; color: #059669;" x-show="remainingMinutes <= 0 && timer !== null">
+                                <span style="font-size: 0.9rem; color: #059669; margin-top: 0.25rem; display: block;" x-show="remainingMinutes <= 0 && timer !== null">
                                     Returning to work...
                                 </span>
                             </p>
