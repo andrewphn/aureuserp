@@ -1,7 +1,7 @@
 <div class="kiosk-container" x-data="{ time: '{{ $this->getCurrentTime() }}' }" x-init="setInterval(() => time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }), 1000)">
     {{-- Header --}}
     <div class="kiosk-header">
-        <img src="/tcs_logo.png" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);">
+        <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
         <p class="kiosk-subtitle">Time Clock</p>
         <div class="kiosk-time" x-text="time"></div>
         <p class="kiosk-date">{{ $this->getCurrentDate() }}</p>
