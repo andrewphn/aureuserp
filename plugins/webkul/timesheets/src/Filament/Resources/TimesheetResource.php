@@ -119,6 +119,48 @@ class TimesheetResource extends Resource
                     ->label(__('timesheets::filament/resources/timesheet.table.columns.employee'))
                     ->sortable()
                     ->searchable(),
+                TextColumn::make('clock_in_time')
+                    ->label('Clock In')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (!$state) {
+                            return '—';
+                        }
+                        return $record->getFormattedClockIn();
+                    })
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('clock_out_time')
+                    ->label('Clock Out')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (!$state) {
+                            return '—';
+                        }
+                        return $record->getFormattedClockOut();
+                    })
+                    ->sortable()
+                    ->toggleable(),
+                TextColumn::make('break_duration_minutes')
+                    ->label('Lunch Duration')
+                    ->formatStateUsing(function ($state, $record) {
+                        if (!$state && !$record->lunch_start_time) {
+                            return '—';
+                        }
+                        // If lunch times exist, calculate actual duration
+                        if ($record->lunch_start_time && $record->lunch_end_time) {
+                            $minutes = $record->getLunchDurationMinutes();
+                        } else {
+                            $minutes = $state ?? 0;
+                        }
+                        
+                        if ($minutes >= 60) {
+                            $hours = floor($minutes / 60);
+                            $mins = $minutes % 60;
+                            return $mins > 0 ? "{$hours}h {$mins}m" : "{$hours}h";
+                        }
+                        return $minutes > 0 ? "{$minutes}m" : '—';
+                    })
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('project.name')
                     ->label(__('timesheets::filament/resources/timesheet.table.columns.project'))
                     ->sortable()
@@ -130,14 +172,15 @@ class TimesheetResource extends Resource
                 TextColumn::make('name')
                     ->label(__('timesheets::filament/resources/timesheet.table.columns.description'))
                     ->sortable()
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('unit_amount')
                     ->label(__('timesheets::filament/resources/timesheet.table.columns.time-spent'))
                     ->formatStateUsing(function ($state) {
                         $hours = floor($state);
-                        $minutes = ($state - $hours) * 60;
+                        $minutes = round(($state - $hours) * 60);
 
-                        return $hours.':'.$minutes;
+                        return $minutes > 0 ? "{$hours}h {$minutes}m" : "{$hours}h";
                     })
                     ->sortable()
                     ->summarize([
@@ -145,9 +188,9 @@ class TimesheetResource extends Resource
                             ->label(__('timesheets::filament/resources/timesheet.table.columns.time-spent'))
                             ->formatStateUsing(function ($state) {
                                 $hours = floor($state);
-                                $minutes = ($state - $hours) * 60;
+                                $minutes = round(($state - $hours) * 60);
 
-                                return $hours.':'.$minutes;
+                                return $minutes > 0 ? "{$hours}h {$minutes}m" : "{$hours}h";
                             }),
                     ]),
                 TextColumn::make('created_at')
