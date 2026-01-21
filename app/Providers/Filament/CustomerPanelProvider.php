@@ -41,7 +41,7 @@ class CustomerPanelProvider extends PanelProvider
             ->passwordReset()
             ->registration()
             ->profile(isSimple: false)
-            ->favicon(asset('images/favicon.ico'))
+            ->favicon(asset('tcs_logo.png'))
             ->brandLogo(asset('images/logo.svg'))
             ->darkMode(false)
             ->brandLogoHeight('2rem')
@@ -49,6 +49,21 @@ class CustomerPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             ->topNavigation()
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn (): string => <<<'HTML'
+                    <link rel="apple-touch-icon" sizes="180x180" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="152x152" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="144x144" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="120x120" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="114x114" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="76x76" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="72x72" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="60x60" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="57x57" href="/tcs_logo.png">
+                    <meta name="apple-mobile-web-app-title" content="TCS ERP">
+                HTML
+            )
             ->plugins([
                 PluginManager::make(),
             ])

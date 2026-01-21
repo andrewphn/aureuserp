@@ -48,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->darkMode()
             ->login()
-            ->favicon(asset('images/favicon.ico'))
+            ->favicon(asset('tcs_logo.png'))
             ->brandLogo(asset('images/logo-light.svg'))
             ->darkModeBrandLogo(asset('images/logo-dark.svg'))
             ->brandLogoHeight('2rem')
@@ -145,6 +145,16 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_END,
                 fn (): string => <<<'HTML'
                     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes">
+                    <link rel="apple-touch-icon" sizes="180x180" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="152x152" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="144x144" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="120x120" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="114x114" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="76x76" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="72x72" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="60x60" href="/tcs_logo.png">
+                    <link rel="apple-touch-icon" sizes="57x57" href="/tcs_logo.png">
+                    <meta name="apple-mobile-web-app-title" content="TCS ERP">
                     <style>
                         /* Note: Removed html { zoom: 0.9 } as it breaks Floating UI dropdown positioning */
                         /* Floating UI calculates positions using getBoundingClientRect() (viewport coords) */
