@@ -486,26 +486,18 @@ class TimeClockKiosk extends Component
             if ($result['success']) {
                 $this->isClockedIn = false;
 
-                // Store summary data directly in component properties
-                // Don't use session flash - set it directly to avoid checksum issues
-                $this->summaryClockInTime = $this->clockedInAt;
-                $this->summaryClockOutTime = now()->format('g:i A');
-                $this->summaryHoursWorked = $result['hours_worked'] ?? 0;
-                $this->summaryLunchMinutes = $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null;
-                
-                // Get project name if selected
-                if ($this->selectedProjectId) {
-                    $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
-                    $this->summaryProjectName = $project ? $project->name : null;
-                } else {
-                    $this->summaryProjectName = null;
-                }
+                // Store summary data in session - will be loaded on page reload
+                session()->flash('clockout_summary', [
+                    'clock_in_time' => $this->clockedInAt,
+                    'clock_out_time' => now()->format('g:i A'),
+                    'hours_worked' => $result['hours_worked'] ?? 0,
+                    'lunch_minutes' => $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null,
+                    'project_name' => $this->selectedProjectId ? (\Webkul\Project\Models\Project::find($this->selectedProjectId)?->name ?? null) : null,
+                    'employee_name' => $this->selectedUserName,
+                ]);
 
-                // Set mode to summary - this will trigger a render
-                // Use skipRender to prevent immediate render, then use JavaScript to reload
-                $this->mode = 'summary';
-                
-                // Use dispatchBrowserEvent to trigger page reload after state is set
+                // Don't change mode here - let the page reload handle it via mount()
+                // Use dispatchBrowserEvent to trigger page reload
                 $this->dispatchBrowserEvent('clockout-complete');
             } else {
                 $this->setStatus($result['message'], 'error');
