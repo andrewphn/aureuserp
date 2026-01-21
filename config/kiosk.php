@@ -69,5 +69,5 @@ return [
     | Set to 0 to disable auto-timeout.
     |
     */
-    'timeout_seconds' => env('KIOSK_TIMEOUT_SECONDS', 60),
+    'timeout_seconds' => env('KIOSK_TIMEOUT_SECONDS', 5),
 ];

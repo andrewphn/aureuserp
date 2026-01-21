@@ -1,8 +1,8 @@
-<div class="kiosk-container" 
+<div class="kiosk-container"
      wire:poll.30s="loadTodayAttendance"
      x-data="{
-         timeoutSeconds: @js(config('kiosk.timeout_seconds', 60)),
-         remainingSeconds: @js(config('kiosk.timeout_seconds', 60)),
+         timeoutSeconds: @js(config('kiosk.timeout_seconds', 5)),
+         remainingSeconds: @js(config('kiosk.timeout_seconds', 5)),
          timeoutTimer: null,
          warningTimer: null,
          showWarning: false,
@@ -19,11 +19,11 @@
              // Clear existing timers
              if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
              if (this.warningTimer) clearInterval(this.warningTimer);
-             
+
              // Hide warning
              this.showWarning = false;
              this.remainingSeconds = this.timeoutSeconds;
-             
+
              // Only set timeout if not on select screen
              const currentMode = @this.get('mode');
              if (currentMode !== 'select') {
@@ -38,7 +38,7 @@
                          this.resetToLogin();
                      }
                  }, 1000);
-                 
+
                  // Set main timeout
                  this.timeoutTimer = setTimeout(() => {
                      this.resetToLogin();
@@ -61,7 +61,7 @@
     </div>
 
     {{-- Timeout Warning --}}
-    <div x-show="showWarning" 
+    <div x-show="showWarning"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform translate-y-[-10px]"
          x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -287,6 +287,9 @@
     @if($mode === 'clock')
         <div class="clock-panel"
              x-data="{
+                 isClockedIn: @js($isClockedIn),
+                 isOnLunch: @js($isOnLunch),
+                 lunchTaken: @js($lunchTaken),
                  handleKeydown(event) {
                      // Escape - go back
                      if (event.key === 'Escape') {
@@ -295,36 +298,46 @@
                      }
                      // Clock In (I key) - only if not clocked in
                      else if (event.key === 'i' || event.key === 'I') {
-                         @if(!$isClockedIn)
+                         if (!this.isClockedIn) {
                              event.preventDefault();
                              @this.call('clockIn');
-                         @endif
+                         }
                      }
                      // Clock Out (O key) - only if clocked in
                      else if (event.key === 'o' || event.key === 'O') {
-                         @if($isClockedIn && !$isOnLunch)
+                         if (this.isClockedIn && !this.isOnLunch) {
                              event.preventDefault();
                              @this.call('clockOut');
-                         @endif
+                         }
                      }
-                    // Start Lunch (L key) - only if clocked in, not on lunch, and before 4 PM
-                    else if (event.key === 'l' || event.key === 'L') {
-                        @if($isClockedIn && !$isOnLunch && !$lunchTaken)
-                            event.preventDefault();
-                            // Check time before starting lunch
-                            const currentHour = new Date().getHours();
-                            if (currentHour < 16) {
-                                @this.call('startLunch');
-                            }
-                        @endif
-                    }
+                     // Start Lunch (L key) - only if clocked in, not on lunch, and before 4 PM
+                     else if (event.key === 'l' || event.key === 'L') {
+                         if (this.isClockedIn && !this.isOnLunch && !this.lunchTaken) {
+                             event.preventDefault();
+                             // Check time before starting lunch
+                             const currentHour = new Date().getHours();
+                             if (currentHour < 16) {
+                                 @this.call('startLunch');
+                             }
+                         }
+                     }
                      // End Lunch (E key) - only if on lunch
                      else if (event.key === 'e' || event.key === 'E') {
-                         @if($isOnLunch)
+                         if (this.isOnLunch) {
                              event.preventDefault();
                              @this.call('endLunch');
-                         @endif
+                         }
                      }
+                 },
+                 init() {
+                     // Update state when Livewire updates
+                     Livewire.hook('commit', ({ component }) => {
+                         if (component === @this) {
+                             this.isClockedIn = @this.get('isClockedIn') || false;
+                             this.isOnLunch = @this.get('isOnLunch') || false;
+                             this.lunchTaken = @this.get('lunchTaken') || false;
+                         }
+                     });
                  }
              }"
              x-on:keydown="handleKeydown"
