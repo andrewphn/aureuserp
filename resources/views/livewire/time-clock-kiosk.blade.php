@@ -4,12 +4,11 @@
      @endif>
 
     {{-- Header --}}
-    <div class="kiosk-header">
+    <div class="kiosk-header" wire:ignore>
         <img src="{{ asset('tcs_logo.png') }}" 
              alt="TCS Woodwork" 
              style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" 
-             onerror="this.style.display='none'; this.nextElementSibling?.style.display='block';"
-             wire:ignore>
+             onerror="this.onerror=null; this.style.display='none'; const fallback = this.nextElementSibling; if(fallback) fallback.style.display='block';">
         <div style="display: none; font-size: 2rem; font-weight: bold; color: white; margin-bottom: 0.5rem;">TCS Woodwork</div>
         <p class="kiosk-subtitle">Time Clock</p>
         <div class="kiosk-time">{{ $this->getCurrentTime() }}</div>
