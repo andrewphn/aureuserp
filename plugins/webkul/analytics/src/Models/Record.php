@@ -63,6 +63,9 @@ class Record extends Model
         'approved_at',
         'work_location_id',
         'clock_notes',
+        // Lunch fields
+        'lunch_start_time',
+        'lunch_end_time',
     ];
 
     /**
@@ -76,6 +79,8 @@ class Record extends Model
         'clock_out_time' => 'datetime:H:i:s',
         'break_duration_minutes' => 'integer',
         'approved_at' => 'datetime',
+        'lunch_start_time' => 'datetime:H:i:s',
+        'lunch_end_time' => 'datetime:H:i:s',
     ];
 
     /**
