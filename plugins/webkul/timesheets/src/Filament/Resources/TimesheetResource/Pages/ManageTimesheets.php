@@ -48,16 +48,16 @@ class ManageTimesheets extends ManageRecords
                         Notification::make()
                             ->success()
                             ->title('Clocked In')
-                            ->body('You have successfully clocked in at ' . $result['clocked_in_at'])
+                            ->body('You have successfully clocked in at ' . ($result['clock_in_time'] ?? 'now'))
                             ->send();
                     } else {
                         Notification::make()
                             ->danger()
                             ->title('Clock In Failed')
-                            ->body($result['message'] ?? 'Unable to clock in')
+                            ->body($result['error'] ?? $result['message'] ?? 'Unable to clock in')
                             ->send();
                     }
-
+                    
                     $this->dispatch('$refresh');
                 }),
 
@@ -98,19 +98,20 @@ class ManageTimesheets extends ManageRecords
                     );
 
                     if ($result['success']) {
+                        $hoursWorked = isset($result['hours_worked']) ? number_format($result['hours_worked'], 2) . ' hours' : 'N/A';
                         Notification::make()
                             ->success()
                             ->title('Clocked Out')
-                            ->body('You have successfully clocked out. Total hours: ' . $result['hours_worked'] ?? 'N/A')
+                            ->body('You have successfully clocked out. Total hours worked: ' . $hoursWorked)
                             ->send();
                     } else {
                         Notification::make()
                             ->danger()
                             ->title('Clock Out Failed')
-                            ->body($result['message'] ?? 'Unable to clock out')
+                            ->body($result['error'] ?? $result['message'] ?? 'Unable to clock out')
                             ->send();
                     }
-
+                    
                     $this->dispatch('$refresh');
                 }),
 
