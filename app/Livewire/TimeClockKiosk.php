@@ -502,10 +502,8 @@ class TimeClockKiosk extends Component
         $result = $this->clockingService->startLunch($this->selectedUserId);
 
         if ($result['success']) {
-            $this->isOnLunch = true;
-            $this->lunchStartTime = $result['lunch_start_time'];
-            $this->lunchStartTimestamp = now()->toIso8601String(); // Store timestamp for auto-end calculation
-            $this->scheduledLunchDurationMinutes = $this->breakDurationMinutes; // Store selected duration
+            $this->scheduledLunchDurationMinutes = $this->breakDurationMinutes; // Store selected duration BEFORE loading status
+            $this->loadClockStatus(); // Reload to get proper timestamps from database
             $this->setStatus("Lunch started at {$this->lunchStartTime} for {$this->breakDurationMinutes} minutes. Enjoy your break!", 'success');
             $this->mode = 'clock'; // Return to clock mode
             $this->loadTodayAttendance();

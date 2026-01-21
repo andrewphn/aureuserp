@@ -616,10 +616,10 @@
                                            this.elapsedSeconds = Math.floor((now - startTime) / 1000);
                                        }
                                    };
-                                   
+
                                    updateTimer();
                                    this.timer = setInterval(updateTimer, 1000);
-                                   
+
                                    // Update when lunch status changes
                                    Livewire.hook('commit', ({ component }) => {
                                        if (component === @this) {
@@ -657,39 +657,50 @@
                                    remainingMinutes: 0,
                                    timer: null,
                                    isOnLunch: @js($isOnLunch),
-                                   init() {
-                                       if (this.lunchStartTimestamp && this.scheduledMinutes && this.isOnLunch) {
-                                           const updateRemaining = () => {
-                                               // Check if still on lunch (user might have manually ended it)
-                                               const currentOnLunch = @this.get('isOnLunch');
-                                               if (!currentOnLunch) {
-                                                   // User manually ended lunch, stop timer
-                                                   if (this.timer) {
-                                                       clearInterval(this.timer);
-                                                       this.timer = null;
-                                                   }
-                                                   return;
+                               init() {
+                                   // Always initialize if on lunch, even if timestamp isn't set yet
+                                   if (this.isOnLunch) {
+                                       const updateRemaining = () => {
+                                           // Check if still on lunch (user might have manually ended it)
+                                           const currentOnLunch = @this.get('isOnLunch');
+                                           if (!currentOnLunch) {
+                                               // User manually ended lunch, stop timer
+                                               if (this.timer) {
+                                                   clearInterval(this.timer);
+                                                   this.timer = null;
                                                }
-                                               
+                                               return;
+                                           }
+
+                                           // Get fresh timestamp from Livewire if not set
+                                           if (!this.lunchStartTimestamp) {
+                                               this.lunchStartTimestamp = @this.get('lunchStartTimestamp');
+                                           }
+
+                                           if (this.lunchStartTimestamp) {
                                                const startTime = new Date(this.lunchStartTimestamp);
                                                const now = new Date();
                                                // Calculate lunch duration (elapsed time)
                                                this.lunchDurationSeconds = Math.floor((now - startTime) / 1000);
-                                               // Calculate remaining time until auto-end
-                                               const elapsedMinutes = Math.floor((now - startTime) / 60000);
-                                               this.remainingMinutes = Math.max(0, this.scheduledMinutes - elapsedMinutes);
                                                
-                                               // Auto-end lunch when time is up (only if still on lunch)
-                                               if (this.remainingMinutes <= 0 && this.timer && currentOnLunch) {
-                                                   clearInterval(this.timer);
-                                                   this.timer = null;
-                                                   @this.call('endLunch');
+                                               // Calculate remaining time until auto-end (if scheduled minutes set)
+                                               if (this.scheduledMinutes) {
+                                                   const elapsedMinutes = Math.floor((now - startTime) / 60000);
+                                                   this.remainingMinutes = Math.max(0, this.scheduledMinutes - elapsedMinutes);
+
+                                                   // Auto-end lunch when time is up (only if still on lunch)
+                                                   if (this.remainingMinutes <= 0 && this.timer && currentOnLunch) {
+                                                       clearInterval(this.timer);
+                                                       this.timer = null;
+                                                       @this.call('endLunch');
+                                                   }
                                                }
-                                           };
-                                           updateRemaining();
-                                           this.timer = setInterval(updateRemaining, 1000); // Update every second
-                                       }
-                                   },
+                                           }
+                                       };
+                                       updateRemaining();
+                                       this.timer = setInterval(updateRemaining, 1000); // Update every second
+                                   }
+                               },
                                    destroy() {
                                        if (this.timer) clearInterval(this.timer);
                                    },
@@ -706,14 +717,14 @@
                                x-init="init()"
                                x-on:destroyed="destroy()">
                                 On Break<br>
-                                <span style="font-size: 1rem; color: #92400e;">Started: {{ $lunchStartTime }}</span><br>
-                                <span style="font-size: 1.1rem; color: #b45309; font-weight: 600; margin-top: 0.5rem; display: block;">
+                                <span style="font-size: 1rem; color: #92400e;">Started: {{ $lunchStartTime ?? 'N/A' }}</span><br>
+                                <span style="font-size: 1.1rem; color: #b45309; font-weight: 600; margin-top: 0.5rem; display: block;" x-show="lunchDurationSeconds > 0">
                                     Duration: <span x-text="formatTime(lunchDurationSeconds)"></span>
                                 </span>
-                                <span style="font-size: 0.9rem; color: #b45309; margin-top: 0.25rem; display: block;" x-show="remainingMinutes > 0">
+                                <span style="font-size: 0.9rem; color: #b45309; margin-top: 0.25rem; display: block;" x-show="scheduledMinutes && remainingMinutes > 0">
                                     Auto-return in <span x-text="remainingMinutes"></span> min
                                 </span>
-                                <span style="font-size: 0.9rem; color: #059669; margin-top: 0.25rem; display: block;" x-show="remainingMinutes <= 0 && timer !== null">
+                                <span style="font-size: 0.9rem; color: #059669; margin-top: 0.25rem; display: block;" x-show="scheduledMinutes && remainingMinutes <= 0 && timer !== null">
                                     Returning to work...
                                 </span>
                             </p>
