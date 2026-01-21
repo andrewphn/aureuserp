@@ -498,7 +498,8 @@ class TimeClockKiosk extends Component
                 ]);
 
                 // Redirect to reload page - this avoids checksum corruption by doing a full page reload
-                return $this->redirect(request()->url(), navigate: false);
+                // Use route name to ensure correct method
+                return $this->redirect(route('time-clock.kiosk'), navigate: false);
             } else {
                 $this->setStatus($result['message'], 'error');
                 $this->mode = 'clock'; // Stay in clock mode on error
