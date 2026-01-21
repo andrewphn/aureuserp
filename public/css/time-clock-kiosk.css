@@ -1,5 +1,14 @@
-/* Time Clock Kiosk - Standalone Styles */
-/* This bypasses Tailwind v4 build issues */
+/* Apple Native Glass Aesthetic - Time Clock Kiosk */
+
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: rgba(0, 0, 0, 0.1);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --accent-color: rgba(0, 122, 255, 0.8);
+    --accent-hover: rgba(0, 122, 255, 1);
+}
 
 * {
     margin: 0;
@@ -8,329 +17,157 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    overflow: hidden;
 }
 
 .kiosk-container {
-    min-height: 100vh;
-    background-color: #111827;
-    color: white;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 2rem;
 }
 
-/* Header */
+/* Header with Glass Effect */
 .kiosk-header {
     text-align: center;
     margin-bottom: 2rem;
+    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
 }
 
-.kiosk-title {
-    font-size: 3rem;
-    font-weight: bold;
-    color: #f59e0b;
+.kiosk-header img {
+    height: 5rem;
     margin-bottom: 0.5rem;
+    display: inline-block;
+    filter: invert(1);
+    opacity: 0.95;
 }
 
 .kiosk-subtitle {
     font-size: 1.5rem;
-    color: #9ca3af;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+    letter-spacing: 0.5px;
 }
 
 .kiosk-time {
-    font-size: 4rem;
-    font-family: monospace;
-    font-weight: bold;
-    margin-top: 1rem;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--text-primary);
+    margin: 0.5rem 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
 }
 
 .kiosk-date {
-    font-size: 1.125rem;
-    color: #6b7280;
+    font-size: 1.25rem;
+    color: var(--text-secondary);
     margin-top: 0.5rem;
+    font-weight: 400;
 }
 
-/* Status Message */
+/* Status Messages with Glass */
 .status-message {
-    max-width: 42rem;
-    margin: 0 auto 1.5rem;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    text-align: center;
-    font-size: 1.125rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
     font-weight: 500;
+    text-align: center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 16px var(--glass-shadow);
 }
 
 .status-success {
-    background-color: #065f46;
-    color: #d1fae5;
+    color: rgba(52, 199, 89, 0.95);
+    border-color: rgba(52, 199, 89, 0.3);
 }
 
 .status-error {
-    background-color: #991b1b;
-    color: #fee2e2;
+    color: rgba(255, 59, 48, 0.95);
+    border-color: rgba(255, 59, 48, 0.3);
 }
 
 .status-info {
-    background-color: #1e40af;
-    color: #dbeafe;
+    color: var(--text-primary);
 }
 
-/* Employee Grid */
+/* Employee Grid with Glass Cards */
 .employee-grid {
-    max-width: 64rem;
-    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
 }
 
 .section-title {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
     text-align: center;
-    margin-bottom: 1.5rem;
-    color: #d1d5db;
+    letter-spacing: 0.5px;
 }
 
-.employee-buttons {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-}
-
-@media (min-width: 640px) {
-    .employee-buttons {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-.employee-btn {
-    padding: 1.5rem;
-    background-color: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 0.75rem;
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: white;
-    text-align: center;
+.employee-card {
+    padding: 2rem 1.5rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
     cursor: pointer;
-    transition: all 0.2s;
-}
-
-.employee-btn:hover {
-    background-color: #374151;
-    border-color: #f59e0b;
-}
-
-.employee-btn:active {
-    background-color: #4b5563;
-}
-
-/* Today's Attendance */
-.attendance-section {
-    margin-top: 3rem;
-}
-
-.attendance-title {
-    font-size: 1.25rem;
-    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
-    margin-bottom: 1rem;
-    color: #9ca3af;
+    box-shadow: 0 4px 16px var(--glass-shadow);
 }
 
-.attendance-list {
-    background-color: #1f2937;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    max-width: 36rem;
-    margin: 0 auto;
+.employee-card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
-.attendance-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #374151;
-}
-
-.attendance-item:last-child {
-    border-bottom: none;
-}
-
-.attendance-status {
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 500;
-}
-
-.status-in {
-    background-color: #065f46;
-}
-
-.status-out {
-    background-color: #4b5563;
-}
-
-/* Clock In/Out Panel */
-.clock-panel {
-    max-width: 32rem;
-    margin: 0 auto;
-}
-
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
-    color: #9ca3af;
-    background: none;
-    border: none;
-    font-size: 1rem;
-    cursor: pointer;
-}
-
-.back-btn:hover {
-    color: white;
-}
-
-.back-btn svg {
-    width: 1.25rem;
-    height: 1.25rem;
-}
-
-.clock-card {
-    background-color: #1f2937;
-    border-radius: 1rem;
-    padding: 2rem;
+.employee-card:active {
+    transform: translateY(-2px);
 }
 
 .employee-name {
-    font-size: 1.875rem;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 0.5rem;
-}
-
-.clock-status {
-    text-align: center;
-    color: #9ca3af;
-    margin-bottom: 2rem;
-}
-
-.clock-status .time {
-    color: #34d399;
-    font-weight: 600;
-}
-
-/* Break Duration */
-.form-section {
-    margin-bottom: 1.5rem;
-}
-
-.form-label {
-    display: block;
-    font-size: 1.125rem;
-    color: #d1d5db;
-    margin-bottom: 0.75rem;
-}
-
-.break-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-}
-
-.break-btn {
-    padding: 1rem;
-    border-radius: 0.5rem;
-    font-size: 1.125rem;
+    font-size: 1.25rem;
     font-weight: 500;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
+    color: var(--text-primary);
+    margin: 0;
 }
 
-.break-btn-inactive {
-    background-color: #374151;
-    color: #d1d5db;
+/* PIN Entry with Glass */
+.pin-entry-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
 }
 
-.break-btn-inactive:hover {
-    background-color: #4b5563;
-}
-
-.break-btn-active {
-    background-color: #d97706;
-    color: white;
-}
-
-/* Project Select */
-.project-select {
-    width: 100%;
-    padding: 1rem;
-    background-color: #374151;
-    border: 1px solid #4b5563;
-    border-radius: 0.5rem;
-    font-size: 1.125rem;
-    color: white;
-}
-
-/* Action Buttons */
-.clock-in-btn {
-    width: 100%;
-    padding: 1.5rem;
-    background-color: #059669;
-    border: none;
-    border-radius: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.clock-in-btn:hover {
-    background-color: #047857;
-}
-
-.clock-in-btn:active {
-    background-color: #065f46;
-}
-
-.clock-in-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.clock-out-btn {
-    width: 100%;
-    padding: 1.5rem;
-    background-color: #dc2626;
-    border: none;
-    border-radius: 0.75rem;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.clock-out-btn:hover {
-    background-color: #b91c1c;
-}
-
-.clock-out-btn:active {
-    background-color: #991b1b;
-}
-
-.clock-out-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* Footer */
-/* PIN Entry */
 .pin-display {
     display: flex;
     justify-content: center;
@@ -339,218 +176,405 @@ body {
 }
 
 .pin-dot {
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    background-color: #374151;
-    border: 2px solid #6b7280;
-    transition: all 0.2s;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 2px solid var(--glass-border);
+    transition: all 0.2s ease;
 }
 
-.pin-dot-filled {
-    background-color: #f59e0b;
-    border-color: #f59e0b;
+.pin-dot.filled {
+    background: var(--accent-color);
+    border-color: var(--accent-hover);
+    box-shadow: 0 0 12px rgba(0, 122, 255, 0.4);
 }
 
-/* Numpad */
-.numpad {
+/* Number Pad with Glass Buttons */
+.number-pad {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-    max-width: 280px;
-    margin: 0 auto;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
-.numpad-btn {
-    padding: 1.25rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-    background-color: #374151;
-    border: none;
-    border-radius: 0.75rem;
-    color: white;
+.number-btn {
+    padding: 1.5rem;
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
     cursor: pointer;
-    transition: all 0.15s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px var(--glass-shadow);
+    font-variant-numeric: tabular-nums;
 }
 
-.numpad-btn:hover {
-    background-color: #4b5563;
+.number-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.numpad-btn:active {
-    background-color: #6b7280;
-    transform: scale(0.95);
+.number-btn:active {
+    transform: scale(0.98);
+    background: rgba(255, 255, 255, 0.2);
 }
 
-.numpad-action {
-    font-size: 0.875rem;
-    background-color: #1f2937;
+.number-btn.clear {
+    grid-column: span 2;
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.3);
+    color: rgba(255, 59, 48, 0.95);
 }
 
-.numpad-action:hover {
-    background-color: #374151;
+.number-btn.clear:hover {
+    background: rgba(255, 59, 48, 0.3);
 }
 
-/* Footer */
-.kiosk-footer {
-    position: fixed;
-    bottom: 1rem;
-    left: 0;
-    right: 0;
-    text-align: center;
-    color: #4b5563;
-    font-size: 0.875rem;
-}
-
-/* ===== Task Tracker Styles ===== */
-
-.task-panel {
-    max-width: 48rem;
+/* Clock Display with Glass */
+.clock-display {
+    max-width: 600px;
     margin: 0 auto;
-    padding-bottom: 4rem;
+    padding: 3rem 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
+    text-align: center;
 }
 
-.task-header {
-    text-align: center;
+.clock-status {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
     margin-bottom: 1.5rem;
 }
 
-.task-count {
-    color: #9ca3af;
-    font-size: 1rem;
+.clock-time {
+    font-size: 4rem;
+    font-weight: 300;
+    color: var(--text-primary);
+    margin: 1rem 0;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 3px;
 }
 
-.no-tasks {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: #9ca3af;
+.clock-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
 }
 
-.task-list {
+/* Buttons with Glass Effect */
+.btn {
+    padding: 1rem 2rem;
+    font-size: 1.125rem;
+    font-weight: 500;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: none;
+    letter-spacing: 0.3px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 16px var(--glass-shadow);
+    color: var(--text-primary);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-primary {
+    background: var(--accent-color);
+    border-color: var(--accent-hover);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 6px 20px rgba(0, 122, 255, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(142, 142, 147, 0.2);
+    border-color: rgba(142, 142, 147, 0.3);
+}
+
+.btn-danger {
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.3);
+    color: rgba(255, 59, 48, 0.95);
+}
+
+.btn-danger:hover {
+    background: rgba(255, 59, 48, 0.3);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Project Selection with Glass */
+.project-selection {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.project-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    margin-top: 1.5rem;
 }
 
-.task-card {
-    background-color: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 0.75rem;
-    padding: 1rem;
+.project-item {
+    padding: 1.25rem 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+}
+
+.project-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateX(4px);
+}
+
+.project-item.selected {
+    background: var(--accent-color);
+    border-color: var(--accent-hover);
+    color: white;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+}
+
+/* Lunch Duration Input with Glass */
+.lunch-input-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.lunch-input-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin: 1.5rem 0;
+}
+
+.lunch-input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    font-size: 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    transition: all 0.2s ease;
+}
+
+.lunch-input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+}
+
+.lunch-input::placeholder {
+    color: var(--text-secondary);
+}
+
+/* Summary Display with Glass */
+.summary-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px var(--glass-shadow);
+}
+
+.summary-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.summary-grid {
+    display: grid;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-item {
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+}
+
+.summary-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.summary-value {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Attendance List with Glass */
+.attendance-list {
+    margin-top: 2rem;
+}
+
+.attendance-item {
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px var(--glass-shadow);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 1rem;
 }
 
-.task-card.task-priority {
-    border-left: 4px solid #f59e0b;
-}
-
-.task-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.task-title {
+.attendance-name {
     font-size: 1.125rem;
-    font-weight: 600;
-    color: white;
-    margin-bottom: 0.25rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-weight: 500;
+    color: var(--text-primary);
 }
 
-.task-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: #9ca3af;
-}
-
-.task-project {
-    background-color: #374151;
-    padding: 0.125rem 0.5rem;
-    border-radius: 0.25rem;
-}
-
-.task-room {
-    color: #60a5fa;
-}
-
-.task-deadline {
-    color: #f87171;
-}
-
-.task-started {
-    font-size: 0.75rem;
-    color: #34d399;
-    margin-top: 0.25rem;
-}
-
-.task-actions {
-    flex-shrink: 0;
-}
-
-.task-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    border: none;
-    border-radius: 0.5rem;
+.attendance-time {
     font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
 }
 
-.task-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.task-btn-start {
-    background-color: #2563eb;
-    color: white;
-}
-
-.task-btn-start:hover:not(:disabled) {
-    background-color: #1d4ed8;
-}
-
-.task-btn-done {
-    background-color: #059669;
-    color: white;
-}
-
-.task-btn-done:hover:not(:disabled) {
-    background-color: #047857;
-}
-
-/* Mobile responsive for task tracker */
-@media (max-width: 640px) {
-    .task-card {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .task-actions {
-        margin-top: 0.75rem;
-    }
-
-    .task-btn {
-        width: 100%;
-        justify-content: center;
+/* Responsive Design */
+@media (max-width: 768px) {
+    .kiosk-container {
         padding: 1rem;
     }
 
-    .task-title {
-        white-space: normal;
+    .kiosk-header {
+        padding: 1.5rem;
     }
+
+    .kiosk-time {
+        font-size: 2.5rem;
+    }
+
+    .clock-time {
+        font-size: 3rem;
+    }
+
+    .employee-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+
+    .number-pad {
+        gap: 0.75rem;
+    }
+
+    .number-btn {
+        padding: 1.25rem;
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
+}
+
+/* Smooth Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kiosk-container > * {
+    animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Focus States for Accessibility */
+*:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
