@@ -26,7 +26,7 @@
     <meta name="theme-color" content="#111827">
 
     {{-- Standalone Kiosk CSS (bypasses Tailwind v4 build issues) --}}
-    <link rel="stylesheet" href="/css/time-clock-kiosk.css">
+    <link rel="stylesheet" href="/css/time-clock-kiosk.css?v={{ filemtime(public_path('css/time-clock-kiosk.css')) }}">
 
     {{-- Livewire Styles --}}
     @livewireStyles
