@@ -459,10 +459,35 @@ class TimeClockKiosk extends Component
      */
     public function showLunchDuration(): void
     {
+        // Validate user is selected and clocked in
+        if (!$this->selectedUserId) {
+            $this->setStatus('No employee selected', 'error');
+            $this->mode = 'select';
+            return;
+        }
+
+        if (!$this->isClockedIn) {
+            $this->setStatus('You must be clocked in to start lunch', 'error');
+            $this->mode = 'clock';
+            return;
+        }
+
+        if ($this->isOnLunch) {
+            $this->setStatus('You are already on lunch break', 'error');
+            return;
+        }
+
+        if ($this->lunchTaken) {
+            $this->setStatus('You have already taken lunch today', 'error');
+            return;
+        }
+
         if (!$this->canTakeLunch()) {
             $this->setStatus('Lunch break not available after 4 PM', 'error');
             return;
         }
+
+        // Set mode to show lunch duration selection
         $this->mode = 'lunch-duration';
         $this->breakDurationMinutes = 60; // Reset to default
     }
