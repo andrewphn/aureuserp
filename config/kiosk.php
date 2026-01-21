@@ -56,4 +56,18 @@ return [
     |
     */
     'pin_length' => env('KIOSK_PIN_LENGTH', 4),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Inactivity Timeout
+    |--------------------------------------------------------------------------
+    |
+    | Number of seconds of inactivity before automatically resetting
+    | to the employee selection screen. This helps maintain privacy
+    | on shared kiosk devices.
+    |
+    | Set to 0 to disable auto-timeout.
+    |
+    */
+    'timeout_seconds' => env('KIOSK_TIMEOUT_SECONDS', 60),
 ];
