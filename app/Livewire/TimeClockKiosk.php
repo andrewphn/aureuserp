@@ -141,6 +141,10 @@ class TimeClockKiosk extends Component
      */
     public function loadTodayAttendance(): void
     {
+        // Don't reload if we're in a transition mode
+        if (in_array($this->mode, ['clockout-lunch', 'summary', 'confirmed'])) {
+            return;
+        }
         $attendance = $this->clockingService->getTodayAttendance();
         $this->todayAttendance = $attendance['employees'] ?? [];
     }
@@ -449,13 +453,13 @@ class TimeClockKiosk extends Component
 
         if ($result['success']) {
             $this->isClockedIn = false;
-            
+
             // Store summary data
             $this->summaryClockInTime = $this->clockedInAt;
             $this->summaryClockOutTime = now()->format('g:i A');
             $this->summaryHoursWorked = $result['hours_worked'] ?? 0;
             $this->summaryLunchMinutes = $this->breakDurationMinutes > 0 ? $this->breakDurationMinutes : null;
-            
+
             // Get project name if selected
             if ($this->selectedProjectId) {
                 $project = \Webkul\Project\Models\Project::find($this->selectedProjectId);
@@ -463,7 +467,7 @@ class TimeClockKiosk extends Component
             } else {
                 $this->summaryProjectName = null;
             }
-            
+
             $this->mode = 'summary'; // Show summary page
             $this->loadTodayAttendance();
         } else {

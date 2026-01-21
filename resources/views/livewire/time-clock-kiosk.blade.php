@@ -56,7 +56,7 @@
 
     {{-- Clock Out Lunch Duration Selection Mode --}}
     @if($mode === 'clockout-lunch')
-        <div class="clock-panel"
+        <div class="clock-panel" wire:key="clockout-lunch-panel"
              x-data="{
                  customMinutes: '',
                  showCustom: false,
@@ -155,9 +155,6 @@
                 </div>
             </div>
         </div>
-    @endif
-
-</div>
     @endif
 
     {{-- PIN Entry Mode --}}
