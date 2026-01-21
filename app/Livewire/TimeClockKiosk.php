@@ -459,37 +459,57 @@ class TimeClockKiosk extends Component
      */
     public function showLunchDuration(): void
     {
-        // Validate user is selected and clocked in
-        if (!$this->selectedUserId) {
-            $this->setStatus('No employee selected', 'error');
-            $this->mode = 'select';
-            return;
-        }
+        try {
+            // Validate user is selected and clocked in
+            if (!$this->selectedUserId) {
+                $this->setStatus('No employee selected', 'error');
+                $this->mode = 'select';
+                \Log::warning('showLunchDuration: No selectedUserId', ['mode' => $this->mode]);
+                return;
+            }
 
-        if (!$this->isClockedIn) {
-            $this->setStatus('You must be clocked in to start lunch', 'error');
-            $this->mode = 'clock';
-            return;
-        }
+            if (!$this->isClockedIn) {
+                $this->setStatus('You must be clocked in to start lunch', 'error');
+                $this->mode = 'clock';
+                \Log::warning('showLunchDuration: Not clocked in', ['selectedUserId' => $this->selectedUserId]);
+                return;
+            }
 
-        if ($this->isOnLunch) {
-            $this->setStatus('You are already on lunch break', 'error');
-            return;
-        }
+            if ($this->isOnLunch) {
+                $this->setStatus('You are already on lunch break', 'error');
+                \Log::info('showLunchDuration: Already on lunch', ['selectedUserId' => $this->selectedUserId]);
+                return;
+            }
 
-        if ($this->lunchTaken) {
-            $this->setStatus('You have already taken lunch today', 'error');
-            return;
-        }
+            if ($this->lunchTaken) {
+                $this->setStatus('You have already taken lunch today', 'error');
+                \Log::info('showLunchDuration: Lunch already taken', ['selectedUserId' => $this->selectedUserId]);
+                return;
+            }
 
-        if (!$this->canTakeLunch()) {
-            $this->setStatus('Lunch break not available after 4 PM', 'error');
-            return;
-        }
+            if (!$this->canTakeLunch()) {
+                $this->setStatus('Lunch break not available after 4 PM', 'error');
+                \Log::info('showLunchDuration: After 4 PM', ['selectedUserId' => $this->selectedUserId]);
+                return;
+            }
 
-        // Set mode to show lunch duration selection
-        $this->mode = 'lunch-duration';
-        $this->breakDurationMinutes = 60; // Reset to default
+            // Set mode to show lunch duration selection
+            $this->mode = 'lunch-duration';
+            $this->breakDurationMinutes = 60; // Reset to default
+            
+            \Log::info('showLunchDuration: Success', [
+                'selectedUserId' => $this->selectedUserId,
+                'mode' => $this->mode,
+                'isClockedIn' => $this->isClockedIn
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('showLunchDuration error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'selectedUserId' => $this->selectedUserId ?? null
+            ]);
+            $this->setStatus('An error occurred. Please try again.', 'error');
+            // Don't reset mode on error - stay in current mode
+        }
     }
 
     /**
