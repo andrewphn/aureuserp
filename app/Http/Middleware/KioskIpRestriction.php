@@ -33,7 +33,16 @@ class KioskIpRestriction
             return $next($request);
         }
 
-        $clientIp = $request->ip();
+        // Get client IP - prioritize Cloudflare header if present (HostGator uses Cloudflare)
+        $clientIp = $request->header('CF-Connecting-IP') 
+            ?: $request->header('X-Real-IP') 
+            ?: $request->header('X-Forwarded-For') 
+            ?: $request->ip();
+        
+        // Handle comma-separated X-Forwarded-For (take first IP)
+        if (str_contains($clientIp, ',')) {
+            $clientIp = trim(explode(',', $clientIp)[0]);
+        }
         
         // Log all IP-related headers for debugging (only in non-production)
         if (config('app.debug', false)) {
