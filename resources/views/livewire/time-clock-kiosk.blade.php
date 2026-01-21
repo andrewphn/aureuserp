@@ -50,10 +50,216 @@
                                 </span>
                             </div>
                         @endforeach
+            </div>
+        </div>
+    @endif
+
+    {{-- Clock Out Lunch Duration Selection Mode --}}
+    @if($mode === 'clockout-lunch')
+        <div class="clock-panel"
+             x-data="{
+                 customMinutes: '',
+                 showCustom: false,
+                 selectDuration(minutes) {
+                     // Auto-submit for preset durations
+                     @this.call('setClockOutLunchDuration', minutes);
+                 },
+                 submitCustom() {
+                     const minutes = parseInt(this.customMinutes);
+                     if (minutes >= 1 && minutes <= 480) {
+                         @this.call('setClockOutLunchDuration', minutes);
+                     } else {
+                         alert('Please enter a duration between 1 and 480 minutes');
+                     }
+                 }
+             }"
+             x-on:keydown.escape="@this.call('cancelClockOutLunch')">
+            <button wire:click="cancelClockOutLunch" class="back-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back (Esc)
+            </button>
+
+            <div class="clock-card">
+                <h2 class="employee-name">{{ $selectedUserName }}</h2>
+                <p class="clock-status">No lunch was logged. Select lunch duration:</p>
+
+                {{-- Preset Duration Buttons --}}
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0;">
+                    <button
+                        x-on:click="selectDuration(30)"
+                        wire:loading.attr="disabled"
+                        wire:target="setClockOutLunchDuration"
+                        class="clock-in-btn"
+                        style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
+                        <span wire:loading.remove wire:target="setClockOutLunchDuration">30 min</span>
+                        <span wire:loading wire:target="setClockOutLunchDuration">...</span>
+                    </button>
+                    <button
+                        x-on:click="selectDuration(45)"
+                        wire:loading.attr="disabled"
+                        wire:target="setClockOutLunchDuration"
+                        class="clock-in-btn"
+                        style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
+                        <span wire:loading.remove wire:target="setClockOutLunchDuration">45 min</span>
+                        <span wire:loading wire:target="setClockOutLunchDuration">...</span>
+                    </button>
+                    <button
+                        x-on:click="selectDuration(60)"
+                        wire:loading.attr="disabled"
+                        wire:target="setClockOutLunchDuration"
+                        class="clock-in-btn"
+                        style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
+                        <span wire:loading.remove wire:target="setClockOutLunchDuration">1 hour</span>
+                        <span wire:loading wire:target="setClockOutLunchDuration">...</span>
+                    </button>
+                </div>
+
+                {{-- Custom Duration Option --}}
+                <div style="margin-top: 1.5rem;">
+                    <button
+                        x-on:click="showCustom = !showCustom; if (!showCustom) customMinutes = '';"
+                        class="clock-in-btn"
+                        style="width: 100%; background: #f3f4f6; color: #111827; border: 2px solid #d1d5db;">
+                        <span x-show="!showCustom">Custom Duration</span>
+                        <span x-show="showCustom">Cancel Custom</span>
+                    </button>
+
+                    <div x-show="showCustom" 
+                         x-transition
+                         style="margin-top: 1rem; padding: 1.5rem; background: #f9fafb; border-radius: 12px; border: 2px solid #e5e7eb;">
+                        <label style="display: block; color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
+                            Enter duration (minutes):
+                        </label>
+                        <input
+                            type="number"
+                            x-model="customMinutes"
+                            x-on:keydown.enter="submitCustom()"
+                            min="1"
+                            max="480"
+                            placeholder="Enter minutes (1-480)"
+                            style="width: 100%; padding: 1rem; font-size: 1.25rem; border: 2px solid #d1d5db; border-radius: 8px; text-align: center; margin-bottom: 1rem;"
+                            autofocus>
+                        <button
+                            x-on:click="submitCustom()"
+                            x-bind:disabled="!customMinutes || customMinutes < 1 || customMinutes > 480"
+                            wire:loading.attr="disabled"
+                            wire:target="setClockOutLunchDuration"
+                            class="clock-in-btn"
+                            style="width: 100%;">
+                            <span wire:loading.remove wire:target="setClockOutLunchDuration">Submit</span>
+                            <span wire:loading wire:target="setClockOutLunchDuration">Processing...</span>
+                        </button>
                     </div>
                 </div>
-            @endif
+            </div>
         </div>
+    @endif
+
+    {{-- Lunch Duration Selection Mode (for starting lunch) --}}
+    @if($mode === 'lunch-duration')
+        <div class="clock-panel"
+             x-data="{
+                 customMinutes: '',
+                 showCustom: false,
+                 selectDuration(minutes) {
+                     // Auto-submit for preset durations
+                     @this.call('setLunchDuration', minutes);
+                 },
+                 submitCustom() {
+                     const minutes = parseInt(this.customMinutes);
+                     if (minutes >= 1 && minutes <= 480) {
+                         @this.call('setLunchDuration', minutes);
+                     } else {
+                         alert('Please enter a duration between 1 and 480 minutes');
+                     }
+                 }
+             }"
+             x-on:keydown.escape="@this.call('cancelLunchDuration')">
+            <button wire:click="cancelLunchDuration" class="back-btn">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+                Back (Esc)
+            </button>
+
+            <div class="clock-card">
+                <h2 class="employee-name">{{ $selectedUserName }}</h2>
+                <p class="clock-status">Select Lunch Duration</p>
+
+                {{-- Preset Duration Buttons --}}
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin: 2rem 0;">
+                    <button
+                        x-on:click="selectDuration(30)"
+                        wire:loading.attr="disabled"
+                        wire:target="setLunchDuration"
+                        class="clock-in-btn"
+                        style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
+                        <span wire:loading.remove wire:target="setLunchDuration">30 min</span>
+                        <span wire:loading wire:target="setLunchDuration">...</span>
+                    </button>
+                    <button
+                        x-on:click="selectDuration(45)"
+                        wire:loading.attr="disabled"
+                        wire:target="setLunchDuration"
+                        class="clock-in-btn"
+                        style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
+                        <span wire:loading.remove wire:target="setLunchDuration">45 min</span>
+                        <span wire:loading wire:target="setLunchDuration">...</span>
+                    </button>
+                    <button
+                        x-on:click="selectDuration(60)"
+                        wire:loading.attr="disabled"
+                        wire:target="setLunchDuration"
+                        class="clock-in-btn"
+                        style="padding: 1.5rem; font-size: 1.25rem; font-weight: 600;">
+                        <span wire:loading.remove wire:target="setLunchDuration">1 hour</span>
+                        <span wire:loading wire:target="setLunchDuration">...</span>
+                    </button>
+                </div>
+
+                {{-- Custom Duration Option --}}
+                <div style="margin-top: 1.5rem;">
+                    <button
+                        x-on:click="showCustom = !showCustom; if (!showCustom) customMinutes = '';"
+                        class="clock-in-btn"
+                        style="width: 100%; background: #f3f4f6; color: #111827; border: 2px solid #d1d5db;">
+                        <span x-show="!showCustom">Custom Duration</span>
+                        <span x-show="showCustom">Cancel Custom</span>
+                    </button>
+
+                    <div x-show="showCustom" 
+                         x-transition
+                         style="margin-top: 1rem; padding: 1.5rem; background: #f9fafb; border-radius: 12px; border: 2px solid #e5e7eb;">
+                        <label style="display: block; color: #374151; font-size: 0.9rem; margin-bottom: 0.5rem; font-weight: 600;">
+                            Enter duration (minutes):
+                        </label>
+                        <input
+                            type="number"
+                            x-model="customMinutes"
+                            x-on:keydown.enter="submitCustom()"
+                            min="1"
+                            max="480"
+                            placeholder="Enter minutes (1-480)"
+                            style="width: 100%; padding: 1rem; font-size: 1.25rem; border: 2px solid #d1d5db; border-radius: 8px; text-align: center; margin-bottom: 1rem;"
+                            autofocus>
+                        <button
+                            x-on:click="submitCustom()"
+                            x-bind:disabled="!customMinutes || customMinutes < 1 || customMinutes > 480"
+                            wire:loading.attr="disabled"
+                            wire:target="setLunchDuration"
+                            class="clock-in-btn"
+                            style="width: 100%;">
+                            <span wire:loading.remove wire:target="setLunchDuration">Submit</span>
+                            <span wire:loading wire:target="setLunchDuration">Processing...</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+</div>
     @endif
 
     {{-- PIN Entry Mode --}}
@@ -380,7 +586,7 @@
                         <p style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">
                             {{ $clockedInAt }}
                         </p>
-                        
+
                         {{-- Counting Duration --}}
                         <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Duration</p>
                         <p style="font-size: 2rem; font-weight: 600; color: #059669;"
@@ -414,7 +620,7 @@
                            x-on:destroyed="destroy()">
                             <span x-text="formatTime(elapsedSeconds)">0m 0s</span>
                         </p>
-                        
+
                         {{-- Lunch Status --}}
                         @if($isOnLunch)
                             <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">Lunch</p>
