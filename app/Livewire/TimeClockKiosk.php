@@ -497,9 +497,8 @@ class TimeClockKiosk extends Component
                     'employee_name' => $this->selectedUserName,
                 ]);
 
-                // Redirect to reload page - this avoids checksum corruption by doing a full page reload
-                // Use route name to ensure correct method
-                return $this->redirect(route('time-clock.kiosk'), navigate: false);
+                // Use JavaScript redirect to avoid Livewire redirect issues
+                $this->dispatch('clockout-complete');
             } else {
                 $this->setStatus($result['message'], 'error');
                 $this->mode = 'clock'; // Stay in clock mode on error
