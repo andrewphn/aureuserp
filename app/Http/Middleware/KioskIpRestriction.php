@@ -34,16 +34,16 @@ class KioskIpRestriction
         }
 
         // Get client IP - prioritize Cloudflare header if present (HostGator uses Cloudflare)
-        $clientIp = $request->header('CF-Connecting-IP') 
-            ?: $request->header('X-Real-IP') 
-            ?: $request->header('X-Forwarded-For') 
+        $clientIp = $request->header('CF-Connecting-IP')
+            ?: $request->header('X-Real-IP')
+            ?: $request->header('X-Forwarded-For')
             ?: $request->ip();
-        
+
         // Handle comma-separated X-Forwarded-For (take first IP)
         if (str_contains($clientIp, ',')) {
             $clientIp = trim(explode(',', $clientIp)[0]);
         }
-        
+
         // Log all IP-related headers for debugging (only in non-production)
         if (config('app.debug', false)) {
             \Log::info("Kiosk IP Check", [
@@ -133,12 +133,23 @@ class KioskIpRestriction
     protected function ipv6InCidr(string $ip, string $cidr): bool
     {
         list($subnet, $mask) = explode('/', $cidr);
-
-        // Normalize IPv6 addresses
-        $ipBin = inet_pton($ip);
-        $subnetBin = inet_pton($subnet);
+        
+        // Expand compressed IPv6 addresses (e.g., :: to full format)
+        // inet_pton handles this, but we need to ensure proper comparison
+        $ipBin = @inet_pton($ip);
+        $subnetBin = @inet_pton($subnet);
 
         if ($ipBin === false || $subnetBin === false) {
+            \Log::warning("Kiosk IPv6 CIDR: Failed to parse IP or subnet", [
+                'ip' => $ip,
+                'subnet' => $subnet,
+                'cidr' => $cidr,
+            ]);
+            return false;
+        }
+
+        // Ensure both are 16 bytes (IPv6 addresses)
+        if (strlen($ipBin) !== 16 || strlen($subnetBin) !== 16) {
             return false;
         }
 
