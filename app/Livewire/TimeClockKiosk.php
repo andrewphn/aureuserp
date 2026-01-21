@@ -497,8 +497,8 @@ class TimeClockKiosk extends Component
                 ]);
 
                 // Don't change mode here - let the page reload handle it via mount()
-                // Use dispatchBrowserEvent to trigger page reload
-                $this->dispatchBrowserEvent('clockout-complete');
+                // Use dispatch to trigger browser event for page reload
+                $this->dispatch('clockout-complete');
             } else {
                 $this->setStatus($result['message'], 'error');
                 $this->mode = 'clock'; // Stay in clock mode on error
