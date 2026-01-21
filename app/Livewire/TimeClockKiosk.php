@@ -185,12 +185,21 @@ class TimeClockKiosk extends Component
     public function loadTodayAttendance(): void
     {
         try {
-            // Don't reload if we're in a transition mode
-            if (in_array($this->mode, ['clockout-lunch', 'summary', 'confirmed'])) {
+            // Don't reload if we're in a transition mode or if no user is selected
+            if (in_array($this->mode, ['clockout-lunch', 'summary', 'confirmed', 'pin', 'select'])) {
                 \Log::debug('TimeClockKiosk: loadTodayAttendance() skipped', ['mode' => $this->mode]);
                 return;
             }
-
+            
+            // Only load if we're in clock mode and have a selected user
+            if ($this->mode !== 'clock' || !$this->selectedUserId) {
+                \Log::debug('TimeClockKiosk: loadTodayAttendance() skipped', [
+                    'mode' => $this->mode,
+                    'has_user' => !empty($this->selectedUserId),
+                ]);
+                return;
+            }
+            
             \Log::debug('TimeClockKiosk: loadTodayAttendance() called', ['mode' => $this->mode]);
             $attendance = $this->clockingService->getTodayAttendance();
             $this->todayAttendance = $attendance['employees'] ?? [];
@@ -271,15 +280,26 @@ class TimeClockKiosk extends Component
 
             // Auto-clock in if not already clocked in
             if (!$this->isClockedIn) {
+                \Log::info('TimeClockKiosk: Auto-clocking in after PIN verification', [
+                    'user_id' => $this->selectedUserId,
+                ]);
+                
                 $result = $this->clockingService->clockIn($this->selectedUserId);
                 if ($result['success']) {
                     $this->isClockedIn = true;
                     $this->clockedInAt = now()->format('g:i A');
                     $this->clockInTimestamp = now()->toIso8601String(); // Store timestamp for elapsed time
                     $this->setStatus("Clocked in at {$this->clockedInAt}", 'success');
-                    $this->loadTodayAttendance();
+                    
+                    // Don't load attendance here - it will be loaded by polling when in clock mode
+                    // Loading it here can cause checksum issues during state transition
+                    
                     // Show confirmation screen, then auto-return after 5 seconds
                     $this->mode = 'confirmed';
+                    
+                    \Log::info('TimeClockKiosk: Clock in successful, mode set to confirmed', [
+                        'clocked_in_at' => $this->clockedInAt,
+                    ]);
                 } else {
                     $this->setStatus($result['message'], 'error');
                     $this->mode = 'clock';
