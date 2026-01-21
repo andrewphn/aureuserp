@@ -50,7 +50,9 @@ class TimeClockKiosk extends Component
     public bool $isOnLunch = false;
     public bool $lunchTaken = false;
     public ?string $lunchStartTime = null;
+    public ?string $lunchStartTimestamp = null; // ISO timestamp for calculating remaining time
     public ?string $lunchEndTime = null;
+    public int $scheduledLunchDurationMinutes = 60; // Selected duration for auto-end
 
     // Form inputs
     public int $breakDurationMinutes = 60;
@@ -281,10 +283,19 @@ class TimeClockKiosk extends Component
             $this->lunchTaken = $status['lunch_taken'] ?? false;
             $this->lunchStartTime = $status['lunch_start_time'];
             $this->lunchEndTime = $status['lunch_end_time'];
-
+            
             // Store clock in timestamp for elapsed time calculation
             if ($this->isClockedIn && $status['clock_in_timestamp'] ?? null) {
                 $this->clockInTimestamp = $status['clock_in_timestamp'];
+            }
+            
+            // Store lunch start timestamp for auto-end calculation
+            if ($this->isOnLunch && $status['lunch_start_timestamp'] ?? null) {
+                $this->lunchStartTimestamp = $status['lunch_start_timestamp'];
+                // Keep the scheduled duration if we already have it, otherwise default to 60
+                if (!$this->scheduledLunchDurationMinutes) {
+                    $this->scheduledLunchDurationMinutes = 60;
+                }
             }
         }
     }
@@ -444,13 +455,24 @@ class TimeClockKiosk extends Component
     }
 
     /**
-     * Show lunch duration selection (only used when starting lunch - but we removed this flow)
-     * Kept for backward compatibility but not used in current flow
+     * Show lunch duration selection when starting lunch
      */
     public function showLunchDuration(): void
     {
-        // This is no longer used - startLunch is called directly
-        // Lunch duration is only selected when clocking out without lunch
+        if (!$this->canTakeLunch()) {
+            $this->setStatus('Lunch break not available after 4 PM', 'error');
+            return;
+        }
+        $this->mode = 'lunch-duration';
+        $this->breakDurationMinutes = 60; // Reset to default
+    }
+
+    /**
+     * Set lunch duration and start lunch
+     */
+    public function setLunchDuration(int $minutes): void
+    {
+        $this->breakDurationMinutes = $minutes;
         $this->startLunch();
     }
 
@@ -470,14 +492,21 @@ class TimeClockKiosk extends Component
             return;
         }
 
-        // Note: Duration is not used when starting lunch - it's only used when clocking out
-        // The actual lunch duration is calculated when ending lunch
+        // Validate duration
+        if ($this->breakDurationMinutes < 1 || $this->breakDurationMinutes > 480) {
+            $this->setStatus('Lunch duration must be between 1 and 480 minutes', 'error');
+            $this->mode = 'clock';
+            return;
+        }
+
         $result = $this->clockingService->startLunch($this->selectedUserId);
 
         if ($result['success']) {
             $this->isOnLunch = true;
             $this->lunchStartTime = $result['lunch_start_time'];
-            $this->setStatus("Lunch started at {$this->lunchStartTime}. Enjoy your break!", 'success');
+            $this->lunchStartTimestamp = now()->toIso8601String(); // Store timestamp for auto-end calculation
+            $this->scheduledLunchDurationMinutes = $this->breakDurationMinutes; // Store selected duration
+            $this->setStatus("Lunch started at {$this->lunchStartTime} for {$this->breakDurationMinutes} minutes. Enjoy your break!", 'success');
             $this->mode = 'clock'; // Return to clock mode
             $this->loadTodayAttendance();
         } else {
@@ -509,6 +538,7 @@ class TimeClockKiosk extends Component
             $this->lunchTaken = true;
             $this->lunchEndTime = $result['lunch_end_time'];
             $this->breakDurationMinutes = $result['lunch_duration_minutes'];
+            $this->lunchStartTimestamp = null; // Clear timestamp
             $this->setStatus($result['message'], 'success');
             $this->loadTodayAttendance();
         } else {

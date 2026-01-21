@@ -624,9 +624,45 @@
                         {{-- Lunch Status --}}
                         @if($isOnLunch)
                             <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">Lunch</p>
-                            <p style="font-size: 1.5rem; font-weight: 600; color: #f59e0b;">
+                            <p style="font-size: 1.5rem; font-weight: 600; color: #f59e0b;"
+                               x-data="{
+                                   lunchStartTimestamp: @js($lunchStartTimestamp),
+                                   scheduledMinutes: @js($scheduledLunchDurationMinutes ?? 60),
+                                   remainingMinutes: 0,
+                                   timer: null,
+                                   init() {
+                                       if (this.lunchStartTimestamp && this.scheduledMinutes) {
+                                           const updateRemaining = () => {
+                                               const startTime = new Date(this.lunchStartTimestamp);
+                                               const now = new Date();
+                                               const elapsedMinutes = Math.floor((now - startTime) / 60000);
+                                               this.remainingMinutes = Math.max(0, this.scheduledMinutes - elapsedMinutes);
+                                               
+                                               // Auto-end lunch when time is up
+                                               if (this.remainingMinutes <= 0 && this.timer) {
+                                                   clearInterval(this.timer);
+                                                   this.timer = null;
+                                                   @this.call('endLunch');
+                                               }
+                                           };
+                                           updateRemaining();
+                                           this.timer = setInterval(updateRemaining, 30000); // Update every 30 seconds
+                                       }
+                                   },
+                                   destroy() {
+                                       if (this.timer) clearInterval(this.timer);
+                                   }
+                               }"
+                               x-init="init()"
+                               x-on:destroyed="destroy()">
                                 On Break<br>
-                                <span style="font-size: 1rem; color: #92400e;">Started: {{ $lunchStartTime }}</span>
+                                <span style="font-size: 1rem; color: #92400e;">Started: {{ $lunchStartTime }}</span><br>
+                                <span style="font-size: 0.9rem; color: #b45309;" x-show="remainingMinutes > 0">
+                                    Auto-return in <span x-text="remainingMinutes"></span> min
+                                </span>
+                                <span style="font-size: 0.9rem; color: #059669;" x-show="remainingMinutes <= 0 && timer !== null">
+                                    Returning to work...
+                                </span>
                             </p>
                         @elseif($lunchTaken)
                             <p style="color: #6b7280; font-size: 0.9rem; margin-top: 1rem; margin-bottom: 0.5rem;">Lunch</p>
@@ -656,14 +692,14 @@
                         {{-- Start Lunch Button (if before 4 PM) --}}
                         @if($this->canTakeLunch())
                             <button
-                                wire:click="startLunch"
+                                wire:click="showLunchDuration"
                                 wire:loading.attr="disabled"
-                                wire:target="startLunch"
+                                wire:target="showLunchDuration"
                                 class="clock-in-btn"
                                 style="background: #f59e0b; width: 100%; margin-top: 1rem;"
                             >
-                                <span wire:loading.remove wire:target="startLunch">Start Lunch (L)</span>
-                                <span wire:loading wire:target="startLunch">Loading...</span>
+                                <span wire:loading.remove wire:target="showLunchDuration">Start Lunch (L)</span>
+                                <span wire:loading wire:target="showLunchDuration">Loading...</span>
                             </button>
                         @endif
 

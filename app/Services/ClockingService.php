@@ -345,6 +345,7 @@ class ClockingService
             'work_location' => $currentEntry?->workLocation?->name,
             'is_on_lunch' => $isOnLunch,
             'lunch_start_time' => $lunchStartTime,
+            'lunch_start_timestamp' => $currentEntry?->lunch_start_time ? Carbon::parse($currentEntry->lunch_start_time)->toIso8601String() : null,
             'lunch_end_time' => $lunchEndTime,
             'lunch_taken' => $lunchTaken,
         ];
