@@ -60,44 +60,44 @@
     @if($mode === 'pin')
         <div class="clock-panel"
              x-data="{
-                 optimisticPin: @js($pin),
+                 localPin: '',
+                 pinLength: @js($this->getPinLength()),
                  handleKeydown(event) {
-                     // Number keys (0-9) - add digit (auto-submits when complete)
+                     // Number keys (0-9) - add digit locally (no server call until complete)
                      if (event.key >= '0' && event.key <= '9') {
                          event.preventDefault();
-                         const pinLength = @js($this->getPinLength());
 
-                         // Optimistic UI update - show digit immediately
-                         if (this.optimisticPin.length < pinLength) {
-                             this.optimisticPin += event.key;
-                         }
+                         // Add to local PIN (optimistic UI - no server call)
+                         if (this.localPin.length < this.pinLength) {
+                             this.localPin += event.key;
 
-                         // Then sync with server
-                         @this.call('addPinDigit', event.key).then(() => {
-                             this.optimisticPin = @this.get('pin') || '';
-                             // Auto-submit when PIN is complete
-                             if (this.optimisticPin.length >= pinLength) {
+                             // When PIN is complete, send all digits at once
+                             if (this.localPin.length >= this.pinLength) {
+                                 // Set all digits at once on server
+                                 @this.set('pin', this.localPin);
+                                 // Then verify immediately
                                  @this.call('verifyPin');
                              }
-                         });
+                         }
                      }
                      // Backspace/Delete - remove last digit
                      else if (event.key === 'Backspace' || event.key === 'Delete') {
                          event.preventDefault();
-                         @this.call('removePinDigit');
+                         this.localPin = this.localPin.slice(0, -1);
+                         @this.set('pin', this.localPin);
                      }
-                     // Enter - submit PIN if complete (optional, auto-submits on 4th digit)
+                     // Enter - submit PIN if complete
                      else if (event.key === 'Enter') {
                          event.preventDefault();
-                         const pinLength = @js($this->getPinLength());
-                         const currentPin = @this.get('pin') || '';
-                         if (currentPin.length >= pinLength) {
+                         if (this.localPin.length >= this.pinLength) {
+                             @this.set('pin', this.localPin);
                              @this.call('verifyPin');
                          }
                      }
                      // Escape - go back
                      else if (event.key === 'Escape') {
                          event.preventDefault();
+                         this.localPin = '';
                          @this.call('backToSelect');
                      }
                  }
@@ -125,7 +125,7 @@
                 <div class="pin-display">
                     @for($i = 0; $i < 4; $i++)
                         <div class="pin-dot"
-                             x-bind:class="$root.localPin.length > {{ $i }} ? 'pin-dot-filled' : ''"></div>
+                             x-bind:class="localPin.length > {{ $i }} ? 'pin-dot-filled' : ''"></div>
                     @endfor
                 </div>
 
@@ -134,10 +134,10 @@
                     @foreach([1,2,3,4,5,6,7,8,9] as $num)
                         <button
                             x-on:click="
-                                if ($root.localPin.length < $root.pinLength) {
-                                    $root.localPin += '{{ $num }}';
-                                    if ($root.localPin.length >= $root.pinLength) {
-                                        @this.set('pin', $root.localPin);
+                                if (localPin.length < pinLength) {
+                                    localPin += '{{ $num }}';
+                                    if (localPin.length >= pinLength) {
+                                        @this.set('pin', localPin);
                                         @this.call('verifyPin');
                                     }
                                 }
@@ -150,7 +150,7 @@
                             {{ $num }}
                         </button>
                     @endforeach
-                    <button x-on:click="$root.localPin = ''; @this.set('pin', '');"
+                    <button x-on:click="localPin = ''; @this.set('pin', '');"
                             class="numpad-btn numpad-action"
                             style="transition: transform 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -159,10 +159,10 @@
                         Clear
                     </button>
                     <button x-on:click="
-                                if ($root.localPin.length < $root.pinLength) {
-                                    $root.localPin += '0';
-                                    if ($root.localPin.length >= $root.pinLength) {
-                                        @this.set('pin', $root.localPin);
+                                if (localPin.length < pinLength) {
+                                    localPin += '0';
+                                    if (localPin.length >= pinLength) {
+                                        @this.set('pin', localPin);
                                         @this.call('verifyPin');
                                     }
                                 }
@@ -174,7 +174,7 @@
                             x-on:mouseleave="$el.style.transform = 'scale(1)'">
                         0
                     </button>
-                    <button x-on:click="$root.localPin = $root.localPin.slice(0, -1); @this.set('pin', $root.localPin);"
+                    <button x-on:click="localPin = localPin.slice(0, -1); @this.set('pin', localPin);"
                             class="numpad-btn numpad-action"
                             style="transition: transform 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -189,14 +189,14 @@
                 {{-- Submit PIN --}}
                 <button
                     x-on:click="
-                        if ($root.localPin.length >= $root.pinLength) {
-                            @this.set('pin', $root.localPin);
+                        if (localPin.length >= pinLength) {
+                            @this.set('pin', localPin);
                             @this.call('verifyPin');
                         }
                     "
                     class="clock-in-btn"
                     style="margin-top: 1.5rem;"
-                    x-bind:disabled="$root.localPin.length < $root.pinLength"
+                    x-bind:disabled="localPin.length < pinLength"
                 >
                     Continue (Enter)
                 </button>
