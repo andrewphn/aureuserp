@@ -27,7 +27,7 @@ use Webkul\Security\Models\User;
  */
 class TimeClockKiosk extends Component
 {
-    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out)
+    // Mode: 'select' (choose employee), 'pin' (enter PIN), 'clock' (clock in/out), 'confirmed' (clock in confirmation)
     public string $mode = 'select';
 
     // Currently selected user
@@ -204,7 +204,7 @@ class TimeClockKiosk extends Component
             $this->pinVerified = true;
             $this->pinAttempts = 0;
             $this->loadClockStatus();
-            
+
             // Auto-clock in if not already clocked in
             if (!$this->isClockedIn) {
                 $result = $this->clockingService->clockIn($this->selectedUserId);
@@ -213,12 +213,16 @@ class TimeClockKiosk extends Component
                     $this->clockedInAt = now()->format('g:i A');
                     $this->setStatus("Clocked in at {$this->clockedInAt}", 'success');
                     $this->loadTodayAttendance();
+                    // Show confirmation screen, then auto-return after 5 seconds
+                    $this->mode = 'confirmed';
                 } else {
                     $this->setStatus($result['message'], 'error');
+                    $this->mode = 'clock';
                 }
+            } else {
+                // Already clocked in, go to clock mode
+                $this->mode = 'clock';
             }
-            
-            $this->mode = 'clock';
         } else {
             $this->pinAttempts++;
             $this->pin = '';

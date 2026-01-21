@@ -283,6 +283,64 @@
         </div>
     @endif
 
+    {{-- Clock In Confirmation Mode --}}
+    @if($mode === 'confirmed')
+        <div class="clock-panel"
+             x-data="{
+                 clockInTime: @js($clockedInAt),
+                 startTime: new Date(),
+                 elapsedSeconds: 0,
+                 timer: null,
+                 timeoutTimer: null,
+                 init() {
+                     // Start running timer
+                     this.timer = setInterval(() => {
+                         const now = new Date();
+                         this.elapsedSeconds = Math.floor((now - this.startTime) / 1000);
+                     }, 1000);
+                     
+                     // Auto-return to main screen after 5 seconds
+                     this.timeoutTimer = setTimeout(() => {
+                         @this.call('backToSelect');
+                     }, 5000);
+                 },
+                 destroy() {
+                     if (this.timer) clearInterval(this.timer);
+                     if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
+                 },
+                 formatTime(seconds) {
+                     const mins = Math.floor(seconds / 60);
+                     const secs = seconds % 60;
+                     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                 }
+             }"
+             x-init="init()"
+             x-on:destroyed="destroy()">
+            <div class="clock-card" style="text-align: center; padding: 3rem 2rem;">
+                <div style="font-size: 4rem; font-weight: 700; color: #10b981; margin-bottom: 1rem;">
+                    ✓
+                </div>
+                <h2 class="employee-name" style="margin-bottom: 1rem;">{{ $selectedUserName }}</h2>
+                <p class="clock-status" style="font-size: 1.5rem; margin-bottom: 2rem;">
+                    Clocked In
+                </p>
+                <div style="background: #f3f4f6; border-radius: 12px; padding: 2rem; margin-bottom: 2rem;">
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Time</p>
+                    <p style="font-size: 2.5rem; font-weight: 700; color: #111827; margin-bottom: 1.5rem;">
+                        {{ $clockedInAt }}
+                    </p>
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Duration</p>
+                    <p style="font-size: 2rem; font-weight: 600; color: #059669;">
+                        <span x-text="formatTime(elapsedSeconds)"></span>
+                    </p>
+                </div>
+                <p style="color: #6b7280; font-size: 0.85rem;">
+                    Returning to main screen in <span x-text="Math.max(0, 5 - Math.floor(elapsedSeconds))"></span> seconds...
+                </p>
+            </div>
+        </div>
+    @endif
+
     {{-- Clock In/Out Mode --}}
     @if($mode === 'clock')
         <div class="clock-panel"
