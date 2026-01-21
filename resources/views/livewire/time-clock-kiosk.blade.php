@@ -526,7 +526,7 @@
                      else if (event.key === 'o' || event.key === 'O') {
                          if (this.isClockedIn && !this.isOnLunch) {
                              event.preventDefault();
-                             @this.call('clockOut');
+                             @this.call('showClockOut');
                          }
                      }
                      // Start Lunch (L key) - only if clocked in, not on lunch, and before 4 PM
