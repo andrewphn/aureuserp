@@ -287,24 +287,33 @@ class TimeClockKiosk extends Component
      */
     public function backToSelect(): void
     {
-        // Reset all state
-        $this->mode = 'select';
-        $this->selectedUserId = null;
-        $this->selectedUserName = null;
-        $this->selectedEmployeeId = null;
-        $this->pin = '';
-        $this->pinVerified = false;
-        $this->pinAttempts = 0;
-        $this->statusMessage = '';
-        $this->isClockedIn = false;
-        $this->clockedInAt = null;
-        $this->isOnLunch = false;
-        $this->lunchTaken = false;
-        $this->lunchStartTime = null;
-        $this->lunchEndTime = null;
-        $this->selectedProjectId = null;
-        $this->breakDurationMinutes = 60;
-        $this->loadTodayAttendance();
+        try {
+            // Reset all state
+            $this->mode = 'select';
+            $this->selectedUserId = null;
+            $this->selectedUserName = null;
+            $this->selectedEmployeeId = null;
+            $this->pin = '';
+            $this->pinVerified = false;
+            $this->pinAttempts = 0;
+            $this->statusMessage = '';
+            $this->statusType = 'info';
+            $this->isClockedIn = false;
+            $this->clockedInAt = null;
+            $this->isOnLunch = false;
+            $this->lunchTaken = false;
+            $this->lunchStartTime = null;
+            $this->lunchEndTime = null;
+            $this->selectedProjectId = null;
+            $this->breakDurationMinutes = 60;
+            
+            // Reload data safely
+            $this->loadTodayAttendance();
+        } catch (\Exception $e) {
+            // If anything fails, just reset mode and let the component reload
+            $this->mode = 'select';
+            \Log::error('backToSelect error: ' . $e->getMessage());
+        }
     }
 
     /**

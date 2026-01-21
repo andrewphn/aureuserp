@@ -1,4 +1,4 @@
-<div class="kiosk-container" wire:poll.30s="loadTodayAttendance">
+<div class="kiosk-container" wire:poll.30s="loadTodayAttendance" wire:poll.keep-alive>
     {{-- Header --}}
     <div class="kiosk-header">
         <img src="{{ asset('tcs_logo.png') }}" alt="TCS Woodwork" style="height: 5rem; margin-bottom: 0.5rem; display: inline-block; filter: invert(1);" onerror="this.src='{{ asset('images/logo.svg') }}'; this.onerror=null;">
@@ -253,9 +253,12 @@
                          if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
 
                          // Return to employee selection (login page)
-                         @this.call('backToSelect').catch(() => {
-                             // If call fails, try redirecting anyway
-                             window.location.reload();
+                         @this.call('backToSelect').then(() => {
+                             // Success - component will update
+                         }).catch((error) => {
+                             // If call fails, reload the page to reset state
+                             console.error('backToSelect failed:', error);
+                             window.location.href = window.location.pathname;
                          });
                      }, 5000);
                  },
