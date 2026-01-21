@@ -63,12 +63,12 @@
                      if (event.key >= '0' && event.key <= '9') {
                          event.preventDefault();
                          const pinLength = @js($this->getPinLength());
-                         
+
                          // Optimistic UI update - show digit immediately
                          if (this.optimisticPin.length < pinLength) {
                              this.optimisticPin += event.key;
                          }
-                         
+
                          // Then sync with server
                          @this.call('addPinDigit', event.key).then(() => {
                              this.optimisticPin = @this.get('pin') || '';
@@ -119,8 +119,8 @@
                 </p>
 
                 {{-- PIN Display --}}
-                <div class="pin-display" 
-                     x-data="{ 
+                <div class="pin-display"
+                     x-data="{
                          optimisticPin: @js($pin),
                          pinLength: @js($this->getPinLength()),
                          init() {
@@ -133,7 +133,7 @@
                          }
                      }">
                     @for($i = 0; $i < 4; $i++)
-                        <div class="pin-dot" 
+                        <div class="pin-dot"
                              x-bind:class="optimisticPin.length > {{ $i }} ? 'pin-dot-filled' : ''"></div>
                     @endfor
                 </div>
@@ -148,7 +148,7 @@
                              if (this.optimisticPin.length < this.pinLength) {
                                  this.optimisticPin += digit;
                              }
-                             
+
                              // Then sync with server
                              @this.call('addPinDigit', digit).then(() => {
                                  this.optimisticPin = @this.get('pin') || '';
@@ -160,8 +160,8 @@
                          }
                      }">
                     @foreach([1,2,3,4,5,6,7,8,9] as $num)
-                        <button 
-                            x-on:click="handlePinDigit('{{ $num }}')" 
+                        <button
+                            x-on:click="handlePinDigit('{{ $num }}')"
                             class="numpad-btn"
                             style="transition: transform 0.1s, background-color 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -170,7 +170,7 @@
                             {{ $num }}
                         </button>
                     @endforeach
-                    <button wire:click="clearPin" 
+                    <button wire:click="clearPin"
                             wire:loading.attr="disabled"
                             class="numpad-btn numpad-action"
                             style="transition: transform 0.1s;"
@@ -180,7 +180,7 @@
                         <span wire:loading.remove wire:target="clearPin">Clear</span>
                         <span wire:loading wire:target="clearPin">...</span>
                     </button>
-                    <button x-on:click="handlePinDigit('0')" 
+                    <button x-on:click="handlePinDigit('0')"
                             class="numpad-btn"
                             style="transition: transform 0.1s;"
                             x-on:mousedown="$el.style.transform = 'scale(0.95)'"
@@ -188,7 +188,7 @@
                             x-on:mouseleave="$el.style.transform = 'scale(1)'">
                         0
                     </button>
-                    <button wire:click="removePinDigit" 
+                    <button wire:click="removePinDigit"
                             wire:loading.attr="disabled"
                             class="numpad-btn numpad-action"
                             style="transition: transform 0.1s;"
@@ -238,13 +238,17 @@
                              @this.call('clockOut');
                          @endif
                      }
-                     // Start Lunch (L key) - only if clocked in and not on lunch
-                     else if (event.key === 'l' || event.key === 'L') {
-                         @if($isClockedIn && !$isOnLunch && !$lunchTaken)
-                             event.preventDefault();
-                             @this.call('startLunch');
-                         @endif
-                     }
+                    // Start Lunch (L key) - only if clocked in, not on lunch, and before 4 PM
+                    else if (event.key === 'l' || event.key === 'L') {
+                        @if($isClockedIn && !$isOnLunch && !$lunchTaken)
+                            event.preventDefault();
+                            // Check time before starting lunch
+                            const currentHour = new Date().getHours();
+                            if (currentHour < 16) {
+                                @this.call('startLunch');
+                            }
+                        @endif
+                    }
                      // End Lunch (E key) - only if on lunch
                      else if (event.key === 'e' || event.key === 'E') {
                          @if($isOnLunch)
@@ -275,9 +279,9 @@
 
                 @if($isClockedIn)
                     <p class="clock-status">
-                        Clocked in at 
-                        @if(!$isOnLunch && !$lunchTaken)
-                            <span class="time" 
+                        Clocked in at
+                        @if(!$isOnLunch && !$lunchTaken && $this->canTakeLunch())
+                            <span class="time"
                                   wire:click="startLunch"
                                   wire:loading.attr="disabled"
                                   wire:target="startLunch"
@@ -303,7 +307,7 @@
                                 On Lunch Break
                             </p>
                             <p style="color: #b45309; font-size: 1rem;">
-                                Started at 
+                                Started at
                                 <span wire:click="endLunch"
                                       wire:loading.attr="disabled"
                                       wire:target="endLunch"
@@ -356,24 +360,15 @@
 
                     {{-- NO LUNCH YET - SHOW OPTIONS --}}
                     @else
-                        <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 1rem 0;">
-                            Click the time above to start lunch break
-                        </p>
-
-                        {{-- Manual Break Duration Selection (fallback) --}}
-                        <div class="form-section">
-                            <label class="form-label">Lunch Break Duration</label>
-                            <div class="break-buttons">
-                                @foreach([0 => 'No lunch', 30 => '30 min', 45 => '45 min', 60 => '1 hour'] as $minutes => $label)
-                                    <button
-                                        wire:click="setBreakDuration({{ $minutes }})"
-                                        class="break-btn {{ $breakDurationMinutes === $minutes ? 'break-btn-active' : 'break-btn-inactive' }}"
-                                    >
-                                        {{ $label }}
-                                    </button>
-                                @endforeach
-                            </div>
-                        </div>
+                        @if($this->canTakeLunch())
+                            <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 1rem 0;">
+                                Click the time above to start lunch break
+                            </p>
+                        @else
+                            <p style="text-align: center; color: #6b7280; font-size: 0.9rem; margin: 1rem 0;">
+                                Lunch break not available after 4 PM
+                            </p>
+                        @endif
 
                         {{-- Project Selection (Optional) --}}
                         @if(count($projects) > 0)
@@ -403,23 +398,6 @@
                             <span wire:loading wire:target="clockOut">Processing...</span>
                         </button>
                     @endif
-                @else
-                    <p class="clock-status">Not currently clocked in</p>
-
-                    {{-- Clock In Button --}}
-                    <button
-                        wire:click="clockIn"
-                        wire:loading.attr="disabled"
-                        wire:target="clockIn"
-                        class="clock-in-btn"
-                        style="transition: transform 0.1s, opacity 0.1s;"
-                        x-on:mousedown="$el.style.transform = 'scale(0.98)'"
-                        x-on:mouseup="$el.style.transform = 'scale(1)'"
-                        x-on:mouseleave="$el.style.transform = 'scale(1)'"
-                    >
-                        <span wire:loading.remove wire:target="clockIn">Clock In (I)</span>
-                        <span wire:loading wire:target="clockIn">Processing...</span>
-                    </button>
                 @endif
             </div>
         </div>

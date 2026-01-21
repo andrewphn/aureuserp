@@ -180,7 +180,7 @@ class TimeClockKiosk extends Component
     }
 
     /**
-     * Verify employee PIN
+     * Verify employee PIN and auto-clock in if not clocked in
      */
     public function verifyPin(): void
     {
@@ -204,8 +204,21 @@ class TimeClockKiosk extends Component
             $this->pinVerified = true;
             $this->pinAttempts = 0;
             $this->loadClockStatus();
+            
+            // Auto-clock in if not already clocked in
+            if (!$this->isClockedIn) {
+                $result = $this->clockingService->clockIn($this->selectedUserId);
+                if ($result['success']) {
+                    $this->isClockedIn = true;
+                    $this->clockedInAt = now()->format('g:i A');
+                    $this->setStatus("Clocked in at {$this->clockedInAt}", 'success');
+                    $this->loadTodayAttendance();
+                } else {
+                    $this->setStatus($result['message'], 'error');
+                }
+            }
+            
             $this->mode = 'clock';
-            $this->setStatus('', 'info');
         } else {
             $this->pinAttempts++;
             $this->pin = '';
@@ -444,6 +457,15 @@ class TimeClockKiosk extends Component
     public function getCurrentDate(): string
     {
         return now()->format('l, F j, Y');
+    }
+
+    /**
+     * Check if lunch option should be available (not after 4 PM)
+     */
+    public function canTakeLunch(): bool
+    {
+        $currentHour = (int) now()->format('H');
+        return $currentHour < 16; // Before 4 PM
     }
 
     public function render(): View
