@@ -1,5 +1,5 @@
 <div class="kiosk-container"
-     @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin')
+     @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin' && $mode !== 'lunch-duration' && $mode !== 'clockout-lunch')
      wire:poll.30s="loadTodayAttendance"
      @endif>
     {{-- Header --}}
