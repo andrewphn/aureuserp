@@ -588,20 +588,45 @@
                         </p>
 
                         {{-- Counting Duration --}}
-                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">Duration</p>
+                        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                            @if($isOnLunch)
+                                Lunch Duration
+                            @else
+                                Duration
+                            @endif
+                        </p>
                         <p style="font-size: 2rem; font-weight: 600; color: #059669;"
                            x-data="{
                                clockInTime: @js($clockInTimestamp),
+                               lunchStartTime: @js($lunchStartTimestamp),
+                               isOnLunch: @js($isOnLunch),
                                elapsedSeconds: 0,
                                timer: null,
                                init() {
-                                   if (this.clockInTime) {
-                                       const startTime = new Date(this.clockInTime);
-                                       this.timer = setInterval(() => {
+                                   const updateTimer = () => {
+                                       if (this.isOnLunch && this.lunchStartTime) {
+                                           // Show lunch duration (time since lunch started)
+                                           const startTime = new Date(this.lunchStartTime);
                                            const now = new Date();
                                            this.elapsedSeconds = Math.floor((now - startTime) / 1000);
-                                       }, 1000);
-                                   }
+                                       } else if (this.clockInTime) {
+                                           // Show overall duration (time since clock-in)
+                                           const startTime = new Date(this.clockInTime);
+                                           const now = new Date();
+                                           this.elapsedSeconds = Math.floor((now - startTime) / 1000);
+                                       }
+                                   };
+                                   
+                                   updateTimer();
+                                   this.timer = setInterval(updateTimer, 1000);
+                                   
+                                   // Update when lunch status changes
+                                   Livewire.hook('commit', ({ component }) => {
+                                       if (component === @this) {
+                                           this.isOnLunch = @this.get('isOnLunch') || false;
+                                           this.lunchStartTime = @this.get('lunchStartTimestamp') || null;
+                                       }
+                                   });
                                },
                                destroy() {
                                    if (this.timer) clearInterval(this.timer);
