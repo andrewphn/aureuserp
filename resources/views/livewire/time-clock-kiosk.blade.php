@@ -1,5 +1,5 @@
 <div class="kiosk-container"
-     @if($mode !== 'confirmed')
+     @if($mode !== 'confirmed' && $mode !== 'select' && $mode !== 'pin')
      wire:poll.30s="loadTodayAttendance"
      @endif>
     {{-- Header --}}
@@ -438,30 +438,62 @@
                          }
                      }, 1000);
 
-                     // Auto-return to login page after 5 seconds
-                     this.timeoutTimer = setTimeout(() => {
-                         // Prevent multiple calls
-                         if (this.hasReturned || this.isTransitioning) return;
-                         this.hasReturned = true;
-                         this.isTransitioning = true;
+                    // Auto-return to login page after 5 seconds
+                    this.timeoutTimer = setTimeout(() => {
+                        // Prevent multiple calls
+                        if (this.hasReturned || this.isTransitioning) return;
+                        this.hasReturned = true;
+                        this.isTransitioning = true;
 
-                         // Clear all timers
-                         if (this.timer) clearInterval(this.timer);
-                         if (this.countdownTimer) clearInterval(this.countdownTimer);
-                         if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
+                        // Clear all timers
+                        if (this.timer) clearInterval(this.timer);
+                        if (this.countdownTimer) clearInterval(this.countdownTimer);
+                        if (this.timeoutTimer) clearTimeout(this.timeoutTimer);
 
-                         // Use a small delay to ensure Livewire is ready
-                         setTimeout(() => {
-                             // Return to employee selection (login page)
-                             @this.call('backToSelect').then(() => {
-                                 // Success - component will update
-                             }).catch((error) => {
-                                 // If call fails, reload the page to reset state
-                                 console.error('backToSelect failed:', error);
-                                 window.location.href = window.location.pathname;
-                             });
-                         }, 100);
-                     }, 5000);
+                        // Stop ALL Livewire activity before reload to prevent 500 errors
+                        // This prevents any pending requests from causing checksum corruption
+                        try {
+                            if (window.Livewire) {
+                                // Get the current component instance
+                                const component = @this;
+                                if (component) {
+                                    // Stop polling for this component
+                                    component.stopPolling();
+                                }
+                                
+                                // Stop all Livewire polling globally
+                                if (window.Livewire.stopPolling) {
+                                    window.Livewire.stopPolling();
+                                }
+                                
+                                // Cancel any pending XHR requests
+                                if (window.Livewire.all && window.Livewire.all().length > 0) {
+                                    window.Livewire.all().forEach(comp => {
+                                        if (comp && comp.$wire && comp.$wire.__instance) {
+                                            // Cancel pending requests
+                                            const instance = comp.$wire.__instance;
+                                            if (instance.requestQueue) {
+                                                instance.requestQueue = [];
+                                            }
+                                            if (instance.pendingRequest) {
+                                                instance.pendingRequest.abort();
+                                                instance.pendingRequest = null;
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Error stopping Livewire:', e);
+                        }
+
+                        // Small delay to ensure Livewire cleanup completes, then reload
+                        setTimeout(() => {
+                            // Reload the page to avoid Livewire checksum corruption
+                            // This is more reliable than calling backToSelect() after a timeout
+                            window.location.href = window.location.pathname;
+                        }, 150);
+                    }, 5000);
                  },
                  destroy() {
                      this.isTransitioning = true;
@@ -682,7 +714,7 @@
                                                const now = new Date();
                                                // Calculate lunch duration (elapsed time)
                                                this.lunchDurationSeconds = Math.floor((now - startTime) / 1000);
-                                               
+
                                                // Calculate remaining time until auto-end (if scheduled minutes set)
                                                if (this.scheduledMinutes) {
                                                    const elapsedMinutes = Math.floor((now - startTime) / 60000);
