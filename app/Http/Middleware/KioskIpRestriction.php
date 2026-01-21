@@ -34,6 +34,18 @@ class KioskIpRestriction
         }
 
         $clientIp = $request->ip();
+        
+        // Log all IP-related headers for debugging (only in non-production)
+        if (config('app.debug', false)) {
+            \Log::info("Kiosk IP Check", [
+                'client_ip' => $clientIp,
+                'x-forwarded-for' => $request->header('X-Forwarded-For'),
+                'x-real-ip' => $request->header('X-Real-IP'),
+                'cf-connecting-ip' => $request->header('CF-Connecting-IP'),
+                'remote_addr' => $request->server('REMOTE_ADDR'),
+                'allowed_ips' => $allowedIps,
+            ]);
+        }
 
         // Check if client IP is in allowed list
         if ($this->isIpAllowed($clientIp, $allowedIps)) {
@@ -41,7 +53,10 @@ class KioskIpRestriction
         }
 
         // Log blocked attempt
-        \Log::warning("Kiosk access blocked from IP: {$clientIp}");
+        \Log::warning("Kiosk access blocked from IP: {$clientIp}", [
+            'allowed_ips' => $allowedIps,
+            'x-forwarded-for' => $request->header('X-Forwarded-For'),
+        ]);
 
         // Return access denied page
         return response()->view('errors.kiosk-restricted', [
@@ -89,14 +104,14 @@ class KioskIpRestriction
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
             $ipLong = ip2long($ip);
             $subnetLong = ip2long($subnet);
-            
+
             if ($ipLong === false || $subnetLong === false) {
                 return false;
             }
-            
+
             $maskLong = -1 << (32 - (int)$mask);
             $subnetLong &= $maskLong;
-            
+
             return ($ipLong & $maskLong) === $subnetLong;
         }
 
@@ -109,27 +124,27 @@ class KioskIpRestriction
     protected function ipv6InCidr(string $ip, string $cidr): bool
     {
         list($subnet, $mask) = explode('/', $cidr);
-        
+
         // Normalize IPv6 addresses
         $ipBin = inet_pton($ip);
         $subnetBin = inet_pton($subnet);
-        
+
         if ($ipBin === false || $subnetBin === false) {
             return false;
         }
-        
+
         // Calculate mask bytes
         $maskBytes = (int)$mask;
         $fullBytes = intval($maskBytes / 8);
         $bits = $maskBytes % 8;
-        
+
         // Compare full bytes
         for ($i = 0; $i < $fullBytes; $i++) {
             if ($ipBin[$i] !== $subnetBin[$i]) {
                 return false;
             }
         }
-        
+
         // Compare partial byte if needed
         if ($bits > 0 && $fullBytes < 16) {
             $maskByte = 0xFF << (8 - $bits);
@@ -137,7 +152,7 @@ class KioskIpRestriction
                 return false;
             }
         }
-        
+
         return true;
     }
 }

@@ -55,6 +55,18 @@ Route::middleware(['web', 'kiosk.ip'])->get('/clock', function () {
     return view('pages.time-clock-kiosk');
 })->name('time-clock.kiosk');
 
+// Debug route to check what IP the server sees (remove in production)
+Route::get('/clock/debug-ip', function (\Illuminate\Http\Request $request) {
+    return response()->json([
+        'client_ip' => $request->ip(),
+        'x_forwarded_for' => $request->header('X-Forwarded-For'),
+        'x_real_ip' => $request->header('X-Real-IP'),
+        'cf_connecting_ip' => $request->header('CF-Connecting-IP'),
+        'remote_addr' => $request->server('REMOTE_ADDR'),
+        'all_headers' => $request->headers->all(),
+    ]);
+})->middleware('web');
+
 
 // Beacon Positioning Routes (for iBeacon indoor positioning)
 Route::middleware(['auth', 'web'])->prefix('admin')->name('filament.admin.beacon.')->group(function () {
