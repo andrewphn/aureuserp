@@ -25,6 +25,95 @@
         >
             <span class="w-2 h-2 rounded-full bg-blue-500 group-hover:animate-pulse"></span>
             Today
+            <span class="text-xs text-gray-400 dark:text-gray-500">(T)</span>
+        </button>
+
+        {{-- Export Button --}}
+        <button
+            x-data
+            x-on:click="$dispatch('gantt-export')"
+            class="px-4 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center gap-2 group"
+        >
+            <x-heroicon-o-arrow-down-tray class="w-4 h-4" />
+            Export
+            <span class="text-xs text-gray-400 dark:text-gray-500">(E)</span>
+        </button>
+
+        {{-- Print Button --}}
+        <button
+            x-data
+            x-on:click="window.print()"
+            class="px-4 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 flex items-center gap-2 group"
+        >
+            <x-heroicon-o-printer class="w-4 h-4" />
+            Print
+            <span class="text-xs text-gray-400 dark:text-gray-500">(P)</span>
+        </button>
+
+        {{-- Keyboard Shortcuts Help --}}
+        <button
+            x-data="{ showHelp: false }"
+            x-on:click="showHelp = !showHelp"
+            class="px-4 py-1.5 text-sm rounded-lg border border-gray-200 dark:border-gray-600 transition-all duration-200 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:border-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 flex items-center gap-2 group relative"
+        >
+            <x-heroicon-o-question-mark-circle class="w-4 h-4" />
+            <span class="text-xs text-gray-400 dark:text-gray-500">(?)</span>
+
+            {{-- Help Tooltip --}}
+            <div
+                x-show="showHelp"
+                x-on:click.away="showHelp = false"
+                x-transition
+                class="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-xl p-4 z-50"
+            >
+                <h4 class="text-sm font-semibold text-gray-900 dark:text-white mb-3">Keyboard Shortcuts</h4>
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Jump to Today</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">T</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Export View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">E</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Print View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">P</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Day View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">1</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Week View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">2</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Month View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">3</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Quarter View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">4</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Year View</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">5</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Navigate Left</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">←</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Navigate Right</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">→</kbd>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600 dark:text-gray-400">Show Help</span>
+                        <kbd class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">?</kbd>
+                    </div>
+                </div>
+            </div>
         </button>
 
         {{-- Stage Filter --}}
@@ -204,6 +293,7 @@
 @assets
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@1.0.0/dist/frappe-gantt.css">
 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@1.0.0/dist/frappe-gantt.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
     /* TCS Gantt Chart Styling - "Don't Make Me Think" UX */
     .gantt-container {
@@ -439,6 +529,62 @@
     .dark .gantt-loading {
         background: rgba(17, 24, 39, 0.8);
     }
+
+    /* ============================================
+       PRINT STYLES - Optimized for Landscape
+       ============================================ */
+
+    @media print {
+        @page {
+            size: landscape;
+            margin: 0.5in;
+        }
+
+        /* Hide interactive elements */
+        .no-print,
+        button,
+        .gantt-popup,
+        nav,
+        header,
+        footer {
+            display: none !important;
+        }
+
+        /* Full width for print */
+        .gantt-chart-wrapper {
+            max-width: 100%;
+        }
+
+        /* Remove shadows and borders for cleaner print */
+        .gantt-chart-wrapper > div {
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Ensure gantt fills page */
+        .gantt-container {
+            height: auto !important;
+            overflow: visible !important;
+            page-break-inside: avoid;
+        }
+
+        /* Print project list on first page */
+        .w-80 {
+            page-break-after: always;
+        }
+
+        /* Optimize colors for print */
+        .gantt .bar-wrapper .bar {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+        }
+
+        /* Show stage legend */
+        .flex.flex-wrap.items-center.gap-4.mt-4 {
+            display: flex !important;
+            page-break-before: avoid;
+        }
+    }
 </style>
 @endassets
 
@@ -457,6 +603,236 @@
 
             // Listen for scroll to today event
             window.addEventListener('gantt-scroll-to-today', () => this.scrollToToday());
+
+            // Listen for export event
+            window.addEventListener('gantt-export', () => this.exportGantt());
+
+            // Setup keyboard shortcuts
+            this.setupKeyboardShortcuts();
+        },
+
+        setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Ignore if user is typing in input field
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                    return;
+                }
+
+                switch(e.key.toLowerCase()) {
+                    case 't':
+                        e.preventDefault();
+                        this.scrollToToday();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        this.exportGantt();
+                        break;
+                    case 'p':
+                        e.preventDefault();
+                        window.print();
+                        break;
+                    case '1':
+                        e.preventDefault();
+                        this.$wire.dispatch('set-view-mode', { mode: 'Day' });
+                        this.changeViewMode('Day');
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        this.$wire.dispatch('set-view-mode', { mode: 'Week' });
+                        this.changeViewMode('Week');
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        this.$wire.dispatch('set-view-mode', { mode: 'Month' });
+                        this.changeViewMode('Month');
+                        break;
+                    case '4':
+                        e.preventDefault();
+                        this.$wire.dispatch('set-view-mode', { mode: 'Quarter' });
+                        this.changeViewMode('Quarter');
+                        break;
+                    case '5':
+                        e.preventDefault();
+                        this.$wire.dispatch('set-view-mode', { mode: 'Year' });
+                        this.changeViewMode('Year');
+                        break;
+                    case 'arrowleft':
+                        e.preventDefault();
+                        this.scrollGantt(-200);
+                        break;
+                    case 'arrowright':
+                        e.preventDefault();
+                        this.scrollGantt(200);
+                        break;
+                    case '?':
+                        e.preventDefault();
+                        // Toggle help - handled by Alpine component
+                        break;
+                }
+            });
+        },
+
+        scrollGantt(amount) {
+            const container = this.$refs.ganttContainer?.querySelector('.gantt-container');
+            if (container) {
+                container.scrollLeft += amount;
+            }
+        },
+
+        exportGantt() {
+            if (!this.$refs.ganttContainer) return;
+
+            // Get the gantt SVG element
+            const svg = this.$refs.ganttContainer.querySelector('.gantt svg');
+            if (!svg) {
+                this.$wire.dispatch('notify', {
+                    type: 'warning',
+                    title: 'No chart to export',
+                    body: 'Please ensure projects are displayed on the timeline.'
+                });
+                return;
+            }
+
+            // Show export menu
+            const exportMenu = document.createElement('div');
+            exportMenu.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+            exportMenu.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-2xl max-w-md w-full mx-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Export Gantt Chart</h3>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">Choose your preferred export format:</p>
+                    <div class="space-y-3">
+                        <button onclick="this.getRootNode().host.exportSVG()" class="w-full px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors flex items-center justify-between group">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                </svg>
+                                SVG (Vector)
+                            </span>
+                            <span class="text-xs opacity-75">Best quality</span>
+                        </button>
+                        <button onclick="this.getRootNode().host.exportPNG()" class="w-full px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center justify-between group">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                PNG (Image)
+                            </span>
+                            <span class="text-xs opacity-75">Most compatible</span>
+                        </button>
+                    </div>
+                    <button onclick="this.getRootNode().host.remove()" class="w-full mt-4 px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            `;
+
+            // Store references for export functions
+            exportMenu.exportSVG = () => {
+                this.exportGanttSVG();
+                exportMenu.remove();
+            };
+            exportMenu.exportPNG = () => {
+                this.exportGanttPNG();
+                exportMenu.remove();
+            };
+
+            document.body.appendChild(exportMenu);
+
+            // Close on outside click
+            exportMenu.addEventListener('click', (e) => {
+                if (e.target === exportMenu) {
+                    exportMenu.remove();
+                }
+            });
+        },
+
+        exportGanttSVG() {
+            const svg = this.$refs.ganttContainer.querySelector('.gantt svg');
+            const svgClone = svg.cloneNode(true);
+
+            // Get SVG dimensions
+            const bbox = svg.getBBox();
+            svgClone.setAttribute('width', bbox.width + 40);
+            svgClone.setAttribute('height', bbox.height + 40);
+            svgClone.setAttribute('viewBox', `${bbox.x - 20} ${bbox.y - 20} ${bbox.width + 40} ${bbox.height + 40}`);
+
+            // Add background
+            const background = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            background.setAttribute('x', bbox.x - 20);
+            background.setAttribute('y', bbox.y - 20);
+            background.setAttribute('width', bbox.width + 40);
+            background.setAttribute('height', bbox.height + 40);
+            background.setAttribute('fill', '#ffffff');
+            svgClone.insertBefore(background, svgClone.firstChild);
+
+            // Convert SVG to string
+            const serializer = new XMLSerializer();
+            const svgString = serializer.serializeToString(svgClone);
+
+            // Create blob and download
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `gantt-chart-${new Date().toISOString().slice(0, 10)}.svg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            this.$wire.dispatch('notify', {
+                type: 'success',
+                title: 'Export successful',
+                body: 'SVG file has been downloaded.'
+            });
+        },
+
+        async exportGanttPNG() {
+            // Show loading notification
+            this.$wire.dispatch('notify', {
+                type: 'info',
+                title: 'Exporting...',
+                body: 'Generating PNG image. This may take a moment.'
+            });
+
+            try {
+                const ganttElement = this.$refs.ganttContainer;
+
+                // Use html2canvas to capture the gantt chart
+                const canvas = await html2canvas(ganttElement, {
+                    backgroundColor: '#ffffff',
+                    scale: 2,
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: true
+                });
+
+                // Convert to blob and download
+                canvas.toBlob((blob) => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `gantt-chart-${new Date().toISOString().slice(0, 10)}.png`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+
+                    this.$wire.dispatch('notify', {
+                        type: 'success',
+                        title: 'Export successful',
+                        body: 'PNG file has been downloaded.'
+                    });
+                });
+            } catch (error) {
+                console.error('PNG export failed:', error);
+                this.$wire.dispatch('notify', {
+                    type: 'error',
+                    title: 'Export failed',
+                    body: 'Unable to export PNG. Please try SVG format instead.'
+                });
+            }
         },
 
         addTodayMarker() {

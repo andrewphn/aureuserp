@@ -266,6 +266,35 @@ class ProjectGanttChart extends Component implements HasForms
     }
 
     /**
+     * Handle notification events from frontend.
+     */
+    #[On('notify')]
+    public function notify(string $type, string $title, string $body): void
+    {
+        $notification = Notification::make()
+            ->title($title)
+            ->body($body);
+
+        match($type) {
+            'success' => $notification->success(),
+            'error' => $notification->danger(),
+            'warning' => $notification->warning(),
+            default => $notification->info(),
+        };
+
+        $notification->send();
+    }
+
+    /**
+     * Handle view mode changes from keyboard shortcuts.
+     */
+    #[On('set-view-mode')]
+    public function handleViewModeChange(string $mode): void
+    {
+        $this->setViewMode($mode);
+    }
+
+    /**
      * Render the component.
      */
     public function render()
