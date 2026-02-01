@@ -367,22 +367,44 @@ class PdfIngestionController extends Controller
     }
 
     /**
-     * Get list of companies for form dropdown
+     * Get list of companies and branches for form dropdown
+     * Returns a flat list with parent companies and their branches
      */
     public function getCompanies(): JsonResponse
     {
-        $companies = Company::where('is_active', true)
-            ->whereNull('parent_id') // Only parent companies
+        $result = [];
+
+        // Get parent companies with their branches
+        $parentCompanies = Company::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with(['branches' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
             ->orderBy('name')
-            ->get(['id', 'name', 'acronym']);
+            ->get();
+
+        foreach ($parentCompanies as $company) {
+            // Add parent company
+            $result[] = [
+                'id' => $company->id,
+                'name' => $company->name,
+                'acronym' => $company->acronym,
+                'is_branch' => false,
+            ];
+
+            // Add branches indented
+            foreach ($company->branches as $branch) {
+                $result[] = [
+                    'id' => $branch->id,
+                    'name' => "↳ {$branch->name}",
+                    'acronym' => $branch->acronym,
+                    'is_branch' => true,
+                    'parent_id' => $company->id,
+                ];
+            }
+        }
 
         return response()->json([
             'success' => true,
-            'companies' => $companies->map(fn ($c) => [
-                'id' => $c->id,
-                'name' => $c->name,
-                'acronym' => $c->acronym,
-            ]),
+            'companies' => $result,
         ]);
     }
 
