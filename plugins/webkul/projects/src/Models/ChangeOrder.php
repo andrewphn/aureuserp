@@ -207,6 +207,23 @@ class ChangeOrder extends Model
     }
 
     /**
+     * Get all stop actions for this change order.
+     */
+    public function stopActions(): HasMany
+    {
+        return $this->hasMany(ChangeOrderStopAction::class, 'change_order_id');
+    }
+
+    /**
+     * Get active (non-reverted) stop actions for this change order.
+     */
+    public function activeStopActions(): HasMany
+    {
+        return $this->hasMany(ChangeOrderStopAction::class, 'change_order_id')
+            ->whereNull('reverted_at');
+    }
+
+    /**
      * Check if change order can be approved.
      */
     public function canBeApproved(): bool

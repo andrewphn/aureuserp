@@ -43,6 +43,22 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // API Info (no auth required)
 Route::get('v1', [V1\ApiInfoController::class, 'index'])->name('api.v1.info');
 
+// ========================================
+// Google Drive Webhooks (no auth - Google sends these)
+// ========================================
+Route::prefix('v1/google-drive')->name('api.v1.google-drive.')->group(function () {
+    // Webhook endpoint - receives push notifications from Google
+    Route::post('webhook', [V1\GoogleDriveWebhookController::class, 'handle'])->name('webhook');
+
+    // Domain verification for Google (required for push notifications)
+    Route::get('verify', [V1\GoogleDriveWebhookController::class, 'verify'])->name('verify');
+});
+
+// Google Drive webhook status (requires auth)
+Route::prefix('v1/google-drive')->middleware(['auth:sanctum'])->name('api.v1.google-drive.')->group(function () {
+    Route::get('status', [V1\GoogleDriveWebhookController::class, 'status'])->name('status');
+});
+
 Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.')->group(function () {
 
     // ========================================

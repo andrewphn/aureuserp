@@ -263,7 +263,16 @@ class ViewProject extends ViewRecord
             ProjectResource\Widgets\ProjectStatusWidget::class,
             ProjectResource\Widgets\ProjectFinancialsWidget::class,
             ProjectResource\Widgets\ProjectTimelineWidget::class,
-            ProjectResource\Widgets\ProjectAlertsWidget::class,
+        ];
+    }
+
+    public function getHeaderWidgetsColumns(): int | array
+    {
+        return [
+            'default' => 1,
+            'sm' => 3,
+            'md' => 3,
+            'lg' => 3,
         ];
     }
 

@@ -17,6 +17,8 @@ enum OrderState: string implements HasColor, HasLabel
 
     case PURCHASE = 'purchase';
 
+    case ON_HOLD = 'on_hold';
+
     case DONE = 'done';
 
     case CANCELED = 'canceled';
@@ -32,6 +34,7 @@ enum OrderState: string implements HasColor, HasLabel
             self::DRAFT->value    => __('purchases::enums/order-state.draft'),
             self::SENT->value     => __('purchases::enums/order-state.sent'),
             self::PURCHASE->value => __('purchases::enums/order-state.purchase'),
+            self::ON_HOLD->value  => __('purchases::enums/order-state.on_hold'),
             self::DONE->value     => __('purchases::enums/order-state.done'),
             self::CANCELED->value => __('purchases::enums/order-state.canceled'),
         ];
@@ -43,6 +46,7 @@ enum OrderState: string implements HasColor, HasLabel
             self::DRAFT    => __('purchases::enums/order-state.draft'),
             self::SENT     => __('purchases::enums/order-state.sent'),
             self::PURCHASE => __('purchases::enums/order-state.purchase'),
+            self::ON_HOLD  => __('purchases::enums/order-state.on_hold'),
             self::DONE     => __('purchases::enums/order-state.done'),
             self::CANCELED => __('purchases::enums/order-state.canceled'),
         };
@@ -54,6 +58,7 @@ enum OrderState: string implements HasColor, HasLabel
             self::DRAFT    => 'gray',
             self::SENT     => 'blue',
             self::PURCHASE => 'success',
+            self::ON_HOLD  => 'warning',
             self::DONE     => 'success',
             self::CANCELED => 'danger',
         };

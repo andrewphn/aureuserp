@@ -7,13 +7,15 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Project Financials Widget Filament widget
+ * Project Financials Widget - Compact single-stat widget
  *
- * @see \Filament\Resources\Resource
+ * Shows quoted amount with key metrics and financial alerts.
  */
 class ProjectFinancialsWidget extends BaseWidget
 {
     public ?Model $record = null;
+
+    protected int | string | array $columnSpan = 1;
 
     protected function getStats(): array
     {
@@ -22,23 +24,73 @@ class ProjectFinancialsWidget extends BaseWidget
         }
 
         $financials = $this->calculateFinancials();
+        $alert = $this->getFinancialAlert($financials);
+
+        // Build description: LF @ price • margin
+        $descParts = [];
+        $descParts[] = $financials['linear_feet'] . ' @ ' . $financials['price_per_lf'];
+        $descParts[] = $financials['margin_formatted'] . ' margin';
+
+        $description = implode(' • ', $descParts);
+        $color = $financials['margin_color'];
+
+        // Show alert if present
+        if ($alert) {
+            $description = '⚠ ' . $alert['message'];
+            $color = $alert['color'];
+        }
 
         return [
-            Stat::make('Total Quoted', $financials['quoted_formatted'])
-                ->description($financials['linear_feet'] . ' LF @ ' . $financials['price_per_lf'])
-                ->descriptionIcon('heroicon-o-document-text')
-                ->color('info'),
-
-            Stat::make('Actual Costs', $financials['actual_formatted'])
-                ->description($financials['cost_breakdown'])
-                ->descriptionIcon('heroicon-o-currency-dollar')
-                ->color($financials['actual_color']),
-
-            Stat::make('Profit Margin', $financials['margin_formatted'])
-                ->description($financials['margin_description'])
-                ->descriptionIcon($financials['margin_icon'])
-                ->color($financials['margin_color']),
+            Stat::make('Financials', $financials['quoted_formatted'])
+                ->description($description)
+                ->icon('heroicon-o-currency-dollar')
+                ->color($color),
         ];
+    }
+
+    /**
+     * Get financial alert if any issues exist
+     */
+    protected function getFinancialAlert(array $financials): ?array
+    {
+        // Check for missing pricing
+        $cabinetsWithoutPrice = $this->record->cabinets()
+            ->where(function ($q) {
+                $q->whereNull('unit_price_per_lf')->orWhereNull('linear_feet');
+            })
+            ->count();
+
+        if ($cabinetsWithoutPrice > 0) {
+            return [
+                'message' => "{$cabinetsWithoutPrice} cabinet(s) missing pricing",
+                'color' => 'warning',
+            ];
+        }
+
+        // Check margin health
+        if ($financials['margin'] < 10 && $financials['quoted'] > 0) {
+            return [
+                'message' => 'Low margin (' . $financials['margin_formatted'] . ')',
+                'color' => 'danger',
+            ];
+        }
+
+        if ($financials['margin'] < 20 && $financials['quoted'] > 0) {
+            return [
+                'message' => 'Margin below 20% target',
+                'color' => 'warning',
+            ];
+        }
+
+        // Check if over budget
+        if ($financials['actual'] > $financials['quoted'] && $financials['quoted'] > 0) {
+            return [
+                'message' => 'Over budget by $' . number_format($financials['actual'] - $financials['quoted'], 0),
+                'color' => 'danger',
+            ];
+        }
+
+        return null;
     }
 
     /**
