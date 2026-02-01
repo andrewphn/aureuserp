@@ -414,6 +414,9 @@ class CncProgram extends Model
             'RiftWOPly' => 'Rift-cut White Oak Plywood',
             'MDF_RiftWO' => 'MDF with Rift White Oak',
             'Medex' => 'Medex engineered wood',
+            'Melamine' => 'Melamine',
+            'Laminate' => 'Laminate',
+            'BW' => 'BW',
         ];
     }
 

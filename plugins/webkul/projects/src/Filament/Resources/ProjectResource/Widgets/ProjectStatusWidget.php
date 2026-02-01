@@ -7,23 +7,16 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Project Production Stage Widget
+ * Project Production Stage Widget - Compact single-stat widget
  *
- * Shows current production stage and gate status.
- *
- * @see \Filament\Resources\Resource
+ * Shows current production stage with gate blockers.
  */
 class ProjectStatusWidget extends BaseWidget
 {
     public ?Model $record = null;
 
-    protected static bool $isLazy = false;
-
     protected int | string | array $columnSpan = 1;
 
-    /**
-     * Human-readable stage labels
-     */
     protected array $stageLabels = [
         'discovery' => 'Discovery',
         'design' => 'Design',
@@ -32,9 +25,6 @@ class ProjectStatusWidget extends BaseWidget
         'delivery' => 'Delivery',
     ];
 
-    /**
-     * Stage icons
-     */
     protected array $stageIcons = [
         'discovery' => 'heroicon-o-magnifying-glass',
         'design' => 'heroicon-o-pencil-square',
@@ -43,9 +33,6 @@ class ProjectStatusWidget extends BaseWidget
         'delivery' => 'heroicon-o-truck',
     ];
 
-    /**
-     * Stage colors
-     */
     protected array $stageColors = [
         'discovery' => 'gray',
         'design' => 'info',
@@ -57,12 +44,7 @@ class ProjectStatusWidget extends BaseWidget
     protected function getStats(): array
     {
         if (! $this->record) {
-            return [
-                Stat::make('Stage', '-')
-                    ->description('Loading...')
-                    ->icon('heroicon-o-flag')
-                    ->color('gray'),
-            ];
+            return [];
         }
 
         $stageData = $this->calculateStageStatus();
@@ -75,9 +57,6 @@ class ProjectStatusWidget extends BaseWidget
         ];
     }
 
-    /**
-     * Calculate production stage status
-     */
     protected function calculateStageStatus(): array
     {
         $currentStage = $this->record->current_production_stage ?? 'discovery';
@@ -85,7 +64,7 @@ class ProjectStatusWidget extends BaseWidget
         $icon = $this->stageIcons[$currentStage] ?? 'heroicon-o-flag';
         $color = $this->stageColors[$currentStage] ?? 'gray';
 
-        // Get gate status to check for blockers
+        // Get gate status for blockers
         $gateStatus = $this->record->getStageGateStatus();
         $blockers = $gateStatus['blockers'] ?? [];
         $canAdvance = $gateStatus['can_advance'] ?? false;
@@ -93,7 +72,6 @@ class ProjectStatusWidget extends BaseWidget
 
         // Build description
         if (!empty($blockers)) {
-            // Show the most important blocker
             $description = '⚠ ' . $blockers[0];
             $color = 'warning';
         } elseif ($canAdvance && $nextStage) {
@@ -103,7 +81,6 @@ class ProjectStatusWidget extends BaseWidget
         } elseif ($currentStage === 'delivery') {
             $description = 'Final stage';
         } else {
-            // Show progress indicator
             $stageIndex = array_search($currentStage, array_keys($this->stageLabels));
             $totalStages = count($this->stageLabels);
             $description = 'Stage ' . ($stageIndex + 1) . ' of ' . $totalStages;
@@ -114,8 +91,6 @@ class ProjectStatusWidget extends BaseWidget
             'description' => $description,
             'icon' => $icon,
             'color' => $color,
-            'can_advance' => $canAdvance,
-            'blockers' => $blockers,
         ];
     }
 }

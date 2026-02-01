@@ -74,6 +74,10 @@ class CreateProjectDriveFoldersJob implements ShouldQueue
                     'folder_url' => $result['folder_url'],
                     'folders' => array_keys($result['folders']),
                 ]);
+
+                // Set up webhook watch for the new folder (delayed to ensure folder is ready)
+                WatchProjectDriveFolderJob::dispatch($this->project->fresh())
+                    ->delay(now()->addSeconds(10));
             }
         } catch (\Exception $e) {
             Log::error('Failed to create Google Drive folders', [

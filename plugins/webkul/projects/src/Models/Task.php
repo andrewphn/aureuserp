@@ -126,6 +126,9 @@ class Task extends Model implements Sortable
         'completed_at',
         'started_by',
         'completed_by',
+        // Change order blocking
+        'blocked_by_change_order_id',
+        'state_before_block',
     ];
 
     /**
@@ -350,6 +353,26 @@ class Task extends Model implements Sortable
     public function cabinet(): BelongsTo
     {
         return $this->belongsTo(Cabinet::class);
+    }
+
+    /**
+     * Change order that is blocking this task.
+     *
+     * @return BelongsTo
+     */
+    public function blockedByChangeOrder(): BelongsTo
+    {
+        return $this->belongsTo(ChangeOrder::class, 'blocked_by_change_order_id');
+    }
+
+    /**
+     * Check if this task is blocked by a change order.
+     *
+     * @return bool
+     */
+    public function isBlockedByChangeOrder(): bool
+    {
+        return $this->blocked_by_change_order_id !== null;
     }
 
     /**

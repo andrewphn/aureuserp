@@ -185,6 +185,10 @@ class Project extends Model implements HasMedia, Sortable
         'total_drawer_count',
         'total_door_count',
         'dimensions_calculated_at',
+        // Change order stop action tracking
+        'has_pending_change_order',
+        'active_change_order_id',
+        'delivery_blocked',
     ];
 
     /**
@@ -240,6 +244,9 @@ class Project extends Model implements HasMedia, Sortable
         'total_drawer_count' => 'integer',
         'total_door_count' => 'integer',
         'dimensions_calculated_at' => 'datetime',
+        // Change order stop action tracking
+        'has_pending_change_order' => 'boolean',
+        'delivery_blocked' => 'boolean',
     ];
 
     protected array $logAttributes = [
@@ -647,6 +654,46 @@ class Project extends Model implements HasMedia, Sortable
     }
 
     /**
+     * Active Change Order (if any)
+     *
+     * @return BelongsTo
+     */
+    public function activeChangeOrder(): BelongsTo
+    {
+        return $this->belongsTo(ChangeOrder::class, 'active_change_order_id');
+    }
+
+    /**
+     * All Change Orders for this project.
+     *
+     * @return HasMany
+     */
+    public function changeOrders(): HasMany
+    {
+        return $this->hasMany(ChangeOrder::class, 'project_id');
+    }
+
+    /**
+     * Check if this project has an active (approved but not applied) change order.
+     *
+     * @return bool
+     */
+    public function hasPendingChangeOrder(): bool
+    {
+        return $this->has_pending_change_order;
+    }
+
+    /**
+     * Check if delivery is blocked due to a change order.
+     *
+     * @return bool
+     */
+    public function isDeliveryBlocked(): bool
+    {
+        return $this->delivery_blocked;
+    }
+
+    /**
      * Tags
      *
      * @return BelongsToMany
@@ -707,6 +754,16 @@ class Project extends Model implements HasMedia, Sortable
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class);
+    }
+
+    /**
+     * CNC Programs
+     *
+     * @return HasMany
+     */
+    public function cncPrograms(): HasMany
+    {
+        return $this->hasMany(CncProgram::class);
     }
 
     /**

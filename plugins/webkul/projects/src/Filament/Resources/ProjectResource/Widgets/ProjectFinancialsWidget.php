@@ -7,71 +7,62 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Project Financials Widget Filament widget
+ * Project Financials Widget - Compact single-stat widget
  *
- * @see \Filament\Resources\Resource
+ * Shows quoted amount with key metrics and financial alerts.
  */
 class ProjectFinancialsWidget extends BaseWidget
 {
     public ?Model $record = null;
-
-    protected static bool $isLazy = false;
 
     protected int | string | array $columnSpan = 1;
 
     protected function getStats(): array
     {
         if (! $this->record) {
-            return [
-                Stat::make('Financials', '-')
-                    ->description('Loading...')
-                    ->icon('heroicon-o-currency-dollar')
-                    ->color('gray'),
-            ];
+            return [];
         }
 
         $financials = $this->calculateFinancials();
-        $alerts = $this->getFinancialAlerts($financials);
+        $alert = $this->getFinancialAlert($financials);
 
-        // Build description with metrics
+        // Build description: LF @ price • margin
         $descParts = [];
         $descParts[] = $financials['linear_feet'] . ' @ ' . $financials['price_per_lf'];
-        if ($financials['actual'] > 0) {
-            $descParts[] = $financials['actual_formatted'] . ' costs';
-        }
         $descParts[] = $financials['margin_formatted'] . ' margin';
 
-        // Add alert if present
         $description = implode(' • ', $descParts);
-        if (!empty($alerts['message'])) {
-            $description = $alerts['icon'] . ' ' . $alerts['message'];
+        $color = $financials['margin_color'];
+
+        // Show alert if present
+        if ($alert) {
+            $description = '⚠ ' . $alert['message'];
+            $color = $alert['color'];
         }
 
         return [
             Stat::make('Financials', $financials['quoted_formatted'])
                 ->description($description)
                 ->icon('heroicon-o-currency-dollar')
-                ->color($alerts['color'] ?? $financials['margin_color']),
+                ->color($color),
         ];
     }
 
     /**
-     * Get financial-specific alerts
+     * Get financial alert if any issues exist
      */
-    protected function getFinancialAlerts(array $financials): array
+    protected function getFinancialAlert(array $financials): ?array
     {
-        // Check for missing pricing data
+        // Check for missing pricing
         $cabinetsWithoutPrice = $this->record->cabinets()
-            ->where(function ($query) {
-                $query->whereNull('unit_price_per_lf')
-                    ->orWhereNull('linear_feet');
+            ->where(function ($q) {
+                $q->whereNull('unit_price_per_lf')->orWhereNull('linear_feet');
             })
             ->count();
 
         if ($cabinetsWithoutPrice > 0) {
             return [
                 'message' => "{$cabinetsWithoutPrice} cabinet(s) missing pricing",
-                'icon' => '⚠',
                 'color' => 'warning',
             ];
         }
@@ -80,30 +71,26 @@ class ProjectFinancialsWidget extends BaseWidget
         if ($financials['margin'] < 10 && $financials['quoted'] > 0) {
             return [
                 'message' => 'Low margin (' . $financials['margin_formatted'] . ')',
-                'icon' => '⚠',
                 'color' => 'danger',
             ];
         }
 
         if ($financials['margin'] < 20 && $financials['quoted'] > 0) {
             return [
-                'message' => 'Margin below target (20%)',
-                'icon' => '⚠',
+                'message' => 'Margin below 20% target',
                 'color' => 'warning',
             ];
         }
 
         // Check if over budget
         if ($financials['actual'] > $financials['quoted'] && $financials['quoted'] > 0) {
-            $overBy = $financials['actual'] - $financials['quoted'];
             return [
-                'message' => 'Over budget by $' . number_format($overBy, 0),
-                'icon' => '⚠',
+                'message' => 'Over budget by $' . number_format($financials['actual'] - $financials['quoted'], 0),
                 'color' => 'danger',
             ];
         }
 
-        return [];
+        return null;
     }
 
     /**
@@ -113,19 +100,15 @@ class ProjectFinancialsWidget extends BaseWidget
      */
     protected function calculateFinancials(): array
     {
-        // Calculate total quoted amount from cabinets
+        // Calculate total quoted amount
         $quoted = $this->record->cabinets()
             ->selectRaw('SUM(unit_price_per_lf * linear_feet * quantity) as total')
             ->value('total') ?? 0;
 
-        // Calculate linear feet from cabinets, fallback to project estimated_linear_feet
-        $cabinetLinearFeet = $this->record->cabinets()
+        // Calculate linear feet
+        $linearFeet = $this->record->cabinets()
             ->selectRaw('SUM(linear_feet * quantity) as total')
             ->value('total') ?? 0;
-
-        // Use cabinet LF if available, otherwise use project estimated LF
-        $linearFeet = $cabinetLinearFeet > 0 ? $cabinetLinearFeet : ($this->record->estimated_linear_feet ?? 0);
-        $isEstimated = $cabinetLinearFeet == 0 && $linearFeet > 0;
 
         // Calculate price per linear foot
         $pricePerLF = $linearFeet > 0 ? $quoted / $linearFeet : 0;
@@ -159,12 +142,6 @@ class ProjectFinancialsWidget extends BaseWidget
         $actualColor = $actual > $quoted ? 'danger' : 'success';
         $costBreakdown = ($actual > 0 && $quoted > 0) ? 'Spent: ' . number_format(($actual / $quoted) * 100, 1) . '% of budget' : 'No costs recorded';
 
-        // Format linear feet with indicator if using estimate
-        $linearFeetFormatted = number_format($linearFeet, 0) . ' LF';
-        if ($isEstimated) {
-            $linearFeetFormatted .= ' (est.)';
-        }
-
         return [
             'quoted' => $quoted,
             'quoted_formatted' => '$' . number_format($quoted, 0),
@@ -174,14 +151,13 @@ class ProjectFinancialsWidget extends BaseWidget
             'margin_formatted' => number_format($margin, 1) . '%',
             'profit' => $profit,
             'profit_formatted' => '$' . number_format($profit, 0),
-            'linear_feet' => $linearFeetFormatted,
+            'linear_feet' => number_format($linearFeet, 0) . ' LF',
             'price_per_lf' => '$' . number_format($pricePerLF, 0) . '/LF',
             'margin_color' => $marginColor,
             'margin_icon' => $marginIcon,
             'margin_description' => $marginDescription,
             'actual_color' => $actualColor,
             'cost_breakdown' => $costBreakdown,
-            'is_estimated' => $isEstimated,
         ];
     }
 }

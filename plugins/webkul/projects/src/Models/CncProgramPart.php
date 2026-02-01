@@ -17,6 +17,10 @@ use Webkul\Security\Models\User;
  * @property int $cnc_program_id
  * @property string $file_name
  * @property string|null $file_path
+ * @property string|null $nc_drive_id
+ * @property string|null $nc_drive_url
+ * @property string|null $reference_photo_drive_id
+ * @property string|null $reference_photo_url
  * @property int|null $sheet_number
  * @property string|null $operation_type
  * @property string|null $tool
@@ -30,7 +34,6 @@ use Webkul\Security\Models\User;
  * @property string|null $component_type
  * @property int|null $component_id
  * @property string|null $part_label
- * @property int $quantity
  * @property array|null $position_data
  */
 class CncProgramPart extends Model
@@ -57,6 +60,10 @@ class CncProgramPart extends Model
         'cnc_program_id',
         'file_name',
         'file_path',
+        'nc_drive_id',
+        'nc_drive_url',
+        'reference_photo_drive_id',
+        'reference_photo_url',
         'sheet_number',
         'operation_type',
         'tool',
@@ -70,7 +77,6 @@ class CncProgramPart extends Model
         'component_type',
         'component_id',
         'part_label',
-        'quantity',
         'position_data',
     ];
 
@@ -79,7 +85,6 @@ class CncProgramPart extends Model
         'run_at' => 'datetime',
         'completed_at' => 'datetime',
         'file_size' => 'integer',
-        'quantity' => 'integer',
     ];
 
     // =========================================================================

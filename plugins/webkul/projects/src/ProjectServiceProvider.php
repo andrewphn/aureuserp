@@ -6,6 +6,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
 use Webkul\Project\Console\Commands\CleanupExpiredDrafts;
 use Webkul\Project\Console\Commands\RecalculateComplexityScores;
+use Webkul\Project\Console\Commands\RenewGoogleDriveWatchesCommand;
 use Webkul\Project\Events\ProjectStageChanged;
 use Webkul\Project\Listeners\HandleProjectStageChange;
 use Webkul\Project\Models\Door;
@@ -22,6 +23,7 @@ use Webkul\Project\Services\GoogleDrive\GoogleDriveAuthService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveFolderService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveSyncService;
+use Webkul\Project\Services\GoogleDrive\GoogleDriveWebhookService;
 use Webkul\Support\Console\Commands\InstallCommand;
 use Webkul\Support\Console\Commands\UninstallCommand;
 use Webkul\Support\Package;
@@ -219,12 +221,16 @@ class ProjectServiceProvider extends PackageServiceProvider
             $service->setSyncService($app->make(GoogleDriveSyncService::class));
             return $service;
         });
+        $this->app->singleton(GoogleDriveWebhookService::class, function ($app) {
+            return new GoogleDriveWebhookService($app->make(GoogleDriveAuthService::class));
+        });
 
         // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
                 CleanupExpiredDrafts::class,
                 RecalculateComplexityScores::class,
+                RenewGoogleDriveWatchesCommand::class,
             ]);
 
             // Schedule the draft cleanup to run daily at 2:00 AM
@@ -235,6 +241,13 @@ class ProjectServiceProvider extends PackageServiceProvider
                     ->withoutOverlapping()
                     ->runInBackground()
                     ->appendOutputTo(storage_path('logs/draft-cleanup.log'));
+
+                // Schedule Google Drive watch renewal daily at 3:00 AM
+                $schedule->command('google-drive:renew-watches')
+                    ->dailyAt('03:00')
+                    ->withoutOverlapping()
+                    ->runInBackground()
+                    ->appendOutputTo(storage_path('logs/google-drive-watches.log'));
             });
         }
     }
