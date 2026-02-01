@@ -18,7 +18,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_stretchers', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_cabinet_stretchers')) {
+            return;
+        }
+
+Schema::table('projects_stretchers', function (Blueprint $table) {
             // Position from bottom of box (in inches) - calculated or override
             if (!Schema::hasColumn('projects_stretchers', 'position_from_bottom_inches')) {
                 $table->decimal('position_from_bottom_inches', 8, 4)->nullable()

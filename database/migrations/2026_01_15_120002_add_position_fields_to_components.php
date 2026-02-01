@@ -33,7 +33,12 @@ return new class extends Migration
 
     public function up(): void
     {
-        foreach ($this->tables as $tableName) {
+        
+        if (!Schema::hasTable('projects_cabinet_components')) {
+            return;
+        }
+
+foreach ($this->tables as $tableName) {
             Schema::table($tableName, function (Blueprint $table) {
                 // ===== VERTICAL POSITION (for stacked components) =====
                 $table->decimal('position_in_opening_inches', 8, 4)

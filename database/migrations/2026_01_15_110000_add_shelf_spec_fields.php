@@ -19,7 +19,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects_shelves', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
+Schema::table('projects_shelves', function (Blueprint $table) {
             // ===== OPENING REFERENCE (input dimensions) =====
             $table->decimal('opening_width_inches', 8, 4)->nullable()
                 ->after('thickness_inches')

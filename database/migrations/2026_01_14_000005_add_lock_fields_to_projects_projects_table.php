@@ -15,7 +15,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_projects', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_projects')) {
+            return;
+        }
+
+Schema::table('projects_projects', function (Blueprint $table) {
             // Design lock - prevents cabinet spec edits
             $table->timestamp('design_locked_at')->nullable();
             $table->foreignId('design_locked_by')

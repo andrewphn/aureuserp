@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Updates slide specifications to match official Blum TANDEM 563H documentation.
@@ -68,7 +69,12 @@ return new class extends Migration
 
     public function up(): void
     {
-        // Step 1: Create 12" slide product if it doesn't exist
+        
+        if (!Schema::hasTable('products_product_attribute_values')) {
+            return;
+        }
+
+// Step 1: Create 12" slide product if it doesn't exist
         $slide12Id = $this->createSlide12Product();
 
         // Step 2: Get attribute IDs

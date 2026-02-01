@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -47,7 +48,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Get attribute IDs by name
+        
+        if (!Schema::hasTable('products_attributes')) {
+            return;
+        }
+
+// Get attribute IDs by name
         $attributes = DB::table('products_attributes')
             ->whereIn('name', [
                 'Slide Length',

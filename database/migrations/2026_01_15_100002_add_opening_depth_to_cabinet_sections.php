@@ -13,7 +13,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (Schema::hasColumn('projects_cabinet_sections', 'opening_depth_inches')) {
+        
+        if (!Schema::hasTable('projects_cabinet_sections')) {
+            return;
+        }
+
+if (Schema::hasColumn('projects_cabinet_sections', 'opening_depth_inches')) {
             return;
         }
 

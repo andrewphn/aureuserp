@@ -15,7 +15,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Extraction jobs table - tracks async extraction job status
+        
+        if (!Schema::hasTable('projects_projects')) {
+            return;
+        }
+
+// Extraction jobs table - tracks async extraction job status
         Schema::create('rhino_extraction_jobs', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();

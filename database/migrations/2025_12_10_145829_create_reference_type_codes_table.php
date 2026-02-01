@@ -11,6 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if products plugin tables don't exist yet
+        if (!Schema::hasTable('products_categories') || !Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::create('products_reference_type_codes', function (Blueprint $table) {
             $table->id();
             $table->string('code', 10)->comment('Type code (e.g., GLUE, SAW, HINGE)');
@@ -37,10 +42,12 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('products_products', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('reference_type_code_id');
-            $table->dropColumn('type_code');
-        });
+        if (Schema::hasTable('products_products')) {
+            Schema::table('products_products', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('reference_type_code_id');
+                $table->dropColumn('type_code');
+            });
+        }
 
         Schema::dropIfExists('products_reference_type_codes');
     }

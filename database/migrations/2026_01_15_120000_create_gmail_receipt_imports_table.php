@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('gmail_receipt_imports', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
+Schema::create('gmail_receipt_imports', function (Blueprint $table) {
             $table->id();
             $table->string('message_id');
             $table->string('thread_id')->nullable();

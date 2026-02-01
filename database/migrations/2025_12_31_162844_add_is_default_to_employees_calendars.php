@@ -12,7 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('employees_calendars', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('employees_calendars')) {
+            return;
+        }
+
+Schema::table('employees_calendars', function (Blueprint $table) {
             $table->boolean('is_default')->default(false)->after('is_active');
         });
 

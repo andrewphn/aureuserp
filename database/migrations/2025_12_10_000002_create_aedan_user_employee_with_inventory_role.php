@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Role;
 
 return new class extends Migration
@@ -12,6 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if required tables don't exist (e.g., in test database before full migration)
+        if (!Schema::hasTable('employees_departments') || !Schema::hasTable('employees_job_positions') || !Schema::hasTable('employees_employees')) {
+            return;
+        }
+
         // 1. Ensure Administration department exists
         $department = DB::table('employees_departments')->where('name', 'Administration')->first();
         if (!$department) {

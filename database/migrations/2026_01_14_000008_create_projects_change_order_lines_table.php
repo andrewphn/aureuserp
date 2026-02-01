@@ -14,7 +14,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects_change_order_lines', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_change_orders')) {
+            return;
+        }
+
+Schema::create('projects_change_order_lines', function (Blueprint $table) {
             $table->id();
             
             // Parent change order

@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('projects_cabinets')) {
+            return;
+        }
+
         Schema::table('projects_cabinets', function (Blueprint $table) {
             // Line item adjustment fields
             $table->string('adjustment_type', 20)->default('none')->after('total_price')
@@ -29,6 +33,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('projects_cabinets')) {
+            return;
+        }
+
         Schema::table('projects_cabinets', function (Blueprint $table) {
             $table->dropColumn([
                 'adjustment_type',

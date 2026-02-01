@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -77,6 +78,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if products tables don't exist yet
+        if (!Schema::hasTable('products_categories') || !Schema::hasTable('products_products')) {
+            return;
+        }
+
         // First, create missing categories
         foreach ($this->categoryMap as $id => $data) {
             $exists = DB::table('products_categories')->where('id', $id)->exists();
@@ -173,8 +179,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_categories') || !Schema::hasTable('products_products')) {
+            return;
+        }
+
         // Remove the type codes
-        DB::table('products_reference_type_codes')->truncate();
+        if (Schema::hasTable('products_reference_type_codes')) {
+            DB::table('products_reference_type_codes')->truncate();
+        }
 
         // Clear the codes from categories
         DB::table('products_categories')->update(['code' => null]);

@@ -14,6 +14,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('products_attributes')) {
+            return;
+        }
+
         Schema::table('products_attributes', function (Blueprint $table) {
             $table->string('category', 50)->nullable()->after('type')
                 ->comment('Attribute category: clearance, dimension, material, finish, hardware, cabinet');
@@ -29,6 +33,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_attributes')) {
+            return;
+        }
+
         Schema::table('products_attributes', function (Blueprint $table) {
             $table->dropColumn(['category', 'is_constant', 'default_value']);
         });

@@ -14,7 +14,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects_gates', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_stages')) {
+            return;
+        }
+
+Schema::create('projects_gates', function (Blueprint $table) {
             $table->id();
             
             // Link to stage - a gate belongs to a specific project stage

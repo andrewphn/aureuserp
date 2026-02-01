@@ -17,6 +17,15 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('analytic_records')) {
+            return;
+        }
+
+        // Skip if clock_out_time doesn't exist (previous migration was skipped)
+        if (!Schema::hasColumn('analytic_records', 'clock_out_time')) {
+            return;
+        }
+
         Schema::table('analytic_records', function (Blueprint $table) {
             // Lunch start/end timestamps for real-time tracking
             $table->time('lunch_start_time')->nullable()->after('clock_out_time')
@@ -31,6 +40,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('analytic_records')) {
+            return;
+        }
+
         Schema::table('analytic_records', function (Blueprint $table) {
             $table->dropColumn([
                 'lunch_start_time',

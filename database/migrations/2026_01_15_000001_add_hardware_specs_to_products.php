@@ -12,7 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products_products', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
+Schema::table('products_products', function (Blueprint $table) {
             // Slide-specific dimension fields
             $table->decimal('min_cabinet_depth_inches', 5, 3)
                 ->nullable()

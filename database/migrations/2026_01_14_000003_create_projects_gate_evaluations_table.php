@@ -14,7 +14,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects_gate_evaluations', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_projects')) {
+            return;
+        }
+
+Schema::create('projects_gate_evaluations', function (Blueprint $table) {
             $table->id();
             
             // Links

@@ -16,7 +16,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_drawers', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_cabinet_drawers')) {
+            return;
+        }
+
+Schema::table('projects_drawers', function (Blueprint $table) {
             // Shop heights - rounded down to nearest 1/2" for safety
             $table->decimal('box_height_shop_inches', 8, 4)->nullable()
                 ->after('box_height_inches')

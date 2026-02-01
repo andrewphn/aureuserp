@@ -20,7 +20,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_construction_templates', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_construction_templates')) {
+            return;
+        }
+
+Schema::table('projects_construction_templates', function (Blueprint $table) {
             // ========================================
             // REVEAL & GAP CONSTANTS
             // ========================================

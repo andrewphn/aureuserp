@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::table('products_products', function (Blueprint $table) {
             $table->string('image_source', 50)->nullable()->after('source_url')
                 ->comment('Source of product image: user_photo, commercial, ai_generated');
@@ -22,6 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::table('products_products', function (Blueprint $table) {
             $table->dropColumn('image_source');
         });

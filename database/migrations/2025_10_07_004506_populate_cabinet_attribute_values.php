@@ -2,13 +2,19 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     public function up(): void
     {
+        // Skip if products table doesn't exist yet (plugin not installed)
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         $now = now();
-        
+
         $cabinetProduct = DB::table('products_products')
             ->where('reference', 'CABINET')
             ->first();
@@ -68,6 +74,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         $cabinetProduct = DB::table('products_products')
             ->where('reference', 'CABINET')
             ->first();

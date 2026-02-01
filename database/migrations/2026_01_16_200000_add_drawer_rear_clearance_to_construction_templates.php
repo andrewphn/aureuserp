@@ -25,7 +25,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_construction_templates', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_construction_templates')) {
+            return;
+        }
+
+Schema::table('projects_construction_templates', function (Blueprint $table) {
             // Add drawer_rear_clearance after back_panel_thickness
             $table->decimal('drawer_rear_clearance', 8, 4)->default(0.75)
                 ->after('back_panel_thickness')

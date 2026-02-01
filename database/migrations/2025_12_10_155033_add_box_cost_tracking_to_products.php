@@ -16,6 +16,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::table('products_products', function (Blueprint $table) {
             // Cost when buying a box/package from supplier
             $table->decimal('box_cost', 12, 4)->nullable()->after('cost');
@@ -36,6 +40,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::table('products_products', function (Blueprint $table) {
             $table->dropColumn([
                 'box_cost',

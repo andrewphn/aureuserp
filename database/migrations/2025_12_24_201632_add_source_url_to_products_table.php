@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::table('products_products', function (Blueprint $table) {
             $table->string('source_url', 500)->nullable()->after('barcode')
                 ->comment('URL to vendor/manufacturer product page (e.g., Richelieu)');
@@ -22,6 +26,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         Schema::table('products_products', function (Blueprint $table) {
             $table->dropColumn('source_url');
         });

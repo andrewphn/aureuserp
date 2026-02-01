@@ -25,6 +25,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('projects_cabinets')) {
+            return;
+        }
+
         Schema::table('projects_cabinets', function (Blueprint $table) {
             // Top construction type
             // Bryan: "Lower cabinet would have 3 inch stretchers because it doesn't need a top"

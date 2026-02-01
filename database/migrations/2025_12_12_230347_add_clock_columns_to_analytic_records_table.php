@@ -21,6 +21,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('analytic_records') || !Schema::hasTable('employees_work_locations')) {
+            return;
+        }
+
         Schema::table('analytic_records', function (Blueprint $table) {
             // Clock in/out timestamps
             $table->time('clock_in_time')->nullable()->after('date')
@@ -76,6 +80,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('analytic_records')) {
+            return;
+        }
+
         Schema::table('analytic_records', function (Blueprint $table) {
             // Drop foreign keys first
             $table->dropForeign(['approved_by']);

@@ -15,7 +15,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_false_fronts', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_cabinet_doors')) {
+            return;
+        }
+
+Schema::table('projects_false_fronts', function (Blueprint $table) {
             // Rename backing_rail fields to backing fields
             if (Schema::hasColumn('projects_false_fronts', 'has_backing_rail')) {
                 $table->renameColumn('has_backing_rail', 'has_backing');

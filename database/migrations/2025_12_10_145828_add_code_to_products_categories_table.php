@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('products_categories')) {
+            return;
+        }
+
         Schema::table('products_categories', function (Blueprint $table) {
             $table->string('code', 10)->nullable()->after('name')->comment('Short code for reference generation (e.g., ADH, BLADE, HW)');
             $table->index('code');

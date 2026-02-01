@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('products_product_suppliers', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('product_suppliers')) {
+            return;
+        }
+
+Schema::table('products_product_suppliers', function (Blueprint $table) {
             $table->boolean('ai_created')->default(false)->after('creator_id');
             $table->string('ai_source_document')->nullable()->after('ai_created');
             $table->timestamp('ai_created_at')->nullable()->after('ai_source_document');

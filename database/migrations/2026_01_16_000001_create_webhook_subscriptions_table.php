@@ -11,7 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('webhook_subscriptions', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('users')) {
+            return;
+        }
+
+Schema::create('webhook_subscriptions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->string('name')->nullable();

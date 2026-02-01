@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -12,6 +13,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if products tables don't exist yet (plugin not installed)
+        if (!Schema::hasTable('products_categories') || !Schema::hasTable('products_products')) {
+            return;
+        }
+
         $now = now();
 
         // Get category
@@ -599,6 +605,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_products')) {
+            return;
+        }
+
         $references = [
             'CLOSET-SHELF-ROD',
             'FLOATING-SHELF',

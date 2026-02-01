@@ -21,7 +21,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add face frame configurator fields to cabinets table
+        
+        if (!Schema::hasTable('projects_cabinets')) {
+            return;
+        }
+
+// Add face frame configurator fields to cabinets table
         Schema::table('projects_cabinets', function (Blueprint $table) {
             if (!Schema::hasColumn('projects_cabinets', 'construction_type')) {
                 $table->string('construction_type', 50)

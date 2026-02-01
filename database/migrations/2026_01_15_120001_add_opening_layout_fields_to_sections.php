@@ -18,7 +18,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('projects_cabinet_sections', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_cabinet_sections')) {
+            return;
+        }
+
+Schema::table('projects_cabinet_sections', function (Blueprint $table) {
             // ===== SPACE TRACKING (calculated fields) =====
             $table->decimal('total_consumed_height_inches', 8, 4)
                 ->nullable()

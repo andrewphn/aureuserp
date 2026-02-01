@@ -16,7 +16,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_drawers', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_cabinet_drawers')) {
+            return;
+        }
+
+Schema::table('projects_drawers', function (Blueprint $table) {
             // Shop depth - slide length + 1/4" for safety
             $table->decimal('box_depth_shop_inches', 8, 4)->nullable()
                 ->after('box_depth_inches')

@@ -14,6 +14,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if required tables don't exist
+        if (!Schema::hasTable('pdf_documents') ||
+            !Schema::hasTable('inventories_operations') ||
+            !Schema::hasTable('partners_partners') ||
+            !Schema::hasTable('purchases_orders')) {
+            return;
+        }
+
         Schema::create('document_scan_logs', function (Blueprint $table) {
             $table->id();
 

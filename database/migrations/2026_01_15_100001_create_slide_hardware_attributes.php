@@ -2,17 +2,22 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
     /**
      * Run the migrations.
-     * 
+     *
      * Creates slide-specific attributes for drawer hardware specifications.
      * Uses the EAV system in products_attributes table.
      */
     public function up(): void
     {
+        if (!Schema::hasTable('products_attributes')) {
+            return;
+        }
+
         $creatorId = DB::table('users')->where('email', 'admin@example.com')->value('id') ?? 1;
         $now = now();
         
@@ -144,6 +149,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_attributes')) {
+            return;
+        }
+
         $attributeNames = [
             'Slide Length',
             'Min Cabinet Depth',

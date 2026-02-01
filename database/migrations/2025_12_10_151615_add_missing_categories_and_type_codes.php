@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -203,6 +204,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Skip if products tables don't exist yet
+        if (!Schema::hasTable('products_categories')) {
+            return;
+        }
+
         $parentId = DB::table('products_categories')->where('name', 'All')->value('id') ?? 1;
 
         // Create new categories
@@ -267,6 +273,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('products_categories')) {
+            return;
+        }
+
         // Remove new categories
         DB::table('products_categories')
             ->whereIn('id', array_keys($this->newCategories))

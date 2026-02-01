@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Fixes vertical clearances to match Blum TANDEM 563H Drawer Specifications diagram.
@@ -19,7 +20,12 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Correct clearances from Blum diagram
+        
+        if (!Schema::hasTable('products_product_attribute_values')) {
+            return;
+        }
+
+// Correct clearances from Blum diagram
         $correctClearances = [
             'Slide Top Clearance' => 0.25,      // 6mm = 1/4"
             'Slide Bottom Clearance' => 0.5625, // 14mm = 9/16"

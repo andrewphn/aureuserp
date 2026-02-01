@@ -14,7 +14,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('projects_gate_requirements', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_gates')) {
+            return;
+        }
+
+Schema::create('projects_gate_requirements', function (Blueprint $table) {
             $table->id();
             
             // Parent gate

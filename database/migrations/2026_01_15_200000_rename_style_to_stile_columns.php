@@ -26,7 +26,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Rename in projects_doors table
+        
+        if (!Schema::hasTable('projects_cabinet_doors')) {
+            return;
+        }
+
+// Rename in projects_doors table
         if (Schema::hasColumn('projects_doors', 'style_width_inches')) {
             Schema::table('projects_doors', function (Blueprint $table) {
                 $table->renameColumn('style_width_inches', 'stile_width_inches');

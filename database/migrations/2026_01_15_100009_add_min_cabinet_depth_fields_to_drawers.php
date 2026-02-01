@@ -21,7 +21,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('projects_drawers', function (Blueprint $table) {
+        
+        if (!Schema::hasTable('projects_cabinet_drawers')) {
+            return;
+        }
+
+Schema::table('projects_drawers', function (Blueprint $table) {
             $table->decimal('min_cabinet_depth_blum_inches', 8, 4)->nullable()
                 ->after('slide_length_inches')
                 ->comment('Blum official minimum inside cabinet depth');
