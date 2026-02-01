@@ -62,10 +62,22 @@ public/images/*.mp3
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
 .playwright-mcp/*.png
 .playwright-mcp/
 tests/Browser/auth-state.json
 
 # MCP configuration (contains API tokens)
 .mcp.json
+.cursor/mcp.json
+
+# Temporary documentation with secrets
+IMPLEMENTATION_COMPLETE.md
+SLACK_MCP_DIAGNOSTIC.md
+NOTION_IMPORT_SUCCESS.md
+test-notion-connection.cjs
+
+# IDE Helper files (auto-generated)
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
