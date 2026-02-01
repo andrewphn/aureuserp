@@ -7,6 +7,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Filament\Resources\ProjectResource\Widgets\ProjectCountWidget;
 use Webkul\TableViews\Filament\Components\PresetView;
 use Webkul\TableViews\Filament\Concerns\HasTableViews;
 
@@ -20,6 +21,13 @@ class ListProjects extends ListRecords
     use HasTableViews;
 
     protected static string $resource = ProjectResource::class;
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ProjectCountWidget::class,
+        ];
+    }
 
     public function getPresetTableViews(): array
     {

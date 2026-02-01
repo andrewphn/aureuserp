@@ -500,7 +500,10 @@ class CreateProject extends Page implements HasForms
                                     ->modalDescription('Quick customer entry - you can add more details later.')
                             )
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                if ($state && $get('use_customer_address')) {
+                                // Default to true if not set (toggle defaults to true)
+                                $useCustomerAddress = $get('use_customer_address') ?? true;
+
+                                if ($state && $useCustomerAddress) {
                                     $partner = Partner::with(['state', 'country'])->find($state);
                                     if ($partner) {
                                         $set('project_address.street1', $partner->street1);
@@ -1782,10 +1785,10 @@ class CreateProject extends Page implements HasForms
             $streetAbbr ? "-{$streetAbbr}" : ''
         );
 
-        // Ensure uniqueness - if this number exists, increment until we find a unique one
+        // Ensure uniqueness - if this number exists (including soft-deleted), increment until we find a unique one
         $originalNumber = $projectNumber;
         $attempt = 0;
-        while (Project::where('project_number', $projectNumber)->exists()) {
+        while (Project::withTrashed()->where('project_number', $projectNumber)->exists()) {
             $attempt++;
             $sequentialNumber++;
             $projectNumber = sprintf(
@@ -1873,6 +1876,26 @@ class CreateProject extends Page implements HasForms
             $sequentialNumber,
             $streetAbbr
         );
+
+        // Ensure uniqueness - if this number exists (including soft-deleted), increment until we find a unique one
+        $originalNumber = $projectNumber;
+        $attempt = 0;
+        while (Project::withTrashed()->where('project_number', $projectNumber)->exists()) {
+            $attempt++;
+            $sequentialNumber++;
+            $projectNumber = sprintf(
+                '%s-%03d-%s',
+                $companyAcronym,
+                $sequentialNumber,
+                $streetAbbr
+            );
+            // Safety limit to prevent infinite loop
+            if ($attempt > 100) {
+                // Fallback: append timestamp
+                $projectNumber = $originalNumber . '-' . time();
+                break;
+            }
+        }
 
         $set('project_number', $projectNumber);
     }
