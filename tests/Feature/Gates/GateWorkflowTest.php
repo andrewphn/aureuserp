@@ -13,7 +13,7 @@ use Webkul\Project\Models\Task;
 use Webkul\Project\Services\Gates\GateEvaluator;
 use Webkul\Project\Services\Gates\GateRequirementChecker;
 use Webkul\Partner\Models\Partner;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 /**
  * Feature tests for the complete gate workflow.
@@ -21,7 +21,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
  */
 class GateWorkflowTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected GateEvaluator $evaluator;
     protected ProjectStage $discoveryStage;
@@ -33,14 +33,16 @@ class GateWorkflowTest extends TestCase
 
         $this->evaluator = new GateEvaluator(new GateRequirementChecker());
 
+        // Use unique stage keys to avoid conflicts with existing data
+        $uniqueId = uniqid();
         $this->discoveryStage = ProjectStage::factory()->create([
-            'name' => 'Discovery',
-            'stage_key' => 'discovery',
+            'name' => 'Test Discovery',
+            'stage_key' => 'test-discovery-' . $uniqueId,
         ]);
 
         $this->designStage = ProjectStage::factory()->create([
-            'name' => 'Design',
-            'stage_key' => 'design',
+            'name' => 'Test Design',
+            'stage_key' => 'test-design-' . $uniqueId,
         ]);
     }
 

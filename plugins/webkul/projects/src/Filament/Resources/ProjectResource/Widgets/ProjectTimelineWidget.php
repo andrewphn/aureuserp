@@ -16,29 +16,49 @@ class ProjectTimelineWidget extends BaseWidget
 {
     public ?Model $record = null;
 
+    protected static bool $isLazy = false;
+
+    protected int | string | array $columnSpan = 1;
+
     protected function getStats(): array
     {
         if (! $this->record) {
-            return [];
+            return [
+                Stat::make('Timeline', '-')
+                    ->description('Loading...')
+                    ->icon('heroicon-o-calendar')
+                    ->color('gray'),
+            ];
         }
 
         $timeline = $this->calculateTimeline();
 
+        // Build condensed description
+        $descParts = [];
+        $descParts[] = $timeline['days_remaining_text'];
+        if ($timeline['estimated_days'] !== 'TBD') {
+            $scheduleNote = '';
+            if ($timeline['estimate_color'] === 'danger') {
+                $scheduleNote = ' (exceeds deadline)';
+            } elseif ($timeline['estimate_color'] === 'warning') {
+                $scheduleNote = ' (tight)';
+            }
+            $descParts[] = $timeline['estimated_days'] . ' production' . $scheduleNote;
+        }
+
+        // Determine overall color - use the more severe color
+        $color = $timeline['completion_color'];
+        if ($timeline['estimate_color'] === 'danger') {
+            $color = 'danger';
+        } elseif ($timeline['estimate_color'] === 'warning' && $color !== 'danger') {
+            $color = 'warning';
+        }
+
         return [
-            Stat::make('Start Date', $timeline['start_formatted'])
-                ->description($timeline['start_description'])
-                ->descriptionIcon('heroicon-o-calendar')
-                ->color('gray'),
-
-            Stat::make('Target Completion', $timeline['completion_formatted'])
-                ->description($timeline['days_remaining_text'])
-                ->descriptionIcon($timeline['completion_icon'])
-                ->color($timeline['completion_color']),
-
-            Stat::make('Production Estimate', $timeline['estimated_days'])
-                ->description($timeline['estimate_description'])
-                ->descriptionIcon('heroicon-o-clock')
-                ->color($timeline['estimate_color']),
+            Stat::make('Timeline', $timeline['completion_formatted'])
+                ->description(implode(' • ', $descParts))
+                ->icon('heroicon-o-calendar')
+                ->color($color),
         ];
     }
 
@@ -65,25 +85,26 @@ class ProjectTimelineWidget extends BaseWidget
         if ($completionDate) {
             $completionFormatted = $completionDate->format('M d, Y');
             $daysRemaining = now()->diffInDays($completionDate, false);
+            $daysRemainingRounded = (int) round($daysRemaining);
 
             if ($daysRemaining < 0) {
-                $daysRemainingText = abs($daysRemaining) . ' days overdue';
+                $daysRemainingText = abs($daysRemainingRounded) . ' day' . (abs($daysRemainingRounded) !== 1 ? 's' : '') . ' overdue';
                 $completionColor = 'danger';
                 $completionIcon = 'heroicon-o-exclamation-triangle';
-            } elseif ($daysRemaining === 0) {
+            } elseif ($daysRemaining < 1) {
                 $daysRemainingText = 'Due today';
                 $completionColor = 'warning';
                 $completionIcon = 'heroicon-o-exclamation-circle';
             } elseif ($daysRemaining < 7) {
-                $daysRemainingText = $daysRemaining . ' days remaining';
+                $daysRemainingText = $daysRemainingRounded . ' day' . ($daysRemainingRounded !== 1 ? 's' : '') . ' remaining';
                 $completionColor = 'warning';
                 $completionIcon = 'heroicon-o-clock';
             } elseif ($daysRemaining < 30) {
-                $daysRemainingText = $daysRemaining . ' days remaining';
+                $daysRemainingText = $daysRemainingRounded . ' day' . ($daysRemainingRounded !== 1 ? 's' : '') . ' remaining';
                 $completionColor = 'info';
                 $completionIcon = 'heroicon-o-calendar';
             } else {
-                $daysRemainingText = $daysRemaining . ' days remaining';
+                $daysRemainingText = $daysRemainingRounded . ' day' . ($daysRemainingRounded !== 1 ? 's' : '') . ' remaining';
                 $completionColor = 'success';
                 $completionIcon = 'heroicon-o-check-circle';
             }

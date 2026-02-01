@@ -410,6 +410,9 @@ class CreateProject extends Page implements HasForms
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
                                 $this->updateProjectNumberPreview($state, $get, $set);
                                 $this->calculateEstimatedProductionTime($get('estimated_linear_feet'), $get, $set);
+                                // Set default warehouse for the selected company
+                                $defaultWarehouse = \Webkul\Inventory\Models\Warehouse::where('company_id', $state)->first();
+                                $set('warehouse_id', $defaultWarehouse?->id);
                             }),
 
                         Select::make('branch_id')
@@ -439,6 +442,7 @@ class CreateProject extends Page implements HasForms
                             }
                             return \Webkul\Inventory\Models\Warehouse::where('company_id', $companyId)->pluck('name', 'id');
                         })
+                        ->default(fn (callable $get) => \Webkul\Inventory\Models\Warehouse::where('company_id', $get('company_id'))->first()?->id)
                         ->searchable()
                         ->preload()
                         ->live(onBlur: true)
@@ -461,7 +465,7 @@ class CreateProject extends Page implements HasForms
                             ->label('Customer')
                             ->searchable()
                             ->required()
-                            ->live(onBlur: true)
+                            ->live()
                             ->getSearchResultsUsing(function (string $search): array {
                                 // Search existing customers
                                 return Partner::where('sub_type', 'customer')
@@ -500,7 +504,10 @@ class CreateProject extends Page implements HasForms
                                     ->modalDescription('Quick customer entry - you can add more details later.')
                             )
                             ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                if ($state && $get('use_customer_address')) {
+                                // Default to true if not set (toggle defaults to true)
+                                $useCustomerAddress = $get('use_customer_address') ?? true;
+
+                                if ($state && $useCustomerAddress) {
                                     $partner = Partner::with(['state', 'country'])->find($state);
                                     if ($partner) {
                                         $set('project_address.street1', $partner->street1);
@@ -1189,6 +1196,10 @@ class CreateProject extends Page implements HasForms
                                 ->label('Allow Milestones')
                                 ->default(true)
                                 ->visible(app(TaskSettings::class)->enable_milestones),
+                            Toggle::make('google_drive_enabled')
+                                ->label('Create Google Drive Folders')
+                                ->helperText('Automatically create project folder structure in Google Drive')
+                                ->default(true),
                         ]),
                     ]),
                 ])
@@ -1782,10 +1793,10 @@ class CreateProject extends Page implements HasForms
             $streetAbbr ? "-{$streetAbbr}" : ''
         );
 
-        // Ensure uniqueness - if this number exists, increment until we find a unique one
+        // Ensure uniqueness - if this number exists (including soft-deleted), increment until we find a unique one
         $originalNumber = $projectNumber;
         $attempt = 0;
-        while (Project::where('project_number', $projectNumber)->exists()) {
+        while (Project::withTrashed()->where('project_number', $projectNumber)->exists()) {
             $attempt++;
             $sequentialNumber++;
             $projectNumber = sprintf(
@@ -1873,6 +1884,26 @@ class CreateProject extends Page implements HasForms
             $sequentialNumber,
             $streetAbbr
         );
+
+        // Ensure uniqueness - if this number exists (including soft-deleted), increment until we find a unique one
+        $originalNumber = $projectNumber;
+        $attempt = 0;
+        while (Project::withTrashed()->where('project_number', $projectNumber)->exists()) {
+            $attempt++;
+            $sequentialNumber++;
+            $projectNumber = sprintf(
+                '%s-%03d-%s',
+                $companyAcronym,
+                $sequentialNumber,
+                $streetAbbr
+            );
+            // Safety limit to prevent infinite loop
+            if ($attempt > 100) {
+                // Fallback: append timestamp
+                $projectNumber = $originalNumber . '-' . time();
+                break;
+            }
+        }
 
         $set('project_number', $projectNumber);
     }

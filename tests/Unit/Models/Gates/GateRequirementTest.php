@@ -5,11 +5,11 @@ namespace Tests\Unit\Models\Gates;
 use Tests\TestCase;
 use Webkul\Project\Models\Gate;
 use Webkul\Project\Models\GateRequirement;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GateRequirementTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function it_can_be_created_with_factory()
@@ -35,10 +35,13 @@ class GateRequirementTest extends TestCase
     public function scope_active_filters_active_requirements()
     {
         $gate = Gate::factory()->create();
+
+        // Count only requirements for this specific gate
         GateRequirement::factory()->count(2)->create(['gate_id' => $gate->id, 'is_active' => true]);
         GateRequirement::factory()->count(1)->create(['gate_id' => $gate->id, 'is_active' => false]);
 
-        $this->assertCount(2, GateRequirement::active()->get());
+        $this->assertCount(2, GateRequirement::where('gate_id', $gate->id)->active()->get());
+        $this->assertCount(1, GateRequirement::where('gate_id', $gate->id)->where('is_active', false)->get());
     }
 
     /** @test */
@@ -49,7 +52,8 @@ class GateRequirementTest extends TestCase
         GateRequirement::factory()->create(['gate_id' => $gate->id, 'sequence' => 10]);
         GateRequirement::factory()->create(['gate_id' => $gate->id, 'sequence' => 20]);
 
-        $requirements = GateRequirement::ordered()->get();
+        // Only check ordering for this gate's requirements
+        $requirements = GateRequirement::where('gate_id', $gate->id)->ordered()->get();
 
         $this->assertEquals(10, $requirements[0]->sequence);
         $this->assertEquals(20, $requirements[1]->sequence);

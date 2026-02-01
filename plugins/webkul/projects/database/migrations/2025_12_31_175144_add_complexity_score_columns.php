@@ -55,9 +55,12 @@ return new class extends Migration
         Schema::table('projects_cabinet_sections', fn(Blueprint $table) =>
             $addComplexityColumns($table, 'projects_cabinet_sections', 'Weighted average complexity of components', 'component_count_cached'));
 
-        // Cabinet level
-        Schema::table('projects_cabinets', fn(Blueprint $table) =>
-            $addComplexityColumns($table, 'projects_cabinets', 'Weighted average complexity of sections', 'section_count_cached'));
+        // Cabinet level (supports both old and new table names)
+        $cabinetTable = Schema::hasTable('projects_cabinets') ? 'projects_cabinets' : 'projects_cabinet_specifications';
+        if (Schema::hasTable($cabinetTable)) {
+            Schema::table($cabinetTable, fn(Blueprint $table) =>
+                $addComplexityColumns($table, $cabinetTable, 'Weighted average complexity of sections', 'section_count_cached'));
+        }
 
         // Cabinet run level
         Schema::table('projects_cabinet_runs', fn(Blueprint $table) =>

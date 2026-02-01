@@ -35,12 +35,12 @@ class CompanyFactory extends Factory
             'email'                 => $this->faker->unique()->companyEmail(),
             'phone'                 => $this->faker->phoneNumber(),
             'mobile'                => $this->faker->e164PhoneNumber(),
-            'logo'                  => $this->faker->imageUrl(200, 200, 'business', true, 'company logo'),
             'color'                 => $this->faker->hexColor(),
-            'is_active'             => $this->faker->boolean(),
+            'is_active'             => true,
             'founded_date'          => $this->faker->date('Y-m-d', '-10 years'),
             'creator_id'            => User::factory(),
             'currency_id'           => null,
+            'partner_id'            => 1, // Use existing partner or will be overridden
         ];
     }
 }

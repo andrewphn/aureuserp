@@ -6,6 +6,7 @@
     $isInline = $isInline();
     $isMultiple = $isMultiple();
     $statePath = $getStatePath();
+    $colors = method_exists($field, 'getColors') ? $field->getColors() : [];
 @endphp
 
 <x-dynamic-component
@@ -27,9 +28,9 @@
             \Filament\Support\prepare_inherited_attributes($attributes)
                 ->merge($getExtraAttributes(), escape: false)
                 ->class([
-                    'state-container',
-                    'grid' => ! $isInline && $gridDirection === 'row',
-                    'flex justify-end flex-wrap' => $isInline,
+                    'fi-fo-progress-stepper',
+                    'grid gap-1' => ! $isInline && $gridDirection === 'row',
+                    'flex flex-wrap gap-0' => $isInline,
                 ])
         }}
     >
@@ -39,14 +40,31 @@
             @php
                 $inputId = "{$id}-{$value}";
                 $shouldOptionBeDisabled = $isDisabled || $isOptionDisabled($value, $label);
+                $color = $getColor($value);
+
+                // Get the color from the colors array if available
+                // Filament v4 uses OKLCH color format: [500 => "oklch(0.623 0.188 259.815)"]
+                $stageColor = null;
+                if (is_array($colors) && isset($colors[$value])) {
+                    $colorValue = $colors[$value];
+                    if (is_array($colorValue) && isset($colorValue[500])) {
+                        // Get the 500 shade - this is already a valid CSS color string (OKLCH in v4)
+                        $stageColor = $colorValue[500];
+                    } elseif (is_string($colorValue)) {
+                        // Named color - will use fallback
+                        $stageColor = null;
+                    }
+                }
             @endphp
 
             <div
                 @class([
-                    'state' => true,
-                    'border-primary-500',
-                    'break-inside-avoid pt-3' => (! $isInline) && ($gridDirection === 'column'),
+                    'fi-fo-progress-stepper-option relative',
+                    'break-inside-avoid' => (! $isInline) && ($gridDirection === 'column'),
                 ])
+                @if($stageColor)
+                    style="--stage-color: {{ $stageColor }};"
+                @endif
             >
                 <input
                     @disabled($shouldOptionBeDisabled)
@@ -58,18 +76,15 @@
                     value="{{ $value }}"
                     wire:loading.attr="disabled"
                     {{ $applyStateBindingModifiers('wire:model') }}="{{ $statePath }}"
-                    {{ $getExtraInputAttributeBag()->class(['peer pointer-events-none absolute opacity-0']) }}
+                    class="fi-fo-progress-stepper-input peer pointer-events-none absolute opacity-0"
                 />
 
-                <x-filament::button
-                    class="stage-button"
-                    :color="$getColor($value)"
-                    :for="$inputId"
-                    :icon="$getIcon($value)"
-                    tag="label"
+                <label
+                    for="{{ $inputId }}"
+                    class="fi-fo-progress-stepper-btn relative inline-flex items-center justify-center px-4 py-2 text-sm font-medium border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 cursor-pointer select-none transition-all duration-150 hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                     {{ $label }}
-                </x-filament::button>
+                </label>
             </div>
         @endforeach
     </div>
@@ -77,67 +92,95 @@
 
 @push('styles')
     <style>
-        .stage-button {
-            border-radius: 0;
-            padding-left: 30px;
-            padding-right: 20px;
-            border: 1px solid var(--gray-300);
-            box-shadow: none;
+        /* Progress Stepper - Arrow/Chevron Style */
+        .fi-fo-progress-stepper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+
+        .fi-fo-progress-stepper-option {
+            position: relative;
+            margin-right: 8px;
+            margin-bottom: 4px;
+        }
+
+        .fi-fo-progress-stepper-option:last-child {
+            margin-right: 0;
+        }
+
+        .fi-fo-progress-stepper-btn {
             min-height: 38px;
+            padding-left: 24px;
+            padding-right: 16px;
+            border-radius: 0 !important;
+            position: relative;
+            z-index: 1;
         }
-        .dark .stage-button {
-            border: 1px solid var(--gray-700);
+
+        /* First button - rounded left */
+        .fi-fo-progress-stepper-option:first-child .fi-fo-progress-stepper-btn {
+            border-radius: 6px 0 0 6px !important;
+            padding-left: 16px;
         }
-        .stage-button:after {
+
+        /* Last button - rounded right, no arrow */
+        .fi-fo-progress-stepper-option:last-child .fi-fo-progress-stepper-btn {
+            border-radius: 0 6px 6px 0 !important;
+            padding-right: 16px;
+        }
+
+        /* Arrow pseudo-element */
+        .fi-fo-progress-stepper-btn::after {
             content: "";
             position: absolute;
             top: 50%;
-            right: -14px;
-            width: 26px;
-            height: 26px;
-            z-index: 1;
+            right: -12px;
+            width: 22px;
+            height: 22px;
+            z-index: 2;
             transform: translateY(-50%) rotate(45deg);
-            background-color: #ffffff;
-            border-right: 1px solid var(--gray-300);
-            border-top: 1px solid var(--gray-300);
-            transition-duration: 75ms;
-        }
-        .dark .stage-button:after {
-            background-color: var(--gray-900);
-            border-right: 1px solid hsla(0, 0%, 100%, .2);
-            border-top: 1px solid hsla(0, 0%, 100%, .2);
+            background-color: white;
+            border-right: 1px solid rgb(209, 213, 219);
+            border-top: 1px solid rgb(209, 213, 219);
+            transition: all 150ms;
         }
 
-        .dark .stage-button:hover:after {
-            background-color: var(--gray-800);
+        /* Hide arrow on last item */
+        .fi-fo-progress-stepper-option:last-child .fi-fo-progress-stepper-btn::after {
+            display: none;
         }
-        .state-container .state:last-child .stage-button {
-            border-radius: 0 8px 8px 0;
+
+        /* Checked state - use stage color */
+        .fi-fo-progress-stepper-input:checked + .fi-fo-progress-stepper-btn {
+            background-color: var(--stage-color, rgb(20, 184, 166));
+            border-color: var(--stage-color, rgb(20, 184, 166));
+            color: white;
         }
-        .state-container .state:first-child .stage-button {
-            border-radius: 8px 0 0 8px;
+
+        .fi-fo-progress-stepper-input:checked + .fi-fo-progress-stepper-btn::after {
+            background-color: var(--stage-color, rgb(20, 184, 166));
+            border-color: var(--stage-color, rgb(20, 184, 166));
         }
-        .state-container .state:last-child .stage-button:after {
-            content: none;
+
+        /* Dark mode adjustments */
+        .dark .fi-fo-progress-stepper-btn {
+            background-color: rgb(31, 41, 55);
+            border-color: rgb(75, 85, 99);
+            color: rgb(209, 213, 219);
         }
-        input:checked + .stage-button {
-            color: #fff;
-            border: 1px solid var(--color-500);
+
+        .dark .fi-fo-progress-stepper-btn:hover {
+            background-color: rgb(55, 65, 81);
         }
-        input:checked + .stage-button:after {
-            background-color: var(--color-600);
-            border-right: 1px solid var(--color-500);
-            border-top: 1px solid var(--color-500);
+
+        .dark .fi-fo-progress-stepper-btn::after {
+            background-color: rgb(31, 41, 55);
+            border-color: rgb(75, 85, 99);
         }
-        .dark input:checked + .stage-button:after {
-            background-color: var(--color-600);
-        }
-        input:checked + .stage-button:hover:after {
-            background-color: var(--color-500);
-            transition-duration: 75ms;
-        }
-        .dark input:checked + .stage-button:hover:after {
-            background-color: var(--color-500);
+
+        .dark .fi-fo-progress-stepper-input:checked + .fi-fo-progress-stepper-btn::after {
+            background-color: var(--stage-color, rgb(20, 184, 166));
         }
     </style>
 @endpush

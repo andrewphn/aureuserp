@@ -7,11 +7,11 @@ use Webkul\Project\Models\Gate;
 use Webkul\Project\Models\GateEvaluation;
 use Webkul\Project\Models\Project;
 use Webkul\Security\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GateEvaluationTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function it_can_be_created_with_factory()

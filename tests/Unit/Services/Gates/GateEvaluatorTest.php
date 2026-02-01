@@ -12,11 +12,11 @@ use Webkul\Project\Models\Room;
 use Webkul\Project\Services\Gates\GateEvaluator;
 use Webkul\Project\Services\Gates\GateEvaluationResult;
 use Webkul\Project\Services\Gates\GateRequirementChecker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GateEvaluatorTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected GateEvaluator $evaluator;
     protected ProjectStage $stage;
@@ -28,9 +28,10 @@ class GateEvaluatorTest extends TestCase
         $requirementChecker = new GateRequirementChecker();
         $this->evaluator = new GateEvaluator($requirementChecker);
 
+        // Use unique stage_key to avoid conflicts with existing data
         $this->stage = ProjectStage::factory()->create([
-            'name' => 'Design',
-            'stage_key' => 'design',
+            'name' => 'Test Design Stage',
+            'stage_key' => 'test-design-' . uniqid(),
         ]);
     }
 

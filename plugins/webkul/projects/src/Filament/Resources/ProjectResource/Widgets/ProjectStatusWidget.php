@@ -15,22 +15,36 @@ class ProjectStatusWidget extends BaseWidget
 {
     public ?Model $record = null;
 
+    protected static bool $isLazy = false;
+
+    protected int | string | array $columnSpan = 1;
+
     protected function getStats(): array
     {
         if (! $this->record) {
-            return [];
+            return [
+                Stat::make('Health', '-')
+                    ->description('Loading...')
+                    ->icon('heroicon-o-heart')
+                    ->color('gray'),
+            ];
         }
 
         $status = $this->calculateProjectHealth();
 
+        // Add alert icon prefix to description if there are issues
+        $description = $status['description'];
+        if ($status['color'] === 'danger') {
+            $description = '⚠ ' . $description;
+        } elseif ($status['color'] === 'warning') {
+            $description = '⚠ ' . $description;
+        }
+
         return [
-            Stat::make('Project Health', $status['label'])
-                ->description($status['description'])
-                ->descriptionIcon($status['icon'])
-                ->color($status['color'])
-                ->extraAttributes([
-                    'class' => 'relative',
-                ]),
+            Stat::make('Health', $status['label'])
+                ->description($description)
+                ->icon($status['icon'])
+                ->color($status['color']),
         ];
     }
 

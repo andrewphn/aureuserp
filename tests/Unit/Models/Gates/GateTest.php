@@ -7,11 +7,11 @@ use Webkul\Project\Models\Gate;
 use Webkul\Project\Models\GateRequirement;
 use Webkul\Project\Models\GateEvaluation;
 use Webkul\Project\Models\ProjectStage;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GateTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function it_can_be_created_with_factory()
@@ -88,35 +88,44 @@ class GateTest extends TestCase
     /** @test */
     public function scope_active_filters_active_gates()
     {
+        $initialActiveCount = Gate::active()->count();
+        $initialInactiveCount = Gate::where('is_active', false)->count();
+
         Gate::factory()->create(['is_active' => true]);
         Gate::factory()->create(['is_active' => true]);
         Gate::factory()->create(['is_active' => false]);
 
-        $this->assertCount(2, Gate::active()->get());
+        $this->assertCount($initialActiveCount + 2, Gate::active()->get());
+        $this->assertCount($initialInactiveCount + 1, Gate::where('is_active', false)->get());
     }
 
     /** @test */
     public function scope_blocking_filters_blocking_gates()
     {
+        $initialBlockingCount = Gate::blocking()->count();
+        $initialNonBlockingCount = Gate::where('is_blocking', false)->count();
+
         Gate::factory()->create(['is_blocking' => true]);
         Gate::factory()->create(['is_blocking' => true]);
         Gate::factory()->create(['is_blocking' => false]);
 
-        $this->assertCount(2, Gate::blocking()->get());
+        $this->assertCount($initialBlockingCount + 2, Gate::blocking()->get());
+        $this->assertCount($initialNonBlockingCount + 1, Gate::where('is_blocking', false)->get());
     }
 
     /** @test */
     public function scope_ordered_orders_by_sequence()
     {
-        Gate::factory()->create(['sequence' => 30]);
-        Gate::factory()->create(['sequence' => 10]);
-        Gate::factory()->create(['sequence' => 20]);
+        // Create gates with unique high sequences to ensure they are at the end
+        $gate1 = Gate::factory()->create(['sequence' => 9030]);
+        $gate2 = Gate::factory()->create(['sequence' => 9010]);
+        $gate3 = Gate::factory()->create(['sequence' => 9020]);
 
-        $gates = Gate::ordered()->get();
+        $gates = Gate::ordered()->where('sequence', '>=', 9000)->get();
 
-        $this->assertEquals(10, $gates[0]->sequence);
-        $this->assertEquals(20, $gates[1]->sequence);
-        $this->assertEquals(30, $gates[2]->sequence);
+        $this->assertEquals(9010, $gates[0]->sequence);
+        $this->assertEquals(9020, $gates[1]->sequence);
+        $this->assertEquals(9030, $gates[2]->sequence);
     }
 
     /** @test */
@@ -135,10 +144,11 @@ class GateTest extends TestCase
     /** @test */
     public function scope_for_stage_key_filters_by_stage_key()
     {
-        $stage = ProjectStage::factory()->create(['stage_key' => 'discovery']);
+        $uniqueStageKey = 'discovery-test-' . uniqid();
+        $stage = ProjectStage::factory()->create(['stage_key' => $uniqueStageKey]);
         Gate::factory()->count(2)->create(['stage_id' => $stage->id]);
 
-        $this->assertCount(2, Gate::forStageKey('discovery')->get());
+        $this->assertCount(2, Gate::forStageKey($uniqueStageKey)->get());
     }
 
     /** @test */

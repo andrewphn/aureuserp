@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Webkul\Project\Database\Factories\GateEvaluationFactory;
 use Webkul\Security\Models\User;
 
 /**
@@ -42,6 +43,14 @@ class GateEvaluation extends Model
      * @var string
      */
     protected $table = 'projects_gate_evaluations';
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): GateEvaluationFactory
+    {
+        return GateEvaluationFactory::new();
+    }
 
     /**
      * Evaluation type constants.

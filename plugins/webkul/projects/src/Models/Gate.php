@@ -4,6 +4,7 @@ namespace Webkul\Project\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Webkul\Project\Database\Factories\GateFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -43,6 +44,14 @@ class Gate extends Model
      * @var string
      */
     protected $table = 'projects_gates';
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): GateFactory
+    {
+        return GateFactory::new();
+    }
 
     /**
      * Fillable attributes.

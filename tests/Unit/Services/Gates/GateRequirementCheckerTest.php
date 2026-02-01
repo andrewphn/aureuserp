@@ -12,11 +12,11 @@ use Webkul\Project\Services\Gates\GateRequirementChecker;
 use Webkul\Project\Services\Gates\RequirementCheckResult;
 use Webkul\Partner\Models\Partner;
 use Webkul\Sale\Models\Order;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GateRequirementCheckerTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected GateRequirementChecker $checker;
 

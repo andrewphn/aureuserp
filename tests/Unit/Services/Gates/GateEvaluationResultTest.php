@@ -7,11 +7,11 @@ use Webkul\Project\Models\Gate;
 use Webkul\Project\Models\GateEvaluation;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Services\Gates\GateEvaluationResult;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GateEvaluationResultTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     /** @test */
     public function it_can_be_constructed_with_all_properties()

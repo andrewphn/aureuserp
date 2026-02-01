@@ -9,7 +9,7 @@ use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Models\Room;
 use Webkul\Security\Models\User;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Laravel\Sanctum\Sanctum;
 
 /**
@@ -17,7 +17,7 @@ use Laravel\Sanctum\Sanctum;
  */
 class GateApiTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected User $user;
     protected ProjectStage $stage;
@@ -29,9 +29,10 @@ class GateApiTest extends TestCase
         $this->user = User::factory()->create();
         Sanctum::actingAs($this->user);
 
+        // Use unique stage key to avoid conflicts with existing data
         $this->stage = ProjectStage::factory()->create([
-            'name' => 'Discovery',
-            'stage_key' => 'discovery',
+            'name' => 'Test Discovery',
+            'stage_key' => 'test-api-discovery-' . uniqid(),
         ]);
     }
 

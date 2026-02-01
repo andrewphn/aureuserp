@@ -20,15 +20,39 @@ class GoogleDriveFolderService
     protected GoogleDriveAuthService $authService;
 
     /**
-     * Standard folder structure for TCS projects
-     * Based on Google Drive template: Folders Template/
+     * Complete folder structure for TCS projects
+     * Based on Google Drive template: docs/sample/Folders Template/
+     * Nested arrays represent subfolders
      */
     public const FOLDER_STRUCTURE = [
-        '01_Discovery',
-        '02_Design',
-        '03_Sourcing',
-        '04_Production',
-        '05_Delivery',
+        '01_Discovery' => [
+            'Architecturals',
+            'Inspo Pics',
+            'Proposal',
+        ],
+        '02_Design' => [
+            'Change Orders',
+            'DWG_Imports',
+            'Submittals',
+        ],
+        '03_Sourcing' => [
+            'BOM',
+            'Invoices',
+        ],
+        '04_Production' => [
+            'CNC' => [
+                'Reference Photos',
+                'ToolPaths',
+                'VCarve Files',
+            ],
+            'Job Cards' => [
+                'Build_PDFs',
+            ],
+            'Sticker Template',
+        ],
+        '05_Delivery' => [
+            'BOL',
+        ],
     ];
 
     /**
@@ -160,23 +184,16 @@ class GoogleDriveFolderService
             $projectFolderId = $this->createFolder($projectFolderName, $activeFolderId);
             $projectFolderUrl = $this->getFolderUrl($projectFolderId);
 
-            // Create the 5 standard subfolders
+            // Create the complete nested folder structure
             $folders = [];
-            foreach (self::FOLDER_STRUCTURE as $folderName) {
-                $folderId = $this->createFolder($folderName, $projectFolderId);
-                $folders[$folderName] = [
-                    'id' => $folderId,
-                    'name' => $folderName,
-                    'url' => $this->getFolderUrl($folderId),
-                ];
-            }
+            $totalFoldersCreated = $this->createNestedFolders(self::FOLDER_STRUCTURE, $projectFolderId, $folders);
 
             Log::info('Google Drive project folders created in Active', [
                 'project_id' => $project->id,
                 'project_number' => $project->project_number,
                 'root_folder_id' => $projectFolderId,
                 'parent_folder' => 'Active',
-                'folders_created' => count($folders),
+                'folders_created' => $totalFoldersCreated,
             ]);
 
             return [
@@ -292,6 +309,75 @@ class GoogleDriveFolderService
         // Fallback to name with sanitization
         $name = preg_replace('/[^a-zA-Z0-9\s\-_]/', '', $project->name ?? 'Project');
         return substr($name, 0, 100);
+    }
+
+    /**
+     * Recursively create nested folder structure
+     *
+     * @param array $structure The folder structure (can be nested)
+     * @param string $parentId The parent folder ID
+     * @param array &$folders Reference to store created folder info
+     * @param string $prefix Path prefix for nested folders
+     * @return int Total number of folders created
+     */
+    protected function createNestedFolders(array $structure, string $parentId, array &$folders, string $prefix = ''): int
+    {
+        $count = 0;
+
+        foreach ($structure as $key => $value) {
+            // Determine folder name and subfolders
+            if (is_array($value)) {
+                // Key is folder name, value is array of subfolders
+                $folderName = $key;
+                $subfolders = $value;
+            } else {
+                // Value is just a folder name (no subfolders)
+                $folderName = $value;
+                $subfolders = [];
+            }
+
+            // Create this folder
+            $folderId = $this->createFolder($folderName, $parentId);
+            $folderPath = $prefix ? "{$prefix}/{$folderName}" : $folderName;
+
+            $folders[$folderPath] = [
+                'id' => $folderId,
+                'name' => $folderName,
+                'url' => $this->getFolderUrl($folderId),
+            ];
+            $count++;
+
+            // Recursively create subfolders if any
+            if (!empty($subfolders)) {
+                // Check if subfolders is associative (has nested structure) or sequential
+                $isAssociative = array_keys($subfolders) !== range(0, count($subfolders) - 1);
+
+                if ($isAssociative) {
+                    // Nested structure with more subfolders
+                    $count += $this->createNestedFolders($subfolders, $folderId, $folders, $folderPath);
+                } else {
+                    // Simple array of subfolder names
+                    foreach ($subfolders as $subfolderName) {
+                        if (is_array($subfolderName)) {
+                            // It's actually a nested structure
+                            $count += $this->createNestedFolders([$subfolderName], $folderId, $folders, $folderPath);
+                        } else {
+                            $subFolderId = $this->createFolder($subfolderName, $folderId);
+                            $subFolderPath = "{$folderPath}/{$subfolderName}";
+
+                            $folders[$subFolderPath] = [
+                                'id' => $subFolderId,
+                                'name' => $subfolderName,
+                                'url' => $this->getFolderUrl($subFolderId),
+                            ];
+                            $count++;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $count;
     }
 
     /**
@@ -412,6 +498,114 @@ class GoogleDriveFolderService
             return true;
         } catch (Exception $e) {
             Log::error('Failed to delete folder', [
+                'folder_id' => $folderId,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Rename a folder
+     *
+     * @param string $folderId The folder ID to rename
+     * @param string $newName The new folder name
+     * @return bool Success status
+     */
+    public function renameFolder(string $folderId, string $newName): bool
+    {
+        if (!$this->isReady()) {
+            return false;
+        }
+
+        try {
+            $fileMetadata = new DriveFile([
+                'name' => $newName,
+            ]);
+
+            $this->driveService->files->update($folderId, $fileMetadata, [
+                'fields' => 'id,name',
+            ]);
+
+            Log::info('Google Drive folder renamed', [
+                'folder_id' => $folderId,
+                'new_name' => $newName,
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Failed to rename folder', [
+                'folder_id' => $folderId,
+                'new_name' => $newName,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Trash a folder (soft delete - moves to Google Drive trash)
+     *
+     * @param string $folderId The folder ID to trash
+     * @return bool Success status
+     */
+    public function trashFolder(string $folderId): bool
+    {
+        if (!$this->isReady()) {
+            return false;
+        }
+
+        try {
+            $fileMetadata = new DriveFile([
+                'trashed' => true,
+            ]);
+
+            $this->driveService->files->update($folderId, $fileMetadata, [
+                'fields' => 'id,trashed',
+            ]);
+
+            Log::info('Google Drive folder moved to trash', [
+                'folder_id' => $folderId,
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Failed to trash folder', [
+                'folder_id' => $folderId,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Restore a folder from trash
+     *
+     * @param string $folderId The folder ID to restore
+     * @return bool Success status
+     */
+    public function restoreFolder(string $folderId): bool
+    {
+        if (!$this->isReady()) {
+            return false;
+        }
+
+        try {
+            $fileMetadata = new DriveFile([
+                'trashed' => false,
+            ]);
+
+            $this->driveService->files->update($folderId, $fileMetadata, [
+                'fields' => 'id,trashed',
+            ]);
+
+            Log::info('Google Drive folder restored from trash', [
+                'folder_id' => $folderId,
+            ]);
+
+            return true;
+        } catch (Exception $e) {
+            Log::error('Failed to restore folder from trash', [
                 'folder_id' => $folderId,
                 'error' => $e->getMessage(),
             ]);

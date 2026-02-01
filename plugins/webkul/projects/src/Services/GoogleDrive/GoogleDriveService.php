@@ -251,4 +251,104 @@ class GoogleDriveService
             ]);
         }
     }
+
+    /**
+     * Rename a project's Google Drive folder
+     *
+     * @param Project $project The project
+     * @param string $newName The new folder name
+     * @return bool Success status
+     */
+    public function renameProjectFolder(Project $project, string $newName): bool
+    {
+        if (!$this->isConfigured() || !$project->google_drive_root_folder_id) {
+            return false;
+        }
+
+        $result = $this->folderService->renameFolder($project->google_drive_root_folder_id, $newName);
+
+        if ($result) {
+            $this->logToChatter($project, 'renamed', "📝 Google Drive folder renamed to **{$newName}**");
+        }
+
+        return $result;
+    }
+
+    /**
+     * Trash a project's Google Drive folder (soft delete)
+     *
+     * @param Project $project The project
+     * @return bool Success status
+     */
+    public function trashProjectFolder(Project $project): bool
+    {
+        if (!$this->isConfigured() || !$project->google_drive_root_folder_id) {
+            return false;
+        }
+
+        $result = $this->folderService->trashFolder($project->google_drive_root_folder_id);
+
+        if ($result) {
+            $this->logToChatter($project, 'trashed', '🗑️ Google Drive folder moved to trash');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Restore a project's Google Drive folder from trash
+     *
+     * @param Project $project The project
+     * @return bool Success status
+     */
+    public function restoreProjectFolder(Project $project): bool
+    {
+        if (!$this->isConfigured() || !$project->google_drive_root_folder_id) {
+            return false;
+        }
+
+        $result = $this->folderService->restoreFolder($project->google_drive_root_folder_id);
+
+        if ($result) {
+            $this->logToChatter($project, 'restored', '♻️ Google Drive folder restored from trash');
+        }
+
+        return $result;
+    }
+
+    /**
+     * Permanently delete a project's Google Drive folder
+     *
+     * @param Project $project The project
+     * @return bool Success status
+     */
+    public function deleteProjectFolder(Project $project): bool
+    {
+        if (!$this->isConfigured() || !$project->google_drive_root_folder_id) {
+            return false;
+        }
+
+        return $this->folderService->deleteFolder($project->google_drive_root_folder_id);
+    }
+
+    /**
+     * Log action to project chatter
+     */
+    protected function logToChatter(Project $project, string $action, string $message): void
+    {
+        try {
+            $project->addMessage([
+                'type' => 'activity',
+                'subject' => 'Google Drive Update',
+                'body' => $message,
+                'is_internal' => true,
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to log Google Drive action to chatter', [
+                'project_id' => $project->id,
+                'action' => $action,
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
 }

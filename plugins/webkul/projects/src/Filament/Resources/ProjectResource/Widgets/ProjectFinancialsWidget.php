@@ -15,28 +15,33 @@ class ProjectFinancialsWidget extends BaseWidget
 {
     public ?Model $record = null;
 
+    protected static bool $isLazy = false;
+
+    protected int | string | array $columnSpan = 1;
+
     protected function getStats(): array
     {
         if (! $this->record) {
-            return [];
+            return [
+                Stat::make('Financials', '-')
+                    ->description('Loading...')
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('gray'),
+            ];
         }
 
         $financials = $this->calculateFinancials();
 
+        // Build condensed description
+        $descParts = [];
+        $descParts[] = $financials['linear_feet'] . ' @ ' . $financials['price_per_lf'];
+        $descParts[] = $financials['actual_formatted'] . ' costs';
+        $descParts[] = $financials['margin_formatted'] . ' margin';
+
         return [
-            Stat::make('Total Quoted', $financials['quoted_formatted'])
-                ->description($financials['linear_feet'] . ' LF @ ' . $financials['price_per_lf'])
-                ->descriptionIcon('heroicon-o-document-text')
-                ->color('info'),
-
-            Stat::make('Actual Costs', $financials['actual_formatted'])
-                ->description($financials['cost_breakdown'])
-                ->descriptionIcon('heroicon-o-currency-dollar')
-                ->color($financials['actual_color']),
-
-            Stat::make('Profit Margin', $financials['margin_formatted'])
-                ->description($financials['margin_description'])
-                ->descriptionIcon($financials['margin_icon'])
+            Stat::make('Financials', $financials['quoted_formatted'])
+                ->description(implode(' • ', $descParts))
+                ->icon('heroicon-o-currency-dollar')
                 ->color($financials['margin_color']),
         ];
     }
@@ -48,15 +53,19 @@ class ProjectFinancialsWidget extends BaseWidget
      */
     protected function calculateFinancials(): array
     {
-        // Calculate total quoted amount
+        // Calculate total quoted amount from cabinets
         $quoted = $this->record->cabinets()
             ->selectRaw('SUM(unit_price_per_lf * linear_feet * quantity) as total')
             ->value('total') ?? 0;
 
-        // Calculate linear feet
-        $linearFeet = $this->record->cabinets()
+        // Calculate linear feet from cabinets, fallback to project estimated_linear_feet
+        $cabinetLinearFeet = $this->record->cabinets()
             ->selectRaw('SUM(linear_feet * quantity) as total')
             ->value('total') ?? 0;
+
+        // Use cabinet LF if available, otherwise use project estimated LF
+        $linearFeet = $cabinetLinearFeet > 0 ? $cabinetLinearFeet : ($this->record->estimated_linear_feet ?? 0);
+        $isEstimated = $cabinetLinearFeet == 0 && $linearFeet > 0;
 
         // Calculate price per linear foot
         $pricePerLF = $linearFeet > 0 ? $quoted / $linearFeet : 0;
@@ -90,6 +99,12 @@ class ProjectFinancialsWidget extends BaseWidget
         $actualColor = $actual > $quoted ? 'danger' : 'success';
         $costBreakdown = ($actual > 0 && $quoted > 0) ? 'Spent: ' . number_format(($actual / $quoted) * 100, 1) . '% of budget' : 'No costs recorded';
 
+        // Format linear feet with indicator if using estimate
+        $linearFeetFormatted = number_format($linearFeet, 0) . ' LF';
+        if ($isEstimated) {
+            $linearFeetFormatted .= ' (est.)';
+        }
+
         return [
             'quoted' => $quoted,
             'quoted_formatted' => '$' . number_format($quoted, 0),
@@ -99,13 +114,14 @@ class ProjectFinancialsWidget extends BaseWidget
             'margin_formatted' => number_format($margin, 1) . '%',
             'profit' => $profit,
             'profit_formatted' => '$' . number_format($profit, 0),
-            'linear_feet' => number_format($linearFeet, 0) . ' LF',
+            'linear_feet' => $linearFeetFormatted,
             'price_per_lf' => '$' . number_format($pricePerLF, 0) . '/LF',
             'margin_color' => $marginColor,
             'margin_icon' => $marginIcon,
             'margin_description' => $marginDescription,
             'actual_color' => $actualColor,
             'cost_breakdown' => $costBreakdown,
+            'is_estimated' => $isEstimated,
         ];
     }
 }

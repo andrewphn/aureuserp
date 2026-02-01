@@ -15,6 +15,8 @@ class ProjectAlertsWidget extends Widget
 {
     public ?Model $record = null;
 
+    protected static bool $isLazy = false;
+
     protected string $view = 'webkul-project::filament.widgets.project-alerts';
 
     protected int | string | array $columnSpan = 'full';
@@ -26,6 +28,26 @@ class ProjectAlertsWidget extends Widget
         }
 
         $alerts = [];
+
+        // Check if using estimated LF (no cabinets yet) - this is normal for early-stage projects
+        $cabinetCount = $this->record->cabinets()->count();
+        $hasEstimatedLF = $this->record->estimated_linear_feet > 0;
+
+        if ($cabinetCount === 0 && $hasEstimatedLF) {
+            $alerts[] = [
+                'type' => 'info',
+                'icon' => 'heroicon-o-calculator',
+                'message' => 'Using estimated ' . number_format($this->record->estimated_linear_feet, 0) . ' LF for planning',
+                'action' => 'Add cabinets from PDF annotations or manually for accurate pricing',
+            ];
+        } elseif ($cabinetCount === 0 && !$hasEstimatedLF) {
+            $alerts[] = [
+                'type' => 'warning',
+                'icon' => 'heroicon-o-calculator',
+                'message' => 'No linear feet data available',
+                'action' => 'Enter estimated LF or add cabinets for production planning',
+            ];
+        }
 
         // Check for missing data
         $roomsWithoutLocations = $this->record->rooms()->doesntHave('locations')->count();
@@ -76,19 +98,22 @@ class ProjectAlertsWidget extends Widget
         // Check timeline issues
         if ($this->record->desired_completion_date) {
             $daysRemaining = now()->diffInDays($this->record->desired_completion_date, false);
+            $daysRemainingRounded = (int) round($daysRemaining);
 
             if ($daysRemaining < 0) {
+                $daysText = abs($daysRemainingRounded) . ' day' . (abs($daysRemainingRounded) !== 1 ? 's' : '');
                 $alerts[] = [
                     'type' => 'danger',
                     'icon' => 'heroicon-o-exclamation-circle',
-                    'message' => 'Project is ' . abs($daysRemaining) . ' days overdue',
+                    'message' => 'Project is ' . $daysText . ' overdue',
                     'action' => 'Update timeline or expedite production',
                 ];
             } elseif ($daysRemaining < 7) {
+                $daysText = $daysRemainingRounded . ' day' . ($daysRemainingRounded !== 1 ? 's' : '');
                 $alerts[] = [
                     'type' => 'warning',
                     'icon' => 'heroicon-o-clock',
-                    'message' => 'Deadline in ' . $daysRemaining . ' days',
+                    'message' => 'Deadline in ' . $daysText,
                     'action' => 'Review production schedule',
                 ];
             }

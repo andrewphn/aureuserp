@@ -33,6 +33,7 @@ class ProjectStageFactory extends Factory
             'is_collapsed' => false,
             'company_id'   => Company::factory(),
             'creator_id'   => User::factory(),
+            'stage_key'    => 'test-stage-' . fake()->unique()->uuid(),
         ];
     }
 }
