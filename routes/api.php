@@ -306,6 +306,9 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     // PDF Ingestion (n8n Integration)
     // ========================================
     Route::prefix('pdf-ingestion')->name('pdf-ingestion.')->group(function () {
+        // Upload PDF and create draft project (for n8n manual upload form)
+        Route::post('upload-and-analyze', [V1\PdfIngestionController::class, 'uploadAndAnalyze'])->name('upload-and-analyze');
+
         // Analyze PDF with AI vision
         Route::post('analyze', [V1\PdfIngestionController::class, 'analyze'])->name('analyze');
 

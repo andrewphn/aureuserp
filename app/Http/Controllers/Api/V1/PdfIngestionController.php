@@ -9,7 +9,10 @@ use App\Services\PdfParsingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Webkul\Project\Models\Project;
+use Webkul\Project\Models\Stage;
 
 /**
  * PDF Ingestion Controller for n8n Integration
@@ -360,6 +363,166 @@ class PdfIngestionController extends Controller
             'project_id'      => $project->id,
             'created'         => $createdEntities,
         ]);
+    }
+
+    /**
+     * Upload PDF and create/attach to project
+     *
+     * Accepts a PDF file upload, creates a draft project if needed,
+     * attaches the PDF, and triggers AI analysis.
+     */
+    public function uploadAndAnalyze(Request $request): JsonResponse
+    {
+        $request->validate([
+            'pdf_file' => 'required|file|mimes:pdf|max:51200', // 50MB max
+            'customer_name' => 'nullable|string|max:255',
+            'project_id' => 'nullable|integer|exists:projects_projects,id',
+        ]);
+
+        try {
+            $pdfFile = $request->file('pdf_file');
+            $customerName = $request->input('customer_name');
+            $projectId = $request->input('project_id');
+
+            // Get or create project
+            if ($projectId) {
+                $project = Project::findOrFail($projectId);
+            } else {
+                // Create a new draft project
+                $draftStage = Stage::where('code', 'draft')
+                    ->orWhere('name', 'like', '%Draft%')
+                    ->first();
+
+                if (! $draftStage) {
+                    $draftStage = Stage::first(); // Fallback to first stage
+                }
+
+                // Generate project number
+                $lastProject = Project::orderBy('id', 'desc')->first();
+                $nextNumber = $lastProject ? ($lastProject->id + 1) : 1;
+                $projectNumber = 'TFW-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+
+                // Use filename or customer name for project name
+                $projectName = $customerName ?: pathinfo($pdfFile->getClientOriginalName(), PATHINFO_FILENAME);
+
+                $project = Project::create([
+                    'name' => $projectName,
+                    'project_number' => $projectNumber,
+                    'stage_id' => $draftStage?->id,
+                    'company_id' => 1, // Default company
+                    'creator_id' => auth()->id() ?? 1,
+                ]);
+
+                Log::info('PDF Ingestion: Created draft project', [
+                    'project_id' => $project->id,
+                    'project_number' => $projectNumber,
+                    'name' => $projectName,
+                ]);
+            }
+
+            // Generate filename with project number
+            $originalName = pathinfo($pdfFile->getClientOriginalName(), PATHINFO_FILENAME);
+            $revision = $project->pdfDocuments()->count() + 1;
+            $fileName = "{$project->project_number}-Rev{$revision}-{$originalName}.pdf";
+
+            // Store the file
+            $filePath = $pdfFile->storeAs('pdf-documents', $fileName, 'public');
+
+            // Get page count
+            $pageCount = 1;
+            try {
+                $parser = new \Smalot\PdfParser\Parser();
+                $pdf = $parser->parseFile(Storage::disk('public')->path($filePath));
+                $pageCount = count($pdf->getPages());
+            } catch (\Exception $e) {
+                Log::warning('Could not parse PDF for page count', ['error' => $e->getMessage()]);
+            }
+
+            // Create PdfDocument record
+            $pdfDocument = PdfDocument::create([
+                'module_type' => Project::class,
+                'module_id' => $project->id,
+                'file_name' => $fileName,
+                'file_path' => $filePath,
+                'file_size' => $pdfFile->getSize(),
+                'mime_type' => 'application/pdf',
+                'page_count' => $pageCount,
+                'document_type' => 'drawing',
+                'version_number' => $revision,
+                'is_latest_version' => true,
+                'uploaded_by' => auth()->id() ?? 1,
+                'processing_status' => 'pending',
+            ]);
+
+            // Create PdfPage records for each page
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $pdfDocument->pages()->create([
+                    'page_number' => $i,
+                    'classification_status' => 'pending',
+                ]);
+            }
+
+            Log::info('PDF Ingestion: PDF uploaded and attached', [
+                'pdf_document_id' => $pdfDocument->id,
+                'project_id' => $project->id,
+                'file_name' => $fileName,
+                'page_count' => $pageCount,
+            ]);
+
+            // Now run the analysis
+            $pdfDocument->markAsProcessing();
+
+            // Step 1: Classify all pages
+            $pageClassifications = $this->aiPdfParsingService->classifyDocumentPages($pdfDocument);
+
+            if (isset($pageClassifications['error'])) {
+                $pdfDocument->markAsFailed($pageClassifications['error']);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => $pageClassifications['error'],
+                    'project_id' => $project->id,
+                    'pdf_document_id' => $pdfDocument->id,
+                ], 500);
+            }
+
+            // Apply classifications
+            $this->aiPdfParsingService->applyBulkClassification($pdfDocument, $pageClassifications);
+
+            // Store extracted data
+            $extractedData = [
+                'page_classifications' => $pageClassifications,
+            ];
+
+            $pdfDocument->update([
+                'extracted_metadata' => $extractedData,
+                'extracted_at' => now(),
+            ]);
+
+            $pdfDocument->markAsCompleted();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PDF uploaded and analyzed successfully',
+                'project_id' => $project->id,
+                'project_number' => $project->project_number,
+                'pdf_document_id' => $pdfDocument->id,
+                'file_name' => $fileName,
+                'page_count' => $pageCount,
+                'data' => $extractedData,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('PDF Ingestion: Upload failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
