@@ -72,6 +72,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetsR
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRunsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\ProjectMediaRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetSpecTreeRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CncProgramsRelationManager;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
@@ -624,6 +625,15 @@ class ProjectResource extends Resource
                                     ])
                                     ->columns(1)
                                     ->visible(static::getTaskSettings()->enable_milestones),
+
+                                Fieldset::make('Google Drive')
+                                    ->schema([
+                                        Toggle::make('google_drive_enabled')
+                                            ->label('Create Google Drive Folders')
+                                            ->helperText('Automatically create project folder structure in Google Drive when saved')
+                                            ->default(true),
+                                    ])
+                                    ->columns(1),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
@@ -1187,6 +1197,10 @@ class ProjectResource extends Resource
                                     ->label(__('webkul-project::filament/resources/project.infolist.sections.settings.entries.milestones-enabled'))
                                     ->boolean()
                                     ->visible(static::getTaskSettings()->enable_milestones),
+
+                                IconEntry::make('google_drive_enabled')
+                                    ->label('Google Drive Folders')
+                                    ->boolean(),
                             ]),
                     ])
                     ->columnSpan(['lg' => 1]),
@@ -1256,6 +1270,11 @@ class ProjectResource extends Resource
                 MilestonesRelationManager::class,
             ])
                 ->icon('heroicon-o-flag'),
+
+            RelationGroup::make('CNC Programs', [
+                CncProgramsRelationManager::class,
+            ])
+                ->icon('heroicon-o-cog-8-tooth'),
         ];
     }
 

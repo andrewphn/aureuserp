@@ -5,6 +5,7 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Webkul\Project\Database\Factories\GateRequirementFactory;
 
 /**
  * Gate Requirement Eloquent model
@@ -45,6 +46,14 @@ class GateRequirement extends Model
     protected $table = 'projects_gate_requirements';
 
     /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): GateRequirementFactory
+    {
+        return GateRequirementFactory::new();
+    }
+
+    /**
      * Requirement type constants.
      */
     public const TYPE_FIELD_NOT_NULL = 'field_not_null';
@@ -57,6 +66,7 @@ class GateRequirement extends Model
     public const TYPE_PAYMENT_RECEIVED = 'payment_received';
     public const TYPE_TASK_COMPLETED = 'task_completed';
     public const TYPE_CUSTOM_CHECK = 'custom_check';
+    public const TYPE_ALL_CNC_COMPLETE = 'all_cnc_complete';
 
     /**
      * Fillable attributes.
@@ -107,6 +117,7 @@ class GateRequirement extends Model
             self::TYPE_PAYMENT_RECEIVED => 'Payment Received',
             self::TYPE_TASK_COMPLETED => 'Task Completed',
             self::TYPE_CUSTOM_CHECK => 'Custom Check',
+            self::TYPE_ALL_CNC_COMPLETE => 'All CNC Programs Complete',
         ];
     }
 

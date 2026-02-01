@@ -130,6 +130,7 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2026_01_12_182839_create_projects_faceframes_table',
                 '2026_01_16_000001_create_construction_templates_table',
                 '2026_01_16_000002_add_construction_template_to_entities',
+                '2026_02_01_000001_add_material_status_to_cnc_program_parts',
             ])
             ->runsMigrations()
             ->hasSettings([

@@ -271,4 +271,162 @@ class CncProgram extends Model
 
         return $summary;
     }
+
+    // =========================================================================
+    // Workflow Methods
+    // =========================================================================
+
+    /**
+     * Check if all parts are complete and update program status accordingly
+     */
+    public function checkProgramCompletion(): bool
+    {
+        $totalParts = $this->parts()->count();
+
+        if ($totalParts === 0) {
+            return false;
+        }
+
+        $completeParts = $this->parts()
+            ->where('status', CncProgramPart::STATUS_COMPLETE)
+            ->count();
+
+        if ($completeParts === $totalParts) {
+            $this->status = self::STATUS_COMPLETE;
+            return $this->save();
+        }
+
+        // Check if any parts are running
+        $runningParts = $this->parts()
+            ->where('status', CncProgramPart::STATUS_RUNNING)
+            ->count();
+
+        if ($runningParts > 0 && $this->status !== self::STATUS_IN_PROGRESS) {
+            $this->status = self::STATUS_IN_PROGRESS;
+            return $this->save();
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the completion percentage for this program
+     */
+    public function getCompletionPercentageAttribute(): float
+    {
+        $totalParts = $this->parts()->count();
+
+        if ($totalParts === 0) {
+            return 0;
+        }
+
+        $completeParts = $this->parts()
+            ->where('status', CncProgramPart::STATUS_COMPLETE)
+            ->count();
+
+        return round(($completeParts / $totalParts) * 100, 1);
+    }
+
+    /**
+     * Check if any parts are waiting for material
+     */
+    public function hasPendingMaterial(): bool
+    {
+        return $this->parts()
+            ->where('material_status', CncProgramPart::MATERIAL_PENDING)
+            ->exists();
+    }
+
+    /**
+     * Get count of pending parts
+     */
+    public function getPendingPartsCountAttribute(): int
+    {
+        return $this->parts()
+            ->where('status', CncProgramPart::STATUS_PENDING)
+            ->count();
+    }
+
+    /**
+     * Get count of running parts
+     */
+    public function getRunningPartsCountAttribute(): int
+    {
+        return $this->parts()
+            ->where('status', CncProgramPart::STATUS_RUNNING)
+            ->count();
+    }
+
+    /**
+     * Get count of complete parts
+     */
+    public function getCompletePartsCountAttribute(): int
+    {
+        return $this->parts()
+            ->where('status', CncProgramPart::STATUS_COMPLETE)
+            ->count();
+    }
+
+    /**
+     * Get total parts count
+     */
+    public function getTotalPartsCountAttribute(): int
+    {
+        return $this->parts()->count();
+    }
+
+    /**
+     * Get progress summary string
+     */
+    public function getProgressSummaryAttribute(): string
+    {
+        $complete = $this->complete_parts_count;
+        $total = $this->total_parts_count;
+
+        if ($total === 0) {
+            return 'No parts';
+        }
+
+        return "{$complete}/{$total} complete";
+    }
+
+    /**
+     * Get available status options
+     */
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::STATUS_PENDING => 'Pending',
+            self::STATUS_IN_PROGRESS => 'In Progress',
+            self::STATUS_COMPLETE => 'Complete',
+            self::STATUS_ERROR => 'Error',
+        ];
+    }
+
+    /**
+     * Get available material codes
+     */
+    public static function getMaterialCodes(): array
+    {
+        return [
+            'FL' => 'Furniture Lumber (solid wood)',
+            'PreFin' => 'Pre-finished material',
+            'RiftWOPly' => 'Rift-cut White Oak Plywood',
+            'MDF_RiftWO' => 'MDF with Rift White Oak',
+            'Medex' => 'Medex engineered wood',
+        ];
+    }
+
+    /**
+     * Get available sheet sizes
+     */
+    public static function getSheetSizes(): array
+    {
+        return [
+            '48x96' => '4\' x 8\' (48" x 96")',
+            '48x120' => '4\' x 10\' (48" x 120")',
+            '60x120' => '5\' x 10\' (60" x 120")',
+            '48x48' => '4\' x 4\' (48" x 48")',
+        ];
+    }
 }

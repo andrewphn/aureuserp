@@ -12,6 +12,8 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Webkul\Partner\Models\Partner;
+use Webkul\Project\Filament\Widgets\CncQueueWidget;
+use Webkul\Project\Filament\Widgets\CncStatsWidget;
 use Webkul\Project\Filament\Widgets\StatsOverviewWidget;
 use Webkul\Project\Filament\Widgets\TaskByStageChart;
 use Webkul\Project\Filament\Widgets\TaskByStateChart;
@@ -118,10 +120,12 @@ class Dashboard extends BaseDashboard
     {
         return [
             StatsOverviewWidget::class,
+            CncStatsWidget::class,
             TaskByStageChart::class,
             TaskByStateChart::class,
             TopAssigneesWidget::class,
             TopProjectsWidget::class,
+            CncQueueWidget::class,
             TodayAttendanceWidget::class,
             WeeklyHoursReportWidget::class,
         ];

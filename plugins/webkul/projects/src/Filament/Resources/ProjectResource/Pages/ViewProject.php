@@ -260,10 +260,20 @@ class ViewProject extends ViewRecord
     protected function getHeaderWidgets(): array
     {
         return [
-            ProjectResource\Widgets\ProjectStatusWidget::class,
             ProjectResource\Widgets\ProjectFinancialsWidget::class,
             ProjectResource\Widgets\ProjectTimelineWidget::class,
-            ProjectResource\Widgets\ProjectAlertsWidget::class,
+            ProjectResource\Widgets\ProjectStatusWidget::class,
+            ProjectResource\Widgets\ProjectCncStatusWidget::class,
+        ];
+    }
+
+    public function getHeaderWidgetsColumns(): int | array
+    {
+        return [
+            'default' => 1,
+            'sm' => 2,
+            'md' => 4,
+            'lg' => 4,
         ];
     }
 

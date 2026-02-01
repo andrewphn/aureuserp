@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Webkul\Project\Models\GateRequirement;
 use Webkul\Project\Models\Project;
+use Webkul\Project\Services\Gates\Requirements\AllCncProgramsCompleteCheck;
 
 /**
  * Gate Requirement Checker
@@ -35,6 +36,7 @@ class GateRequirementChecker
                 GateRequirement::TYPE_PAYMENT_RECEIVED => $this->checkPaymentReceived($project, $requirement),
                 GateRequirement::TYPE_TASK_COMPLETED => $this->checkTaskCompleted($project, $requirement),
                 GateRequirement::TYPE_CUSTOM_CHECK => $this->checkCustom($project, $requirement),
+                GateRequirement::TYPE_ALL_CNC_COMPLETE => $this->checkAllCncComplete($project, $requirement),
                 default => new RequirementCheckResult(false, "Unknown requirement type: {$requirement->requirement_type}"),
             };
         } catch (\Exception $e) {
@@ -334,5 +336,15 @@ class GateRequirementChecker
             return $value + 0; // Convert to int or float
         }
         return $value;
+    }
+
+    /**
+     * Check if all CNC programs are complete.
+     */
+    protected function checkAllCncComplete(Project $project, GateRequirement $requirement): RequirementCheckResult
+    {
+        $checker = app(AllCncProgramsCompleteCheck::class);
+
+        return $checker->check($project, $requirement);
     }
 }
