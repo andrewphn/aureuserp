@@ -1,10 +1,10 @@
 <?php
 
+use App\Http\Controllers\Api\ClockController;
+use App\Http\Controllers\Api\PdfAnnotationController;
+use App\Http\Controllers\Api\V1;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\PdfAnnotationController;
-use App\Http\Controllers\Api\ClockController;
-use App\Http\Controllers\Api\V1;
 
 /*
 |--------------------------------------------------------------------------
@@ -301,6 +301,26 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
         Route::post('review/{id}/approve', [V1\RhinoExtractionController::class, 'approveReview'])->name('review.approve');
         Route::post('review/{id}/reject', [V1\RhinoExtractionController::class, 'rejectReview'])->name('review.reject');
     });
+
+    // ========================================
+    // PDF Ingestion (n8n Integration)
+    // ========================================
+    Route::prefix('pdf-ingestion')->name('pdf-ingestion.')->group(function () {
+        // Analyze PDF with AI vision
+        Route::post('analyze', [V1\PdfIngestionController::class, 'analyze'])->name('analyze');
+
+        // Get processing status
+        Route::get('{id}/status', [V1\PdfIngestionController::class, 'status'])->name('status');
+
+        // Get extracted data
+        Route::get('{id}/data', [V1\PdfIngestionController::class, 'getExtractedData'])->name('data');
+
+        // Create project entities from extracted data
+        Route::post('create-entities', [V1\PdfIngestionController::class, 'createEntities'])->name('create-entities');
+
+        // Generate sales order from line items
+        Route::post('generate-sales-order', [V1\PdfIngestionController::class, 'generateSalesOrder'])->name('generate-sales-order');
+    });
 });
 
 // PDF Page Annotation API Routes (Unified System)
@@ -347,7 +367,7 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             },
             'rooms.locations.cabinetRuns' => function ($query) {
                 $query->orderBy('sort_order')->orderBy('name');
-            }
+            },
         ])->findOrFail($projectId);
 
         // Get annotation counts for all entities in this project
@@ -370,8 +390,8 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             ->map(function ($annotations) {
                 return $annotations->map(function ($anno) {
                     return [
-                        'page' => $anno->page_number,
-                        'viewType' => $anno->view_type
+                        'page'     => $anno->page_number,
+                        'viewType' => $anno->view_type,
                     ];
                 })->unique()->values();
             });
@@ -395,8 +415,8 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             ->map(function ($annotations) {
                 return $annotations->map(function ($anno) {
                     return [
-                        'page' => $anno->page_number,
-                        'viewType' => $anno->view_type
+                        'page'     => $anno->page_number,
+                        'viewType' => $anno->view_type,
                     ];
                 })->unique()->values();
             });
@@ -420,8 +440,8 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             ->map(function ($annotations) {
                 return $annotations->map(function ($anno) {
                     return [
-                        'page' => $anno->page_number,
-                        'viewType' => $anno->view_type
+                        'page'     => $anno->page_number,
+                        'viewType' => $anno->view_type,
                     ];
                 })->unique()->values();
             });
@@ -444,13 +464,13 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
             ->map(function ($cabinets) {
                 return $cabinets->map(function ($cabinet) {
                     return [
-                        'id' => $cabinet->id,
-                        'name' => $cabinet->label,
-                        'type' => 'cabinet',
+                        'id'    => $cabinet->id,
+                        'name'  => $cabinet->label,
+                        'type'  => 'cabinet',
                         'pages' => [[
-                            'page' => $cabinet->page_number,
-                            'viewType' => $cabinet->view_type
-                        ]]
+                            'page'     => $cabinet->page_number,
+                            'viewType' => $cabinet->view_type,
+                        ]],
                     ];
                 })->values();
             });
@@ -458,30 +478,30 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
         // Transform to tree structure expected by V3 component
         $tree = $project->rooms->map(function ($room) use ($roomAnnotationCounts, $roomPages, $locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
             return [
-                'id' => $room->id,
-                'name' => $room->name,
-                'type' => 'room',
+                'id'               => $room->id,
+                'name'             => $room->name,
+                'type'             => 'room',
                 'annotation_count' => $roomAnnotationCounts->get($room->id, 0),
-                'pages' => $roomPages->get($room->id, collect())->toArray(),
-                'children' => $room->locations->map(function ($location) use ($locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
+                'pages'            => $roomPages->get($room->id, collect())->toArray(),
+                'children'         => $room->locations->map(function ($location) use ($locationAnnotationCounts, $locationPages, $runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
                     return [
-                        'id' => $location->id,
-                        'name' => $location->name,
-                        'type' => 'room_location',
+                        'id'               => $location->id,
+                        'name'             => $location->name,
+                        'type'             => 'room_location',
                         'annotation_count' => $locationAnnotationCounts->get($location->id, 0),
-                        'pages' => $locationPages->get($location->id, collect())->toArray(),
-                        'children' => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
+                        'pages'            => $locationPages->get($location->id, collect())->toArray(),
+                        'children'         => $location->cabinetRuns->map(function ($run) use ($runAnnotationCounts, $runPages, $cabinetsByCabinetRun) {
                             return [
-                                'id' => $run->id,
-                                'name' => $run->name ?: "Run {$run->id}",
-                                'type' => 'cabinet_run',
+                                'id'               => $run->id,
+                                'name'             => $run->name ?: "Run {$run->id}",
+                                'type'             => 'cabinet_run',
                                 'annotation_count' => $runAnnotationCounts->get($run->id, 0),
-                                'pages' => $runPages->get($run->id, collect())->toArray(),
-                                'children' => $cabinetsByCabinetRun->get($run->id, collect())->toArray(),
+                                'pages'            => $runPages->get($run->id, collect())->toArray(),
+                                'children'         => $cabinetsByCabinetRun->get($run->id, collect())->toArray(),
                             ];
-                        })->values()
+                        })->values(),
                     ];
-                })->values()
+                })->values(),
             ];
         })->values();
 
@@ -496,9 +516,9 @@ Route::middleware(['web', 'auth:web'])->prefix('projects')->group(function () {
         $project->tags()->sync($tagIds);
 
         return response()->json([
-            'success' => true,
-            'message' => 'Tags updated successfully',
-            'tag_count' => count($tagIds)
+            'success'   => true,
+            'message'   => 'Tags updated successfully',
+            'tag_count' => count($tagIds),
         ]);
     })->name('api.projects.tags.update');
 

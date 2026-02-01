@@ -1,0 +1,200 @@
+{
+  "name": "PDF Project Ingestion - TCS Woodwork",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "pdf-ingestion",
+        "authentication": "headerAuth",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "PDF Upload Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [100, 300],
+      "webhookId": "pdf-ingestion"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LARAVEL_API_URL }}/api/v1/pdf-ingestion/analyze",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ pdf_document_id: $json.pdf_document_id }) }}",
+        "options": {
+          "timeout": 180000,
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "analyze-pdf",
+      "name": "Analyze PDF (Laravel AI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [350, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_LARAVEL_API_CREDENTIAL_ID",
+          "name": "Laravel API Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "success-check",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-success",
+      "name": "Check Analysis Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.LARAVEL_API_URL }}/api/v1/pdf-ingestion/create-entities",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ pdf_document_id: $('PDF Upload Webhook').first().json.pdf_document_id, auto_create_rooms: true, auto_create_locations: true }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "create-entities",
+      "name": "Create Project Entities",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [850, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YOUR_LARAVEL_API_CREDENTIAL_ID",
+          "name": "Laravel API Token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const webhookData = $('PDF Upload Webhook').first().json;\nconst analysisResult = $('Analyze PDF (Laravel AI)').first().json;\nconst entitiesResult = $input.first().json;\n\nreturn [{\n  json: {\n    success: true,\n    message: 'PDF analyzed and entities created successfully',\n    pdf_document_id: webhookData.pdf_document_id,\n    project_id: webhookData.project_id,\n    project: webhookData.project,\n    analysis: {\n      pages_classified: analysisResult.data?.page_classifications?.length || 0,\n      elevations_found: analysisResult.data?.elevations?.length || 0,\n      line_items_found: analysisResult.data?.line_items?.length || 0,\n      cover_page_data: analysisResult.data?.cover_page_data || null,\n      floor_plans: analysisResult.data?.floor_plans || [],\n    },\n    entities_created: entitiesResult.created || {},\n    processing_time_ms: Date.now() - new Date(webhookData.uploaded_at || Date.now()).getTime(),\n  }\n}];"
+      },
+      "id": "prepare-success",
+      "name": "Prepare Success Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1100, 200]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const webhookData = $('PDF Upload Webhook').first().json;\nconst analysisResult = $('Analyze PDF (Laravel AI)').first().json;\n\nreturn [{\n  json: {\n    success: false,\n    message: 'PDF analysis failed',\n    pdf_document_id: webhookData.pdf_document_id,\n    project_id: webhookData.project_id,\n    error: analysisResult.error || 'Unknown error occurred during PDF analysis',\n    processing_status: analysisResult.processing_status || 'failed',\n  }\n}];"
+      },
+      "id": "prepare-error",
+      "name": "Prepare Error Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 400]
+    }
+  ],
+  "connections": {
+    "PDF Upload Webhook": {
+      "main": [
+        [
+          {
+            "node": "Analyze PDF (Laravel AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze PDF (Laravel AI)": {
+      "main": [
+        [
+          {
+            "node": "Check Analysis Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Analysis Success": {
+      "main": [
+        [
+          {
+            "node": "Create Project Entities",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Project Entities": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "PDF Processing"
+    },
+    {
+      "name": "AI"
+    },
+    {
+      "name": "TCS Integration"
+    }
+  ],
+  "triggerCount": 0,
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "tcs-woodwork"
+  }
+}

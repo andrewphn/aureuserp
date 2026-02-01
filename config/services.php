@@ -42,7 +42,7 @@ return [
 
     'google' => [
         'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
-        'api_key' => env('GOOGLE_API_KEY', env('GEMINI_API_KEY')),
+        'api_key'        => env('GOOGLE_API_KEY', env('GEMINI_API_KEY')),
     ],
 
     'gemini' => [
@@ -50,28 +50,28 @@ return [
     ],
 
     'google_drive' => [
-        'client_id' => env('GOOGLE_DRIVE_CLIENT_ID'),
+        'client_id'     => env('GOOGLE_DRIVE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_DRIVE_CLIENT_SECRET'),
-        'redirect_uri' => env('GOOGLE_DRIVE_REDIRECT_URI'),
-        'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID'),
+        'redirect_uri'  => env('GOOGLE_DRIVE_REDIRECT_URI'),
+        'folder_id'     => env('GOOGLE_DRIVE_FOLDER_ID'),
         'refresh_token' => env('GOOGLE_DRIVE_REFRESH_TOKEN'),
     ],
 
     'hubspot' => [
-        'api_key' => env('HUBSPOT_API_KEY'),
-        'access_token' => env('HUBSPOT_ACCESS_TOKEN'),
-        'owner_id' => env('HUBSPOT_OWNER_ID'),
+        'api_key'                   => env('HUBSPOT_API_KEY'),
+        'access_token'              => env('HUBSPOT_ACCESS_TOKEN'),
+        'owner_id'                  => env('HUBSPOT_OWNER_ID'),
         'questionnaire_workflow_id' => env('HUBSPOT_QUESTIONNAIRE_WORKFLOW_ID'),
     ],
 
     'turnstile' => [
-        'site_key' => env('TURNSTILE_SITE_KEY'),
+        'site_key'   => env('TURNSTILE_SITE_KEY'),
         'secret_key' => env('TURNSTILE_SECRET_KEY'),
     ],
 
     'leads' => [
         'notification_email' => env('LEAD_NOTIFICATION_EMAIL', 'info@tcswoodwork.com'),
-        'api_key' => env('LEADS_API_KEY'),
+        'api_key'            => env('LEADS_API_KEY'),
     ],
 
     'scrapeops' => [
@@ -80,6 +80,12 @@ return [
 
     'libredwg' => [
         'path' => env('LIBREDWG_PATH', '/Users/andrewphan/bin'),
+    ],
+
+    'n8n' => [
+        'webhook_url' => env('N8N_WEBHOOK_URL'),
+        'api_key'     => env('N8N_API_KEY'),
+        'enabled'     => env('N8N_ENABLED', false),
     ],
 
 ];

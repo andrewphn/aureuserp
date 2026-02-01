@@ -3,7 +3,8 @@
 namespace Webkul\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use App\Models\PdfDocument;
-use App\Services\PdfParsingService;
+use App\Models\PdfPage;
+use App\Models\PdfPageAnnotation;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -19,9 +20,9 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Models\PdfPage;
-use App\Models\PdfPageAnnotation;
 
 /**
  * Pdf Documents Relation Manager class
@@ -36,9 +37,6 @@ class PdfDocumentsRelationManager extends RelationManager
 
     /**
      * Define the form schema
-     *
-     * @param Schema $schema
-     * @return Schema
      */
     public function form(Schema $schema): Schema
     {
@@ -93,13 +91,13 @@ class PdfDocumentsRelationManager extends RelationManager
                 \Filament\Forms\Components\Select::make('document_type')
                     ->label('Document Type')
                     ->options([
-                        'drawing' => 'Architectural Drawing',
-                        'blueprint' => 'Blueprint',
+                        'drawing'       => 'Architectural Drawing',
+                        'blueprint'     => 'Blueprint',
                         'specification' => 'Specification',
-                        'contract' => 'Contract',
-                        'permit' => 'Permit',
-                        'photo' => 'Photo/Image',
-                        'other' => 'Other',
+                        'contract'      => 'Contract',
+                        'permit'        => 'Permit',
+                        'photo'         => 'Photo/Image',
+                        'other'         => 'Other',
                     ])
                     ->default('drawing')
                     ->required()
@@ -116,10 +114,10 @@ class PdfDocumentsRelationManager extends RelationManager
                             ->maxLength(255),
                         \Filament\Forms\Components\Select::make('type')
                             ->options([
-                                'status' => 'Status',
+                                'status'   => 'Status',
                                 'category' => 'Category',
                                 'priority' => 'Priority',
-                                'custom' => 'Custom',
+                                'custom'   => 'Custom',
                             ])
                             ->default('custom'),
                         \Filament\Forms\Components\TextInput::make('color')
@@ -146,9 +144,6 @@ class PdfDocumentsRelationManager extends RelationManager
 
     /**
      * Define the table schema
-     *
-     * @param Table $table
-     * @return Table
      */
     public function table(Table $table): Table
     {
@@ -199,10 +194,13 @@ class PdfDocumentsRelationManager extends RelationManager
                         // Create PdfPage records for each page in the PDF
                         $this->createPdfPages($record);
 
+                        // Trigger n8n workflow for AI processing (if enabled)
+                        $this->triggerN8nPdfIngestion($record);
+
                         // Redirect to Review & Price wizard after upload
                         return redirect()->route('filament.admin.resources.project.projects.pdf-review', [
                             'record' => $this->getOwnerRecord()->id,
-                            'pdf' => $record->id,
+                            'pdf'    => $record->id,
                         ]);
                     })
                     ->mutateFormDataUsing(function (array $data): array {
@@ -210,10 +208,10 @@ class PdfDocumentsRelationManager extends RelationManager
                         $originalPath = $data['file_path'];
 
                         // If file_name was auto-generated with proper format, rename the actual file
-                        if (!empty($data['file_name']) && !empty($originalPath)) {
+                        if (! empty($data['file_name']) && ! empty($originalPath)) {
                             // Build new path with proper filename
                             $directory = dirname($originalPath);
-                            $newPath = $directory . '/' . $data['file_name'];
+                            $newPath = $directory.'/'.$data['file_name'];
 
                             // Rename the actual file in storage
                             Storage::disk('public')->move($originalPath, $newPath);
@@ -224,13 +222,13 @@ class PdfDocumentsRelationManager extends RelationManager
                             // Store metadata about original filename
                             $existingPdfCount = $project->pdfDocuments()->count();
                             $data['metadata'] = json_encode([
-                                'revision' => $existingPdfCount + 1,
+                                'revision'          => $existingPdfCount + 1,
                                 'original_filename' => basename($originalPath),
                             ]);
                         }
 
                         // Get file size if not set
-                        if (empty($data['file_size']) && !empty($data['file_path'])) {
+                        if (empty($data['file_size']) && ! empty($data['file_path'])) {
                             $data['file_size'] = Storage::disk('public')->size($data['file_path']);
                         }
 
@@ -240,23 +238,24 @@ class PdfDocumentsRelationManager extends RelationManager
                         }
 
                         // Extract page count from PDF using proper parser
-                        if (empty($data['page_count']) && !empty($data['file_path'])) {
+                        if (empty($data['page_count']) && ! empty($data['file_path'])) {
                             try {
                                 $fullPath = Storage::disk('public')->path($data['file_path']);
                                 if (file_exists($fullPath)) {
-                                    $parser = new \Smalot\PdfParser\Parser();
+                                    $parser = new \Smalot\PdfParser\Parser;
                                     $pdf = $parser->parseFile($fullPath);
                                     $pages = $pdf->getPages();
                                     $data['page_count'] = count($pages);
                                 }
                             } catch (\Exception $e) {
-                                \Log::warning('Could not extract page count from PDF: ' . $e->getMessage());
+                                \Log::warning('Could not extract page count from PDF: '.$e->getMessage());
                             }
                         }
 
                         $data['module_type'] = get_class($project);
                         $data['module_id'] = $project->id;
                         $data['uploaded_by'] = Auth::id();
+
                         return $data;
                     }),
             ])
@@ -268,7 +267,7 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->visible(fn (PdfDocument $record) => $record->document_type === 'drawing')
                     ->url(fn (PdfDocument $record) => route('filament.admin.resources.project.projects.pdf-review', [
                         'record' => $this->getOwnerRecord()->id,
-                        'pdf' => $record->id,
+                        'pdf'    => $record->id,
                     ])),
 
                 Action::make('uploadNewVersion')
@@ -312,22 +311,22 @@ class PdfDocumentsRelationManager extends RelationManager
                         try {
                             $fullPath = Storage::disk('public')->path($data['new_version_file']);
                             if (file_exists($fullPath)) {
-                                $parser = new \Smalot\PdfParser\Parser();
+                                $parser = new \Smalot\PdfParser\Parser;
                                 $pdf = $parser->parseFile($fullPath);
                                 $pages = $pdf->getPages();
                                 $newVersion->page_count = count($pages);
                                 $newVersion->file_size = Storage::disk('public')->size($data['new_version_file']);
                             }
                         } catch (\Exception $e) {
-                            \Log::warning('Could not extract page count from new version: ' . $e->getMessage());
+                            \Log::warning('Could not extract page count from new version: '.$e->getMessage());
                         }
 
                         // Store version metadata
                         $newVersion->version_metadata = [
-                            'version_notes' => $data['version_notes'] ?? null,
+                            'version_notes'       => $data['version_notes'] ?? null,
                             'migrate_annotations' => $data['migrate_annotations'] ?? false,
-                            'migration_date' => now()->toIso8601String(),
-                            'migrated_by' => Auth::id(),
+                            'migration_date'      => now()->toIso8601String(),
+                            'migrated_by'         => Auth::id(),
                         ];
 
                         $newVersion->save();
@@ -345,7 +344,7 @@ class PdfDocumentsRelationManager extends RelationManager
 
                         return redirect()->route('filament.admin.resources.project.projects.pdf-review', [
                             'record' => $this->getOwnerRecord()->id,
-                            'pdf' => $newVersion->id,
+                            'pdf'    => $newVersion->id,
                         ]);
                     }),
 
@@ -353,10 +352,10 @@ class PdfDocumentsRelationManager extends RelationManager
                     ->label('Version History')
                     ->icon('heroicon-o-clock')
                     ->color('gray')
-                    ->visible(fn (PdfDocument $record) => $record->version_number > 1 || !$record->is_latest_version)
-                    ->modalHeading(fn (PdfDocument $record) => 'Version History: ' . $record->file_name)
+                    ->visible(fn (PdfDocument $record) => $record->version_number > 1 || ! $record->is_latest_version)
+                    ->modalHeading(fn (PdfDocument $record) => 'Version History: '.$record->file_name)
                     ->modalContent(fn (PdfDocument $record) => view('filament.modals.pdf-version-history', [
-                        'versions' => $record->getAllVersions(),
+                        'versions'       => $record->getAllVersions(),
                         'currentVersion' => $record,
                     ]))
                     ->modalWidth('4xl')
@@ -366,9 +365,9 @@ class PdfDocumentsRelationManager extends RelationManager
                 Action::make('view')
                     ->label('View')
                     ->icon('heroicon-o-eye')
-                    ->modalHeading(fn (PdfDocument $record) => 'View PDF: ' . $record->file_name)
+                    ->modalHeading(fn (PdfDocument $record) => 'View PDF: '.$record->file_name)
                     ->modalContent(fn (PdfDocument $record) => view('filament.modals.pdf-viewer', [
-                        'documentId' => $record->id,
+                        'documentId'  => $record->id,
                         'documentUrl' => Storage::disk('public')->url($record->file_path),
                     ]))
                     ->modalWidth('7xl')
@@ -390,14 +389,15 @@ class PdfDocumentsRelationManager extends RelationManager
                                 ->where(fn ($q) => $q->whereNotNull('cabinet_id')->orWhereNotNull('cabinet_run_id'))
                                 ->count();
 
-                            $desc = "This document has {$annotationCount} " . \Str::plural('annotation', $annotationCount);
+                            $desc = "This document has {$annotationCount} ".\Str::plural('annotation', $annotationCount);
                             if ($roomRefs > 0) {
-                                $desc .= ", {$roomRefs} room " . \Str::plural('reference', $roomRefs);
+                                $desc .= ", {$roomRefs} room ".\Str::plural('reference', $roomRefs);
                             }
                             if ($cabinetRefs > 0) {
-                                $desc .= ", {$cabinetRefs} cabinet " . \Str::plural('reference', $cabinetRefs);
+                                $desc .= ", {$cabinetRefs} cabinet ".\Str::plural('reference', $cabinetRefs);
                             }
-                            return $desc . ". These will be soft deleted and can be restored later.";
+
+                            return $desc.'. These will be soft deleted and can be restored later.';
                         }
 
                         return 'Are you sure you want to delete this document?';
@@ -409,11 +409,12 @@ class PdfDocumentsRelationManager extends RelationManager
                             ->default(false)
                             ->visible(function (PdfDocument $record) {
                                 $pageIds = $record->pages()->pluck('id');
+
                                 return PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)->exists();
                             }),
                     ])
                     ->before(function (PdfDocument $record, array $data) {
-                        if (!empty($data['clear_entities'])) {
+                        if (! empty($data['clear_entities'])) {
                             $pageIds = $record->pages()->pluck('id');
                             PdfPageAnnotation::whereIn('pdf_page_id', $pageIds)->forceDelete();
                         }
@@ -431,22 +432,20 @@ class PdfDocumentsRelationManager extends RelationManager
      */
     /**
      * Create Pdf Pages
-     *
-     * @param PdfDocument $pdfDocument
-     * @return void
      */
     protected function createPdfPages(PdfDocument $pdfDocument): void
     {
         try {
             $fullPath = Storage::disk('public')->path($pdfDocument->file_path);
 
-            if (!file_exists($fullPath)) {
+            if (! file_exists($fullPath)) {
                 \Log::warning("PDF file not found at: {$fullPath}");
+
                 return;
             }
 
             // Parse PDF to get actual page count and dimensions
-            $parser = new \Smalot\PdfParser\Parser();
+            $parser = new \Smalot\PdfParser\Parser;
             $pdf = $parser->parseFile($fullPath);
             $pages = $pdf->getPages();
             $actualPageCount = count($pages);
@@ -463,17 +462,17 @@ class PdfDocumentsRelationManager extends RelationManager
                 PdfPage::create([
                     'document_id' => $pdfDocument->id,
                     'page_number' => $index + 1,
-                    'width' => $details['MediaBox'][2] ?? null,
-                    'height' => $details['MediaBox'][3] ?? null,
-                    'rotation' => $details['Rotate'] ?? 0,
-                    'page_type' => null, // Will be set later during review
+                    'width'       => $details['MediaBox'][2] ?? null,
+                    'height'      => $details['MediaBox'][3] ?? null,
+                    'rotation'    => $details['Rotate'] ?? 0,
+                    'page_type'   => null, // Will be set later during review
                 ]);
             }
 
             \Log::info("Created {$actualPageCount} PdfPage records for document {$pdfDocument->id}");
 
         } catch (\Exception $e) {
-            \Log::error("Error creating PdfPage records: " . $e->getMessage());
+            \Log::error('Error creating PdfPage records: '.$e->getMessage());
 
             Notification::make()
                 ->title('Warning: Page Processing Issue')
@@ -488,10 +487,6 @@ class PdfDocumentsRelationManager extends RelationManager
      */
     /**
      * Migrate Annotations
-     *
-     * @param PdfDocument $oldVersion
-     * @param PdfDocument $newVersion
-     * @return void
      */
     protected function migrateAnnotations(PdfDocument $oldVersion, PdfDocument $newVersion): void
     {
@@ -514,6 +509,73 @@ class PdfDocumentsRelationManager extends RelationManager
                 // Log migration in metadata
                 \Log::info("Migrated annotation {$oldAnnotation->id} from page {$oldPage->page_number} (v{$oldVersion->version_number}) to new page {$newPage->id} (v{$newVersion->version_number})");
             }
+        }
+    }
+
+    /**
+     * Trigger n8n workflow for AI-powered PDF ingestion and analysis.
+     *
+     * Sends PDF metadata to n8n for:
+     * - Room layouts & cabinet specs extraction
+     * - Customer & project info extraction
+     * - Line items for quoting (LF, SF, etc.)
+     * - Vector database storage for RAG/search
+     */
+    protected function triggerN8nPdfIngestion(PdfDocument $pdfDocument): void
+    {
+        // Check if n8n integration is enabled
+        if (! config('services.n8n.enabled') || empty(config('services.n8n.webhook_url'))) {
+            return;
+        }
+
+        try {
+            $project = $this->getOwnerRecord();
+
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'X-API-Key'    => config('services.n8n.api_key'),
+                    'Content-Type' => 'application/json',
+                ])
+                ->post(config('services.n8n.webhook_url').'/pdf-ingestion', [
+                    'pdf_document_id' => $pdfDocument->id,
+                    'project_id'      => $project->id,
+                    'file_path'       => $pdfDocument->file_path,
+                    'file_url'        => Storage::disk('public')->url($pdfDocument->file_path),
+                    'file_name'       => $pdfDocument->file_name,
+                    'document_type'   => $pdfDocument->document_type,
+                    'page_count'      => $pdfDocument->page_count,
+                    'uploaded_at'     => $pdfDocument->created_at->toIso8601String(),
+                    'project'         => [
+                        'id'             => $project->id,
+                        'project_number' => $project->project_number,
+                        'name'           => $project->name,
+                        'partner_id'     => $project->partner_id,
+                        'stage'          => $project->stage?->name ?? null,
+                    ],
+                ]);
+
+            if ($response->successful()) {
+                // Mark PDF as processing
+                $pdfDocument->markAsProcessing();
+
+                Log::info('n8n PDF ingestion triggered', [
+                    'pdf_document_id' => $pdfDocument->id,
+                    'project_id'      => $project->id,
+                    'response_status' => $response->status(),
+                ]);
+            } else {
+                Log::warning('n8n PDF ingestion failed', [
+                    'pdf_document_id' => $pdfDocument->id,
+                    'response_status' => $response->status(),
+                    'response_body'   => $response->body(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Don't block the upload if n8n is unavailable
+            Log::error('n8n PDF ingestion error', [
+                'pdf_document_id' => $pdfDocument->id,
+                'error'           => $e->getMessage(),
+            ]);
         }
     }
 }
