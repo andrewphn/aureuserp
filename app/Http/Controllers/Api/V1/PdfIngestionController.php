@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Stage;
+use Webkul\Support\Models\Company;
 
 /**
  * PDF Ingestion Controller for n8n Integration
@@ -366,6 +367,47 @@ class PdfIngestionController extends Controller
     }
 
     /**
+     * Get list of companies for form dropdown
+     */
+    public function getCompanies(): JsonResponse
+    {
+        $companies = Company::where('is_active', true)
+            ->whereNull('parent_id') // Only parent companies
+            ->orderBy('name')
+            ->get(['id', 'name', 'acronym']);
+
+        return response()->json([
+            'success' => true,
+            'companies' => $companies->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'acronym' => $c->acronym,
+            ]),
+        ]);
+    }
+
+    /**
+     * Get list of branches for a company
+     */
+    public function getBranches(int $companyId): JsonResponse
+    {
+        $company = Company::findOrFail($companyId);
+        $branches = $company->branches()
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name', 'acronym']);
+
+        return response()->json([
+            'success' => true,
+            'branches' => $branches->map(fn ($b) => [
+                'id' => $b->id,
+                'name' => $b->name,
+                'acronym' => $b->acronym,
+            ]),
+        ]);
+    }
+
+    /**
      * Upload PDF and create/attach to project
      *
      * Accepts a PDF file upload, creates a draft project if needed,
@@ -377,12 +419,19 @@ class PdfIngestionController extends Controller
             'pdf_file' => 'required|file|mimes:pdf|max:51200', // 50MB max
             'customer_name' => 'nullable|string|max:255',
             'project_id' => 'nullable|integer|exists:projects_projects,id',
+            'company_id' => 'nullable|integer|exists:companies,id',
+            'branch_id' => 'nullable|integer|exists:companies,id',
         ]);
 
         try {
             $pdfFile = $request->file('pdf_file');
             $customerName = $request->input('customer_name');
             $projectId = $request->input('project_id');
+            $companyId = $request->input('company_id') ?: 1; // Default to company 1
+            $branchId = $request->input('branch_id');
+
+            // If branch is selected, use branch as company for project
+            $effectiveCompanyId = $branchId ?: $companyId;
 
             // Get or create project
             if ($projectId) {
@@ -397,10 +446,35 @@ class PdfIngestionController extends Controller
                     $draftStage = Stage::first(); // Fallback to first stage
                 }
 
-                // Generate project number
-                $lastProject = Project::orderBy('id', 'desc')->first();
-                $nextNumber = $lastProject ? ($lastProject->id + 1) : 1;
-                $projectNumber = 'TFW-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+                // Get company for acronym and number sequence
+                $company = Company::find($effectiveCompanyId);
+                $companyAcronym = $company?->acronym ?? strtoupper(substr($company?->name ?? 'TCS', 0, 3));
+                $startNumber = $company?->project_number_start ?? 1;
+
+                // Find last project number for this company
+                $lastProject = Project::where('company_id', $effectiveCompanyId)
+                    ->where('project_number', 'like', "{$companyAcronym}-%")
+                    ->orderBy('id', 'desc')
+                    ->first();
+
+                $sequentialNumber = $startNumber;
+                if ($lastProject && $lastProject->project_number) {
+                    preg_match('/-(\d+)/', $lastProject->project_number, $matches);
+                    if (! empty($matches[1])) {
+                        $sequentialNumber = max(intval($matches[1]) + 1, $startNumber);
+                    }
+                }
+
+                // Generate project number: ACRONYM-NNN
+                $projectNumber = sprintf('%s-%03d', $companyAcronym, $sequentialNumber);
+
+                // Ensure uniqueness
+                $counter = 0;
+                $originalNumber = $projectNumber;
+                while (Project::where('project_number', $projectNumber)->exists()) {
+                    $counter++;
+                    $projectNumber = "{$originalNumber}-{$counter}";
+                }
 
                 // Use filename or customer name for project name
                 $projectName = $customerName ?: pathinfo($pdfFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -409,13 +483,15 @@ class PdfIngestionController extends Controller
                     'name' => $projectName,
                     'project_number' => $projectNumber,
                     'stage_id' => $draftStage?->id,
-                    'company_id' => 1, // Default company
+                    'company_id' => $effectiveCompanyId,
                     'creator_id' => auth()->id() ?? 1,
                 ]);
 
                 Log::info('PDF Ingestion: Created draft project', [
                     'project_id' => $project->id,
                     'project_number' => $projectNumber,
+                    'company_id' => $effectiveCompanyId,
+                    'company_acronym' => $companyAcronym,
                     'name' => $projectName,
                 ]);
             }

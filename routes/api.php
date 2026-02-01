@@ -306,6 +306,12 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     // PDF Ingestion (n8n Integration)
     // ========================================
     Route::prefix('pdf-ingestion')->name('pdf-ingestion.')->group(function () {
+        // Get companies for form dropdown
+        Route::get('companies', [V1\PdfIngestionController::class, 'getCompanies'])->name('companies');
+
+        // Get branches for a company
+        Route::get('companies/{companyId}/branches', [V1\PdfIngestionController::class, 'getBranches'])->name('branches');
+
         // Upload PDF and create draft project (for n8n manual upload form)
         Route::post('upload-and-analyze', [V1\PdfIngestionController::class, 'uploadAndAnalyze'])->name('upload-and-analyze');
 
