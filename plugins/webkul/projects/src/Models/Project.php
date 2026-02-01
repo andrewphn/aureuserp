@@ -710,6 +710,16 @@ class Project extends Model implements HasMedia, Sortable
     }
 
     /**
+     * CNC Programs
+     *
+     * @return HasMany
+     */
+    public function cncPrograms(): HasMany
+    {
+        return $this->hasMany(CncProgram::class);
+    }
+
+    /**
      * Room Locations
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasManyThrough
