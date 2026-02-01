@@ -20,11 +20,13 @@ class ProjectCncStatusWidget extends BaseWidget
 
     protected static bool $isLazy = false;
 
+    protected int | string | array $columnSpan = 1;
+
     protected function getStats(): array
     {
         if (!$this->record) {
             return [
-                Stat::make('CNC Programs', '-')
+                Stat::make('CNC', '-')
                     ->description('Loading...')
                     ->icon('heroicon-o-cog-8-tooth')
                     ->color('gray'),
@@ -37,43 +39,67 @@ class ProjectCncStatusWidget extends BaseWidget
         // If no CNC programs, show a minimal message
         if ($stats['total_programs'] === 0) {
             return [
-                Stat::make('CNC Programs', '0')
-                    ->description('No programs yet')
+                Stat::make('CNC', 'No Programs')
+                    ->description('No CNC programs created')
                     ->icon('heroicon-o-cog-8-tooth')
                     ->color('gray'),
             ];
         }
 
+        // Build condensed description
+        $descParts = [];
+        $descParts[] = "{$stats['complete_parts']}/{$stats['total_parts']} parts";
+        if ($stats['running_parts'] > 0) {
+            $descParts[] = "{$stats['running_parts']} running";
+        }
+
+        // Check for alerts
+        $alert = $this->getCncAlerts($stats);
+        $description = implode(' • ', $descParts);
+
+        if (!empty($alert['message'])) {
+            $description = $alert['icon'] . ' ' . $alert['message'];
+        }
+
+        // Determine color
+        $color = $alert['color'] ?? match (true) {
+            $stats['completion_percentage'] >= 100 => 'success',
+            $stats['completion_percentage'] >= 50 => 'info',
+            $stats['completion_percentage'] > 0 => 'warning',
+            default => 'gray',
+        };
+
         return [
-            Stat::make('CNC Programs', "{$stats['complete_programs']}/{$stats['total_programs']}")
-                ->description($stats['in_progress_programs'] > 0 ? "{$stats['in_progress_programs']} in progress" : 'Programs complete')
+            Stat::make('CNC', "{$stats['completion_percentage']}%")
+                ->description($description)
                 ->icon('heroicon-o-cog-8-tooth')
-                ->color($stats['complete_programs'] === $stats['total_programs'] ? 'success' : 'info'),
-
-            Stat::make('CNC Parts', "{$stats['complete_parts']}/{$stats['total_parts']}")
-                ->description($stats['running_parts'] > 0 ? "{$stats['running_parts']} running now" : "{$stats['pending_parts']} pending")
-                ->icon('heroicon-o-queue-list')
-                ->color($stats['complete_parts'] === $stats['total_parts'] ? 'success' : 'info'),
-
-            Stat::make('Progress', "{$stats['completion_percentage']}%")
-                ->description('Parts completed')
-                ->icon('heroicon-o-chart-pie')
-                ->color(match (true) {
-                    $stats['completion_percentage'] >= 100 => 'success',
-                    $stats['completion_percentage'] >= 50 => 'info',
-                    $stats['completion_percentage'] > 0 => 'warning',
-                    default => 'gray',
-                }),
-
-            $stats['pending_material'] > 0
-                ? Stat::make('Material Issues', $stats['pending_material'])
-                    ->description('Parts waiting for material')
-                    ->icon('heroicon-o-exclamation-triangle')
-                    ->color('danger')
-                : Stat::make('Material', 'Ready')
-                    ->description('All materials available')
-                    ->icon('heroicon-o-check-circle')
-                    ->color('success'),
+                ->color($color),
         ];
+    }
+
+    /**
+     * Get CNC-specific alerts
+     */
+    protected function getCncAlerts(array $stats): array
+    {
+        // Material issues are critical
+        if ($stats['pending_material'] > 0) {
+            return [
+                'message' => "{$stats['pending_material']} parts waiting for material",
+                'icon' => '⚠',
+                'color' => 'danger',
+            ];
+        }
+
+        // All complete
+        if ($stats['completion_percentage'] >= 100) {
+            return [
+                'message' => 'All parts complete',
+                'icon' => '✓',
+                'color' => 'success',
+            ];
+        }
+
+        return [];
     }
 }

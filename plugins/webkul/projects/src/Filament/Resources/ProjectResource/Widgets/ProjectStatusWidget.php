@@ -7,7 +7,9 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Project Status Widget Filament widget
+ * Project Production Stage Widget
+ *
+ * Shows current production stage and gate status.
  *
  * @see \Filament\Resources\Resource
  */
@@ -19,137 +21,101 @@ class ProjectStatusWidget extends BaseWidget
 
     protected int | string | array $columnSpan = 1;
 
+    /**
+     * Human-readable stage labels
+     */
+    protected array $stageLabels = [
+        'discovery' => 'Discovery',
+        'design' => 'Design',
+        'sourcing' => 'Sourcing',
+        'production' => 'Production',
+        'delivery' => 'Delivery',
+    ];
+
+    /**
+     * Stage icons
+     */
+    protected array $stageIcons = [
+        'discovery' => 'heroicon-o-magnifying-glass',
+        'design' => 'heroicon-o-pencil-square',
+        'sourcing' => 'heroicon-o-shopping-cart',
+        'production' => 'heroicon-o-wrench-screwdriver',
+        'delivery' => 'heroicon-o-truck',
+    ];
+
+    /**
+     * Stage colors
+     */
+    protected array $stageColors = [
+        'discovery' => 'gray',
+        'design' => 'info',
+        'sourcing' => 'warning',
+        'production' => 'primary',
+        'delivery' => 'success',
+    ];
+
     protected function getStats(): array
     {
         if (! $this->record) {
             return [
-                Stat::make('Health', '-')
+                Stat::make('Stage', '-')
                     ->description('Loading...')
-                    ->icon('heroicon-o-heart')
+                    ->icon('heroicon-o-flag')
                     ->color('gray'),
             ];
         }
 
-        $status = $this->calculateProjectHealth();
-
-        // Add alert icon prefix to description if there are issues
-        $description = $status['description'];
-        if ($status['color'] === 'danger') {
-            $description = '⚠ ' . $description;
-        } elseif ($status['color'] === 'warning') {
-            $description = '⚠ ' . $description;
-        }
+        $stageData = $this->calculateStageStatus();
 
         return [
-            Stat::make('Health', $status['label'])
-                ->description($description)
-                ->icon($status['icon'])
-                ->color($status['color']),
+            Stat::make('Stage', $stageData['label'])
+                ->description($stageData['description'])
+                ->icon($stageData['icon'])
+                ->color($stageData['color']),
         ];
     }
 
     /**
-     * Calculate Project Health
-     *
-     * @return array
+     * Calculate production stage status
      */
-    protected function calculateProjectHealth(): array
+    protected function calculateStageStatus(): array
     {
-        $warnings = [];
-        $criticals = [];
+        $currentStage = $this->record->current_production_stage ?? 'discovery';
+        $label = $this->stageLabels[$currentStage] ?? ucfirst($currentStage);
+        $icon = $this->stageIcons[$currentStage] ?? 'heroicon-o-flag';
+        $color = $this->stageColors[$currentStage] ?? 'gray';
 
-        // Check financial health
-        $margin = $this->calculateMargin();
-        if ($margin !== null) {
-            if ($margin < 10) {
-                $criticals[] = 'Low margin (' . number_format($margin, 1) . '%)';
-            } elseif ($margin < 20) {
-                $warnings[] = 'Margin below target';
-            }
-        }
+        // Get gate status to check for blockers
+        $gateStatus = $this->record->getStageGateStatus();
+        $blockers = $gateStatus['blockers'] ?? [];
+        $canAdvance = $gateStatus['can_advance'] ?? false;
+        $nextStage = $gateStatus['next_stage'] ?? null;
 
-        // Check timeline
-        if ($this->record->desired_completion_date) {
-            $daysRemaining = now()->diffInDays($this->record->desired_completion_date, false);
-            if ($daysRemaining < 0) {
-                $criticals[] = 'Past due date';
-            } elseif ($daysRemaining < 7) {
-                $warnings[] = 'Deadline approaching';
-            }
-        }
-
-        // Check for incomplete data
-        $roomsWithoutLocations = $this->record->rooms()->doesntHave('locations')->count();
-        if ($roomsWithoutLocations > 0) {
-            $warnings[] = "{$roomsWithoutLocations} room(s) without locations";
-        }
-
-        $cabinetsWithoutPrice = $this->record->cabinets()
-            ->whereNull('unit_price_per_lf')
-            ->orWhereNull('linear_feet')
-            ->count();
-        if ($cabinetsWithoutPrice > 0) {
-            $warnings[] = "{$cabinetsWithoutPrice} cabinet(s) missing pricing";
-        }
-
-        // Determine status
-        if (count($criticals) > 0) {
-            return [
-                'label' => 'Needs Attention',
-                'description' => implode(', ', array_merge($criticals, $warnings)),
-                'icon' => 'heroicon-o-exclamation-triangle',
-                'color' => 'danger',
-            ];
-        }
-
-        if (count($warnings) > 2) {
-            return [
-                'label' => 'Review Needed',
-                'description' => implode(', ', $warnings),
-                'icon' => 'heroicon-o-exclamation-circle',
-                'color' => 'warning',
-            ];
-        }
-
-        if (count($warnings) > 0) {
-            return [
-                'label' => 'On Track',
-                'description' => implode(', ', $warnings),
-                'icon' => 'heroicon-o-information-circle',
-                'color' => 'info',
-            ];
+        // Build description
+        if (!empty($blockers)) {
+            // Show the most important blocker
+            $description = '⚠ ' . $blockers[0];
+            $color = 'warning';
+        } elseif ($canAdvance && $nextStage) {
+            $nextLabel = $this->stageLabels[$nextStage] ?? ucfirst($nextStage);
+            $description = '✓ Ready for ' . $nextLabel;
+            $color = 'success';
+        } elseif ($currentStage === 'delivery') {
+            $description = 'Final stage';
+        } else {
+            // Show progress indicator
+            $stageIndex = array_search($currentStage, array_keys($this->stageLabels));
+            $totalStages = count($this->stageLabels);
+            $description = 'Stage ' . ($stageIndex + 1) . ' of ' . $totalStages;
         }
 
         return [
-            'label' => 'Healthy',
-            'description' => 'All systems go',
-            'icon' => 'heroicon-o-check-circle',
-            'color' => 'success',
+            'label' => $label,
+            'description' => $description,
+            'icon' => $icon,
+            'color' => $color,
+            'can_advance' => $canAdvance,
+            'blockers' => $blockers,
         ];
-    }
-
-    /**
-     * Calculate Margin
-     *
-     * @return ?float
-     */
-    protected function calculateMargin(): ?float
-    {
-        $quoted = $this->record->cabinets()
-            ->selectRaw('SUM(unit_price_per_lf * linear_feet * quantity) as total')
-            ->value('total');
-
-        if (! $quoted) {
-            return null;
-        }
-
-        $actual = $this->record->orders()->sum('amount_total');
-
-        // Check for division by zero - if quoted is 0, can't calculate margin
-        if ($quoted === 0 || $actual === 0) {
-            return null;
-        }
-
-        return (($quoted - $actual) / $quoted) * 100;
     }
 }

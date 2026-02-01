@@ -31,19 +31,79 @@ class ProjectFinancialsWidget extends BaseWidget
         }
 
         $financials = $this->calculateFinancials();
+        $alerts = $this->getFinancialAlerts($financials);
 
-        // Build condensed description
+        // Build description with metrics
         $descParts = [];
         $descParts[] = $financials['linear_feet'] . ' @ ' . $financials['price_per_lf'];
-        $descParts[] = $financials['actual_formatted'] . ' costs';
+        if ($financials['actual'] > 0) {
+            $descParts[] = $financials['actual_formatted'] . ' costs';
+        }
         $descParts[] = $financials['margin_formatted'] . ' margin';
+
+        // Add alert if present
+        $description = implode(' • ', $descParts);
+        if (!empty($alerts['message'])) {
+            $description = $alerts['icon'] . ' ' . $alerts['message'];
+        }
 
         return [
             Stat::make('Financials', $financials['quoted_formatted'])
-                ->description(implode(' • ', $descParts))
+                ->description($description)
                 ->icon('heroicon-o-currency-dollar')
-                ->color($financials['margin_color']),
+                ->color($alerts['color'] ?? $financials['margin_color']),
         ];
+    }
+
+    /**
+     * Get financial-specific alerts
+     */
+    protected function getFinancialAlerts(array $financials): array
+    {
+        // Check for missing pricing data
+        $cabinetsWithoutPrice = $this->record->cabinets()
+            ->where(function ($query) {
+                $query->whereNull('unit_price_per_lf')
+                    ->orWhereNull('linear_feet');
+            })
+            ->count();
+
+        if ($cabinetsWithoutPrice > 0) {
+            return [
+                'message' => "{$cabinetsWithoutPrice} cabinet(s) missing pricing",
+                'icon' => '⚠',
+                'color' => 'warning',
+            ];
+        }
+
+        // Check margin health
+        if ($financials['margin'] < 10 && $financials['quoted'] > 0) {
+            return [
+                'message' => 'Low margin (' . $financials['margin_formatted'] . ')',
+                'icon' => '⚠',
+                'color' => 'danger',
+            ];
+        }
+
+        if ($financials['margin'] < 20 && $financials['quoted'] > 0) {
+            return [
+                'message' => 'Margin below target (20%)',
+                'icon' => '⚠',
+                'color' => 'warning',
+            ];
+        }
+
+        // Check if over budget
+        if ($financials['actual'] > $financials['quoted'] && $financials['quoted'] > 0) {
+            $overBy = $financials['actual'] - $financials['quoted'];
+            return [
+                'message' => 'Over budget by $' . number_format($overBy, 0),
+                'icon' => '⚠',
+                'color' => 'danger',
+            ];
+        }
+
+        return [];
     }
 
     /**

@@ -32,34 +32,83 @@ class ProjectTimelineWidget extends BaseWidget
         }
 
         $timeline = $this->calculateTimeline();
+        $alerts = $this->getTimelineAlerts($timeline);
 
-        // Build condensed description
+        // Build description with production estimate
         $descParts = [];
-        $descParts[] = $timeline['days_remaining_text'];
         if ($timeline['estimated_days'] !== 'TBD') {
-            $scheduleNote = '';
-            if ($timeline['estimate_color'] === 'danger') {
-                $scheduleNote = ' (exceeds deadline)';
-            } elseif ($timeline['estimate_color'] === 'warning') {
-                $scheduleNote = ' (tight)';
-            }
-            $descParts[] = $timeline['estimated_days'] . ' production' . $scheduleNote;
+            $descParts[] = $timeline['estimated_days'] . ' production needed';
+        }
+        $descParts[] = $timeline['days_remaining_text'];
+
+        // Use alert message if present, otherwise show normal description
+        $description = implode(' • ', $descParts);
+        if (!empty($alerts['message'])) {
+            $description = $alerts['icon'] . ' ' . $alerts['message'];
         }
 
-        // Determine overall color - use the more severe color
-        $color = $timeline['completion_color'];
-        if ($timeline['estimate_color'] === 'danger') {
-            $color = 'danger';
-        } elseif ($timeline['estimate_color'] === 'warning' && $color !== 'danger') {
-            $color = 'warning';
-        }
+        // Determine color - alerts take priority
+        $color = $alerts['color'] ?? $timeline['completion_color'];
 
         return [
             Stat::make('Timeline', $timeline['completion_formatted'])
-                ->description(implode(' • ', $descParts))
-                ->icon('heroicon-o-calendar')
+                ->description($description)
+                ->icon($timeline['completion_icon'])
                 ->color($color),
         ];
+    }
+
+    /**
+     * Get timeline-specific alerts
+     */
+    protected function getTimelineAlerts(array $timeline): array
+    {
+        // Check if overdue
+        if ($timeline['days_remaining'] !== null && $timeline['days_remaining'] < 0) {
+            $daysOverdue = abs((int) round($timeline['days_remaining']));
+            return [
+                'message' => $daysOverdue . ' day' . ($daysOverdue !== 1 ? 's' : '') . ' overdue!',
+                'icon' => '⚠',
+                'color' => 'danger',
+            ];
+        }
+
+        // Check if production estimate exceeds deadline
+        if ($timeline['estimate_color'] === 'danger') {
+            return [
+                'message' => 'Production time exceeds deadline',
+                'icon' => '⚠',
+                'color' => 'danger',
+            ];
+        }
+
+        // Check if deadline is approaching (within 7 days)
+        if ($timeline['days_remaining'] !== null && $timeline['days_remaining'] >= 0 && $timeline['days_remaining'] < 7) {
+            $daysLeft = (int) round($timeline['days_remaining']);
+            if ($daysLeft === 0) {
+                return [
+                    'message' => 'Due today!',
+                    'icon' => '⚠',
+                    'color' => 'warning',
+                ];
+            }
+            return [
+                'message' => 'Deadline in ' . $daysLeft . ' day' . ($daysLeft !== 1 ? 's' : ''),
+                'icon' => '⚠',
+                'color' => 'warning',
+            ];
+        }
+
+        // Check if schedule is tight
+        if ($timeline['estimate_color'] === 'warning') {
+            return [
+                'message' => 'Tight schedule - limited buffer',
+                'icon' => '⚠',
+                'color' => 'warning',
+            ];
+        }
+
+        return [];
     }
 
     /**
