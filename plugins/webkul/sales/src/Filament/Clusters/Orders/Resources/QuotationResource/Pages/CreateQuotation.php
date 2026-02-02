@@ -8,9 +8,11 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Webkul\Partner\Models\Partner;
+use Webkul\Project\Models\Project;
 use Webkul\Sale\Enums\OrderState;
 use Webkul\Sale\Facades\SaleOrder;
 use Webkul\Sale\Filament\Clusters\Orders\Resources\QuotationResource;
+use Webkul\Sale\Settings\QuotationAndOrderSettings;
 use Webkul\Support\Concerns\HasRepeaterColumnManager;
 
 /**
@@ -33,12 +35,24 @@ class CreateQuotation extends CreateRecord
     {
         parent::mount();
 
-        // Pre-fill project_id from URL query parameter
+        // Pre-fill from URL query parameters
         $projectId = request()->query('project_id');
         if ($projectId) {
-            $this->form->fill([
+            $project = Project::find($projectId);
+            $settings = app(QuotationAndOrderSettings::class);
+
+            $fillData = [
                 'project_id' => (int) $projectId,
-            ]);
+                'date_order' => now(),
+                'validity_date' => now()->addDays($settings->default_quotation_validity),
+            ];
+
+            // Also pre-fill the customer from the project
+            if ($project && $project->partner_id) {
+                $fillData['partner_id'] = $project->partner_id;
+            }
+
+            $this->form->fill($fillData);
         }
     }
 
