@@ -72,6 +72,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetsR
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRunsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\ProjectMediaRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetSpecTreeRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\ChangeOrdersRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CncProgramsRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\SalesOrdersRelationManager;
 use Webkul\Project\Models\Project;
@@ -1281,6 +1282,11 @@ class ProjectResource extends Resource
                 SalesOrdersRelationManager::class,
             ])
                 ->icon('heroicon-o-shopping-bag'),
+
+            RelationGroup::make('Change Orders', [
+                ChangeOrdersRelationManager::class,
+            ])
+                ->icon('heroicon-o-document-text'),
         ];
     }
 

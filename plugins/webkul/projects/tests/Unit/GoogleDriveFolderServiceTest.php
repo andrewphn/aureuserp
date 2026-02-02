@@ -186,7 +186,7 @@ class GoogleDriveFolderServiceTest extends TestCase
         $this->assertIsArray($cncFolders);
         $this->assertCount(3, $cncFolders); // VCarve, ToolPaths, Reference Photos
 
-        // Verify Job_Cards folder exists
-        $this->assertArrayHasKey('Job_Cards', $structure['04_Production']);
+        // Verify Job Cards folder exists (with space, not underscore)
+        $this->assertArrayHasKey('Job Cards', $structure['04_Production']);
     }
 }

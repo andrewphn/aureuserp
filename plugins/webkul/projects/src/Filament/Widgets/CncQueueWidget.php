@@ -3,8 +3,8 @@
 namespace Webkul\Project\Filament\Widgets;
 
 use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
+use Filament\Actions\Action;
 use Filament\Tables;
-use Filament\Tables\Actions\Action as TableAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -88,7 +88,7 @@ class CncQueueWidget extends BaseWidget
                     ->placeholder('-'),
             ])
             ->actions([
-                TableAction::make('view_program')
+                Action::make('view_program')
                     ->label('View')
                     ->icon('heroicon-o-eye')
                     ->url(fn (CncProgramPart $record) => route(

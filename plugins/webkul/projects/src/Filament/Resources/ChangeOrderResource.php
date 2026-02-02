@@ -306,7 +306,7 @@ class ChangeOrderResource extends Resource
                 EditAction::make()
                     ->visible(fn ($record) => $record->canBeEdited()),
 
-                TableAction::make('print')
+                Action::make('print')
                     ->label(__('projects::filament/resources/change-order.actions.print.label'))
                     ->icon('heroicon-o-printer')
                     ->color('gray')

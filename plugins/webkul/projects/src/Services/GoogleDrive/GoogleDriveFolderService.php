@@ -612,4 +612,144 @@ class GoogleDriveFolderService
             return false;
         }
     }
+
+    /**
+     * Navigate to a subfolder path from a root folder.
+     *
+     * @param string $rootFolderId The root folder to start from
+     * @param string $path Path like "02_Design/DWG_Imports"
+     * @return string|null The subfolder ID or null if not found
+     */
+    public function navigateToSubfolder(string $rootFolderId, string $path): ?string
+    {
+        if (empty($path)) {
+            return $rootFolderId;
+        }
+
+        if (!$this->isReady()) {
+            return null;
+        }
+
+        $parts = array_filter(explode('/', $path), fn($p) => !empty(trim($p)));
+        $currentFolderId = $rootFolderId;
+
+        foreach ($parts as $folderName) {
+            $folderName = trim($folderName);
+            $nextFolderId = $this->findFolderByName($folderName, $currentFolderId);
+
+            if (!$nextFolderId) {
+                Log::debug('Subfolder not found in path', [
+                    'path' => $path,
+                    'missing_folder' => $folderName,
+                    'parent_id' => $currentFolderId,
+                ]);
+                return null;
+            }
+
+            $currentFolderId = $nextFolderId;
+        }
+
+        return $currentFolderId;
+    }
+
+    /**
+     * Find files by extension in a folder.
+     *
+     * @param string $folderId The folder to search in
+     * @param string|array $extensions File extension(s) to find (without dot)
+     * @param bool $recursive Whether to search subfolders
+     * @return array Array of file info arrays
+     */
+    public function findFilesByExtension(string $folderId, string|array $extensions, bool $recursive = false): array
+    {
+        if (!$this->isReady()) {
+            return [];
+        }
+
+        $extensions = is_array($extensions) ? $extensions : [$extensions];
+        $files = [];
+
+        try {
+            // Build query to get all files in folder
+            $query = "'{$folderId}' in parents and trashed = false";
+
+            $response = $this->driveService->files->listFiles([
+                'q' => $query,
+                'fields' => 'files(id, name, mimeType, size, webViewLink, thumbnailLink, createdTime, modifiedTime)',
+                'pageSize' => 1000,
+            ]);
+
+            foreach ($response->getFiles() as $file) {
+                $fileName = $file->getName();
+                $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+                // Check if extension matches
+                if (in_array($fileExt, array_map('strtolower', $extensions))) {
+                    $files[] = [
+                        'id' => $file->getId(),
+                        'name' => $fileName,
+                        'mimeType' => $file->getMimeType(),
+                        'size' => $file->getSize(),
+                        'webViewLink' => $file->getWebViewLink(),
+                        'thumbnailLink' => $file->getThumbnailLink(),
+                        'createdTime' => $file->getCreatedTime(),
+                        'modifiedTime' => $file->getModifiedTime(),
+                    ];
+                }
+
+                // Recursively search subfolders if needed
+                if ($recursive && $file->getMimeType() === 'application/vnd.google-apps.folder') {
+                    $subFiles = $this->findFilesByExtension($file->getId(), $extensions, true);
+                    $files = array_merge($files, $subFiles);
+                }
+            }
+        } catch (Exception $e) {
+            Log::error('Failed to find files by extension', [
+                'folder_id' => $folderId,
+                'extensions' => $extensions,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $files;
+    }
+
+    /**
+     * Check if a project has design files in a specific folder.
+     *
+     * @param string $projectRootFolderId The project's root folder ID
+     * @param string $folderPath Path to check (e.g., "02_Design/DWG_Imports")
+     * @param string|array $extensions Extensions to look for
+     * @return array Result with 'exists', 'count', 'files', and 'folder_found' keys
+     */
+    public function checkProjectHasDesignFiles(
+        string $projectRootFolderId,
+        string $folderPath,
+        string|array $extensions
+    ): array {
+        $result = [
+            'exists' => false,
+            'count' => 0,
+            'files' => [],
+            'folder_found' => false,
+        ];
+
+        // Navigate to the target folder
+        $targetFolderId = $this->navigateToSubfolder($projectRootFolderId, $folderPath);
+
+        if (!$targetFolderId) {
+            return $result;
+        }
+
+        $result['folder_found'] = true;
+
+        // Find files with matching extensions
+        $files = $this->findFilesByExtension($targetFolderId, $extensions);
+
+        $result['files'] = $files;
+        $result['count'] = count($files);
+        $result['exists'] = $result['count'] > 0;
+
+        return $result;
+    }
 }
