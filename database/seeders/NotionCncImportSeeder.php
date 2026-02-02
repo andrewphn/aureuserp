@@ -44,6 +44,9 @@ class NotionCncImportSeeder extends Seeder
 
     /**
      * Material code detection patterns
+     *
+     * Maps VCarve filename patterns to canonical material codes.
+     * Thickness prefixes (1Medex, 3_4Medex, etc.) map to base material.
      */
     protected array $materialPatterns = [
         'MDF_RiftWO' => 'MDF_RiftWO',
@@ -60,7 +63,6 @@ class NotionCncImportSeeder extends Seeder
         '3_4Mel' => 'Melamine',
         '5_8Mel' => 'Melamine',
         'Lam' => 'Laminate',
-        'FL' => 'FL',
         'WO' => 'RiftWOPly',
         'BW' => 'BW',
     ];
@@ -85,6 +87,13 @@ class NotionCncImportSeeder extends Seeder
 
     public function run(): void
     {
+        // PRODUCTION GUARD - This seeder is for development/staging only
+        if (app()->environment('production')) {
+            $this->command->error('⛔ This seeder cannot run in production!');
+            $this->command->error('   NotionCncImportSeeder is for development data only.');
+            return;
+        }
+
         $csvPath = base_path('notion_import/cnc/extracted/Private & Shared/Cut File Log 270a8c394fe480c3a826c54e90a7ba3e_all.csv');
 
         if (!file_exists($csvPath)) {
@@ -332,7 +341,7 @@ class NotionCncImportSeeder extends Seeder
             str_contains($material, 'Medex') => 'Medex',
             str_contains($material, 'Mel') => 'Melamine',
             str_contains($material, 'Lam') => 'Laminate',
-            str_contains($material, 'FL') => 'FL',
+            str_contains($material, 'BW') => 'BW',
             default => 'Other',
         };
     }

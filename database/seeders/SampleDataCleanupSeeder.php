@@ -40,6 +40,13 @@ class SampleDataCleanupSeeder extends Seeder
 
     public function run(): void
     {
+        // PRODUCTION GUARD - This seeder is for development/staging only
+        if (app()->environment('production')) {
+            $this->command->error('⛔ This seeder cannot run in production!');
+            $this->command->error('   SampleDataCleanupSeeder is for development data only.');
+            return;
+        }
+
         $this->command->info('');
         $this->command->info('╔═══════════════════════════════════════════════════════════╗');
         $this->command->info('║        SAMPLE DATA CLEANUP - REMOVING SEEDED DATA         ║');

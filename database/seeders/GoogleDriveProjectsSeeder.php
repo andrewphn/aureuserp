@@ -91,6 +91,13 @@ class GoogleDriveProjectsSeeder extends Seeder
      */
     public function run(): void
     {
+        // PRODUCTION GUARD - This seeder is for development/staging only
+        if (app()->environment('production')) {
+            $this->command->error('⛔ This seeder cannot run in production!');
+            $this->command->error('   GoogleDriveProjectsSeeder is for development data only.');
+            return;
+        }
+
         $this->now = Carbon::now();
 
         $this->command->info("\n=== Google Drive Projects Seeder ===\n");

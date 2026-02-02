@@ -104,19 +104,6 @@ class CncMaterialProductsSeeder extends Seeder
             'is_box_material' => false,
             'is_face_frame' => false,
         ],
-        'FL' => [
-            'name' => '4/4 Furniture Lumber (Solid)',
-            'description' => 'Solid wood lumber for face frames and furniture components',
-            'species' => 'mixed',
-            'tcs_tier' => 'stain_grade',
-            'thickness' => 1.0,
-            'sheet_size' => null,
-            'sqft_per_sheet' => null,
-            'bf_per_unit' => 1.0,
-            'cost_per_bf' => 8.50,
-            'is_box_material' => false,
-            'is_face_frame' => true,
-        ],
         'BW' => [
             'name' => '3/4" Black Walnut Plywood 4x8',
             'description' => 'Black Walnut plywood for premium exotic cabinets',
@@ -160,6 +147,13 @@ class CncMaterialProductsSeeder extends Seeder
      */
     public function run(): void
     {
+        // PRODUCTION GUARD - This seeder is for development/staging only
+        if (app()->environment('production')) {
+            $this->command->error('⛔ This seeder cannot run in production!');
+            $this->command->error('   CncMaterialProductsSeeder is for development data only.');
+            return;
+        }
+
         $this->command->info('');
         $this->command->info('╔═══════════════════════════════════════════════════════════╗');
         $this->command->info('║      CNC MATERIAL PRODUCTS - SHEET GOODS SEEDER           ║');

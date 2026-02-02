@@ -28,6 +28,13 @@ class RealTCSDataSeeder extends Seeder
      */
     public function run(): void
     {
+        // PRODUCTION GUARD - This seeder is for development/staging only
+        if (app()->environment('production')) {
+            $this->command->error('⛔ This seeder cannot run in production!');
+            $this->command->error('   RealTCSDataSeeder is for development data only.');
+            return;
+        }
+
         $this->command->info("\n");
         $this->command->info("╔══════════════════════════════════════════════════════════════╗");
         $this->command->info("║        TCS WOODWORK - COMPREHENSIVE DATA IMPORT              ║");
