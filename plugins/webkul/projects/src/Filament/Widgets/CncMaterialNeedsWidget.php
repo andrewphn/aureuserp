@@ -22,7 +22,7 @@ class CncMaterialNeedsWidget extends TableWidget
 
     protected int | string | array $columnSpan = 'full';
 
-    protected static ?string $pollingInterval = '60s';
+    protected ?string $pollingInterval = '60s';
 
     public function table(Table $table): Table
     {

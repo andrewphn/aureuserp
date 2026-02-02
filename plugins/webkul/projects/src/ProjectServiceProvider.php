@@ -4,21 +4,29 @@ namespace Webkul\Project;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Event;
+use Webkul\Project\Console\Commands\AggregateProductionMetrics;
 use Webkul\Project\Console\Commands\CleanupExpiredDrafts;
+use Webkul\Project\Console\Commands\GenerateCncCapacityReportCommand;
+use Webkul\Project\Console\Commands\ImportVCarveHtmlCommand;
 use Webkul\Project\Console\Commands\RecalculateComplexityScores;
 use Webkul\Project\Console\Commands\RenewGoogleDriveWatchesCommand;
 use Webkul\Project\Events\ProjectStageChanged;
 use Webkul\Project\Listeners\HandleProjectStageChange;
+use Webkul\Project\Models\CncProgramPart;
 use Webkul\Project\Models\Door;
 use Webkul\Project\Models\Drawer;
 use Webkul\Project\Models\HardwareRequirement;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\Pullout;
 use Webkul\Project\Models\Shelf;
+use Webkul\Project\Observers\CncProgramPartObserver;
 use Webkul\Project\Observers\ComplexityScoreObserver;
 use Webkul\Project\Observers\HardwareRequirementObserver;
 use Webkul\Project\Observers\ProjectObserver;
+use Webkul\Project\Services\CncCapacityAnalyticsService;
 use Webkul\Project\Services\ComplexityScoreService;
+use Webkul\Project\Services\GeminiTaskTemplateService;
+use Webkul\Project\Services\ProductionMetricsAggregationService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveAuthService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveFolderService;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
@@ -133,6 +141,11 @@ class ProjectServiceProvider extends PackageServiceProvider
                 '2026_01_16_000001_create_construction_templates_table',
                 '2026_01_16_000002_add_construction_template_to_entities',
                 '2026_02_01_000001_add_material_status_to_cnc_program_parts',
+                '2026_02_03_000001_create_ai_task_suggestions_table',
+                '2026_02_03_000002_add_ai_suggestion_id_to_milestone_template_tasks',
+                '2026_02_03_000003_create_milestone_template_tag_table',
+                '2026_02_03_100001_create_production_metrics_daily_table',
+                '2026_02_02_000001_create_cnc_cut_parts_table',
             ])
             ->runsMigrations()
             ->hasSettings([
@@ -179,6 +192,8 @@ class ProjectServiceProvider extends PackageServiceProvider
         \Livewire\Livewire::component('project-data-cards', \Webkul\Project\Livewire\ProjectDataCards::class);
         \Livewire\Livewire::component('webkul-project::opening-configurator', \Webkul\Project\Livewire\OpeningConfigurator::class);
         \Livewire\Livewire::component('webkul-project::cabinet-configurator', \Webkul\Project\Livewire\CabinetConfigurator::class);
+        \Livewire\Livewire::component('webkul.project.milestone-template-manager', \Webkul\Project\Livewire\MilestoneTemplateManager::class);
+        \Livewire\Livewire::component('cut-parts-qa-manager', \Webkul\Project\Livewire\CutPartsQaManager::class);
         // Old Livewire Kanban archived - now using mokhosh/filament-kanban package
         // \Livewire\Livewire::component('project-kanban-board', \Webkul\Project\Livewire\ProjectKanbanBoard::class);
 
@@ -225,10 +240,29 @@ class ProjectServiceProvider extends PackageServiceProvider
             return new GoogleDriveWebhookService($app->make(GoogleDriveAuthService::class));
         });
 
+        // Register CncCapacityAnalyticsService as singleton
+        $this->app->singleton(CncCapacityAnalyticsService::class);
+
+        // Register ProductionMetricsAggregationService as singleton
+        $this->app->singleton(ProductionMetricsAggregationService::class);
+
+        // Register CncProgramPart observer for production metrics aggregation
+        CncProgramPart::observe(CncProgramPartObserver::class);
+
+        // Register GeminiTaskTemplateService for AI-powered task generation
+        $this->app->singleton(GeminiTaskTemplateService::class, function ($app) {
+            return new GeminiTaskTemplateService(
+                $app->make(\App\Services\AI\GeminiService::class)
+            );
+        });
+
         // Register console commands
         if ($this->app->runningInConsole()) {
             $this->commands([
+                AggregateProductionMetrics::class,
                 CleanupExpiredDrafts::class,
+                GenerateCncCapacityReportCommand::class,
+                ImportVCarveHtmlCommand::class,
                 RecalculateComplexityScores::class,
                 RenewGoogleDriveWatchesCommand::class,
             ]);
@@ -248,6 +282,20 @@ class ProjectServiceProvider extends PackageServiceProvider
                     ->withoutOverlapping()
                     ->runInBackground()
                     ->appendOutputTo(storage_path('logs/google-drive-watches.log'));
+
+                // Schedule production metrics aggregation daily at 1:00 AM
+                $schedule->command('production:aggregate')
+                    ->dailyAt('01:00')
+                    ->withoutOverlapping()
+                    ->runInBackground()
+                    ->appendOutputTo(storage_path('logs/production-metrics.log'));
+
+                // Re-run production metrics at 6:00 AM for yesterday (catch late completions)
+                $schedule->command('production:aggregate')
+                    ->dailyAt('06:00')
+                    ->withoutOverlapping()
+                    ->runInBackground()
+                    ->appendOutputTo(storage_path('logs/production-metrics.log'));
             });
         }
     }

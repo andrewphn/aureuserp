@@ -23,7 +23,7 @@ class TopProjectsWidget extends BaseWidget
 
     protected static bool $isLazy = false;
 
-    protected static ?string $pollingInterval = '15s';
+    protected ?string $pollingInterval = '15s';
 
     public function getHeading(): string|Htmlable|null
     {

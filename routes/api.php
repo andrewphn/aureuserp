@@ -319,6 +319,20 @@ Route::prefix('v1')->middleware(['auth:sanctum', 'throttle:api'])->name('api.v1.
     });
 
     // ========================================
+    // CNC Capacity Analytics
+    // ========================================
+    Route::prefix('cnc/capacity')->name('cnc.capacity.')->group(function () {
+        Route::get('/', [V1\CncCapacityController::class, 'index'])->name('index');
+        Route::get('today', [V1\CncCapacityController::class, 'today'])->name('today');
+        Route::get('summary', [V1\CncCapacityController::class, 'summary'])->name('summary');
+        Route::get('materials', [V1\CncCapacityController::class, 'materials'])->name('materials');
+        Route::get('peaks', [V1\CncCapacityController::class, 'peaks'])->name('peaks');
+        Route::get('daily/{date}', [V1\CncCapacityController::class, 'daily'])->name('daily');
+        Route::get('weekly', [V1\CncCapacityController::class, 'weekly'])->name('weekly');
+        Route::get('monthly', [V1\CncCapacityController::class, 'monthly'])->name('monthly');
+    });
+
+    // ========================================
     // PDF Ingestion (n8n Integration)
     // ========================================
     Route::prefix('pdf-ingestion')->name('pdf-ingestion.')->group(function () {

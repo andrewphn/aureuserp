@@ -4,6 +4,7 @@ namespace Webkul\Project\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Webkul\Security\Models\User;
 
@@ -64,6 +65,11 @@ class CncProgramPart extends Model
         'nc_drive_url',
         'reference_photo_drive_id',
         'reference_photo_url',
+        'vcarve_html_path',
+        'vcarve_html_drive_id',
+        'vcarve_html_drive_url',
+        'vcarve_svg_content',
+        'vcarve_metadata',
         'sheet_number',
         'operation_type',
         'tool',
@@ -82,6 +88,7 @@ class CncProgramPart extends Model
 
     protected $casts = [
         'position_data' => 'array',
+        'vcarve_metadata' => 'array',
         'run_at' => 'datetime',
         'completed_at' => 'datetime',
         'file_size' => 'integer',
@@ -110,6 +117,30 @@ class CncProgramPart extends Model
     public function component(): MorphTo
     {
         return $this->morphTo('component', 'component_type', 'component_id');
+    }
+
+    /**
+     * Get the individual cut parts on this sheet
+     */
+    public function cutParts(): HasMany
+    {
+        return $this->hasMany(CncCutPart::class, 'cnc_program_part_id');
+    }
+
+    /**
+     * Get failed parts on this sheet
+     */
+    public function failedParts(): HasMany
+    {
+        return $this->cutParts()->where('status', CncCutPart::STATUS_FAILED);
+    }
+
+    /**
+     * Get parts needing recut on this sheet
+     */
+    public function recutNeededParts(): HasMany
+    {
+        return $this->cutParts()->where('status', CncCutPart::STATUS_RECUT_NEEDED);
     }
 
     // =========================================================================
