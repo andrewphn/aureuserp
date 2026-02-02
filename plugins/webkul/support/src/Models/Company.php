@@ -102,6 +102,18 @@ class Company extends Model implements Sortable
         'website',
         'acronym',
         'project_number_start',
+        // Department production rates (LF per day)
+        'design_concepts_lf_per_day',
+        'design_revisions_lf_per_day',
+        'shop_drawings_lf_per_day',
+        'cut_list_bom_lf_per_day',
+        'rough_mill_lf_per_day',
+        'cabinet_assembly_lf_per_day',
+        'doors_drawers_lf_per_day',
+        'sanding_prep_lf_per_day',
+        'finishing_lf_per_day',
+        'hardware_install_lf_per_day',
+        'installation_lf_per_day',
     ];
 
     public $sortable = [

@@ -50,14 +50,14 @@ class GeminiService
      */
     public function __construct()
     {
-        // Use gemini-1.5-flash as the default - it supports both text and vision
-        $this->modelName = config('gemini.default_model', 'gemini-1.5-flash');
-        
-        // Ensure we're not using deprecated models
+        // Use gemini-2.5-flash as the default - fast and capable
+        $this->modelName = config('gemini.default_model', 'gemini-2.5-flash');
+
+        // Ensure we're not using very old deprecated models
         if (in_array($this->modelName, ['gemini-pro', 'gemini-pro-vision'])) {
-            $this->modelName = 'gemini-1.5-flash';
+            $this->modelName = 'gemini-2.5-flash';
         }
-        
+
         $this->initializeModel();
         $this->setupSystemContext();
     }
@@ -560,20 +560,102 @@ class GeminiService
     }
 
     /**
+     * Generate a response with custom max tokens (for longer outputs)
+     *
+     * @param string $prompt The user's input prompt
+     * @param array $context Additional context data
+     * @param int $maxTokens Maximum output tokens
+     * @return string The generated response text
+     * @throws Exception
+     */
+    public function generateResponseWithTokenLimit(string $prompt, array $context = [], int $maxTokens = 8192): string
+    {
+        return $this->generateResponseWithModel($prompt, $context, $this->modelName, $maxTokens);
+    }
+
+    /**
+     * Generate a response with a specific model and token limit.
+     * Useful for tasks that require a smarter model (e.g., gemini-1.5-pro).
+     *
+     * @param string $prompt The user's input prompt
+     * @param array $context Additional context data
+     * @param string $modelName The Gemini model to use (e.g., 'gemini-1.5-pro', 'gemini-1.5-flash')
+     * @param int $maxTokens Maximum output tokens
+     * @return string The generated response text
+     * @throws Exception
+     */
+    public function generateResponseWithModel(string $prompt, array $context = [], string $modelName = 'gemini-1.5-pro', int $maxTokens = 8192): string
+    {
+        try {
+            // Apply rate limiting
+            $this->checkRateLimit();
+
+            // Add context to prompt if provided
+            if (!empty($context)) {
+                $contextString = $this->formatContext($context);
+                $prompt = $contextString . "\n\nUser Query: " . $prompt;
+            }
+
+            // Create a temporary model with custom model name and token limit
+            $tempModel = Gemini::generativeModel($modelName);
+            $tempConfig = new GenerationConfig(
+                candidateCount: 1,
+                stopSequences: [],
+                maxOutputTokens: $maxTokens,
+                temperature: config('gemini.temperature', 0.7),
+                topP: 0.95,
+                topK: 40
+            );
+            $tempModel->withGenerationConfig($tempConfig);
+
+            if ($this->systemInstruction) {
+                $tempModel->withSystemInstruction($this->systemInstruction);
+            }
+
+            Log::info('Gemini API Request with custom model', [
+                'model' => $modelName,
+                'maxTokens' => $maxTokens,
+                'promptLength' => strlen($prompt),
+            ]);
+
+            // Generate response
+            $response = $tempModel->generateContent($prompt);
+
+            // Extract text from response
+            $text = $this->extractTextFromResponse($response);
+
+            // Log the interaction
+            $this->logInteraction($prompt, $text);
+
+            return $text;
+
+        } catch (Exception $e) {
+            Log::error('Gemini API Error (custom model)', [
+                'model' => $modelName,
+                'prompt' => substr($prompt, 0, 500),
+                'maxTokens' => $maxTokens,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw new Exception('Failed to generate response: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Check rate limiting for API calls
-     * 
+     *
      * @throws Exception
      */
     protected function checkRateLimit(): void
     {
         $key = 'gemini_api_requests';
         $maxAttempts = config('gemini.rate_limit_per_minute', 60);
-        
+
         if (RateLimiter::tooManyAttempts($key, $maxAttempts)) {
             $seconds = RateLimiter::availableIn($key);
             throw new Exception("Rate limit exceeded. Try again in {$seconds} seconds.");
         }
-        
+
         RateLimiter::hit($key, 60); // 60 seconds decay
     }
 }
