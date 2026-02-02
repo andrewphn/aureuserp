@@ -420,6 +420,28 @@ class ProjectsKanbanBoard extends KanbanBoard
         }
     }
 
+    // =========================================
+    // PROJECT TAGS
+    // =========================================
+
+    public function getAvailableTags(): Collection
+    {
+        return \Webkul\Project\Models\Tag::query()->orderBy('name')->get();
+    }
+
+    public function toggleProjectTag(int $tagId): void
+    {
+        $project = $this->getQuickActionsRecord();
+        if (!$project) return;
+
+        $project->tags()->toggle($tagId);
+
+        Notification::make()
+            ->title('Tags updated')
+            ->success()
+            ->send();
+    }
+
     public function postQuickComment(): void
     {
         if (empty(trim($this->quickComment))) return;

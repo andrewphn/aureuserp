@@ -74,43 +74,46 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label(__('admin.navigation.dashboard'))
-                    ->icon('icon-dashboard'),
+                    ->icon('heroicon-o-squares-2x2'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.contact'))
-                    ->icon('icon-contacts'),
+                    ->icon('heroicon-o-user-group'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.sale'))
-                    ->icon('icon-sales'),
+                    ->icon('heroicon-o-currency-dollar'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.purchase'))
-                    ->icon('icon-purchases'),
+                    ->icon('heroicon-o-shopping-cart'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.invoice'))
-                    ->icon('icon-invoices'),
+                    ->icon('heroicon-o-document-currency-dollar'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.inventory'))
-                    ->icon('icon-inventories'),
+                    ->icon('heroicon-o-cube'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.project'))
-                    ->icon('icon-projects'),
+                    ->icon('heroicon-o-folder-open'),
+                NavigationGroup::make()
+                    ->label('Production')
+                    ->icon('heroicon-o-wrench-screwdriver'),
                 NavigationGroup::make()
                     ->label('Documents')
                     ->icon('heroicon-o-document-text'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.employee'))
-                    ->icon('icon-employees'),
+                    ->icon('heroicon-o-identification'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.time-off'))
-                    ->icon('icon-time-offs'),
+                    ->icon('heroicon-o-calendar-days'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.recruitment'))
-                    ->icon('icon-recruitments'),
+                    ->icon('heroicon-o-briefcase'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.website'))
-                    ->icon('icon-website'),
+                    ->icon('heroicon-o-globe-alt'),
                 NavigationGroup::make()
                     ->label(__('admin.navigation.setting'))
-                    ->icon('icon-settings'),
+                    ->icon('heroicon-o-cog-6-tooth'),
             ])
             ->resources([
                 \App\Filament\Resources\PdfDocumentResource::class,

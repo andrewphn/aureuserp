@@ -2,6 +2,7 @@
 
 namespace Webkul\Project\Filament\Resources;
 
+use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -20,6 +21,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Webkul\Project\Filament\Clusters\Configurations;
 use Webkul\Project\Filament\Resources\GateResource\Pages\CreateGate;
 use Webkul\Project\Filament\Resources\GateResource\Pages\EditGate;
 use Webkul\Project\Filament\Resources\GateResource\Pages\ListGates;
@@ -36,23 +38,22 @@ class GateResource extends Resource
 {
     protected static ?string $model = Gate::class;
 
-    protected static ?string $slug = 'project/gates';
+    protected static ?string $slug = 'gates';
 
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $cluster = Configurations::class;
+
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shield-check';
 
     public static function getNavigationLabel(): string
     {
         return 'Gates';
     }
 
-    public static function getNavigationIcon(): ?string
-    {
-        return 'heroicon-o-check-badge';
-    }
-
     public static function getNavigationSort(): ?int
     {
-        return 10;
+        return 5;
     }
 
     public static function getModelLabel(): string

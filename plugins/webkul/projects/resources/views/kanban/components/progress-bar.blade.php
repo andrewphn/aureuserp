@@ -23,17 +23,11 @@
     $bgClass = $colors['bg'];
 @endphp
 
-<div class="relative {{ $height }} {{ $bgClass }} border-t border-gray-100 dark:border-gray-700">
-    {{-- Filled portion --}}
-    <div
-        class="absolute inset-y-0 left-0 {{ $barClass }} transition-all duration-300"
-        style="width: {{ min(100, max(0, $percent)) }}%;"
-    ></div>
-
-    {{-- Progress text overlay --}}
-    <div class="absolute inset-0 flex items-center justify-between px-3">
+<div class="px-3 py-2 {{ $bgClass }}">
+    {{-- Progress info row --}}
+    <div class="flex items-center justify-between mb-1">
         @if($label)
-            <span class="text-[10px] font-bold text-gray-700 dark:text-gray-200 relative z-10">
+            <span class="text-[10px] font-medium text-gray-600 dark:text-gray-400">
                 {{ $label }}
             </span>
         @else
@@ -41,9 +35,17 @@
         @endif
 
         @if($showPercent)
-            <span class="text-[10px] font-bold text-gray-700 dark:text-gray-200 relative z-10">
+            <span class="text-[10px] font-semibold text-gray-700 dark:text-gray-300">
                 {{ round($percent) }}%
             </span>
         @endif
+    </div>
+
+    {{-- Progress bar --}}
+    <div class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+        <div
+            class="h-full {{ $barClass }} rounded-full transition-all duration-300"
+            style="width: {{ min(100, max(0, $percent)) }}%;"
+        ></div>
     </div>
 </div>

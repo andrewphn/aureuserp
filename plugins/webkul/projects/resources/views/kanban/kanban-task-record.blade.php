@@ -78,8 +78,7 @@
 
             {{-- Row 2: Project name (if exists) --}}
             @if($record->project)
-                <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-1.5 flex items-center gap-1">
-                    <x-filament::icon icon="heroicon-m-folder" class="h-3 w-3 text-gray-400" />
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate mt-1.5">
                     {{ $record->project->name }}
                 </p>
             @endif

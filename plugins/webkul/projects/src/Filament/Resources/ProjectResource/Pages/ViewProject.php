@@ -260,9 +260,10 @@ class ViewProject extends ViewRecord
     protected function getHeaderWidgets(): array
     {
         return [
-            ProjectResource\Widgets\ProjectStatusWidget::class,
+            ProjectResource\Widgets\ProjectStageWidget::class,
             ProjectResource\Widgets\ProjectFinancialsWidget::class,
             ProjectResource\Widgets\ProjectTimelineWidget::class,
+            ProjectResource\Widgets\ProjectCncStatsWidget::class,
         ];
     }
 
@@ -270,9 +271,9 @@ class ViewProject extends ViewRecord
     {
         return [
             'default' => 1,
-            'sm' => 3,
-            'md' => 3,
-            'lg' => 3,
+            'sm' => 2,
+            'md' => 4,
+            'lg' => 4,
         ];
     }
 

@@ -119,25 +119,27 @@ class ProjectTimelineWidget extends BaseWidget
         if ($completionDate) {
             $completionFormatted = $completionDate->format('M d, Y');
             $daysRemaining = now()->diffInDays($completionDate, false);
+            $daysRounded = (int) round($daysRemaining);
 
             if ($daysRemaining < 0) {
-                $daysRemainingText = abs($daysRemaining) . ' days overdue';
+                $days = abs($daysRounded);
+                $daysRemainingText = $days . ' day' . ($days !== 1 ? 's' : '') . ' overdue';
                 $completionColor = 'danger';
                 $completionIcon = 'heroicon-o-exclamation-triangle';
-            } elseif ($daysRemaining === 0) {
+            } elseif ($daysRounded === 0) {
                 $daysRemainingText = 'Due today';
                 $completionColor = 'warning';
                 $completionIcon = 'heroicon-o-exclamation-circle';
             } elseif ($daysRemaining < 7) {
-                $daysRemainingText = $daysRemaining . ' days remaining';
+                $daysRemainingText = $daysRounded . ' day' . ($daysRounded !== 1 ? 's' : '') . ' remaining';
                 $completionColor = 'warning';
                 $completionIcon = 'heroicon-o-clock';
             } elseif ($daysRemaining < 30) {
-                $daysRemainingText = $daysRemaining . ' days remaining';
+                $daysRemainingText = $daysRounded . ' day' . ($daysRounded !== 1 ? 's' : '') . ' remaining';
                 $completionColor = 'info';
                 $completionIcon = 'heroicon-o-calendar';
             } else {
-                $daysRemainingText = $daysRemaining . ' days remaining';
+                $daysRemainingText = $daysRounded . ' day' . ($daysRounded !== 1 ? 's' : '') . ' remaining';
                 $completionColor = 'success';
                 $completionIcon = 'heroicon-o-check-circle';
             }

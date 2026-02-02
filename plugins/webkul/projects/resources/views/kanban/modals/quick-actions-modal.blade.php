@@ -75,6 +75,34 @@
                 </div>
             </div>
 
+            {{-- Tags --}}
+            @php
+                $availableTags = $this->getAvailableTags();
+                $projectTagIds = $project->tags->pluck('id')->toArray();
+            @endphp
+            @if($availableTags->isNotEmpty())
+                <div class="space-y-2">
+                    <h4 class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tags</h4>
+                    <div class="flex flex-wrap gap-1.5">
+                        @foreach($availableTags as $tag)
+                            <button
+                                wire:click="toggleProjectTag({{ $tag->id }})"
+                                @class([
+                                    'px-2 py-0.5 text-xs rounded-full transition-all border',
+                                    'bg-primary-100 border-primary-300 text-primary-700 dark:bg-primary-900/30 dark:border-primary-700 dark:text-primary-300' => in_array($tag->id, $projectTagIds),
+                                    'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700' => !in_array($tag->id, $projectTagIds),
+                                ])
+                            >
+                                @if(in_array($tag->id, $projectTagIds))
+                                    <x-heroicon-s-check class="w-3 h-3 inline -ml-0.5 mr-0.5" />
+                                @endif
+                                {{ $tag->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <hr class="border-gray-200 dark:border-gray-700" />
 
             {{-- Customer & Details Row --}}
