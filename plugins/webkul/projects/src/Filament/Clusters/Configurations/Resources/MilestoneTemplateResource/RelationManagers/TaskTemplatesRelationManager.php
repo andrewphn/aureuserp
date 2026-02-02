@@ -2,11 +2,13 @@
 
 namespace Webkul\Project\Filament\Clusters\Configurations\Resources\MilestoneTemplateResource\RelationManagers;
 
+use App\Services\AI\GeminiService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -23,6 +25,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Log;
 use Webkul\Project\Models\MilestoneTemplateTask;
 
 class TaskTemplatesRelationManager extends RelationManager
@@ -323,6 +326,14 @@ class TaskTemplatesRelationManager extends RelationManager
                     ->sortable()
                     ->alignCenter(),
 
+                TextColumn::make('children_count')
+                    ->label('Subtasks')
+                    ->counts('children')
+                    ->badge()
+                    ->color(fn ($state) => $state > 0 ? 'info' : 'gray')
+                    ->formatStateUsing(fn ($state) => $state ?: '—')
+                    ->alignCenter(),
+
                 TextColumn::make('sort_order')
                     ->label('Order')
                     ->sortable()
@@ -346,6 +357,24 @@ class TaskTemplatesRelationManager extends RelationManager
                     ),
             ])
             ->actions([
+                Action::make('generateSubtasks')
+                    ->label('AI Subtasks')
+                    ->icon('heroicon-o-sparkles')
+                    ->color('primary')
+                    ->visible(fn (MilestoneTemplateTask $record) => $record->parent_id === null) // Only for root tasks
+                    ->requiresConfirmation()
+                    ->modalHeading('Generate Subtasks with AI')
+                    ->modalDescription(fn (MilestoneTemplateTask $record) => "Generate subtasks for \"{$record->title}\" using AI. Existing subtasks will NOT be deleted.")
+                    ->modalSubmitActionLabel('Generate')
+                    ->form([
+                        Textarea::make('context')
+                            ->label('Additional Context (optional)')
+                            ->placeholder('e.g., Include QC checkpoints, break into daily tasks...')
+                            ->rows(2),
+                    ])
+                    ->action(function (MilestoneTemplateTask $record, array $data) {
+                        $this->generateSubtasksWithAi($record, $data['context'] ?? null);
+                    }),
                 EditAction::make()
                     ->slideOver()
                     ->modalWidth('xl')
@@ -366,5 +395,164 @@ class TaskTemplatesRelationManager extends RelationManager
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    /**
+     * Generate subtasks for a task using AI.
+     */
+    protected function generateSubtasksWithAi(MilestoneTemplateTask $task, ?string $context = null): void
+    {
+        try {
+            $geminiService = app(GeminiService::class);
+            $milestoneTemplate = $this->getOwnerRecord();
+
+            $prompt = $this->buildSubtaskPrompt($task, $milestoneTemplate, $context);
+
+            Log::info('Generating subtasks with AI', [
+                'task_id' => $task->id,
+                'task_title' => $task->title,
+                'milestone' => $milestoneTemplate->name,
+            ]);
+
+            // Use reasoning model for better subtask generation
+            $reasoningModel = config('gemini.reasoning_model', 'gemini-2.5-pro');
+            $response = $geminiService->generateResponseWithModel(
+                $prompt,
+                ['domain' => 'woodworking_production'],
+                $reasoningModel,
+                8192
+            );
+
+            // Parse the response
+            $parsed = $this->parseSubtaskResponse($response);
+
+            if (empty($parsed['subtasks'])) {
+                Notification::make()
+                    ->warning()
+                    ->title('No subtasks generated')
+                    ->body('The AI did not generate any subtasks. Try providing more context.')
+                    ->send();
+                return;
+            }
+
+            // Create the subtasks
+            $created = 0;
+            $nextSortOrder = $task->children()->max('sort_order') ?? 0;
+
+            foreach ($parsed['subtasks'] as $subtaskData) {
+                $nextSortOrder++;
+                MilestoneTemplateTask::create([
+                    'milestone_template_id' => $milestoneTemplate->id,
+                    'parent_id' => $task->id,
+                    'title' => $subtaskData['title'],
+                    'description' => $subtaskData['description'] ?? null,
+                    'allocated_hours' => $subtaskData['allocated_hours'] ?? 0,
+                    'relative_days' => $subtaskData['relative_days'] ?? 0,
+                    'duration_type' => 'fixed',
+                    'duration_days' => $subtaskData['duration_days'] ?? 1,
+                    'priority' => $subtaskData['priority'] ?? false,
+                    'sort_order' => $nextSortOrder,
+                    'is_active' => true,
+                ]);
+                $created++;
+            }
+
+            Notification::make()
+                ->success()
+                ->title('Subtasks Generated')
+                ->body("Created {$created} subtasks for \"{$task->title}\"")
+                ->send();
+
+            Log::info('AI subtasks created', [
+                'task_id' => $task->id,
+                'subtask_count' => $created,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to generate subtasks with AI', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            Notification::make()
+                ->danger()
+                ->title('Failed to Generate Subtasks')
+                ->body('An error occurred: ' . $e->getMessage())
+                ->send();
+        }
+    }
+
+    /**
+     * Build the prompt for subtask generation.
+     */
+    protected function buildSubtaskPrompt(MilestoneTemplateTask $task, $milestone, ?string $context): string
+    {
+        $existingSubtasks = $task->children->pluck('title')->toArray();
+        $existingList = !empty($existingSubtasks)
+            ? "\n\nExisting subtasks (do NOT duplicate):\n- " . implode("\n- ", $existingSubtasks)
+            : '';
+
+        $contextSection = $context ? "\n\nAdditional context: {$context}" : '';
+
+        return <<<PROMPT
+You are a woodworking production expert. Generate subtasks for a task in a cabinetry shop.
+
+## Parent Task
+- **Title**: {$task->title}
+- **Description**: {$task->description}
+- **Milestone**: {$milestone->name} ({$milestone->production_stage} phase)
+- **Allocated Hours**: {$task->allocated_hours}h
+- **Duration**: {$task->duration_days} days
+{$existingList}
+{$contextSection}
+
+## Instructions
+Generate 3-6 subtasks that break down this task into discrete, actionable steps.
+Focus on woodworking-specific activities appropriate for a custom cabinetry shop.
+Each subtask should be completable in 1-4 hours.
+
+## Response Format
+Return ONLY a JSON object:
+```json
+{
+  "subtasks": [
+    {
+      "title": "Subtask title (action-oriented)",
+      "description": "Brief description of what to do",
+      "allocated_hours": 2,
+      "relative_days": 0,
+      "duration_days": 1,
+      "priority": false
+    }
+  ]
+}
+```
+
+Return ONLY the JSON object, no additional text.
+PROMPT;
+    }
+
+    /**
+     * Parse the AI response for subtasks.
+     */
+    protected function parseSubtaskResponse(string $response): array
+    {
+        $jsonStart = strpos($response, '{');
+        $jsonEnd = strrpos($response, '}');
+
+        if ($jsonStart === false || $jsonEnd === false) {
+            Log::warning('No JSON found in subtask response', ['response' => substr($response, 0, 500)]);
+            return ['subtasks' => []];
+        }
+
+        $jsonString = substr($response, $jsonStart, $jsonEnd - $jsonStart + 1);
+        $parsed = json_decode($jsonString, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::warning('Failed to parse subtask JSON', ['error' => json_last_error_msg()]);
+            return ['subtasks' => []];
+        }
+
+        return $parsed;
     }
 }
