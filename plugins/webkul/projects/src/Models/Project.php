@@ -124,6 +124,7 @@ class Project extends Model implements HasMedia, Sortable
         'estimated_linear_feet',
         'allow_timesheets',
         'allow_milestones',
+        'selected_milestone_templates', // Array of milestone template IDs to create
         'allow_task_dependencies',
         'is_active',
         'stage_id',
@@ -206,6 +207,7 @@ class Project extends Model implements HasMedia, Sortable
         'stage_entered_at'        => 'datetime',
         'allow_timesheets'        => 'boolean',
         'allow_milestones'        => 'boolean',
+        'selected_milestone_templates' => 'array',
         'allow_task_dependencies' => 'boolean',
         // Stage gate timestamps
         'design_approved_at'        => 'datetime',
@@ -763,7 +765,7 @@ class Project extends Model implements HasMedia, Sortable
      */
     public function cncPrograms(): HasMany
     {
-        return $this->hasMany(CncProgram::class);
+        return $this->hasMany(CncProgram::class, 'project_id');
     }
 
     /**
@@ -791,16 +793,6 @@ class Project extends Model implements HasMedia, Sortable
     public function cabinets(): HasMany
     {
         return $this->hasMany(Cabinet::class);
-    }
-
-    /**
-     * CNC Programs
-     *
-     * @return HasMany
-     */
-    public function cncPrograms(): HasMany
-    {
-        return $this->hasMany(CncProgram::class, 'project_id');
     }
 
     /**

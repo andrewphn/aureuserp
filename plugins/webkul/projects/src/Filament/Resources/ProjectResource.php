@@ -73,6 +73,7 @@ use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetRu
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\ProjectMediaRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CabinetSpecTreeRelationManager;
 use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\CncProgramsRelationManager;
+use Webkul\Project\Filament\Resources\ProjectResource\RelationManagers\SalesOrdersRelationManager;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectStage;
 use Webkul\Project\Settings\TaskSettings;
@@ -1275,6 +1276,11 @@ class ProjectResource extends Resource
                 CncProgramsRelationManager::class,
             ])
                 ->icon('heroicon-o-cog-8-tooth'),
+
+            RelationGroup::make('Sales Orders', [
+                SalesOrdersRelationManager::class,
+            ])
+                ->icon('heroicon-o-shopping-bag'),
         ];
     }
 

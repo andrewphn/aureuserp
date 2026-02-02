@@ -297,24 +297,31 @@ class ViewProject extends ViewRecord
     /**
      * Define the infolist schema
      *
+     * Compact Header Bar Layout:
+     * - Full-width project info bar with inline project details and actions
+     * - Primary Reference in collapsible section below
+     * - Project Data Cards full width at bottom
+     *
      * @param Schema $schema
      * @return Schema
      */
     public function infolist(Schema $schema): Schema
     {
         return $schema
-            ->columns(3) // Set 3 columns for 2/3 + 1/3 split
             ->schema([
-                // Left Column: Project Overview with Gallery (2/3 width)
-                Section::make('Project Overview')
+                // Compact Project Info Bar (Full Width)
+                Section::make('')
                     ->schema([
-                        Grid::make(3)
+                        // Row 1: Project info inline (name, status, customer, tags)
+                        Grid::make(4)
                             ->schema([
                                 TextEntry::make('name')
-                                    ->label('Project Name')
+                                    ->label('')
                                     ->icon('heroicon-o-folder')
-                                    ->weight(FontWeight::Bold),
+                                    ->weight(FontWeight::Bold)
+                                    ->size('lg'),
                                 TextEntry::make('status')
+                                    ->label('')
                                     ->badge()
                                     ->color(fn ($state): string => match ($state) {
                                         'active' => 'success',
@@ -324,98 +331,38 @@ class ViewProject extends ViewRecord
                                         default => 'gray',
                                     }),
                                 TextEntry::make('partner.name')
-                                    ->label('Customer')
-                                    ->icon('heroicon-o-user'),
+                                    ->label('')
+                                    ->icon('heroicon-o-user')
+                                    ->placeholder('No customer'),
+                                TextEntry::make('tags.name')
+                                    ->label('')
+                                    ->badge()
+                                    ->state(function ($record): array {
+                                        return $record->tags->map(fn ($tag) => [
+                                            'label' => $tag->name,
+                                            'color' => $tag->color ?? '#808080',
+                                        ])->toArray();
+                                    })
+                                    ->formatStateUsing(fn ($state) => $state['label'] ?? '')
+                                    ->color(fn ($state) => \Filament\Support\Colors\Color::generateV3Palette($state['color'] ?? '#808080'))
+                                    ->separator(' ')
+                                    ->placeholder('No tags'),
                             ]),
 
-                        // Project Tags
-                        TextEntry::make('tags.name')
-                            ->label('Tags')
-                            ->badge()
-                            ->state(function ($record): array {
-                                return $record->tags->map(fn ($tag) => [
-                                    'label' => $tag->name,
-                                    'color' => $tag->color ?? '#808080',
-                                ])->toArray();
-                            })
-                            ->formatStateUsing(fn ($state) => $state['label'] ?? '')
-                            ->color(fn ($state) => \Filament\Support\Colors\Color::generateV3Palette($state['color'] ?? '#808080'))
-                            ->separator(', ')
-                            ->visible(fn ($record) => $record->tags->count() > 0)
-                            ->columnSpanFull(),
-
-                        // Primary Reference Gallery
-                        ViewEntry::make('primary_reference_gallery')
-                            ->label('Primary Reference')
-                            ->view('filament.infolists.components.primary-reference-gallery')
-                            ->state(fn ($record) => $record->pdfDocuments()->where('is_primary_reference', true)->first())
-                            ->visible(fn ($record) => $record->pdfDocuments()->where('is_primary_reference', true)->exists())
-                            ->columnSpanFull(),
-                    ])
-                    ->collapsible()
-                    ->collapsed(false)
-                    ->columnSpan(2), // Takes 2/3 of the width
-
-                // Right Column: Quick Actions (1/3 width, top of right column)
-                Section::make('Quick Actions')
-                    ->schema([
+                        // Row 2: All actions in a single horizontal row
                         Actions::make([
-                            Action::make('syncGoogleDrive')
-                                ->label('Sync Drive')
-                                ->icon('heroicon-o-arrow-path')
-                                ->color('gray')
-                                ->visible(fn () => $this->record->google_drive_enabled && $this->record->google_drive_root_folder_id)
-                                ->action(function () {
-                                    $driveService = app(GoogleDriveService::class);
-                                    $result = $driveService->syncProject($this->record);
-
-                                    if ($result['success']) {
-                                        $added = count($result['changes']['added'] ?? []);
-                                        $deleted = count($result['changes']['deleted'] ?? []);
-                                        $modified = count($result['changes']['modified'] ?? []);
-
-                                        if ($added > 0 || $deleted > 0 || $modified > 0) {
-                                            $changes = [];
-                                            if ($added > 0) $changes[] = "{$added} added";
-                                            if ($deleted > 0) $changes[] = "{$deleted} deleted";
-                                            if ($modified > 0) $changes[] = "{$modified} modified";
-
-                                            Notification::make()
-                                                ->success()
-                                                ->title('Google Drive Synced')
-                                                ->body('Changes: ' . implode(', ', $changes) . '. Check chatter for details.')
-                                                ->send();
-                                        } else {
-                                            Notification::make()
-                                                ->success()
-                                                ->title('Google Drive Synced')
-                                                ->body('No changes detected. ' . $result['total_files'] . ' files in Drive.')
-                                                ->send();
-                                        }
-                                    } else {
-                                        Notification::make()
-                                            ->danger()
-                                            ->title('Sync Failed')
-                                            ->body($result['message'] ?? 'Unknown error')
-                                            ->send();
-                                    }
-                                }),
-                            Action::make('openGoogleDrive')
-                                ->label('Open Drive')
-                                ->icon('heroicon-o-folder-open')
-                                ->color('info')
-                                ->visible(fn () => $this->record->google_drive_folder_url)
-                                ->url(fn () => $this->record->google_drive_folder_url)
-                                ->openUrlInNewTab(),
+                            // Primary export actions
                             Action::make('exportBom')
-                                ->label('Export BOM')
+                                ->label('BOM')
                                 ->icon('heroicon-o-document-arrow-down')
                                 ->color('primary')
+                                ->size('sm')
                                 ->action(fn () => $this->exportBom()),
                             Action::make('generateSummary')
-                                ->label('Generate Summary')
+                                ->label('Summary')
                                 ->icon('heroicon-o-document-text')
                                 ->color('success')
+                                ->size('sm')
                                 ->form([
                                     Section::make('Report Sections')
                                         ->description('Select which sections to include in your report')
@@ -453,22 +400,86 @@ class ViewProject extends ViewRecord
                                 ])
                                 ->action(fn (array $data) => $this->generateSummary($data)),
                             Action::make('purchaseRequisition')
-                                ->label('Purchase Requisition')
+                                ->label('Purchase')
                                 ->icon('heroicon-o-shopping-cart')
                                 ->color('warning')
+                                ->size('sm')
                                 ->action(fn () => $this->generatePurchaseRequisition()),
-                        ])->fullWidth(),
-                    ])
-                    ->columnSpan(1), // Takes 1/3 of the width
+                            // Google Drive actions
+                            Action::make('syncGoogleDrive')
+                                ->label('Sync')
+                                ->icon('heroicon-o-arrow-path')
+                                ->color('gray')
+                                ->size('sm')
+                                ->visible(fn () => $this->record->google_drive_enabled && $this->record->google_drive_root_folder_id)
+                                ->action(function () {
+                                    $driveService = app(GoogleDriveService::class);
+                                    $result = $driveService->syncProject($this->record);
 
-                // Project Breakdown Cards (full width row) - with Card/Table toggle
+                                    if ($result['success']) {
+                                        $added = count($result['changes']['added'] ?? []);
+                                        $deleted = count($result['changes']['deleted'] ?? []);
+                                        $modified = count($result['changes']['modified'] ?? []);
+
+                                        if ($added > 0 || $deleted > 0 || $modified > 0) {
+                                            $changes = [];
+                                            if ($added > 0) $changes[] = "{$added} added";
+                                            if ($deleted > 0) $changes[] = "{$deleted} deleted";
+                                            if ($modified > 0) $changes[] = "{$modified} modified";
+
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Google Drive Synced')
+                                                ->body('Changes: ' . implode(', ', $changes) . '. Check chatter for details.')
+                                                ->send();
+                                        } else {
+                                            Notification::make()
+                                                ->success()
+                                                ->title('Google Drive Synced')
+                                                ->body('No changes detected. ' . $result['total_files'] . ' files in Drive.')
+                                                ->send();
+                                        }
+                                    } else {
+                                        Notification::make()
+                                            ->danger()
+                                            ->title('Sync Failed')
+                                            ->body($result['message'] ?? 'Unknown error')
+                                            ->send();
+                                    }
+                                }),
+                            Action::make('openGoogleDrive')
+                                ->label('Drive')
+                                ->icon('heroicon-o-folder-open')
+                                ->color('info')
+                                ->size('sm')
+                                ->visible(fn () => $this->record->google_drive_folder_url)
+                                ->url(fn () => $this->record->google_drive_folder_url)
+                                ->openUrlInNewTab(),
+                        ]),
+                    ])
+                    ->columnSpanFull(),
+
+                // Primary Reference Gallery (collapsible, full width)
+                Section::make('Primary Reference')
+                    ->schema([
+                        ViewEntry::make('primary_reference_gallery')
+                            ->label('')
+                            ->view('filament.infolists.components.primary-reference-gallery')
+                            ->state(fn ($record) => $record->pdfDocuments()->where('is_primary_reference', true)->first()),
+                    ])
+                    ->collapsible()
+                    ->collapsed(false)
+                    ->visible(fn ($record) => $record->pdfDocuments()->where('is_primary_reference', true)->exists())
+                    ->columnSpanFull(),
+
+                // Project Breakdown Cards (full width)
                 Section::make('')
                     ->schema([
                         ViewEntry::make('project_data_cards')
                             ->label('')
                             ->view('webkul-project::filament.infolists.components.project-data-cards-wrapper'),
                     ])
-                    ->columnSpanFull(), // Full width on its own row
+                    ->columnSpanFull(),
             ]);
     }
 

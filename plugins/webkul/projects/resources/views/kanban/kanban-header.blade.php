@@ -103,7 +103,7 @@
                 <x-filament::dropdown.list.item
                     @click="setSort('default')"
                     icon="heroicon-m-bars-3"
-                    :class="sortBy === 'default' ? 'bg-gray-100 dark:bg-gray-800' : ''"
+                    ::class="sortBy === 'default' ? 'bg-gray-100 dark:bg-gray-800' : ''"
                 >
                     <span class="flex items-center justify-between w-full">
                         Default

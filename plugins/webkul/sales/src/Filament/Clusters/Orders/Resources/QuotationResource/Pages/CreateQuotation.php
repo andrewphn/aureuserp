@@ -25,6 +25,24 @@ class CreateQuotation extends CreateRecord
     protected static string $resource = QuotationResource::class;
 
     /**
+     * Mount the page component
+     *
+     * Pre-fills form fields from URL query parameters.
+     */
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Pre-fill project_id from URL query parameter
+        $projectId = request()->query('project_id');
+        if ($projectId) {
+            $this->form->fill([
+                'project_id' => (int) $projectId,
+            ]);
+        }
+    }
+
+    /**
      * Get the header actions for this page
      *
      * @return array<\Filament\Actions\Action>

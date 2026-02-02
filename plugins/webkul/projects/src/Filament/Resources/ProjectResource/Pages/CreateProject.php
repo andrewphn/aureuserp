@@ -13,6 +13,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -42,6 +43,7 @@ use Webkul\Project\Enums\BudgetRange;
 use Webkul\Project\Enums\LeadSource;
 use Webkul\Project\Enums\ProjectVisibility;
 use Webkul\Project\Filament\Resources\ProjectResource;
+use Webkul\Project\Models\MilestoneTemplate;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Models\ProjectDraft;
 use Webkul\Project\Models\ProjectStage;
@@ -1194,8 +1196,31 @@ class CreateProject extends Page implements HasForms
                                 ->visible(app(TimeSettings::class)->enable_timesheets),
                             Toggle::make('allow_milestones')
                                 ->label('Allow Milestones')
+                                ->helperText('Create milestone checkpoints for this project')
                                 ->default(true)
+                                ->live()
                                 ->visible(app(TaskSettings::class)->enable_milestones),
+                            CheckboxList::make('selected_milestone_templates')
+                                ->label('Select Milestones to Include')
+                                ->helperText('Choose which milestone checkpoints to create. Leave all selected for the standard workflow.')
+                                ->options(function () {
+                                    return MilestoneTemplate::active()
+                                        ->orderBy('production_stage')
+                                        ->orderBy('sort_order')
+                                        ->get()
+                                        ->mapWithKeys(function ($template) {
+                                            $stageLabel = ucfirst(str_replace('_', ' ', $template->production_stage ?? 'general'));
+                                            $criticalBadge = $template->is_critical ? ' (Critical)' : '';
+                                            return [$template->id => "{$template->name}{$criticalBadge} - {$stageLabel}"];
+                                        })
+                                        ->toArray();
+                                })
+                                ->default(function () {
+                                    return MilestoneTemplate::active()->pluck('id')->toArray();
+                                })
+                                ->columns(1)
+                                ->bulkToggleable()
+                                ->visible(fn (Get $get) => $get('allow_milestones') && app(TaskSettings::class)->enable_milestones),
                             Toggle::make('google_drive_enabled')
                                 ->label('Create Google Drive Folders')
                                 ->helperText('Automatically create project folder structure in Google Drive')

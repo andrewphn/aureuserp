@@ -3,18 +3,19 @@
 namespace Webkul\Project\Observers;
 
 use Illuminate\Support\Facades\Log;
-use Webkul\Project\Models\Project;
-use Webkul\Project\Jobs\CreateProjectDriveFoldersJob;
-use Webkul\Project\Jobs\RenameProjectDriveFolderJob;
 use Webkul\Project\Jobs\ArchiveProjectDriveFolderJob;
-use Webkul\Project\Jobs\RestoreProjectDriveFolderJob;
+use Webkul\Project\Jobs\CreateProjectDriveFoldersJob;
 use Webkul\Project\Jobs\DeleteProjectDriveFolderJob;
+use Webkul\Project\Jobs\RenameProjectDriveFolderJob;
+use Webkul\Project\Jobs\RestoreProjectDriveFolderJob;
+use Webkul\Project\Models\Project;
+use Webkul\Project\Services\ProjectMilestoneService;
 
 /**
  * Project Observer
  *
- * Handles lifecycle events for projects, including full Google Drive CRUD:
- * - Create: Creates folder structure when project is created
+ * Handles lifecycle events for projects:
+ * - Create: Creates milestones from templates, creates Google Drive folder structure
  * - Update: Renames folder when project number changes
  * - Delete (soft): Archives folder (moves to Archived folder)
  * - Restore: Reactivates folder (moves back to Active folder)
@@ -25,11 +26,39 @@ class ProjectObserver
     /**
      * Handle the Project "created" event.
      *
-     * Dispatches a job to create Google Drive folders for the new project.
+     * - Creates milestones from templates (if allow_milestones is enabled)
+     * - Dispatches job to create Google Drive folders
      */
     public function created(Project $project): void
     {
-        // Skip if Google Drive is disabled for this project
+        // Create milestones from templates (if allow_milestones is enabled)
+        if ($project->allow_milestones) {
+            try {
+                $milestoneService = app(ProjectMilestoneService::class);
+
+                // Use selected_milestone_templates if set, otherwise create all
+                $templateIds = $project->selected_milestone_templates;
+
+                $result = $milestoneService->createMilestonesFromTemplates(
+                    $project,
+                    null,
+                    $templateIds
+                );
+
+                Log::info('Created milestones for new project', [
+                    'project_id' => $project->id,
+                    'milestones_created' => $result['milestones_created'],
+                    'selected_templates' => $templateIds,
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to create milestones for project', [
+                    'project_id' => $project->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        // Skip Google Drive if disabled for this project
         if (!$project->google_drive_enabled) {
             Log::debug('Google Drive disabled for project, skipping folder creation', [
                 'project_id' => $project->id,
