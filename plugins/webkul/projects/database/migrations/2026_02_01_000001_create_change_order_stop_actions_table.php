@@ -55,8 +55,8 @@ return new class extends Migration
             $table->timestamps();
 
             // Indexes for efficient querying
-            $table->index(['change_order_id', 'action_type']);
-            $table->index(['entity_type', 'entity_id']);
+            $table->index(['change_order_id', 'action_type'], 'co_stop_actions_order_type_idx');
+            $table->index(['entity_type', 'entity_id'], 'co_stop_actions_entity_idx');
             $table->index('performed_at');
         });
     }
