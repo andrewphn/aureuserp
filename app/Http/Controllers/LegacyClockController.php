@@ -97,14 +97,17 @@ class LegacyClockController extends Controller
     }
 
     /**
-     * POST /clock-legacy/pin — Verify PIN (accumulates digits via session)
+     * POST /clock-legacy/pin — Verify full PIN submitted client-side
+     *
+     * The PIN numpad uses basic inline JS (ES3-compatible, works on iOS 9+)
+     * to accumulate digits client-side and submits the full PIN in one POST.
+     * Only one page load per PIN attempt instead of one per digit.
      */
     public function verifyPin(Request $request)
     {
         $userId     = $request->session()->get('legacy_clock.user_id');
         $userName   = $request->session()->get('legacy_clock.user_name');
         $employeeId = $request->session()->get('legacy_clock.employee_id');
-        $pinSoFar   = $request->session()->get('legacy_clock.pin', '');
         $attempts   = $request->session()->get('legacy_clock.pin_attempts', 0);
         $pinLength  = config('kiosk.pin_length', 4);
 
@@ -112,16 +115,11 @@ class LegacyClockController extends Controller
             return redirect()->route('clock-legacy');
         }
 
-        // Handle digit addition
-        if ($request->has('digit')) {
-            $pinSoFar .= $request->digit;
-            $request->session()->put('legacy_clock.pin', $pinSoFar);
-        }
+        // Full PIN arrives from client-side JS in the 'digit' field
+        $enteredPin = trim((string) ($request->input('digit', '')));
 
-        // Handle clear
-        if ($request->has('clear')) {
-            $request->session()->put('legacy_clock.pin', '');
-
+        // Not enough digits — re-show PIN screen (shouldn't happen with JS, but fallback)
+        if (strlen($enteredPin) < $pinLength) {
             return view('pages.legacy-clock-kiosk', [
                 'mode'         => 'pin',
                 'selectedName' => $userName,
@@ -130,38 +128,13 @@ class LegacyClockController extends Controller
             ]);
         }
 
-        // Handle backspace
-        if ($request->has('backspace')) {
-            $pinSoFar = substr($pinSoFar, 0, -1);
-            $request->session()->put('legacy_clock.pin', $pinSoFar);
-
-            return view('pages.legacy-clock-kiosk', [
-                'mode'         => 'pin',
-                'selectedName' => $userName,
-                'pin'          => $pinSoFar,
-                'pinLength'    => $pinLength,
-            ]);
-        }
-
-        // Not enough digits yet — re-show PIN screen
-        if (strlen($pinSoFar) < $pinLength) {
-            return view('pages.legacy-clock-kiosk', [
-                'mode'         => 'pin',
-                'selectedName' => $userName,
-                'pin'          => $pinSoFar,
-                'pinLength'    => $pinLength,
-            ]);
-        }
-
         // PIN is complete — verify
         $employee  = Employee::find($employeeId);
         $storedPin = trim((string) ($employee->pin ?? ''));
-        $enteredPin = trim($pinSoFar);
 
         if ($storedPin === $enteredPin && ! empty($storedPin)) {
             // PIN correct — reset attempts
             $request->session()->put('legacy_clock.pin_attempts', 0);
-            $request->session()->put('legacy_clock.pin', '');
 
             // Check clock status
             $status = $this->clockingService->getStatus($userId);

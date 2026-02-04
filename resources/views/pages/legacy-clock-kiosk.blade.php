@@ -90,44 +90,70 @@
                     <h2 class="employee-name">{{ $selectedName }}</h2>
                     <p class="clock-status">Enter your {{ $pinLength }}-digit PIN</p>
 
-                    {{-- PIN Display --}}
-                    <div class="pin-display">
+                    {{-- PIN Display (updated client-side, no page reload) --}}
+                    <div class="pin-display" id="pinDots">
                         @for($i = 0; $i < $pinLength; $i++)
-                            <div class="pin-dot {{ $i < strlen($pin ?? '') ? 'pin-dot-filled' : '' }}"></div>
+                            <div class="pin-dot" id="dot{{ $i }}"></div>
                         @endfor
                     </div>
 
-                    {{-- Numpad — each button is a form POST that adds one digit --}}
-                    <div class="numpad">
-                        @foreach([1,2,3,4,5,6,7,8,9] as $num)
-                            <form method="POST" action="{{ route('clock-legacy.pin') }}" style="display:contents;">
-                                @csrf
-                                <input type="hidden" name="digit" value="{{ $num }}">
-                                <button type="submit" class="numpad-btn">{{ $num }}</button>
-                            </form>
-                        @endforeach
+                    {{-- Single form — PIN is accumulated client-side via basic JS (ES3, works on iOS 12) --}}
+                    <form method="POST" action="{{ route('clock-legacy.pin') }}" id="pinForm">
+                        @csrf
+                        <input type="hidden" name="digit" value="" id="pinAll">
 
-                        {{-- Clear --}}
-                        <form method="POST" action="{{ route('clock-legacy.pin') }}" style="display:contents;">
-                            @csrf
-                            <input type="hidden" name="clear" value="1">
-                            <button type="submit" class="numpad-btn numpad-action">Clear</button>
-                        </form>
+                        <div class="numpad">
+                            @foreach([1,2,3,4,5,6,7,8,9] as $num)
+                                <button type="button" class="numpad-btn" onclick="addDigit('{{ $num }}')">{{ $num }}</button>
+                            @endforeach
 
-                        {{-- 0 --}}
-                        <form method="POST" action="{{ route('clock-legacy.pin') }}" style="display:contents;">
-                            @csrf
-                            <input type="hidden" name="digit" value="0">
-                            <button type="submit" class="numpad-btn">0</button>
-                        </form>
+                            {{-- Clear --}}
+                            <button type="button" class="numpad-btn numpad-action" onclick="clearPin()">Clear</button>
 
-                        {{-- Backspace --}}
-                        <form method="POST" action="{{ route('clock-legacy.pin') }}" style="display:contents;">
-                            @csrf
-                            <input type="hidden" name="backspace" value="1">
-                            <button type="submit" class="numpad-btn numpad-action">&larr;</button>
-                        </form>
-                    </div>
+                            {{-- 0 --}}
+                            <button type="button" class="numpad-btn" onclick="addDigit('0')">0</button>
+
+                            {{-- Backspace --}}
+                            <button type="button" class="numpad-btn numpad-action" onclick="backspace()">&larr;</button>
+                        </div>
+                    </form>
+
+                    {{--
+                        Basic inline JS — no Proxy, no ES2015+, no Alpine.
+                        Uses only var, getElementById, className — works on iOS 9+.
+                    --}}
+                    <script>
+                        var pin = '';
+                        var pinLen = {{ $pinLength }};
+                        function updateDots() {
+                            for (var i = 0; i < pinLen; i++) {
+                                var dot = document.getElementById('dot' + i);
+                                if (i < pin.length) {
+                                    dot.className = 'pin-dot pin-dot-filled';
+                                } else {
+                                    dot.className = 'pin-dot';
+                                }
+                            }
+                        }
+                        function addDigit(d) {
+                            if (pin.length < pinLen) {
+                                pin = pin + d;
+                                updateDots();
+                                if (pin.length >= pinLen) {
+                                    document.getElementById('pinAll').value = pin;
+                                    document.getElementById('pinForm').submit();
+                                }
+                            }
+                        }
+                        function clearPin() {
+                            pin = '';
+                            updateDots();
+                        }
+                        function backspace() {
+                            pin = pin.substring(0, pin.length - 1);
+                            updateDots();
+                        }
+                    </script>
                 </div>
             </div>
 
