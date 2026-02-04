@@ -3,7 +3,7 @@
 return [
     'navigation' => [
         'title' => 'Projects',
-        'group' => 'Project',
+        'group' => 'Projects',
     ],
 
     'global-search' => [

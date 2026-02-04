@@ -113,6 +113,7 @@ class Task extends Model implements Sortable
         'progress',
         'stage_id',
         'project_id',
+        'milestone_id',
         'partner_id',
         'parent_id',
         'company_id',

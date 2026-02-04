@@ -5,6 +5,7 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Webkul\Chatter\Traits\HasChatter;
 use Webkul\Security\Models\User;
 
 /**
@@ -42,6 +43,7 @@ use Webkul\Security\Models\User;
  */
 class CncProgram extends Model
 {
+    use HasChatter;
     protected $table = 'projects_cnc_programs';
 
     protected $fillable = [
@@ -405,18 +407,26 @@ class CncProgram extends Model
 
     /**
      * Get available material codes
+     *
+     * These match VCarve file naming conventions used at TCS:
+     * - PreFin: Pre-finished Maple plywood (cabinet boxes)
+     * - Medex: Medex moisture-resistant MDF (paint-grade, wet areas)
+     * - RiftWOPly: Rift-cut White Oak Plywood (premium stain-grade)
+     * - MDF_RiftWO: MDF core with Rift White Oak veneer (doors)
+     * - Melamine: White melamine for cabinet interiors
+     * - Laminate: HPL laminate for countertops
+     * - BW: Black Walnut plywood (exotic/custom)
      */
     public static function getMaterialCodes(): array
     {
         return [
-            'FL' => 'Furniture Lumber (solid wood)',
-            'PreFin' => 'Pre-finished material',
-            'RiftWOPly' => 'Rift-cut White Oak Plywood',
-            'MDF_RiftWO' => 'MDF with Rift White Oak',
-            'Medex' => 'Medex engineered wood',
-            'Melamine' => 'Melamine',
-            'Laminate' => 'Laminate',
-            'BW' => 'BW',
+            'PreFin' => 'Pre-finished Maple Plywood',
+            'Medex' => 'Medex (Moisture-Resistant MDF)',
+            'RiftWOPly' => 'Rift White Oak Plywood',
+            'MDF_RiftWO' => 'MDF w/ Rift White Oak Veneer',
+            'Melamine' => 'White Melamine',
+            'Laminate' => 'HPL Laminate',
+            'BW' => 'Black Walnut Plywood',
         ];
     }
 

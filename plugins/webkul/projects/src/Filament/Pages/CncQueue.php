@@ -11,9 +11,12 @@ use Filament\Pages\Page;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
+use Webkul\Project\Filament\Widgets\CncCapacitySummaryWidget;
+use Webkul\Project\Filament\Widgets\CncProductionStatsWidget;
 use Webkul\Project\Models\CncProgram;
 use Webkul\Project\Models\CncProgramPart;
 use Webkul\Project\Services\CncProgramService;
+use Webkul\Project\Services\CncProductionStatsService;
 use Webkul\Security\Models\User;
 
 /**
@@ -34,6 +37,8 @@ class CncQueue extends Page
     protected static ?int $navigationSort = 10;
 
     public ?int $activePartId = null;
+    public bool $showPartsQaModal = false;
+    public ?int $partsQaSheetId = null;
 
     public static function getNavigationLabel(): string
     {
@@ -201,6 +206,18 @@ class CncQueue extends Page
         }
     }
 
+    public function openPartsQaModal(int $partId): void
+    {
+        $this->partsQaSheetId = $partId;
+        $this->showPartsQaModal = true;
+    }
+
+    public function closePartsQaModal(): void
+    {
+        $this->showPartsQaModal = false;
+        $this->partsQaSheetId = null;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -217,5 +234,34 @@ class CncQueue extends Page
     public function getPollingInterval(): string
     {
         return '30s';
+    }
+
+    /**
+     * Get footer widgets for the page
+     */
+    protected function getFooterWidgets(): array
+    {
+        return [
+            CncProductionStatsWidget::class,
+            CncCapacitySummaryWidget::class,
+        ];
+    }
+
+    /**
+     * Get capacity stats for display in view
+     */
+    public function getCapacityStats(): array
+    {
+        $service = app(CncProductionStatsService::class);
+        return $service->getDailyCapacitySummary();
+    }
+
+    /**
+     * Get today's production stats
+     */
+    public function getTodayStats(): array
+    {
+        $service = app(CncProductionStatsService::class);
+        return $service->getTodayStats();
     }
 }

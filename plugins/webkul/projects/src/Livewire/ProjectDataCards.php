@@ -95,8 +95,25 @@ class ProjectDataCards extends Component
             ->map(function ($room) {
                 $room->location_count = $room->locations->count();
                 $room->cabinet_count = $room->locations->sum(fn($loc) => $loc->cabinetRuns->sum(fn($run) => $run->cabinets->count()));
-                $room->total_linear_feet = $room->locations->sum(fn($loc) => $loc->cabinetRuns->sum(fn($run) => $run->cabinets->sum('linear_feet')));
-                $room->total_value = $room->locations->sum(fn($loc) => $loc->cabinetRuns->sum(fn($run) => $run->cabinets->sum('total_price')));
+
+                // Calculate LF from cabinets if available
+                $cabinetLF = $room->locations->sum(fn($loc) => $loc->cabinetRuns->sum(fn($run) => $run->cabinets->sum('linear_feet')));
+
+                // Fall back to room tier-based LF if no cabinet data
+                if ($cabinetLF > 0) {
+                    $room->total_linear_feet = $cabinetLF;
+                } else {
+                    // Sum all tier columns from room
+                    $room->total_linear_feet = ($room->total_linear_feet_tier_1 ?? 0)
+                        + ($room->total_linear_feet_tier_2 ?? 0)
+                        + ($room->total_linear_feet_tier_3 ?? 0)
+                        + ($room->total_linear_feet_tier_4 ?? 0)
+                        + ($room->total_linear_feet_tier_5 ?? 0);
+                }
+
+                // Calculate value from cabinets if available, otherwise use room estimate
+                $cabinetValue = $room->locations->sum(fn($loc) => $loc->cabinetRuns->sum(fn($run) => $run->cabinets->sum('total_price')));
+                $room->total_value = $cabinetValue > 0 ? $cabinetValue : ($room->estimated_cabinet_value ?? 0);
 
                 return $room;
             });

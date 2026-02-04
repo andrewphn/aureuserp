@@ -292,6 +292,13 @@ class CncProgramResource extends Resource
         ];
     }
 
+    public static function getWidgets(): array
+    {
+        return [
+            CncProgramResource\Widgets\CncProgramStatusWidget::class,
+        ];
+    }
+
     public static function getPages(): array
     {
         return [

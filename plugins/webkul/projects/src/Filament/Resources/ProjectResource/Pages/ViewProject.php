@@ -272,7 +272,7 @@ class ViewProject extends ViewRecord
         return [
             'default' => 1,
             'sm' => 2,
-            'md' => 4,
+            'md' => 2,
             'lg' => 4,
         ];
     }

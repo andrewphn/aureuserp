@@ -93,6 +93,75 @@ class RoomsRelationManager extends RelationManager
                             ->rows(3)
                             ->columnSpanFull(),
 
+                        Section::make('Linear Feet by Tier')
+                            ->description('Enter linear feet for each pricing tier')
+                            ->schema([
+                                Grid::make(5)
+                                    ->schema([
+                                        TextInput::make('total_linear_feet_tier_1')
+                                            ->label('Tier 1')
+                                            ->numeric()
+                                            ->suffix('LF')
+                                            ->placeholder('0'),
+                                        TextInput::make('total_linear_feet_tier_2')
+                                            ->label('Tier 2')
+                                            ->numeric()
+                                            ->suffix('LF')
+                                            ->placeholder('0'),
+                                        TextInput::make('total_linear_feet_tier_3')
+                                            ->label('Tier 3')
+                                            ->numeric()
+                                            ->suffix('LF')
+                                            ->placeholder('0'),
+                                        TextInput::make('total_linear_feet_tier_4')
+                                            ->label('Tier 4')
+                                            ->numeric()
+                                            ->suffix('LF')
+                                            ->placeholder('0'),
+                                        TextInput::make('total_linear_feet_tier_5')
+                                            ->label('Tier 5')
+                                            ->numeric()
+                                            ->suffix('LF')
+                                            ->placeholder('0'),
+                                    ]),
+                            ])
+                            ->columnSpanFull()
+                            ->collapsible(),
+
+                        Section::make('Pricing & Materials')
+                            ->schema([
+                                Grid::make(3)
+                                    ->schema([
+                                        Select::make('cabinet_level')
+                                            ->label('Cabinet Level')
+                                            ->options([
+                                                1 => 'Level 1 - Basic',
+                                                2 => 'Level 2 - Standard',
+                                                3 => 'Level 3 - Enhanced',
+                                                4 => 'Level 4 - Premium',
+                                                5 => 'Level 5 - Custom',
+                                            ])
+                                            ->native(false),
+                                        Select::make('material_category')
+                                            ->label('Material Category')
+                                            ->options([
+                                                'paint_grade' => 'Paint Grade',
+                                                'stain_grade' => 'Stain Grade',
+                                                'natural_wood' => 'Natural Wood',
+                                                'laminate' => 'Laminate',
+                                                'thermofoil' => 'Thermofoil',
+                                            ])
+                                            ->native(false),
+                                        TextInput::make('estimated_cabinet_value')
+                                            ->label('Estimated Value')
+                                            ->numeric()
+                                            ->prefix('$')
+                                            ->placeholder('Auto-calculated'),
+                                    ]),
+                            ])
+                            ->columnSpanFull()
+                            ->collapsible(),
+
                         Section::make('Products & Materials')
                             ->schema([
                                 Repeater::make('hardwareRequirements')
@@ -187,6 +256,24 @@ class RoomsRelationManager extends RelationManager
                     ->label('Cabinets')
                     ->counts('cabinets')
                     ->badge()
+                    ->color('success'),
+
+                Tables\Columns\TextColumn::make('total_lf')
+                    ->label('Linear Feet')
+                    ->getStateUsing(fn (Room $record): float =>
+                        ($record->total_linear_feet_tier_1 ?? 0) +
+                        ($record->total_linear_feet_tier_2 ?? 0) +
+                        ($record->total_linear_feet_tier_3 ?? 0) +
+                        ($record->total_linear_feet_tier_4 ?? 0) +
+                        ($record->total_linear_feet_tier_5 ?? 0)
+                    )
+                    ->numeric(decimalPlaces: 1)
+                    ->suffix(' LF')
+                    ->color('primary'),
+
+                Tables\Columns\TextColumn::make('estimated_cabinet_value')
+                    ->label('Est. Value')
+                    ->money('USD')
                     ->color('success'),
             ])
             ->filters([

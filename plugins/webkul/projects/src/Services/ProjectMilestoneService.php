@@ -8,7 +8,10 @@ use Webkul\Project\Models\Gate;
 use Webkul\Project\Models\Milestone;
 use Webkul\Project\Models\MilestoneRequirement;
 use Webkul\Project\Models\MilestoneTemplate;
+use Webkul\Project\Models\MilestoneTemplateTask;
 use Webkul\Project\Models\Project;
+use Webkul\Project\Models\Task;
+use Webkul\Project\Models\TaskStage;
 
 /**
  * Project Milestone Service
@@ -125,6 +128,9 @@ class ProjectMilestoneService
         // Create verification requirements from template
         $this->createRequirementsFromTemplate($milestone, $template);
 
+        // Create tasks from template
+        $this->createTasksFromTemplate($project, $milestone, $template, $deadline);
+
         return $milestone;
     }
 
@@ -155,6 +161,135 @@ class ProjectMilestoneService
         }
 
         return $count;
+    }
+
+    /**
+     * Create tasks from milestone template task templates.
+     *
+     * @param Project $project
+     * @param Milestone $milestone
+     * @param MilestoneTemplate $template
+     * @param Carbon $milestoneDeadline
+     * @return int Number of tasks created
+     */
+    protected function createTasksFromTemplate(
+        Project $project,
+        Milestone $milestone,
+        MilestoneTemplate $template,
+        Carbon $milestoneDeadline
+    ): int {
+        $count = 0;
+
+        // Get the default task stage
+        $defaultStage = TaskStage::where('project_id', $project->id)->orderBy('sort')->first()
+            ?? TaskStage::whereNull('project_id')->orderBy('sort')->first();
+
+        // Get root-level task templates (no parent)
+        $rootTaskTemplates = $template->taskTemplates()
+            ->whereNull('parent_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get();
+
+        foreach ($rootTaskTemplates as $taskTemplate) {
+            $task = $this->createTaskFromTemplate(
+                $project,
+                $milestone,
+                $taskTemplate,
+                $milestoneDeadline,
+                $defaultStage,
+                null // No parent for root tasks
+            );
+
+            $count++;
+
+            // Create subtasks
+            $subtaskTemplates = $taskTemplate->children()->where('is_active', true)->orderBy('sort_order')->get();
+            foreach ($subtaskTemplates as $subtaskTemplate) {
+                $this->createTaskFromTemplate(
+                    $project,
+                    $milestone,
+                    $subtaskTemplate,
+                    $milestoneDeadline,
+                    $defaultStage,
+                    $task // Parent task
+                );
+                $count++;
+            }
+        }
+
+        Log::info('Created tasks from milestone template', [
+            'project_id' => $project->id,
+            'milestone_id' => $milestone->id,
+            'milestone_name' => $milestone->name,
+            'tasks_created' => $count,
+        ]);
+
+        return $count;
+    }
+
+    /**
+     * Create a single task from a task template.
+     *
+     * @param Project $project
+     * @param Milestone $milestone
+     * @param MilestoneTemplateTask $taskTemplate
+     * @param Carbon $milestoneDeadline
+     * @param TaskStage|null $defaultStage
+     * @param Task|null $parentTask
+     * @return Task
+     */
+    protected function createTaskFromTemplate(
+        Project $project,
+        Milestone $milestone,
+        MilestoneTemplateTask $taskTemplate,
+        Carbon $milestoneDeadline,
+        ?TaskStage $defaultStage,
+        ?Task $parentTask
+    ): Task {
+        // Calculate task start and deadline based on relative days and duration
+        // relative_days = when task starts (from milestone start)
+        // duration_days = how long the task takes (or calculated from project size)
+        // deadline = start + duration
+
+        // Get project metrics for formula-based duration calculations
+        $linearFeet = $project->estimated_linear_feet ?? $project->total_linear_feet ?? null;
+        $cabinetCount = $project->cabinets()->count();
+        $roomCount = $project->rooms()->count();
+        $doorCount = $project->cabinets()->withCount('doors')->get()->sum('doors_count');
+        $drawerCount = $project->cabinets()->withCount('drawers')->get()->sum('drawers_count');
+
+        // Get company for production rates
+        $company = $project->company;
+
+        // Calculate duration using the template's formula or fixed value
+        $duration = $taskTemplate->calculateDuration(
+            $linearFeet,
+            $cabinetCount,
+            $roomCount,
+            $doorCount,
+            $drawerCount,
+            $company
+        );
+
+        $taskStart = $milestoneDeadline->copy()->addDays($taskTemplate->relative_days);
+        $taskDeadline = $taskStart->copy()->addDays($duration);
+
+        return Task::create([
+            'title' => $taskTemplate->title,
+            'description' => $taskTemplate->description,
+            'allocated_hours' => $taskTemplate->allocated_hours,
+            'priority' => $taskTemplate->priority,
+            'sort' => $taskTemplate->sort_order,
+            'deadline' => $taskDeadline,
+            'project_id' => $project->id,
+            'milestone_id' => $milestone->id,
+            'parent_id' => $parentTask?->id,
+            'stage_id' => $defaultStage?->id,
+            'company_id' => $project->company_id,
+            'creator_id' => auth()->id() ?? $project->creator_id,
+            'is_active' => true,
+        ]);
     }
 
     /**

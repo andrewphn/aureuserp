@@ -35,6 +35,7 @@ use Filament\Support\Enums\TextSize;
 use Filament\Tables;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
@@ -657,62 +658,56 @@ class ProjectResource extends Resource
         return $table
             ->columns(static::mergeCustomTableColumns([
                 Stack::make([
-                    Stack::make([
-                        TextColumn::make('name')
-                            ->weight(FontWeight::Bold)
-                            ->label(__('webkul-project::filament/resources/project.table.columns.name'))
-                            ->searchable()
-                            ->sortable(),
-                    ]),
-                    Stack::make([
-                        TextColumn::make('partner.name')
-                            ->label(__('webkul-project::filament/resources/project.table.columns.customer'))
-                            ->icon('heroicon-o-phone')
-                            ->tooltip(__('webkul-project::filament/resources/project.table.columns.customer'))
-                            ->sortable(),
-                    ])
+                    // Row 1: Project Name (Primary - Large & Bold)
+                    TextColumn::make('name')
+                        ->weight(FontWeight::Bold)
+                        ->size(TextSize::Large)
+                        ->label(__('webkul-project::filament/resources/project.table.columns.name'))
+                        ->searchable()
+                        ->sortable(),
+
+                    // Row 2: Address (Secondary identifier)
+                    TextColumn::make('project_address')
+                        ->icon('heroicon-o-map-pin')
+                        ->iconColor('gray')
+                        ->color('gray')
+                        ->size(TextSize::Small)
+                        ->state(fn (Project $record): string => static::getProjectAddressDisplay($record))
+                        ->visible(fn (Project $record): bool => filled(static::getProjectAddressDisplay($record))),
+
+                    // Row 3: Client Name (Tertiary - smaller, muted)
+                    TextColumn::make('partner.name')
+                        ->label(__('webkul-project::filament/resources/project.table.columns.customer'))
+                        ->prefix('Client: ')
+                        ->color('gray')
+                        ->size(TextSize::ExtraSmall)
                         ->visible(fn (Project $record) => filled($record->partner)),
-                    Stack::make([
-                        TextColumn::make('start_date')
-                            ->label(__('webkul-project::filament/resources/project.table.columns.start-date'))
-                            ->sortable()
-                            ->extraAttributes(['class' => 'hidden']),
-                        TextColumn::make('end_date')
-                            ->label(__('webkul-project::filament/resources/project.table.columns.end-date'))
-                            ->sortable()
-                            ->extraAttributes(['class' => 'hidden']),
-                        TextColumn::make('planned_date')
-                            ->icon('heroicon-o-calendar')
-                            ->tooltip(__('webkul-project::filament/resources/project.table.columns.planned-date'))
-                            ->state(fn (Project $record): string => $record->start_date->format('d M Y').' - '.$record->end_date->format('d M Y')),
-                    ])
-                        ->visible(fn (Project $record) => filled($record->start_date) && filled($record->end_date)),
-                    Stack::make([
-                        TextColumn::make('remaining_hours')
-                            ->icon('heroicon-o-clock')
-                            ->badge()
-                            ->color('success')
-                            ->color(fn (Project $record): string => $record->remaining_hours < 0 ? 'danger' : 'success')
-                            ->state(fn (Project $record): string => $record->remaining_hours.' Hours')
-                            ->tooltip(__('webkul-project::filament/resources/project.table.columns.remaining-hours')),
-                    ])
-                        ->visible(fn (Project $record) => static::getTimeSettings()->enable_timesheets && $record->allow_milestones && $record->remaining_hours),
+
+                    // Row 4: Stage Progress Bar (Visual status)
+                    ViewColumn::make('stage_progress')
+                        ->view('webkul-project::filament.tables.columns.stage-progress')
+                        ->visible(fn (?Project $record): bool => static::getTaskSettings()->enable_project_stages),
+
+                    // Row 5: Metadata - Project Manager + Timeline
                     Stack::make([
                         TextColumn::make('user.name')
-                            ->label(__('webkul-project::filament/resources/project.table.columns.project-manager'))
                             ->icon('heroicon-o-user')
-                            ->label(__('webkul-project::filament/resources/project.table.columns.project-manager'))
-                            ->sortable(),
-                    ])
-                        ->visible(fn (Project $record) => filled($record->user)),
-                    Stack::make([
-                        TextColumn::make('stage.name')
-                            ->badge()
-                            ->color(fn (Project $record): string => $record->stage?->color ?? 'gray')
-                            ->icon('heroicon-o-flag')
-                            ->tooltip(__('webkul-project::filament/resources/project.table.columns.stage')),
-                    ])
-                        ->visible(fn (Project $record): bool => static::getTaskSettings()->enable_project_stages && filled($record->stage)),
+                            ->iconColor('gray')
+                            ->size(TextSize::Small)
+                            ->visible(fn (Project $record) => filled($record->user)),
+                        TextColumn::make('planned_date')
+                            ->icon('heroicon-o-calendar')
+                            ->iconColor('gray')
+                            ->size(TextSize::Small)
+                            ->state(fn (Project $record): ?string =>
+                                filled($record->start_date) && filled($record->end_date)
+                                    ? $record->start_date->format('M d').' - '.$record->end_date->format('M d')
+                                    : null
+                            )
+                            ->visible(fn (Project $record) => filled($record->start_date) && filled($record->end_date)),
+                    ])->space(1),
+
+                    // Row 6: Tags
                     Stack::make([
                         TextColumn::make('tags.name')
                             ->badge()
@@ -722,14 +717,20 @@ class ProjectResource extends Resource
                                     'color' => $tag->color ?? '#808080',
                                 ])->toArray();
                             })
-                            ->badge()
                             ->formatStateUsing(fn ($state) => $state['label'])
-                            ->color(fn ($state) => Color::generateV3Palette($state['color']))
-                            ->weight(FontWeight::Bold),
+                            ->color(fn ($state) => Color::generateV3Palette($state['color'])),
                     ])
                         ->visible(fn (Project $record): bool => (bool) $record->tags?->count()),
+
+                    // Hidden columns for sorting
+                    TextColumn::make('start_date')
+                        ->sortable()
+                        ->extraAttributes(['class' => 'hidden']),
+                    TextColumn::make('end_date')
+                        ->sortable()
+                        ->extraAttributes(['class' => 'hidden']),
                 ])
-                    ->space(3),
+                    ->space(2),
             ]))
             ->groups([
                 Tables\Grouping\Group::make('stage.name')
@@ -845,11 +846,25 @@ class ProjectResource extends Resource
             )
             ->filtersFormColumns(2)
             ->recordActions([
+                // Pin action - pins card to top
+                Action::make('is_pinned_by_user')
+                    ->hiddenLabel()
+                    ->icon(fn (Project $record): string => $record->is_pinned_by_user ? 'heroicon-s-bookmark' : 'heroicon-o-bookmark')
+                    ->color(fn (Project $record): string => $record->is_pinned_by_user ? 'primary' : 'gray')
+                    ->tooltip(fn (Project $record): string => $record->is_pinned_by_user ? 'Unpin from top' : 'Pin to top')
+                    ->action(function (Project $record): void {
+                        $record->pinnedUsers()->toggle([Auth::id()]);
+
+                        $record->load(['pinnedUsers' => function ($query) {
+                            $query->where('user_id', Auth::id());
+                        }]);
+                    }),
+                // Favorite action
                 Action::make('is_favorite_by_user')
                     ->hiddenLabel()
                     ->icon(fn (Project $record): string => $record->is_favorite_by_user ? 'heroicon-s-star' : 'heroicon-o-star')
                     ->color(fn (Project $record): string => $record->is_favorite_by_user ? 'warning' : 'gray')
-                    ->size('xl')
+                    ->tooltip(fn (Project $record): string => $record->is_favorite_by_user ? 'Remove from favorites' : 'Add to favorites')
                     ->action(function (Project $record): void {
                         $record->favoriteUsers()->toggle([Auth::id()]);
 
@@ -1002,12 +1017,22 @@ class ProjectResource extends Resource
                 '2xl' => 4,
             ])
             ->modifyQueryUsing(function (Builder $query) {
+                $userId = Auth::id();
+
                 $query->with([
                     'milestones',
-                    'favoriteUsers' => function ($query) {
-                        $query->where('user_id', Auth::id());
+                    'stage',
+                    'partner',
+                    'addresses',
+                    'favoriteUsers' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
                     },
-                ]);
+                    'pinnedUsers' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    },
+                ])
+                // Sort pinned projects to top
+                ->orderByRaw('EXISTS(SELECT 1 FROM projects_user_project_pins WHERE projects_user_project_pins.project_id = projects_projects.id AND projects_user_project_pins.user_id = ?) DESC', [$userId]);
             });
     }
 
@@ -1221,6 +1246,44 @@ class ProjectResource extends Resource
     static public function getTimeSettings(): TimeSettings
     {
         return once(fn () => app(TimeSettings::class));
+    }
+
+    /**
+     * Get formatted project address for display
+     */
+    protected static function getProjectAddressDisplay(Project $record): string
+    {
+        // Try project's own addresses first
+        if ($record->relationLoaded('addresses') ? $record->addresses->count() > 0 : $record->addresses()->exists()) {
+            $address = $record->addresses()->where('is_primary', true)->first()
+                ?? $record->addresses()->first();
+
+            if ($address) {
+                $parts = array_filter([
+                    $address->street1,
+                    $address->city,
+                    $address->state?->code ?? $address->state?->name ?? null,
+                ]);
+
+                if (!empty($parts)) {
+                    return implode(', ', $parts);
+                }
+            }
+        }
+
+        // Fallback to partner address
+        if ($record->partner) {
+            $parts = array_filter([
+                $record->partner->street1,
+                $record->partner->city,
+            ]);
+
+            if (!empty($parts)) {
+                return implode(', ', $parts);
+            }
+        }
+
+        return '';
     }
 
     /**

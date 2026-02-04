@@ -21,6 +21,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
+use Webkul\Project\Models\CncCutPart;
 use Webkul\Project\Models\CncProgramPart;
 use Webkul\Security\Models\User;
 
@@ -170,6 +171,33 @@ class CncProgramPartsRelationManager extends RelationManager
                     ->suffix(' min')
                     ->getStateUsing(fn (CncProgramPart $record) => $record->run_duration_minutes)
                     ->placeholder('-'),
+
+                // Cut Parts QA Summary
+                TextColumn::make('cut_parts_summary')
+                    ->label('QA')
+                    ->getStateUsing(function (CncProgramPart $record) {
+                        $total = $record->cutParts()->count();
+                        if ($total === 0) return null;
+
+                        $passed = $record->cutParts()->where('status', 'passed')->count();
+                        $failed = $record->cutParts()->whereIn('status', ['failed', 'recut_needed', 'scrapped'])->count();
+
+                        return "{$passed}/{$total}";
+                    })
+                    ->badge()
+                    ->color(function (CncProgramPart $record) {
+                        $total = $record->cutParts()->count();
+                        if ($total === 0) return 'gray';
+
+                        $failed = $record->cutParts()->whereIn('status', ['failed', 'recut_needed', 'scrapped'])->count();
+                        if ($failed > 0) return 'danger';
+
+                        $passed = $record->cutParts()->where('status', 'passed')->count();
+                        if ($passed === $total) return 'success';
+
+                        return 'warning';
+                    })
+                    ->placeholder('-'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
@@ -215,6 +243,62 @@ class CncProgramPartsRelationManager extends RelationManager
                         $record->markComplete();
                         Notification::make()
                             ->title('Part Completed')
+                            ->success()
+                            ->send();
+                    }),
+
+                // Manage Cut Parts action - opens modal to manage individual cabinet parts
+                Action::make('manage_parts')
+                    ->label('Parts QA')
+                    ->icon('heroicon-o-squares-2x2')
+                    ->color('warning')
+                    ->modalHeading(fn (CncProgramPart $record) => "Cut Parts QA: {$record->file_name}")
+                    ->modalWidth('7xl')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Close')
+                    ->modalContent(fn (CncProgramPart $record) => view('webkul-project::filament.modals.cut-parts-qa-livewire', [
+                        'sheetId' => $record->id,
+                    ])),
+
+                // Add cut parts inline
+                Action::make('add_cut_part')
+                    ->label('Add Part')
+                    ->icon('heroicon-o-plus')
+                    ->form([
+                        TextInput::make('part_label')
+                            ->label('Part Label')
+                            ->required()
+                            ->placeholder('e.g., BS-1, DR-2'),
+
+                        Select::make('part_type')
+                            ->label('Part Type')
+                            ->options(CncCutPart::getPartTypeOptions()),
+
+                        TextInput::make('description')
+                            ->label('Description'),
+
+                        Grid::make(3)->schema([
+                            TextInput::make('part_width')
+                                ->label('Width')
+                                ->numeric()
+                                ->suffix('"'),
+
+                            TextInput::make('part_height')
+                                ->label('Height')
+                                ->numeric()
+                                ->suffix('"'),
+
+                            TextInput::make('part_thickness')
+                                ->label('Thickness')
+                                ->numeric()
+                                ->suffix('"'),
+                        ]),
+                    ])
+                    ->action(function (CncProgramPart $record, array $data): void {
+                        $record->cutParts()->create($data);
+                        Notification::make()
+                            ->title('Cut Part Added')
+                            ->body("Part {$data['part_label']} added to sheet")
                             ->success()
                             ->send();
                     }),

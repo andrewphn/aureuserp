@@ -5,6 +5,7 @@ namespace Webkul\Project\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Webkul\Project\Database\Factories\MilestoneFactory;
 use Webkul\Security\Models\User;
 
@@ -88,6 +89,16 @@ class Milestone extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Tasks associated with this milestone
+     *
+     * @return HasMany
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
     }
 
     /**

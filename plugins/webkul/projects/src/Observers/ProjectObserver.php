@@ -16,7 +16,7 @@ use Webkul\Project\Services\ProjectMilestoneService;
  *
  * Handles lifecycle events for projects:
  * - Create: Creates milestones from templates, creates Google Drive folder structure
- * - Update: Renames folder when project number changes
+ * - Update: Creates Google Drive folders if enabled but missing, renames folder when project number changes
  * - Delete (soft): Archives folder (moves to Archived folder)
  * - Restore: Reactivates folder (moves back to Active folder)
  * - Force Delete: Permanently deletes folder
@@ -94,11 +94,33 @@ class ProjectObserver
     /**
      * Handle the Project "updated" event.
      *
-     * Renames Google Drive folder when project number changes.
+     * - Creates Google Drive folders if enabled and not yet created
+     * - Renames Google Drive folder when project number changes
      */
     public function updated(Project $project): void
     {
-        // Skip if no Google Drive folder exists
+        // Check if Google Drive should be enabled but folders don't exist yet
+        // This handles the case where google_drive_enabled is toggled ON for an existing project
+        if ($project->google_drive_enabled && !$project->google_drive_root_folder_id) {
+            try {
+                CreateProjectDriveFoldersJob::dispatch($project);
+
+                Log::info('Dispatched Google Drive folder creation job for existing project (enabled on save)', [
+                    'project_id' => $project->id,
+                    'project_number' => $project->project_number,
+                    'google_drive_enabled_changed' => $project->wasChanged('google_drive_enabled'),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('Failed to dispatch Google Drive folder creation job on update', [
+                    'project_id' => $project->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return; // Don't try to rename a folder that's being created
+        }
+
+        // Skip remaining logic if no Google Drive folder exists
         if (!$project->google_drive_root_folder_id) {
             return;
         }

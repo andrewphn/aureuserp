@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Webkul\Project\Models\Project;
 use Webkul\Project\Services\GoogleDrive\GoogleDriveService;
+use Webkul\Project\Services\CncFileIngestionService;
 
 /**
  * Sync Project Drive Folder Job
@@ -67,6 +68,11 @@ class SyncProjectDriveFolderJob implements ShouldQueue
                     'files_removed' => $syncResult['removed'] ?? 0,
                     'files_modified' => $syncResult['modified'] ?? 0,
                 ]);
+
+                // Process CNC file ingestion if there are file changes
+                if (!empty($syncResult['changes'])) {
+                    $this->processCncIngestion($syncResult['changes']);
+                }
             } else {
                 Log::warning('Google Drive sync completed with issues', [
                     'project_id' => $this->project->id,
@@ -104,5 +110,37 @@ class SyncProjectDriveFolderJob implements ShouldQueue
     public function uniqueFor(): int
     {
         return 30; // Prevent duplicate syncs within 30 seconds
+    }
+
+    /**
+     * Process CNC file ingestion for synced files
+     */
+    protected function processCncIngestion(array $changes): void
+    {
+        try {
+            $ingestionService = app(CncFileIngestionService::class);
+
+            $result = $ingestionService->processChanges($this->project, [
+                'added' => $changes['added'] ?? [],
+                'modified' => $changes['modified'] ?? [],
+                'deleted' => $changes['removed'] ?? [],
+            ]);
+
+            if ($result['programs_created'] > 0 || $result['parts_created'] > 0) {
+                Log::info('CNC file ingestion completed', [
+                    'project_id' => $this->project->id,
+                    'programs_created' => $result['programs_created'],
+                    'programs_updated' => $result['programs_updated'],
+                    'parts_created' => $result['parts_created'],
+                    'parts_updated' => $result['parts_updated'],
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::error('CNC file ingestion failed', [
+                'project_id' => $this->project->id,
+                'error' => $e->getMessage(),
+            ]);
+            // Don't rethrow - CNC ingestion failure shouldn't fail the sync
+        }
     }
 }

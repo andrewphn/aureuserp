@@ -17,6 +17,9 @@ class GanttChart extends Page
 
     protected static ?int $navigationSort = 2;
 
+    // Hide from main navigation - accessible via Project views
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationLabel(): string
     {
         return 'Gantt Chart';

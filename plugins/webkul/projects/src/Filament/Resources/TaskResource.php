@@ -97,6 +97,9 @@ class TaskResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    // Hide from main navigation - accessible via Kanban Board and Project details
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationLabel(): string
     {
         return __('webkul-project::filament/resources/task.navigation.title');

@@ -5,7 +5,7 @@ return [
 
     'navigation' => [
         'title' => 'Tasks',
-        'group' => 'Project',
+        'group' => 'Projects',
     ],
 
     'global-search' => [

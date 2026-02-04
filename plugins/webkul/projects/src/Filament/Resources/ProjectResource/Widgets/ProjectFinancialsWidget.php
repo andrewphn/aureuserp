@@ -96,19 +96,47 @@ class ProjectFinancialsWidget extends BaseWidget
     /**
      * Calculate Financials
      *
+     * Data source priority:
+     * 1. Cabinet-level data (linear_feet, unit_price_per_lf) - most detailed
+     * 2. Room-level data (tier LF, estimated_cabinet_value) - wizard estimates
+     * 3. Project-level estimates (estimated_linear_feet) - fallback
+     *
      * @return array
      */
     protected function calculateFinancials(): array
     {
-        // Calculate total quoted amount
-        $quoted = $this->record->cabinets()
+        // Try cabinet-level data first (detailed pricing)
+        $cabinetQuoted = $this->record->cabinets()
             ->selectRaw('SUM(unit_price_per_lf * linear_feet * quantity) as total')
             ->value('total') ?? 0;
 
-        // Calculate linear feet
-        $linearFeet = $this->record->cabinets()
+        $cabinetLinearFeet = $this->record->cabinets()
             ->selectRaw('SUM(linear_feet * quantity) as total')
             ->value('total') ?? 0;
+
+        // Try room-level data (wizard estimates)
+        $roomLinearFeet = $this->record->rooms()
+            ->selectRaw('SUM(COALESCE(total_linear_feet_tier_1, 0) + COALESCE(total_linear_feet_tier_2, 0) + COALESCE(total_linear_feet_tier_3, 0) + COALESCE(total_linear_feet_tier_4, 0) + COALESCE(total_linear_feet_tier_5, 0)) as total')
+            ->value('total') ?? 0;
+
+        $roomEstimatedValue = $this->record->rooms()
+            ->selectRaw('SUM(COALESCE(estimated_cabinet_value, 0)) as total')
+            ->value('total') ?? 0;
+
+        // Determine which data source to use
+        if ($cabinetLinearFeet > 0) {
+            // Use cabinet-level data (most detailed)
+            $linearFeet = $cabinetLinearFeet;
+            $quoted = $cabinetQuoted;
+        } elseif ($roomLinearFeet > 0) {
+            // Use room-level data (wizard estimates)
+            $linearFeet = $roomLinearFeet;
+            $quoted = $roomEstimatedValue;
+        } else {
+            // Fallback to project estimates
+            $linearFeet = $this->record->estimated_linear_feet ?? 0;
+            $quoted = $this->record->estimated_project_value ?? 0;
+        }
 
         // Calculate price per linear foot
         $pricePerLF = $linearFeet > 0 ? $quoted / $linearFeet : 0;

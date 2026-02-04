@@ -517,6 +517,23 @@ class Project extends Model implements HasMedia, Sortable
         return $this->favoriteUsers()->where('user_id', Auth::id())->exists();
     }
 
+    /**
+     * Users who have pinned this project
+     */
+    public function pinnedUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'projects_user_project_pins', 'project_id', 'user_id');
+    }
+
+    public function getIsPinnedByUserAttribute(): bool
+    {
+        if ($this->relationLoaded('pinnedUsers')) {
+            return $this->pinnedUsers->contains('id', Auth::id());
+        }
+
+        return $this->pinnedUsers()->where('user_id', Auth::id())->exists();
+    }
+
     public function getRemainingHoursAttribute(): float
     {
         return $this->allocated_hours - $this->tasks->sum('remaining_hours');

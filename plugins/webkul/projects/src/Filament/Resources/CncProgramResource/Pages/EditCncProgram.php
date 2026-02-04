@@ -5,6 +5,7 @@ namespace Webkul\Project\Filament\Resources\CncProgramResource\Pages;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Webkul\Chatter\Filament\Actions\ChatterAction;
 use Webkul\Project\Filament\Resources\CncProgramResource;
 
 /**
@@ -18,6 +19,8 @@ class EditCncProgram extends EditRecord
     {
         return [
             ViewAction::make(),
+            ChatterAction::make()
+                ->setResource(static::$resource),
             DeleteAction::make(),
         ];
     }

@@ -43,6 +43,9 @@ class CabinetMaterialsBomResource extends Resource
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-text';
 
+    // Hide from main navigation - accessible via Project details
+    protected static bool $shouldRegisterNavigation = false;
+
     public static function getNavigationLabel(): string
     {
         return 'Materials BOM';

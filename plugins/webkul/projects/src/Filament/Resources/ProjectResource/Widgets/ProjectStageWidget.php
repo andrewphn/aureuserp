@@ -4,20 +4,29 @@ namespace Webkul\Project\Filament\Resources\ProjectResource\Widgets;
 
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\On;
+use Webkul\Project\Enums\TaskState;
+use Webkul\Project\Models\Task;
 use Webkul\Project\Services\Gates\GateEvaluator;
 
 /**
- * Project Stage Widget - Shows production stage with gate checklist
+ * Project Stage Widget - Shows production stage with gate checklist and tasks drawer
  *
  * Connected to the actual Gate system in the database.
+ * Includes expandable task list grouped by milestone.
  */
 class ProjectStageWidget extends Widget
 {
     public ?Model $record = null;
 
+    protected static bool $isLazy = false;
+
     protected string $view = 'webkul-project::filament.widgets.project-stage';
 
-    protected int | string | array $columnSpan = 1;
+    protected int | string | array $columnSpan = 2;
+
+    public bool $showTasks = false;
+    public ?int $selectedMilestoneId = null;
 
     protected array $stageLabels = [
         'discovery' => 'Discovery',
@@ -269,5 +278,156 @@ class ProjectStageWidget extends Widget
         }
 
         return $gates;
+    }
+
+    /**
+     * Toggle the tasks drawer
+     */
+    public function toggleTasks(): void
+    {
+        $this->showTasks = !$this->showTasks;
+    }
+
+    /**
+     * Select a milestone to filter tasks
+     */
+    public function selectMilestone(?int $milestoneId): void
+    {
+        $this->selectedMilestoneId = $this->selectedMilestoneId === $milestoneId ? null : $milestoneId;
+    }
+
+    /**
+     * Get tasks data grouped by milestone for the current stage
+     */
+    public function getTasksData(): array
+    {
+        if (!$this->record) {
+            return [
+                'total' => 0,
+                'done' => 0,
+                'progress' => 0,
+                'milestones' => [],
+                'ungrouped' => [],
+            ];
+        }
+
+        $currentStage = $this->record->current_production_stage ?? 'discovery';
+
+        // Get milestones for current stage (or all if no stage filter)
+        $milestonesQuery = $this->record->milestones()
+            ->orderBy('sort_order')
+            ->orderBy('deadline')
+            ->with(['tasks' => function ($query) {
+                $query->whereNull('parent_id')
+                    ->orderByRaw("CASE
+                        WHEN state = 'in_progress' THEN 1
+                        WHEN state = 'blocked' THEN 2
+                        WHEN state = 'pending' THEN 3
+                        ELSE 4
+                    END")
+                    ->orderBy('priority', 'desc');
+            }]);
+
+        // Filter by production_stage if milestones have it
+        if ($currentStage) {
+            $milestonesQuery->where('production_stage', $currentStage);
+        }
+
+        $milestones = $milestonesQuery->get();
+
+        // Get tasks without milestone
+        $ungroupedTasks = $this->record->tasks()
+            ->whereNull('parent_id')
+            ->whereNull('milestone_id')
+            ->orderByRaw("CASE
+                WHEN state = 'in_progress' THEN 1
+                WHEN state = 'blocked' THEN 2
+                WHEN state = 'pending' THEN 3
+                ELSE 4
+            END")
+            ->orderBy('priority', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Calculate totals
+        $allTasks = $this->record->tasks()->whereNull('parent_id')->get();
+        $total = $allTasks->count();
+        $done = $allTasks->where('state', TaskState::DONE)->count();
+        $progress = $total > 0 ? round(($done / $total) * 100) : 0;
+
+        // Format milestones with their tasks
+        $formattedMilestones = $milestones->map(function ($milestone) {
+            $tasks = $milestone->tasks;
+            $milestoneDone = $tasks->where('state', TaskState::DONE)->count();
+            $milestoneTotal = $tasks->count();
+
+            return [
+                'id' => $milestone->id,
+                'name' => $milestone->name,
+                'is_completed' => $milestone->is_completed,
+                'is_critical' => $milestone->is_critical,
+                'deadline' => $milestone->deadline,
+                'done' => $milestoneDone,
+                'total' => $milestoneTotal,
+                'progress' => $milestoneTotal > 0 ? round(($milestoneDone / $milestoneTotal) * 100) : 0,
+                'tasks' => $tasks->take(5)->map(fn ($task) => $this->formatTask($task))->toArray(),
+            ];
+        })->toArray();
+
+        return [
+            'total' => $total,
+            'done' => $done,
+            'progress' => $progress,
+            'milestones' => $formattedMilestones,
+            'ungrouped' => $ungroupedTasks->map(fn ($task) => $this->formatTask($task))->toArray(),
+        ];
+    }
+
+    /**
+     * Format a task for display
+     */
+    protected function formatTask(Task $task): array
+    {
+        return [
+            'id' => $task->id,
+            'title' => $task->title,
+            'state' => $task->state,
+            'state_label' => $task->state?->getLabel() ?? 'Unknown',
+            'state_color' => $task->state?->getColor() ?? 'gray',
+            'priority' => $task->priority,
+            'deadline' => $task->deadline,
+        ];
+    }
+
+    /**
+     * Mark a task as done
+     */
+    public function markTaskDone(int $taskId): void
+    {
+        $task = Task::find($taskId);
+
+        if ($task && $task->project_id === $this->record?->id) {
+            $task->update(['state' => TaskState::DONE]);
+            $this->dispatch('task-updated');
+        }
+    }
+
+    /**
+     * Mark a task as in progress
+     */
+    public function markTaskInProgress(int $taskId): void
+    {
+        $task = Task::find($taskId);
+
+        if ($task && $task->project_id === $this->record?->id) {
+            $task->update(['state' => TaskState::IN_PROGRESS]);
+            $this->dispatch('task-updated');
+        }
+    }
+
+    #[On('task-updated')]
+    public function refreshWidget(): void
+    {
+        // Livewire will automatically re-render
     }
 }
