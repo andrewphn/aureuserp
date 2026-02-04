@@ -103,4 +103,14 @@ class TableColumn extends Component
     {
         return (bool) $this->evaluate($this->isMarkedAsRequired);
     }
+
+    /**
+     * Get Group - stub for CanBeToggled trait compatibility
+     *
+     * @return string|null
+     */
+    public function getGroup(): ?string
+    {
+        return null;
+    }
 }
