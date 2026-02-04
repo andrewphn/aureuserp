@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LegacyClockController;
 use App\Http\Controllers\PdfPreviewController;
 
 // Redirect /login to /admin/login (only register once, not conditionally)
@@ -51,9 +52,47 @@ Route::middleware(['auth', 'web'])->group(function () {
 // Time Clock Kiosk Route (Shop Floor Tablet)
 // Access: /clock - Touch-friendly interface for employees to clock in/out
 // Security: IP restricted to shop network + PIN required per employee
-Route::middleware(['web', 'kiosk.ip'])->get('/clock', function () {
+// Auto-detects legacy browsers (iOS 12, old Safari) and redirects to /clock-legacy
+Route::middleware(['web', 'kiosk.ip'])->get('/clock', function (\Illuminate\Http\Request $request) {
+    $ua = $request->userAgent() ?? '';
+
+    // Detect browsers that lack ES2015+ Proxy support (required by Livewire 3 / Alpine.js 3):
+    //  - iOS 12.x and below (Safari on iPad/iPhone)
+    //  - Safari < 10
+    //  - Android WebView < 49 (Chrome < 49)
+    $isLegacy = false;
+
+    // iOS version check: "OS 12_" or lower (e.g. "CPU OS 12_5_7 like Mac OS X")
+    if (preg_match('/CPU.*OS (\d+)[_\s]/', $ua, $m)) {
+        $isLegacy = (int) $m[1] <= 12;
+    }
+    // macOS Safari version check: Safari/xxx but not Chrome/Edge
+    elseif (preg_match('/Version\/(\d+).*Safari/', $ua, $m) && !preg_match('/Chrome|CriOS|EdgiOS|Edg/', $ua)) {
+        $isLegacy = (int) $m[1] < 10;
+    }
+
+    // Allow ?legacy=1 query param to force legacy mode (for testing)
+    if ($request->query('legacy') === '1') {
+        $isLegacy = true;
+    }
+
+    if ($isLegacy) {
+        return redirect()->route('clock-legacy');
+    }
+
     return view('pages.time-clock-kiosk');
 })->name('time-clock.kiosk');
+
+// Legacy Time Clock Kiosk — pure server-side HTML forms, zero JavaScript
+// For iOS 12 iPads and other browsers lacking Proxy/ES2015+ support
+Route::middleware(['web', 'kiosk.ip'])->prefix('clock-legacy')->group(function () {
+    Route::get('/', [LegacyClockController::class, 'index'])->name('clock-legacy');
+    Route::post('/select', [LegacyClockController::class, 'selectEmployee'])->name('clock-legacy.select');
+    Route::post('/pin', [LegacyClockController::class, 'verifyPin'])->name('clock-legacy.pin');
+    Route::post('/clock-out', [LegacyClockController::class, 'clockOut'])->name('clock-legacy.clock-out');
+    Route::post('/lunch-clock-out', [LegacyClockController::class, 'setLunchAndClockOut'])->name('clock-legacy.lunch-clock-out');
+    Route::get('/back', [LegacyClockController::class, 'backToSelect'])->name('clock-legacy.back');
+});
 
 // Debug route to check what IP the server sees (remove in production)
 Route::get('/clock/debug-ip', function (\Illuminate\Http\Request $request) {
