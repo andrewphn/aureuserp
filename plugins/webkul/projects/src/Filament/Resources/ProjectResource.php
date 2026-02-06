@@ -673,7 +673,7 @@ class ProjectResource extends Resource
                         ->color('gray')
                         ->size(TextSize::Small)
                         ->state(fn (Project $record): string => static::getProjectAddressDisplay($record))
-                        ->visible(fn (Project $record): bool => filled(static::getProjectAddressDisplay($record))),
+                        ->visible(fn (?Project $record): bool => $record ? filled(static::getProjectAddressDisplay($record)) : false),
 
                     // Row 3: Client Name (Tertiary - smaller, muted)
                     TextColumn::make('partner.name')
@@ -681,7 +681,7 @@ class ProjectResource extends Resource
                         ->prefix('Client: ')
                         ->color('gray')
                         ->size(TextSize::ExtraSmall)
-                        ->visible(fn (Project $record) => filled($record->partner)),
+                        ->visible(fn (?Project $record) => $record && filled($record->partner)),
 
                     // Row 4: Stage Progress Bar (Visual status)
                     ViewColumn::make('stage_progress')
@@ -694,7 +694,7 @@ class ProjectResource extends Resource
                             ->icon('heroicon-o-user')
                             ->iconColor('gray')
                             ->size(TextSize::Small)
-                            ->visible(fn (Project $record) => filled($record->user)),
+                            ->visible(fn (?Project $record) => $record && filled($record->user)),
                         TextColumn::make('planned_date')
                             ->icon('heroicon-o-calendar')
                             ->iconColor('gray')
@@ -704,7 +704,7 @@ class ProjectResource extends Resource
                                     ? $record->start_date->format('M d').' - '.$record->end_date->format('M d')
                                     : null
                             )
-                            ->visible(fn (Project $record) => filled($record->start_date) && filled($record->end_date)),
+                            ->visible(fn (?Project $record) => $record && filled($record->start_date) && filled($record->end_date)),
                     ])->space(1),
 
                     // Row 6: Tags
@@ -720,7 +720,7 @@ class ProjectResource extends Resource
                             ->formatStateUsing(fn ($state) => $state['label'])
                             ->color(fn ($state) => Color::generateV3Palette($state['color'])),
                     ])
-                        ->visible(fn (Project $record): bool => (bool) $record->tags?->count()),
+                        ->visible(fn (?Project $record): bool => $record && (bool) $record->tags?->count()),
 
                     // Hidden columns for sorting
                     TextColumn::make('start_date')
